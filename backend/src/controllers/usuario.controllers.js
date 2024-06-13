@@ -1,5 +1,5 @@
 import usuarioModel from "../models/usuario.models.js";
-import Persona from "../models/personas.models.js";
+import Persona from "../models/persona.models.js";
 import Rol from "../models/rol.models.js";
 export const getUsuario = async (req, res, next) => {
     try {
@@ -25,4 +25,8 @@ export const getUsuario = async (req, res, next) => {
     } catch (error) {
         next(error)
     }
+}
+
+export const postUsuario = async (req, res, next) => {
+    res.status(200).json(req.user);
 }

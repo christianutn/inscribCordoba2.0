@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
-import Persona from "./personas.models.js";
+import Persona from "./persona.models.js";
 import Instancia from "./instancia.models.js";
 
 const TutoresXInstancia = sequelize.define("tutores_x_instancia", {

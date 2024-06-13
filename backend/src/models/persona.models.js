@@ -26,7 +26,6 @@ const Personas = sequelize.define("personas", {
     },
     mail: {
         type: DataTypes.STRING(100),
-        allowNull: false,
         validate: {
             isEmail: true,  // Validación de formato de correo electrónico
             len: [1, 100]
@@ -41,13 +40,7 @@ const Personas = sequelize.define("personas", {
     }
 }, {
     tableName: "personas",  // Nombre explícito de la tabla
-    timestamps: false,
-    indexes: [
-        {
-            unique: true,
-            fields: ['mail']
-        }
-    ]
+    timestamps: false
 });
 
 export default Personas;

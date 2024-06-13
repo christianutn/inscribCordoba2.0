@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 
 import sequelize from "../config/database.js";
 import Rol from "./rol.models.js";
-import Persona from "./personas.models.js";
+import Persona from "./persona.models.js";
 
 const Usuario = sequelize.define("usuarios", {
     cuil: {

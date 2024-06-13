@@ -1,6 +1,6 @@
 import tutorXInstanciaModel from "../models/tutorXInstancia.models.js";
 import Instancia from "../models/instancia.models.js";
-import Persona from "../models/personas.models.js";
+import Persona from "../models/persona.models.js";
 
 
 export const getTutoresXInstancia = async (req, res, next) => {
