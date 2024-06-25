@@ -38,6 +38,9 @@ const Curso = sequelize.define("cursos", {
     tipo_capacitacion: {
         type: DataTypes.STRING(15),
         allowNull: false
+    },
+    area: {
+        type: DataTypes.STRING(15)
     }
 }, {
     timestamps: false,

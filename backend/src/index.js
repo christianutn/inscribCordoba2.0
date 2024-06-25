@@ -1,8 +1,11 @@
 import express from "express";
 import indexRoutes from "./routes/index.routes.js"
 import inicializarPassport from "../src/config/passport.js"
+import cors from "cors";
 
 const app = express(); 
+
+app.use(cors());
 
 const PORT = 4000
 

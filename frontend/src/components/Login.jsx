@@ -10,23 +10,69 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import obtenerToken from '../services/obtenerToken.js';
+import { useState } from 'react';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+
+
 
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
 const defaultTheme = createTheme();
+
 const Login = () => {
-    const handleSubmit = (event) => {
+
+
+    //Setear mensaje de error
+    const [mensajeDeError, setMensajeDeError] = useState(null);
+    const [open, setOpen] = React.useState(false);
+    const handleSubmit = async (event) => {
         event.preventDefault();
+        setOpen(true);
+
         const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('cuil'),
-            password: data.get('password'),
-        });
+
+        try {
+            //se obtiene el token en caso de ser cuil y password correctos
+            const response = await obtenerToken(data.get('cuil'), data.get('contrasenia'));
+
+            //Guardar token en header authorization
+
+            //localStorage.setItem('token', `Bearer ${token}`)
+            
+            setMensajeDeError(null);
+
+
+        } catch (error) {
+            setMensajeDeError("Cuil o contraseña incorrectos");
+        } finally {
+            setOpen(false);
+        }
     };
 
     return (
         <ThemeProvider theme={defaultTheme}>
+            {
+                mensajeDeError &&
+                <Stack sx={{ width: '100%' }} spacing={2}>
+                    <Alert variant="filled" severity="error">
+                        {mensajeDeError}
+                    </Alert>
+                </Stack>
+            }
+            {
+                open &&
+                <Backdrop
+                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    open={open}
+                >
+                    <CircularProgress color="inherit" />
+                </Backdrop>
+            }
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
                 <Box
@@ -58,14 +104,15 @@ const Login = () => {
                             margin="normal"
                             required
                             fullWidth
-                            name="password"
+                            name="contrasenia"
                             label="Contraseña"
                             type="password"
-                            id="password"
+                            id="contrasenia"
                             autoComplete="current-password"
                         />
-                        
+
                         <Button
+                           
                             type="submit"
                             fullWidth
                             variant="contained"
@@ -78,17 +125,19 @@ const Login = () => {
                         >
                             Iniciar Sesión
                         </Button>
+                        
+                         
                         <Grid container>
                             <Grid item xs style={{ textAlign: 'center' }}>
                                 <Link href="#" variant="body2">
                                     No recuerdo mi contraseña
                                 </Link>
                             </Grid>
-                            
+
                         </Grid>
                     </Box>
                 </Box>
-                
+
             </Container>
         </ThemeProvider>
     );

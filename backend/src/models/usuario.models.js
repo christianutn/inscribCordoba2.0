@@ -23,6 +23,9 @@ const Usuario = sequelize.define("usuarios", {
     rol: {
         type: DataTypes.STRING(15),
         allowNull: false
+    },
+    ministerio: {
+        type: DataTypes.STRING(15)
     }
 },{
     timestamps: false,

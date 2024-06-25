@@ -87,7 +87,7 @@ const inicializarPassport = () => {
             if (!validatePassword(String(contrasenia), usuario.contrasenia)) {
                 done(null, false);
             }
-            done(null, usuario);
+            done(null,usuario);
         } catch (error) {
             done(error)
         }

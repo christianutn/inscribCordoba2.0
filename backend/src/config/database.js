@@ -38,7 +38,7 @@ const connectDB = async () => {
 };
 connectDB(); 
  
-/*  const syncModels = async () => {
+ const syncModels = async () => {
   try {
     await sequelize.sync({ alter: true }); // Usa `alter: true` para hacer cambios seguros en la tabla
     console.log("Las tablas han sido sincronizadas.");
@@ -47,7 +47,7 @@ connectDB();
   }
 };
 
-syncModels();   */
+//syncModels();   
 
 
 export default sequelize;

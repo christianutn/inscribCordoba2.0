@@ -7,8 +7,13 @@ const areas = sequelize.define('areas', {
       type: DataTypes.STRING(15),
       primaryKey: true
     },
-    nombre: DataTypes.STRING(100)
-  }, {
+    nombre: DataTypes.STRING(100),
+    ministerio: {
+      type: DataTypes.STRING(15)
+    }
+  },
+ 
+  {
     timestamps: false
   });
 
