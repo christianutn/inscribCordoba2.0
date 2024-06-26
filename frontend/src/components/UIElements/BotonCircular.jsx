@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 
-export default function FloatingActionButton() {
+export default function FloatingActionButton({onClick}) {
   return (
     <Box 
       sx={{ 
@@ -13,7 +13,7 @@ export default function FloatingActionButton() {
         width: '100%',
       }}
     >
-      <Fab color="primary" aria-label="add">
+      <Fab color="primary" aria-label="add" onClick={onClick}>
         <AddIcon />
       </Fab>
     </Box>

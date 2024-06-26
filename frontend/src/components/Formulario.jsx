@@ -13,6 +13,7 @@ import { getMinisterios } from "../services/ministerios.service.js"
 import Alert from '@mui/material/Alert';
 
 
+
 export default function Formulario() {
 
 
@@ -21,6 +22,16 @@ export default function Formulario() {
   const [ministerios, setMinisterios] = useState([]);
 
   const [error, setError] = useState(null);
+
+  //Logica relacionada al componente de Búsqueda de tutores
+  
+  const [abrirBusqTutores, setBusqTutores] = useState(false);
+
+  const handleBusqTutores = () => {
+    console.log("Manejador de búsqueda de tutores")
+
+    setBusqTutores(true)
+  }
 
   useEffect(() => {
 
@@ -99,8 +110,8 @@ export default function Formulario() {
           <div className='card-fechas-cursada'>
             <CardFecha titulo={"Fecha de cursada"} mensajeDesde={"Fecha de cursada desde"} mensajeHasta={"Fecha de cursada hasta"} />
           </div>
-          <div className='card-tutores'>
-            <Tutores />
+          <div className='card-tutores' >
+            <Tutores onClick={handleBusqTutores}/>
           </div>
           <div className='submit'>
             <Button mensaje={"Registrar"} type={"submit"} />

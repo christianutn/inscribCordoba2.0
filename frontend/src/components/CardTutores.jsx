@@ -4,8 +4,13 @@ import SchoolIcon from '@mui/icons-material/School';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal';
 import BotonCircular from './UIElements/BotonCircular';
 
-const CardTutores = () => {
 
+const CardTutores = ({onClick}) => {
+
+    const handleBusquedaTutores = () =>{
+        console.log("Manejador de búsquedas de tutores")
+    }
+    
     return (
 
         <Card className='container-card-tutores' sx={{ height: '100%', padding: 2 }}>
@@ -30,7 +35,7 @@ const CardTutores = () => {
           
 
             <div className='card-tutores-footer'>
-                <BotonCircular ></BotonCircular>
+                <BotonCircular onClick = {handleBusquedaTutores}></BotonCircular>
             </div>
 
 
