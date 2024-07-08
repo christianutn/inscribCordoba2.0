@@ -16,10 +16,13 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import Formulario from './Formulario';
+import { DataProviderTutores } from "../components/context/Formulario.context.jsx"
+import ClassIcon from '@mui/icons-material/Class';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+
+import Cursos from "./Cursos.jsx"
 
 const drawerWidth = 240;
 
@@ -87,9 +90,11 @@ export default function Principal() {
   const mostrarOpcion = () => {
     switch (opcionSeleccionada) {
       case "Formulario":
-        return <Formulario />; // Renderiza tu componente específico
+        return <DataProviderTutores><Formulario /></DataProviderTutores>; // Renderiza tu componente específico
       case "Calendario":
         return <h1>Calendario</h1> // Puedes reemplazar esto con tu componente real
+      case "Cursos":
+        return <Cursos/>
       default:
         return <h1>Bienvenido</h1> // Mensaje por defecto o componente
     }
@@ -134,11 +139,13 @@ export default function Principal() {
         </DrawerHeader>
         <Divider />
         <List>
-          {[["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["Send email", "otro"], ["Drafts", "otro"]].map((item, index) => (
+          {[["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["Cursos", "Cursos"]].map((item, index) => (
             <ListItem key={index} disablePadding>
               <ListItemButton onClick={() => handleListItemClick(item[1])}>
                 <ListItemIcon>
-                  {index === 0 ? <EditCalendarIcon /> : <InboxIcon />}
+                  {index === 0 && <EditCalendarIcon />}
+                  {index === 1 && <CalendarMonthIcon />}
+                  {index === 2 && <ClassIcon />}
                 </ListItemIcon>
                 <ListItemText primary={item[0]} />
               </ListItemButton>
@@ -146,18 +153,7 @@ export default function Principal() {
           ))}
         </List>
         <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton onClick={() => handleListItemClick(text)}>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+        
       </Drawer>
       <Main open={open} style={{marginTop: '3%'}}>
         {mostrarOpcion()}

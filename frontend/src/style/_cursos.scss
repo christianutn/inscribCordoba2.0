@@ -1,0 +1,18 @@
+.container-cursos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .title {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .data-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+}

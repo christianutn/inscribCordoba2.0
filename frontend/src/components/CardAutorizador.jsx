@@ -28,7 +28,7 @@ export default function CardAutorizador() {
                 <Subtitulo texto="Lopez, Fernando" fontWeight={500}></Subtitulo>
             </CardContent>
             <CardActions>
-                <FabAlargado />
+                <FabAlargado mensaje={"Ver Cursos"} icon={"verAutorizador"}/>
             </CardActions>
         </Card>
     );

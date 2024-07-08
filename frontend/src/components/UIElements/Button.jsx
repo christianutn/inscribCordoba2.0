@@ -1,9 +1,9 @@
 import Button from '@mui/material/Button';
 
-const MyButton = ({mensaje, type, handle}) => {
+const MyButton = ({mensaje, type, width, hanldeOnClick}) => {
 
     return(
-        <Button variant="contained" type={type} sx={{ width: '100%' }}>{mensaje}</Button> // <Button variant="contained" type={type} sx={{ width: '100%' }} onClick={hanlde}>{mensaje}</Button>
+        <Button variant="contained" type={type} sx={{ width: width || "100%" }} onClick={hanldeOnClick}>{mensaje}</Button> 
     )
 }
 

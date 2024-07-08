@@ -1,9 +1,16 @@
 
 import areaModel from "../models/area.models.js"
+import ministerio from "../models/ministerio.models.js";
 
 export const getAreas = async (req, res, next) => {
     try {
-        const areas = await areaModel.findAll();
+        const areas = await areaModel.findAll({
+            include: [
+                {
+                    model: ministerio, as: 'detalle_ministerio'
+                }
+            ]
+        });
         
         if(areas.length === 0){
             

@@ -16,6 +16,7 @@ const obtenerToken = async (cuil, contrasenia) => {
         }
 
         const data = await response.json();
+        
         return data.token;
     } catch (error) {
         

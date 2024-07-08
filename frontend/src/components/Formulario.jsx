@@ -6,15 +6,21 @@ import Tutores from "./CardTutores";
 import Titulo from './fonts/TituloPrincipal'
 import Autocomplete from './UIElements/Autocomplete';
 import TextField from './UIElements/TextField';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useForm } from "react-hook-form"
 import Button from "./UIElements/Button"
 import { getMinisterios } from "../services/ministerios.service.js"
 import Alert from '@mui/material/Alert';
+import { DataContextTutores } from "../components/context/Formulario.context.jsx"
+import BusquedaTutores from './BusquedaTutores.jsx'
+
 
 
 
 export default function Formulario() {
+
+  //Variables de contexto
+  const { tutores, mostrar } = useContext(DataContextTutores)
 
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
@@ -24,7 +30,7 @@ export default function Formulario() {
   const [error, setError] = useState(null);
 
   //Logica relacionada al componente de Búsqueda de tutores
-  
+
   const [abrirBusqTutores, setBusqTutores] = useState(false);
 
   const handleBusqTutores = () => {
@@ -49,9 +55,13 @@ export default function Formulario() {
   }, [])
 
   const onSubmit = (data) => {
-    console.log("Hola mundo")
+    console.log("DAtos:", data)
 
   }
+
+
+ 
+
 
   return (
 
@@ -59,65 +69,73 @@ export default function Formulario() {
 
       <Alert severity="error" sx={{ display: error ? 'block' : 'none', zIndex: 1, width: '100%' }}>{"MEnsaje de error"}</Alert>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      {
+        mostrar === "Formulario" &&
+        <form onSubmit={handleSubmit(onSubmit)}>
 
-        <div className='grid-container-formulario'>
+          <div className='grid-container-formulario'>
 
-          <div className='titulo'><Titulo texto='Formulario de inscripción' /></div>
+            <div className='titulo'><Titulo texto='Formulario de inscripción' /></div>
 
-          <div className='select-ministerio'>
-            <Autocomplete options={ministerios} label={"Seleccione un ministerio"} />
-          </div>
 
-          <div className='select-area'>
-            <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione un área"} />
+            <div className='select-ministerio'>
+              <Autocomplete options={ministerios} label={"Seleccione un ministerio"} />
+            </div>
 
-          </div>
+            <div className='select-area'>
+              <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione un área"} />
 
-          <div className='select-curso'>
+            </div>
 
-            <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione un curso"} />
-          </div>
-          <div className='card-autorizador'>
-            <Autorizador />
-          </div>
-          <div className='card-info1'>
-            <CardInfo titulo={"Acumulado cantidad de cupos otorgados"} dato={"10596"} />
-          </div>
-          <div className='card-info2'>
-            <CardInfo titulo={"Acumulado cantidad de inscriptos"} dato={"50632"} />
-          </div>
-          <div className='card-info3'>
-            <CardInfo titulo={"Recomendación para cantidad de cupos"} dato={"6987"} />
+            <div className='select-curso'>
 
-          </div>
-          <div className='select-medio-inscripcion'>
-            <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione medio de inscripción"} />
-          </div>
-          <div className='select-plataforma-dictado'>
-            <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione plataforma de dictado"} />
-          </div>
-          <div className='input'>
+              <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione un curso"} />
+            </div>
+            <div className='card-autorizador'>
+              <Autorizador/>
+            </div>
+            <div className='card-info1'>
+              <CardInfo titulo={"Acumulado cantidad de cupos otorgados"} dato={"10596"} />
+            </div>
+            <div className='card-info2'>
+              <CardInfo titulo={"Acumulado cantidad de inscriptos"} dato={"50632"} />
+            </div>
+            <div className='card-info3'>
+              <CardInfo titulo={"Recomendación para cantidad de cupos"} dato={"6987"} />
 
-            <TextField label={"Cupo"} />
-            <TextField label={"Cantidad de horas"} />
+            </div>
+            <div className='select-medio-inscripcion'>
+              <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione medio de inscripción"} />
+            </div>
+            <div className='select-plataforma-dictado'>
+              <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione plataforma de dictado"} />
+            </div>
+            <div className='input'>
 
-          </div>
+              <TextField label={"Cupo"} />
+              <TextField label={"Cantidad de horas"} />
 
-          <div className='card-fecha-inscripcion'>
-            <CardFecha titulo={"Fecha de inscripción"} mensajeDesde={"Fecha de inscripción desde"} mensajeHasta={"Fecha de inscripción hasta"} />
+            </div>
+
+            <div className='card-fecha-inscripcion'>
+              <CardFecha titulo={"Fecha de inscripción"} mensajeDesde={"Fecha de inscripción desde"} mensajeHasta={"Fecha de inscripción hasta"} />
+            </div>
+            <div className='card-fechas-cursada'>
+              <CardFecha titulo={"Fecha de cursada"} mensajeDesde={"Fecha de cursada desde"} mensajeHasta={"Fecha de cursada hasta"} />
+            </div>
+            {<div className='card-tutores' >
+              <Tutores onClick={handleBusqTutores} />
+            </div>}
+            <div className='submit'>
+              <Button mensaje={"Registrar"} type={"submit"} />
+            </div>
           </div>
-          <div className='card-fechas-cursada'>
-            <CardFecha titulo={"Fecha de cursada"} mensajeDesde={"Fecha de cursada desde"} mensajeHasta={"Fecha de cursada hasta"} />
-          </div>
-          <div className='card-tutores' >
-            <Tutores onClick={handleBusqTutores}/>
-          </div>
-          <div className='submit'>
-            <Button mensaje={"Registrar"} type={"submit"} />
-          </div>
-        </div>
-      </form>
+        </form>
+      }
+      {
+        mostrar === "BusquedaTutores" &&
+        <BusquedaTutores></BusquedaTutores>
+      }
     </>
 
 

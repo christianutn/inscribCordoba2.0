@@ -3,17 +3,25 @@ import ThreePIcon from '@mui/icons-material/ThreeP';
 import SchoolIcon from '@mui/icons-material/School';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal';
 import BotonCircular from './UIElements/BotonCircular';
-
+import BusquedaTutores from './BusquedaTutores.jsx';
+import { useState } from 'react';
+import { useContext } from 'react';
+import { DataContextTutores } from '../components/context/Formulario.context.jsx'
 
 const CardTutores = ({onClick}) => {
 
+    const { setMostrar } = useContext(DataContextTutores)
+
+    const [abrirBusqTutores, setBusqTutores] = useState(false);
     const handleBusquedaTutores = () =>{
-        console.log("Manejador de búsquedas de tutores")
+        setMostrar("BusquedaTutores")
+
     }
     
     return (
-
+        
         <Card className='container-card-tutores' sx={{ height: '100%', padding: 2 }}>
+          
 
             <div className='card-tutores-encabezado'>
                 <ThreePIcon sx={{ mr: 1, height:'32px', width:'32px' }}/>
@@ -35,7 +43,7 @@ const CardTutores = ({onClick}) => {
           
 
             <div className='card-tutores-footer'>
-                <BotonCircular onClick = {handleBusquedaTutores}></BotonCircular>
+                <BotonCircular onClick = {handleBusquedaTutores} icon="agregar"></BotonCircular>
             </div>
 
 
