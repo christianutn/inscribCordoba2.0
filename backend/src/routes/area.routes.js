@@ -9,4 +9,5 @@ areaRouter.get("/", passport.authenticate('jwt', {session:false}), autorizar(["T
 
 
 
+
 export default areaRouter

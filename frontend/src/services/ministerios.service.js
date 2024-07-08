@@ -5,9 +5,14 @@ const URL = "http://localhost:4000/api/ministerios";
 
 export const getMinisterios = async () => {
     try {
-        const response = await fetch(URL);
+        const response = await fetch(URL, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`}
+        });
 
-        console.log(response)
+        console.log("Daata:",response)
         if(response.status !== 200){
 
             const error = new Error("No existen ministerios");

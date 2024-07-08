@@ -5,7 +5,7 @@ import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 
 
 
-const FabAlargado = ({ mensaje, handleOnClick, icon }) => {
+const FabAlargado = ({ mensaje, onClick, icon }) => {
 
 
     return (
@@ -18,7 +18,7 @@ const FabAlargado = ({ mensaje, handleOnClick, icon }) => {
                 height: 30, // Ajusta la altura del botón
                 minHeight: 30, // Asegúrate de que la altura mínima del botón sea 30
                 padding: '0 10px' // Ajusta el padding del botón
-            }} onClick={handleOnClick}>
+            }} onClick={onClick}>
                 {
                     icon === "verAutorizador" && <VisibilityIcon sx={{ mr: 1 }}></VisibilityIcon>
                 }

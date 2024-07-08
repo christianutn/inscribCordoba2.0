@@ -13,6 +13,7 @@ export const getTutoresXInstancia = async (req, res, next) => {
                 {
                     model: Instancia, as: 'detalle_instancia'
                 }
+
             ]
         });
         if(tutoresXInstancia.length === 0) {

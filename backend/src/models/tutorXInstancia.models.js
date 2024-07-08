@@ -1,7 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
-import Persona from "./persona.models.js";
-import Instancia from "./instancia.models.js";
+
 
 const TutoresXInstancia = sequelize.define("tutores_x_instancia", {
   cuil: {
@@ -28,10 +27,6 @@ const TutoresXInstancia = sequelize.define("tutores_x_instancia", {
   tableName: 'tutores_x_instancia'
 });
 
-TutoresXInstancia.belongsTo(Persona, { foreignKey: 'cuil', as: 'detalle_tutor' });
 
-// Define las relaciones con alias únicos
-TutoresXInstancia.belongsTo(Instancia, { foreignKey: 'curso', targetKey: 'curso', as: 'detalle_curso' });
-TutoresXInstancia.belongsTo(Instancia, { foreignKey: 'fecha_inicio_curso', targetKey: 'fecha_inicio_curso', as: 'detalle_instancia' });
 
 export default TutoresXInstancia;

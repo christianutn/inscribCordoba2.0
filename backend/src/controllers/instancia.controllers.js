@@ -1,17 +1,21 @@
 import instanciaModel from "../models/instancia.models.js";
 import Curso from "../models/curso.models.js";
 import Estado from "../models/estado.models.js";
-
+import Area from "../models/area.models.js";
+import Ministerio from "../models/ministerio.models.js";
+import medioInscripcion from "../models/medioInscripcion.models.js";
 
 export const getInstancias = async (req, res, next) => {
     try {
         const instancias = await instanciaModel.findAll({
             include: [
                 {
-                    model: Curso, as: 'detalle_curso'
+                    model: Curso, as: 'detalle_curso',
+                   
                 },
                 {
                     model: Estado, as: 'detalle_estado'
+
                 }
             ]
         });

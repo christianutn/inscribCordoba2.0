@@ -5,7 +5,7 @@ import passport from "passport";
 const ministerioRouter = Router();
 
 
-ministerioRouter.get("/", /* passport.authenticate('jwt', {session: false}), */ getMinisterios)
+ministerioRouter.get("/", passport.authenticate('jwt', {session: false}),  getMinisterios)
 
 
 export default ministerioRouter

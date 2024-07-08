@@ -38,11 +38,11 @@ const Login = () => {
 
         try {
             //se obtiene el token en caso de ser cuil y password correctos
-            const response = await obtenerToken(data.get('cuil'), data.get('contrasenia'));
+            const token = await obtenerToken(data.get('cuil'), data.get('contrasenia'));
 
             //Guardar token en header authorization
 
-            //localStorage.setItem('token', `Bearer ${token}`)
+            localStorage.setItem('jwt', `${token}`)
             
             setMensajeDeError(null);
 

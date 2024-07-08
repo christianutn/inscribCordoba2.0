@@ -1,7 +1,8 @@
-import {DataTypes} from "sequelize"
-import sequelize from "../config/database.js"
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
 
-const ministerio = sequelize.define('ministerios', {
+
+const Ministerio = sequelize.define('ministerios', {
     cod: {
         type: DataTypes.STRING(15),
         primaryKey: true
@@ -9,6 +10,10 @@ const ministerio = sequelize.define('ministerios', {
     nombre: DataTypes.STRING(100)
 }, {
     timestamps: false
-})
+});
 
-export default ministerio
+
+
+//Ministerio.hasMany(Area, { foreignKey: 'ministerio', as: 'areas' }); // Establece la relación de uno a muchos
+
+export default Ministerio;

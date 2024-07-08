@@ -48,9 +48,6 @@ const Curso = sequelize.define("cursos", {
     tableName: 'cursos'
 });
 
-Curso.belongsTo(MedioInscripcion, { foreignKey: 'medio_inscripcion', as: 'detalle_medioInscripcion' });
-Curso.belongsTo(TipoCapacitacion, { foreignKey: 'tipo_capacitacion', as: 'detalle_tipoCapacitacion' });
-Curso.belongsTo(PlataformaDictado, { foreignKey: 'plataforma_dictado', as: 'detalle_plataformaDictado' });
-Curso.belongsTo(Area, { foreignKey: 'area', as: 'detalle_area' });
+
 
 export default Curso;

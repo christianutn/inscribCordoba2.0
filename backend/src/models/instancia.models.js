@@ -1,8 +1,7 @@
 import { DataTypes } from "sequelize";
 
 import sequelize from "../config/database.js";
-import Curso from "./curso.models.js";
-import Estado from "./estado.models.js";
+
 
 const Instancia = sequelize.define("instancias", {
     curso: {
@@ -37,6 +36,5 @@ const Instancia = sequelize.define("instancias", {
 });
 
 
-Instancia.belongsTo(Curso, { foreignKey: 'curso', as: 'detalle_curso' });
-Instancia.belongsTo(Estado, { foreignKey: 'estado', as: 'detalle_estado' });
+
 export default Instancia
