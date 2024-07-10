@@ -1,6 +1,6 @@
 import areaModel from "../models/area.models.js";
 import Ministerio from "../models/ministerio.models.js"; // Importa el modelo de Ministerio
-import { Op } from "sequelize";
+import Curso from "../models/curso.models.js";
 
 export const getAreas = async (req, res, next) => {
     try {
@@ -12,6 +12,11 @@ export const getAreas = async (req, res, next) => {
                     model: Ministerio, // Utiliza el modelo de Ministerio importado
                     as: 'detalle_ministerio',
                     attributes: ['cod', 'nombre'] // Puedes especificar qué atributos del ministerio quieres obtener
+                },
+                {
+                    model: Curso,
+                    as: 'detalle_cursos'
+                    
                 }
             ]
         });

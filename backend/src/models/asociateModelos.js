@@ -11,6 +11,7 @@ import Estado from "./estado.models.js";
 const associateModels = () => {
     Ministerio.hasMany(Area, { foreignKey: 'ministerio', as: 'detalle_areas' });
     Area.belongsTo(Ministerio, { foreignKey: 'ministerio', as: 'detalle_ministerio' });
+    Area.hasMany(Curso, { foreignKey: 'area', as: 'detalle_cursos' });
   
 
     Curso.belongsTo(MedioInscripcion, { foreignKey: 'medio_inscripcion', as: 'detalle_medioInscripcion' });

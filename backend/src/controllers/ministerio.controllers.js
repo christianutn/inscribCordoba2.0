@@ -1,13 +1,20 @@
 import Ministerio from "../models/ministerio.models.js";
 import Area from "../models/area.models.js";
-
+import Curso from "../models/curso.models.js";
 export const getMinisterios = async (req, res, next) => {
     try {
         const ministerios = await Ministerio.findAll({
             include: [
                 {
                     model: Area,
-                    as: 'detalle_areas'
+                    as: 'detalle_areas',
+                    include: [
+                        {
+                            model: Curso,
+                            as: 'detalle_cursos'
+                        }
+                    ]
+
                 }
             ]
         });

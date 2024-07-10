@@ -21,6 +21,10 @@ export default function Formulario() {
 
   const [ministerios, setMinisterios] = useState([]);
 
+  const [areas, setAreas] = useState([]);
+
+  const [cursos, setCursos] = useState([]);
+
   const [error, setError] = useState(null);
 
   // Logica relacionada al componente de Búsqueda de tutores
@@ -34,7 +38,8 @@ export default function Formulario() {
     (async () => {
       try {
         const listaMinisterios = await getMinisterios();
-        setMinisterios(listaMinisterios.map(e => e.nombre));
+        setMinisterios(listaMinisterios);
+
       } catch (error) {
         setError(true);
       }
@@ -43,13 +48,16 @@ export default function Formulario() {
 
   const onSubmit = (data) => {
     console.log("Datos:", data);
+    
 
   }
 
   return (
     <>
       <Alert severity="error" sx={{ display: error ? 'block' : 'none', zIndex: 1, width: '100%' }}>{"Mensaje de error"}</Alert>
-
+      {
+        console.log("AREAS:", areas)
+      }
       {
         mostrar === "Formulario" &&
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -57,12 +65,33 @@ export default function Formulario() {
             <div className='titulo'><Titulo texto='Formulario de inscripción' /></div>
 
             <div className='select-ministerio'>
-              <Autocomplete options={ministerios} label={"Seleccione un ministerio"}
+              <Autocomplete options={ministerios.map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"}
                 getValue={(value) => {
                   setValue("ministerio", value); // Actualiza el valor del formulario
+                  // Encuentra el ministerio seleccionado
+                  const ministerioSeleccionado = ministerios.find(ministerio => ministerio.nombre === value);
+
+                  // Si se encuentra el ministerio, actualiza las áreas
+                  if (ministerioSeleccionado) {
+                    reset({
+                      curso: '',
+                      medioInscripcion: '',
+                      plataformaDictado: '',
+                      cupo: '',
+                      horas: '',
+                      fechaInscripcionDesde: "",
+                      fechaInscripcionHasta: "",
+                      fechaCursadaDesde: "",
+                      fechaCursadaHasta: ""
+                    });
+                    setAreas(ministerioSeleccionado.detalle_areas);
+                  } else {
+                    setAreas([]);
+                  }
+
                 }}
                 {...register("ministerio", {
-                  validate: (value) => value !== (null || "") || "Debe seleccionar un ministerio"
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un ministerio"
                 })}
 
               />
@@ -73,12 +102,34 @@ export default function Formulario() {
             </div>
 
             <div className='select-area'>
-              <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione un área"}
+              <Autocomplete options={areas.map(a => a.nombre)} label={"Seleccione un área"}
                 getValue={(value) => {
                   setValue("area", value)
+
+                  // Encuentra el area seleccionado
+                  const areaSeleccionada = areas.find(area => area.nombre === value);
+
+                  // Si se encuentra el ministerio, actualiza las áreas
+                  if (areaSeleccionada) {
+                    reset({
+                      curso: '',
+                      medioInscripcion: '',
+                      plataformaDictado: '',
+                      cupo: '',
+                      horas: '',
+                      fechaInscripcionDesde: "",
+                      fechaInscripcionHasta: "",
+                      fechaCursadaDesde: "",
+                      fechaCursadaHasta: ""
+                    });
+                    setCursos(areaSeleccionada.detalle_cursos);
+                  } else {
+                    setCursos([]);
+                  }
+
                 }}
                 {...register("area", {
-                  validate: (value) => value !== (null || "") || "Debe seleccionar un área"
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un área"
                 })}
 
               />
@@ -88,12 +139,12 @@ export default function Formulario() {
             </div>
 
             <div className='select-curso'>
-              <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione un curso"}
+              <Autocomplete options={cursos.map(c => c.nombre)} label={"Seleccione un curso"}
                 getValue={(value) => {
                   setValue("curso", value)
                 }}
                 {...register("curso", {
-                  validate: (value) => value !== (null || "") || "Debe seleccionar un curso"
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un curso"
                 })}
               />
               {
@@ -119,7 +170,7 @@ export default function Formulario() {
                   setValue("medioInscripcion", value); // Actualiza el valor del formulario
                 }}
                 {...register("medioInscripcion", {
-                  validate: (value) => value !== null || "Debe seleccionar un medio de inscripción"
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un medio de inscripción"
                 })} />
               {
                 errors.medioInscripcion && <p style={{ color: 'red' }}>{errors.medioInscripcion.message}</p>
@@ -131,7 +182,7 @@ export default function Formulario() {
                   setValue("plataformaDictado", value);
                 }}
                 {...register("plataformaDictado", {
-                  validate: (value) => value !== null || "Debe seleccionar una plataforma de dictado"
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar una plataforma de dictado"
                 })} />
               {
                 errors.plataformaDictado && <p style={{ color: 'red' }}>{errors.plataformaDictado.message}</p>
@@ -140,7 +191,7 @@ export default function Formulario() {
             <div className='input'>
               <TextField label={"Cupo"} getValue={(value) => setValue("cupo", value)}
                 {...register("cupo", {
-                  validate: (value) => value !== (null || "") || "Debe seleccionar una plataforma de dictado"
+                  validate: (value) => value !== null && value !== "" || "Debe ingresar cupo"
                 })} />
 
               {
@@ -148,7 +199,7 @@ export default function Formulario() {
               }
               <TextField label={"Cantidad de horas"} getValue={(value) => setValue("horas", value)}
                 {...register("horas", {
-                  validate: (value) => value !== (null || "")|| "Debe seleccionar una plataforma de dictado"
+                  validate: (value) => value !== null && value !== "" || "Debe ingresar cantidad de horas"
                 })} />
 
               {
@@ -163,12 +214,12 @@ export default function Formulario() {
                 getFechaDesde={(newFecha) => setValue("fechaInscripcionDesde", newFecha)}
                 getFechaHasta={(newFecha) => setValue("fechaInscripcionHasta", newFecha)}
                 {...register("fechaInscripcionDesde", {
-                  validate: (value) => value !== (null || "") || "Debe seleccionar fecha de inscripción"
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un fecha de inscripción"
                 })}
                 {...register("fechaInscripcionHasta", {
-                  validate: (value) => value !== (null || "") || "Debe seleccionar fecha de inscripción"
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar una fecha de inscripción"
                 })} />
-                {
+              {
                 errors.fechaInscripcionDesde && <p style={{ color: 'red' }}>{errors.fechaInscripcionDesde.message}</p>
               }
               {
@@ -182,10 +233,10 @@ export default function Formulario() {
                 getFechaDesde={(newFecha) => setValue("fechaCursadaDesde", newFecha)}
                 getFechaHasta={(newFecha) => setValue("fechaCursadaHasta", newFecha)}
                 {...register("fechaCursadaDesde", {
-                  validate: (value) => value !== (null || "") || "Debe seleccionar fecha de cursada"
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar fecha de cursada"
                 })}
                 {...register("fechaCursadaHasta", {
-                  validate: (value) => value !== (null || "") || "Debe seleccionar fecha de cursada"
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar fecha de cursada"
                 })}
               />
               {

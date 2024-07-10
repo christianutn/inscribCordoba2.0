@@ -12,7 +12,7 @@ export const getMinisterios = async () => {
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`}
         });
 
-        console.log("Daata:",response)
+        
         if(response.status !== 200){
 
             const error = new Error("No existen ministerios");
@@ -20,6 +20,7 @@ export const getMinisterios = async () => {
             throw error;
         }
         const data = await response.json()
+        console.log("Daata:",data)
 
         return data
     } catch (error) {
