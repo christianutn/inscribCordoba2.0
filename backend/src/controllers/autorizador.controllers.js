@@ -1,5 +1,5 @@
 import autorizadorModel from "../models/autorizador.models.js";
-import Persona from "../models/personas.models.js";
+import Persona from "../models/persona.models.js";
 import Curso from "../models/curso.models.js";
 
 

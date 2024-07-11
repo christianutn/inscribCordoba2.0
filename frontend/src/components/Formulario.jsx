@@ -52,6 +52,7 @@ export default function Formulario() {
 
   }
 
+
   return (
     <>
       <Alert severity="error" sx={{ display: error ? 'block' : 'none', zIndex: 1, width: '100%' }}>{"Mensaje de error"}</Alert>
@@ -68,13 +69,15 @@ export default function Formulario() {
               <Autocomplete options={ministerios.map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"}
                 getValue={(value) => {
                   setValue("ministerio", value); // Actualiza el valor del formulario
+
                   // Encuentra el ministerio seleccionado
                   const ministerioSeleccionado = ministerios.find(ministerio => ministerio.nombre === value);
 
                   // Si se encuentra el ministerio, actualiza las áreas
                   if (ministerioSeleccionado) {
                     reset({
-                      curso: '',
+                      area: "",
+                      curso: "",
                       medioInscripcion: '',
                       plataformaDictado: '',
                       cupo: '',

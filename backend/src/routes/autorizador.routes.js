@@ -1,9 +1,9 @@
-import {getUsuario} from "../controllers/usuario.controllers.js";
+import {getAutorizadores} from "../controllers/autorizador.controllers.js";
 import { Router } from "express";
 
 const autorizadorRouter = Router();
 
 
-autorizadorRouter.get("/", getUsuario)
+autorizadorRouter.get("/", getAutorizadores)
 
 export default autorizadorRouter

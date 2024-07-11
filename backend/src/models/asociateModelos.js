@@ -8,6 +8,7 @@ import MedioInscripcion from "./medioInscripcion.models.js";
 import TipoCapacitacion from "./tipoCapacitacion.models.js";
 import PlataformaDictado from "./plataformaDictado.models.js";
 import Estado from "./estado.models.js";
+import Autorizador from "./autorizador.models.js";
 const associateModels = () => {
     Ministerio.hasMany(Area, { foreignKey: 'ministerio', as: 'detalle_areas' });
     Area.belongsTo(Ministerio, { foreignKey: 'ministerio', as: 'detalle_ministerio' });
@@ -27,6 +28,10 @@ const associateModels = () => {
     //TutoresXInstancia
     TutoresXInstancia.belongsTo(Curso, { foreignKey: 'curso', as: 'detalle_curso' });
     TutoresXInstancia.belongsTo(Persona, { foreignKey: 'cuil', as: 'detalle_tutor' });
+
+    //Autorizador
+    Autorizador.belongsTo(Curso, { foreignKey: 'curso', as: 'detalle_curso' });
+    Autorizador.belongsTo(Persona, { foreignKey: 'cuil', as: 'detalle_persona' });
 
 };
 

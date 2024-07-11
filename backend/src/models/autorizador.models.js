@@ -1,8 +1,7 @@
 import { DataTypes } from "sequelize";
 
-import sequelize from "../data/database.js";
-import Curso from "./curso.models.js";
-import Persona from "./personas.models.js";
+import sequelize from "../config/database.js";
+
 
 const Autorizador = sequelize.define("autorizadores", {
     curso: {
@@ -30,5 +29,5 @@ const Autorizador = sequelize.define("autorizadores", {
     tableName: 'autorizadores'
 });
 
-Autorizador.belongsTo(Curso, { foreignKey: 'cod', as: 'detalle_curso' });
-Autorizador.belongsTo(Persona, { foreignKey: 'cuil', as: 'detalle_persona' });
+
+export default Autorizador
