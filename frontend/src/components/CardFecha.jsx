@@ -4,7 +4,7 @@ import Fecha from './Fecha';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal';
 import { forwardRef } from 'react';
 
-const CardFecha = forwardRef(({ titulo, mensajeDesde, mensajeHasta, getFechaDesde, getFechaHasta }, ref) => {
+const CardFecha = forwardRef(({ titulo, mensajeDesde, mensajeHasta, getFechaDesde, getFechaHasta, registerDesde, registerHasta }, ref) => {
   return (
     <Card className='container-card-fecha' sx={{ height: '100%', padding: 2 }} ref={ref}>
       <div className='card-fecha-encabezado'>
@@ -12,12 +12,14 @@ const CardFecha = forwardRef(({ titulo, mensajeDesde, mensajeHasta, getFechaDesd
         <SubtituloPrincipal texto={titulo} />
       </div>
       <div className='card-fecha-datos'>
-        <Fecha mensaje={mensajeDesde} getFecha={getFechaDesde} />
-        <Fecha mensaje={mensajeHasta} getFecha={getFechaHasta} />
+        <Fecha mensaje={mensajeDesde} getFecha={getFechaDesde} {...registerDesde} />
+        
+        <Fecha mensaje={mensajeHasta} getFecha={getFechaHasta} {...registerHasta} />
       </div>
     </Card>
   );
 });
 
 export default CardFecha;
+
 

@@ -48,7 +48,7 @@ export default function Formulario() {
 
   const onSubmit = (data) => {
     console.log("Datos:", data);
-    
+
 
   }
 
@@ -211,17 +211,20 @@ export default function Formulario() {
             </div>
 
             <div className='card-fecha-inscripcion'>
-              <CardFecha titulo={"Fecha de inscripción"}
+              <CardFecha
+                titulo={"Fecha de inscripción"}
                 mensajeDesde={"Fecha de inscripción desde"}
                 mensajeHasta={"Fecha de inscripción hasta"}
                 getFechaDesde={(newFecha) => setValue("fechaInscripcionDesde", newFecha)}
                 getFechaHasta={(newFecha) => setValue("fechaInscripcionHasta", newFecha)}
-                {...register("fechaInscripcionDesde", {
+                errors = {errors}
+                registerDesde={register("fechaInscripcionDesde", {
                   validate: (value) => value !== null && value !== "" || "Debe seleccionar un fecha de inscripción"
                 })}
-                {...register("fechaInscripcionHasta", {
+                registerHasta={register("fechaInscripcionHasta", {
                   validate: (value) => value !== null && value !== "" || "Debe seleccionar una fecha de inscripción"
-                })} />
+                })}
+              />
               {
                 errors.fechaInscripcionDesde && <p style={{ color: 'red' }}>{errors.fechaInscripcionDesde.message}</p>
               }
@@ -230,24 +233,27 @@ export default function Formulario() {
               }
             </div>
             <div className='card-fechas-cursada'>
-              <CardFecha titulo={"Fecha de cursada"}
+              <CardFecha
+                titulo={"Fecha de Cursada"}
                 mensajeDesde={"Fecha de cursada desde"}
                 mensajeHasta={"Fecha de cursada hasta"}
                 getFechaDesde={(newFecha) => setValue("fechaCursadaDesde", newFecha)}
                 getFechaHasta={(newFecha) => setValue("fechaCursadaHasta", newFecha)}
-                {...register("fechaCursadaDesde", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar fecha de cursada"
+                registerDesde={register("fechaCursadaDesde", {
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar fecha de cursada desde"
                 })}
-                {...register("fechaCursadaHasta", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar fecha de cursada"
+                registerHasta={register("fechaCursadaHasta", {
+                  validate: (value) => value !== null && value !== "" || "Debe seleccionar fecha de Cursada hasta"
                 })}
               />
+
               {
                 errors.fechaCursadaDesde && <p style={{ color: 'red' }}>{errors.fechaCursadaDesde.message}</p>
               }
               {
                 errors.fechaCursadaHasta && <p style={{ color: 'red' }}>{errors.fechaCursadaHasta.message}</p>
               }
+
             </div>
             <div className='card-tutores' >
               <Tutores onClick={handleBusqTutores} />
