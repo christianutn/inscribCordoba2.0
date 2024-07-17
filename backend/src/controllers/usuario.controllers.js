@@ -1,6 +1,7 @@
 import usuarioModel from "../models/usuario.models.js";
 import Persona from "../models/persona.models.js";
 import Rol from "../models/rol.models.js";
+import Area from "../models/area.models.js";
 export const getUsuario = async (req, res, next) => {
     try {
         const usuarios = await usuarioModel.findAll({
@@ -10,6 +11,9 @@ export const getUsuario = async (req, res, next) => {
                 },
                 {
                     model: Rol, as: 'detalle_rol'
+                },
+                {
+                    model: Area, as: 'detalle_area'
                 }
             ]
         });

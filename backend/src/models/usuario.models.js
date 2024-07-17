@@ -24,7 +24,7 @@ const Usuario = sequelize.define("usuarios", {
         type: DataTypes.STRING(15),
         allowNull: false
     },
-    ministerio: {
+    area: {
         type: DataTypes.STRING(15)
     }
 },{
@@ -32,7 +32,6 @@ const Usuario = sequelize.define("usuarios", {
     tableName: 'usuarios'
 });
 
-Usuario.belongsTo(Rol, { foreignKey: 'rol', as: 'detalle_rol' });
-Usuario.belongsTo(Persona, { foreignKey: 'cuil', as: 'detalle_persona' });
+
 
 export default Usuario;

@@ -5,6 +5,8 @@ import cors from "cors";
 import sequelize from "./config/database.js";
 import associateModels from "./models/asociateModelos.js";
 
+
+
 const app = express();
 
 // Inicialización de Sequelize
@@ -29,7 +31,6 @@ app.use(cors());
 
 const PORT = 4000
 
-
 //MIdleware
 app.use(express.json());
 inicializarPassport();
@@ -42,7 +43,6 @@ app.use("/api", indexRoutes);
 app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({ message: err.message || "Error Interno" })
 })
-
 
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
