@@ -25,6 +25,10 @@ export default function Formulario() {
 
   const [cursos, setCursos] = useState([]);
 
+  const [medioInscripcions, setMedioInscripciones] = useState([]);
+  const [plataformaDictados, setPlataformaDictados] = useState([]);
+  const [tipoCapacitacions, setTipoCapacitaciones] = useState([]);
+  
   const [error, setError] = useState(null);
 
   // Logica relacionada al componente de Búsqueda de tutores
@@ -194,7 +198,7 @@ export default function Formulario() {
             <div className='input'>
               <TextField label={"Cupo"} getValue={(value) => setValue("cupo", value)}
                 {...register("cupo", {
-                  validate: (value) => value !== null && value !== "" || "Debe ingresar cupo"
+                  validate: (value) => value !== null && value !== "" && value > 0 || "Cupo inválido"
                 })} />
 
               {
@@ -202,7 +206,7 @@ export default function Formulario() {
               }
               <TextField label={"Cantidad de horas"} getValue={(value) => setValue("horas", value)}
                 {...register("horas", {
-                  validate: (value) => value !== null && value !== "" || "Debe ingresar cantidad de horas"
+                  validate: (value) => value !== null && value !== "" && value > 0 || "Cantidad de horas inválidas"
                 })} />
 
               {
@@ -219,18 +223,16 @@ export default function Formulario() {
                 getFechaHasta={(newFecha) => setValue("fechaInscripcionHasta", newFecha)}
                 errors = {errors}
                 registerDesde={register("fechaInscripcionDesde", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un fecha de inscripción"
+                  validate: (value) => value !== null && value !== "" 
                 })}
                 registerHasta={register("fechaInscripcionHasta", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar una fecha de inscripción"
+                  validate: (value) => value !== null && value !== "" 
                 })}
               />
               {
-                errors.fechaInscripcionDesde && <p style={{ color: 'red' }}>{errors.fechaInscripcionDesde.message}</p>
+                (errors.fechaInscripcionDesde || errors.fechaInscripcionHasta) && <p style={{ color: 'red' }}>{"Debe seleccionar una fecha de inscripción"}</p>
               }
-              {
-                errors.fechaInscripcionHasta && <p style={{ color: 'red' }}>{errors.fechaInscripcionHasta.message}</p>
-              }
+              
             </div>
             <div className='card-fechas-cursada'>
               <CardFecha
@@ -240,19 +242,17 @@ export default function Formulario() {
                 getFechaDesde={(newFecha) => setValue("fechaCursadaDesde", newFecha)}
                 getFechaHasta={(newFecha) => setValue("fechaCursadaHasta", newFecha)}
                 registerDesde={register("fechaCursadaDesde", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar fecha de cursada desde"
+                  validate: (value) => value !== null && value !== "" 
                 })}
                 registerHasta={register("fechaCursadaHasta", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar fecha de Cursada hasta"
+                  validate: (value) => value !== null && value !== ""
                 })}
               />
 
               {
-                errors.fechaCursadaDesde && <p style={{ color: 'red' }}>{errors.fechaCursadaDesde.message}</p>
+                (errors.fechaCursadaDesde || errors.fechaCursadaHasta) && <p style={{ color: 'red' }}>{"Debe seleccionar una fecha de Cursada"}</p>
               }
-              {
-                errors.fechaCursadaHasta && <p style={{ color: 'red' }}>{errors.fechaCursadaHasta.message}</p>
-              }
+            
 
             </div>
             <div className='card-tutores' >

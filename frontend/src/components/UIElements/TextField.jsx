@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { forwardRef } from 'react';
 
-const Input = forwardRef(({ label, getValue }, ref) => {
+const Input = forwardRef(({ label, getValue, type }, ref) => {
   return (
     <Box
       sx={{
@@ -15,7 +15,7 @@ const Input = forwardRef(({ label, getValue }, ref) => {
         <TextField
           id="outlined-number"
           label={label}
-          type="number"
+          type={type||"number"}
           InputLabelProps={{
             shrink: true,
           }}
