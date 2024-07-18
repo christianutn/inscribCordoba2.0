@@ -4,6 +4,7 @@ import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 
 
 export default function FloatingActionButton({ onClick, icon, width, height, color }) {
@@ -15,6 +16,8 @@ export default function FloatingActionButton({ onClick, icon, width, height, col
         return 'fab-editar';
       case 'borrar':
         return 'fab-borrar';
+      case 'descargar':
+        return 'fab-descargar';
       default:
         return '';
     }
@@ -38,6 +41,7 @@ export default function FloatingActionButton({ onClick, icon, width, height, col
         {icon === 'agregar' && <AddIcon />}
         {icon === 'editar' && <EditNoteIcon />}
         {icon === 'borrar' && <DeleteForeverIcon />}
+        {icon === 'descargar' && <DownloadForOfflineIcon />}
       </Fab>
     </Box>
   );

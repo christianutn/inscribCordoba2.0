@@ -4,8 +4,10 @@ import Box from '@mui/material/Box';
 import TituloPrincipal from "./fonts/TituloPrincipal.jsx";
 import Button from "./UIElements/Button.jsx";
 import BotonCircular from "./UIElements/BotonCircular.jsx";
-import {getCursos} from "../services/cursos.service.js";
+import { getCursos } from "../services/cursos.service.js";
+import {descargarExcel} from "../services/excel.service.js";
 import { useEffect, useState } from 'react';
+
 
 const Cursos = () => {
 
@@ -17,7 +19,7 @@ const Cursos = () => {
             try {
                 const listaCursos = await getCursos();
                 setCursos(listaCursos);
-                
+
             } catch (error) {
                 window.alert("Error en la carga de cursos");
             }
@@ -28,17 +30,45 @@ const Cursos = () => {
         console.log(`${action} clickeado`, params);
     }
 
-    const rows = cursos.map((curso) => ({ 
-        id: curso.cod, 
-        Ministerio: curso.detalle_area.detalle_ministerio.nombre,
-        Area: curso.detalle_area.nombre, 
-        Cod: curso.cod, 
-        Nombre: curso.nombre, 
-        Cupo: curso.cupo, 
-        PlataformaDictado: curso.detalle_plataformaDictado.nombre, 
-        MedioInscripcion: curso.detalle_medioInscripcion.nombre, 
-        TipoCapacitacion: curso.detalle_tipoCapacitacion.nombre, 
-        CantidadHoras: 40 }));
+    //Bloque para manejar la descarga del excel
+
+    const handleDescargarExcel = async () => {
+        const data = generarDatosCurso();
+         // Definir los encabezados de las columnas
+         const cabecera = [
+            { header: 'Area', key: 'Area', width: 30 },
+            { header: 'CantidadHoras', key: 'CantidadHoras', width: 15 },
+            { header: 'Cod', key: 'Cod', width: 15 },
+            { header: 'Cupo', key: 'Cupo', width: 10 },
+            { header: 'MedioInscripcion', key: 'MedioInscripcion', width: 30 },
+            { header: 'Ministerio', key: 'Ministerio', width: 30 },
+            { header: 'Nombre', key: 'Nombre', width: 50 },
+            { header: 'PlataformaDictado', key: 'PlataformaDictado', width: 30 },
+            { header: 'TipoCapacitacion', key: 'TipoCapacitacion', width: 20 }
+        ];
+        await descargarExcel(data ,cabecera);
+    }
+
+    const generarDatosCurso = () => {
+
+        
+        const data = cursos.map((curso) => ({
+            id: curso.cod,
+            Ministerio: curso.detalle_area.detalle_ministerio.nombre,
+            Area: curso.detalle_area.nombre,
+            Cod: curso.cod,
+            Nombre: curso.nombre,
+            Cupo: curso.cupo,
+            PlataformaDictado: curso.detalle_plataformaDictado.nombre,
+            MedioInscripcion: curso.detalle_medioInscripcion.nombre,
+            TipoCapacitacion: curso.detalle_tipoCapacitacion.nombre,
+            CantidadHoras: 40
+        }));
+
+        return data
+    }
+
+    const rows = generarDatosCurso();
 
     const columns = [
         { field: 'Ministerio', headerName: 'Ministerio', flex: 1 },
@@ -67,7 +97,12 @@ const Cursos = () => {
         <div className='container-cursos'>
             <div className='title'>
                 <TituloPrincipal texto="Cursos" />
-                <BotonCircular icon="agregar" />
+                <div className='opciones'>
+                    <BotonCircular icon="descargar" onClick={handleDescargarExcel} />
+                    <BotonCircular icon="agregar" />
+                </div>
+
+
             </div>
             <div className='data-grid'>
                 <DataGrid rows={rows} columns={columns} autoHeight />

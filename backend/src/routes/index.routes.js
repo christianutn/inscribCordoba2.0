@@ -34,4 +34,6 @@ router.use("/instancias", instanciaRouter)
 router.use("/tutoresXInstancias", tutorXInstanciaRouter)
 
 router.use("/login", loginRouter)
+
+
 export default router
