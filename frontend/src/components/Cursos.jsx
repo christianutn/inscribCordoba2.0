@@ -4,18 +4,41 @@ import Box from '@mui/material/Box';
 import TituloPrincipal from "./fonts/TituloPrincipal.jsx";
 import Button from "./UIElements/Button.jsx";
 import BotonCircular from "./UIElements/BotonCircular.jsx";
+import {getCursos} from "../services/cursos.service.js";
+import { useEffect, useState } from 'react';
 
 const Cursos = () => {
+
+
+    const [cursos, setCursos] = useState([]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const listaCursos = await getCursos();
+                setCursos(listaCursos);
+                
+            } catch (error) {
+                window.alert("Error en la carga de cursos");
+            }
+        })();
+    }, []);
 
     const handleActionClick = (action, params) => {
         console.log(`${action} clickeado`, params);
     }
 
-    const rows = [
-        { id: 1, Ministerio: 'Salud', Area: 'Medicina', Cod: '001', Nombre: 'Curso 1', Cupo: 30, PlataformaDictado: 'Online', MedioInscripcion: 'Web', TipoCapacitacion: 'Especialización', CantidadHoras: 40 },
-        { id: 2, Ministerio: 'Educación', Area: 'Matemáticas', Cod: '002', Nombre: 'Curso 2', Cupo: 20, PlataformaDictado: 'Presencial', MedioInscripcion: 'Oficina', TipoCapacitacion: 'Diplomatura', CantidadHoras: 60 },
-        { id: 3, Ministerio: 'Tecnología', Area: 'Programación', Cod: '003', Nombre: 'Curso 3', Cupo: 25, PlataformaDictado: 'Online', MedioInscripcion: 'App', TipoCapacitacion: 'Curso', CantidadHoras: 80 },
-    ];
+    const rows = cursos.map((curso) => ({ 
+        id: curso.cod, 
+        Ministerio: curso.detalle_area.detalle_ministerio.nombre,
+        Area: curso.detalle_area.nombre, 
+        Cod: curso.cod, 
+        Nombre: curso.nombre, 
+        Cupo: curso.cupo, 
+        PlataformaDictado: curso.detalle_plataformaDictado.nombre, 
+        MedioInscripcion: curso.detalle_medioInscripcion.nombre, 
+        TipoCapacitacion: curso.detalle_tipoCapacitacion.nombre, 
+        CantidadHoras: 40 }));
 
     const columns = [
         { field: 'Ministerio', headerName: 'Ministerio', flex: 1 },

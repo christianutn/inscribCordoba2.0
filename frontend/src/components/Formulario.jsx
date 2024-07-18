@@ -9,6 +9,8 @@ import { useState, useEffect, useContext } from 'react';
 import { useForm } from "react-hook-form";
 import Button from "./UIElements/Button";
 import { getMinisterios } from "../services/ministerios.service.js";
+import {getMediosInscripcion} from "../services/mediosInscripcion.service.js";
+import {getPlataformasDictado} from "../services/plataformasDictado.service.js";
 import Alert from '@mui/material/Alert';
 import { DataContextTutores } from "../components/context/Formulario.context.jsx";
 import BusquedaTutores from './BusquedaTutores.jsx';
@@ -25,9 +27,9 @@ export default function Formulario() {
 
   const [cursos, setCursos] = useState([]);
 
-  const [medioInscripcions, setMedioInscripciones] = useState([]);
-  const [plataformaDictados, setPlataformaDictados] = useState([]);
-  const [tipoCapacitacions, setTipoCapacitaciones] = useState([]);
+  const [mediosInscripcion, setMediosInscripciones] = useState([]);
+  const [plataformasDictado, setPlataformasDictado] = useState([]);
+  const [tiposCapacitacions, setTiposCapacitaciones] = useState([]);
   
   const [error, setError] = useState(null);
 
@@ -43,6 +45,12 @@ export default function Formulario() {
       try {
         const listaMinisterios = await getMinisterios();
         setMinisterios(listaMinisterios);
+
+        const listaMediosInscripciones = await getMediosInscripcion();
+        setMediosInscripciones(listaMediosInscripciones);
+
+        const listaPlataformasDictados = await getPlataformasDictado();
+        setPlataformasDictado(listaPlataformasDictados);
 
       } catch (error) {
         setError(true);
@@ -172,7 +180,7 @@ export default function Formulario() {
               <CardInfo titulo={"Recomendación para cantidad de cupos"} dato={"6987"} />
             </div>
             <div className='select-medio-inscripcion'>
-              <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione medio de inscripción"}
+              <Autocomplete options={mediosInscripcion.map(m => m.nombre)} label={"Seleccione medio de inscripción"}
                 getValue={(value) => {
                   setValue("medioInscripcion", value); // Actualiza el valor del formulario
                 }}
@@ -184,7 +192,7 @@ export default function Formulario() {
               }
             </div>
             <div className='select-plataforma-dictado'>
-              <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione plataforma de dictado"}
+              <Autocomplete options={plataformasDictado.map(p => p.nombre)} label={"Seleccione plataforma de dictado"}
                 getValue={(value) => {
                   setValue("plataformaDictado", value);
                 }}
