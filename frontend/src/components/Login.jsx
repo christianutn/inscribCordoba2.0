@@ -1,4 +1,4 @@
-import * as React from 'react';
+
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -16,6 +16,8 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -29,7 +31,8 @@ const Login = () => {
 
     //Setear mensaje de error
     const [mensajeDeError, setMensajeDeError] = useState(null);
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
+    const navigate = useNavigate();
     const handleSubmit = async (event) => {
         event.preventDefault();
         setOpen(true);
@@ -46,6 +49,7 @@ const Login = () => {
             
             setMensajeDeError(null);
 
+            navigate("/principal");
 
         } catch (error) {
             setMensajeDeError("Cuil o contraseña incorrectos");
@@ -67,7 +71,7 @@ const Login = () => {
             {
                 open &&
                 <Backdrop
-                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                     open={open}
                 >
                     <CircularProgress color="inherit" />
@@ -83,7 +87,7 @@ const Login = () => {
                         alignItems: 'center',
                     }}
                 >
-                    <Avatar sx={{ m: 1, bgcolor: '#5CB85C' }}>
+                    <Avatar sx={{ m: 1, bgcolor: '#00519C' }}>
                         <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h1" variant="h5">
@@ -119,7 +123,7 @@ const Login = () => {
                             sx={{
                                 mt: 3,
                                 mb: 2,
-                                bgcolor: '#5CB85C', // Establecer el color de fondo
+                                bgcolor: '#00519C', // Establecer el color de fondo
                                 color: '#fff', // Establecer el color del texto
                             }}
                         >

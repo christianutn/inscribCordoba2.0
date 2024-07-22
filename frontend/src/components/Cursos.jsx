@@ -1,24 +1,30 @@
 import React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
+                
+
 import Box from '@mui/material/Box';
 import TituloPrincipal from "./fonts/TituloPrincipal.jsx";
-import Button from "./UIElements/Button.jsx";
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import { getCursos } from "../services/cursos.service.js";
 import {descargarExcel} from "../services/excel.service.js";
 import { useEffect, useState } from 'react';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 
 const Cursos = () => {
 
 
     const [cursos, setCursos] = useState([]);
+    const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
         (async () => {
             try {
                 const listaCursos = await getCursos();
                 setCursos(listaCursos);
+                setCargando(false);
 
             } catch (error) {
                 window.alert("Error en la carga de cursos");
@@ -94,7 +100,20 @@ const Cursos = () => {
     ];
 
     return (
+
+        
         <div className='container-cursos'>
+
+            {
+                cargando && 
+                <Backdrop
+                    sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    open={cargando}
+                >
+                    <CircularProgress color="inherit" />
+                </Backdrop>
+            }
+            
             <div className='title'>
                 <TituloPrincipal texto="Cursos" />
                 <div className='opciones'>
@@ -106,7 +125,7 @@ const Cursos = () => {
             </div>
             <div className='data-grid'>
                 <DataGrid rows={rows} columns={columns} autoHeight />
-                <Button mensaje={"Volver"} width={"10%"} />
+                
             </div>
         </div>
     );
