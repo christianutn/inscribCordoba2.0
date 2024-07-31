@@ -6,7 +6,7 @@ const Input = forwardRef(({ label, getValue, type }, ref) => {
   return (
     <Box
       sx={{
-        '& .MuiTextField-root': { m: 1, width: '25ch' },
+        '& .MuiTextField-root': { m: 0, width: '25ch' },
       }}
       noValidate
       autoComplete="off"

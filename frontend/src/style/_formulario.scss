@@ -4,15 +4,11 @@
     grid-template-rows: auto;
     grid-template-areas:
         "titulo titulo titulo"
-        "select-ministerio select-ministerio  select-ministerio"
-        "select-area select-area select-area"
-        "select-curso select-curso select-curso"
-        "card-autorizador card-info1 card-info3"
-        "card-autorizador card-info2 card-info3"
-        "select-medio-inscripcion select-medio-inscripcion  select-medio-inscripcion"
-        "select-plataforma-dictado select-plataforma-dictado  select-plataforma-dictado"
-        "input input input"
-        "card-fecha-inscripcion card-fechas-cursada card-tutores"
+        "select-ministerio select-area  select-curso"
+        "select-medio-inscripcion select-plataforma-dictado  select-tipo-capacitacion"
+        "input . ."
+        "tutores tutores tutores"
+       
         "submit submit submit";
     grid-gap: 20px;
     margin-left: 250px;
@@ -30,21 +26,11 @@
         grid-area: select-curso;
     }
 
-    .card-autorizador {
-        grid-area: card-autorizador;
+    .select-tipo-capacitacion {
+        grid-area: select-tipo-capacitacion;
     }
 
-    .card-info1 {
-        grid-area: card-info1;
-    }
-
-    .card-info2 {
-        grid-area: card-info2;
-    }
-
-    .card-info3 {
-        grid-area: card-info3;
-    }
+  
 
     .select-medio-inscripcion {
         grid-area: select-medio-inscripcion;
@@ -52,26 +38,29 @@
 
     .input {
         grid-area: input;
+        //Tiene que estar uno al lado del otro de izquierda a derecha
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        
         
     }
 
+   .tutores{
+       grid-area: tutores;
+
+       display: flex;
+       flex-direction: column;
+    
+      
+   }
+
    
-
-    .card-fecha-inscripcion {
-        grid-area: card-fecha-inscripcion;
-    }
-
-    .card-fechas-cursada {
-        grid-area: card-fechas-cursada;
-    }
-
     .submit {
         grid-area: submit;
     }
 
-    .card-tutores {
-        grid-area: card-tutores;
-    }
+   
 
     .select-plataforma-dictado {
         grid-area: select-plataforma-dictado;
@@ -79,6 +68,7 @@
 
     .titulo {
         grid-area: titulo;
+        
     }
 }
 
@@ -90,16 +80,10 @@
         "select-ministerio"
         "select-area"
         "select-curso"
-        "card-autorizador"
-        "card-info1"
-        "card-info2"
-        "card-info3"
         "select-medio-inscripcion"
         "select-plataforma-dictado"
+        "select-tipo-capacitacion"
         "input"
-        "card-fecha-inscripcion"
-        "card-fechas-cursada"
-        "card-tutores"
         "submit";
       margin-left: 20px;
       margin-right: 20px;

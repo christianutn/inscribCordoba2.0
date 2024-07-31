@@ -7,7 +7,7 @@ const TituloPrincipal = ({texto}) => {
             variant="h3"
             color="text.primary"
             sx={{
-                fontFamily: 'Roboto Condensed, sans-serif',
+                fontFamily: 'Roboto, sans-serif',
                 fontWeight: 'bold'
             }}
         >

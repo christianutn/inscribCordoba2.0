@@ -7,7 +7,7 @@ const SubtituloPrincipal = ({ texto, fontWeight, variant }) => {
             variant= {variant || 'h5'}
             color="text.primary"
             sx={{
-                fontFamily: 'Roboto Condensed, sans-serif',
+                fontFamily: 'Roboto, sans-serif',
                 fontWeight: parseInt(fontWeight) || 'bold'
             }}
         >

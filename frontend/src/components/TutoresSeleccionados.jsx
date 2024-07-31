@@ -1,12 +1,13 @@
 import React from 'react';
-import { Box, Card, Typography, Avatar, Button, Divider } from '@mui/material';
+import { Box, Card, Typography, Avatar, Divider } from '@mui/material';
 import { styled } from '@mui/system';
+import Subtitulo from "./fonts/SubtituloPrincipal"
 
 const Root = styled(Box)(({ theme }) => ({
   width: '100%',
-  maxWidth: 500,
-  margin: 'auto',
+  maxWidth: 'none', // Ajustar esto según sea necesario
   padding: theme.spacing(2),
+  margin: 0, // Eliminar el centrado automático
 }));
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -28,20 +29,20 @@ const Details = styled(Box)(({ theme }) => ({
   marginLeft: theme.spacing(2),
 }));
 
-const tutors = [
-  { name: 'John Doe', friends: 2, initials: 'JD' },
-  { name: 'Jane Doette', friends: 14, initials: 'JD' },
-  { name: 'Xin Yue', friends: 22, initials: 'XY' },
-];
+/* const tutors = [
+  { name: 'John Doe Bergero', rol: "Profesor con permiso de edición", initials: 'JD' },
+  { name: 'Jane Doette', rol:"Profesor con permiso de edición", initials: 'JD' },
+  { name: 'Xin Yue', rol: "Profesor con permiso de edición", initials: 'XY' },
+]; */
 
-const TutoresSeleccionados = () => {
+
+
+const TutoresSeleccionados = ({tutors}) => {
   return (
     <Root>
-      <Typography variant="h6" gutterBottom>
-        Tutores seleccionados
-      </Typography>
-      <Divider sx={{ marginBottom: 2 }} />
-      {tutors.map((tutor, index) => (
+      <Subtitulo texto="Tutores Seleccionados" variant={"h6"} fontWeight={"100"}></Subtitulo>
+      <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} />
+      {tutors && tutors.map((tutor, index) => (
         <Box key={index}>
           <StyledCard>
             <AvatarContainer>
@@ -49,13 +50,11 @@ const TutoresSeleccionados = () => {
               <Details>
                 <Typography variant="body1">{tutor.name}</Typography>
                 <Typography variant="body2" color="textSecondary">
-                  {tutor.friends} friends
+                  {tutor.rol} 
                 </Typography>
               </Details>
             </AvatarContainer>
-            <Button variant="outlined" color="primary">
-              ADD FRIEND
-            </Button>
+            
           </StyledCard>
           <Divider />
         </Box>
@@ -65,6 +64,3 @@ const TutoresSeleccionados = () => {
 };
 
 export default TutoresSeleccionados;
-
-
-
