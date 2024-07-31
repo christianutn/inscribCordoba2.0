@@ -12,6 +12,8 @@ import autorizadorRouter from "./autorizador.routes.js";
 import instanciaRouter from "./instancia.routes.js";
 import tutorXInstanciaRouter from "./tutorXInstancia.routes.js";
 import loginRouter from "./login.routes.js";
+import tutorRouter from "./tutor.routes.js";
+import tipoRolTutor from "./tipoRolTutor.routes.js";
 
 
 import {Router} from "express";
@@ -35,5 +37,7 @@ router.use("/tutoresXInstancias", tutorXInstanciaRouter)
 
 router.use("/login", loginRouter)
 
+router.use("/tutores", tutorRouter)
+router.use("/tiposRolTutor", tipoRolTutor)
 
 export default router

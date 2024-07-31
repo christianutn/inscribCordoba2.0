@@ -33,7 +33,7 @@ const Personas = sequelize.define("personas", {
     },
     celular: {
         type: DataTypes.STRING(10),  // Asumiendo una longitud máxima de 15 caracteres para el celular
-        allowNull: true,
+       
         validate: {
             len: [10, 10]  // Validación de longitud
         }
