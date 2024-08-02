@@ -7,7 +7,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 
 
-export default function FloatingActionButton({ onClick, icon, width, height, color }) {
+export default function FloatingActionButton({ onClick, icon, width, height, color, justifyContent, alignItems }) {
   const getClassForIcon = (icon) => {
     switch (icon) {
       case 'agregar':
@@ -27,7 +27,8 @@ export default function FloatingActionButton({ onClick, icon, width, height, col
     <Box className="boton-circular"
       sx={{ 
         display: 'flex', 
-        justifyContent: 'flex-end', 
+        justifyContent: justifyContent ||'flex-end', 
+        alignItems: alignItems ||'flex-end',
         '& > :not(style)': { m: 1 },
         width: '100%',
       }}

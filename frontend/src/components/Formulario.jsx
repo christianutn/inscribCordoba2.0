@@ -1,7 +1,7 @@
 import Titulo from './fonts/TituloPrincipal';
 import Autocomplete from './UIElements/Autocomplete';
 import TextField from './UIElements/TextField';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import Button from "./UIElements/Button";
 import { getMinisterios } from "../services/ministerios.service.js";
@@ -13,44 +13,41 @@ import Alert from '@mui/material/Alert';
 import Select from '@mui/material/Select';
 import { DataGrid, useGridApiContext } from '@mui/x-data-grid';
 import TutoresSeleccionados from './TutoresSeleccionados.jsx';
-
-
-
+import Cohortes from "./Cohortes.jsx";
 
 export default function Formulario() {
-
-  // Variables de contexto
-
-
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
 
   const [ministerios, setMinisterios] = useState([]);
-
   const [areas, setAreas] = useState([]);
-
   const [cursos, setCursos] = useState([]);
-
   const [mediosInscripcion, setMediosInscripciones] = useState([]);
   const [plataformasDictado, setPlataformasDictado] = useState([]);
   const [tiposCapacitacions, setTiposCapacitaciones] = useState([]);
   const [tutores, setTutores] = useState([]);
- 
   const [error, setError] = useState(null);
 
-
-
-  //Data grid de tutores
+  // Data grid de tutores
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
   const [tutoresSeleccionados, setTutoresSeleccionados] = useState([]);
+
+  // Función para comprobar si una fila está seleccionada
+  const isRowSelected = (id) => rowSelectionModel.includes(id);
 
   function SelectEditInputCell(props) {
     const { id, value, field } = props;
     const apiRef = useGridApiContext();
 
     const handleChangeSelect = async (event) => {
-      await apiRef.current.setEditCellValue({ id, field, value: event.target.value });
+      const newValue = event.target.value;
+      await apiRef.current.setEditCellValue({ id, field, value: newValue });
       apiRef.current.stopCellEditMode({ id, field });
-      
+
+      setTutores((prevTutores) =>
+        prevTutores.map((tutor) =>
+          tutor.cuil === id ? { ...tutor, rol: newValue } : tutor
+        )
+      );
     };
 
     return (
@@ -61,6 +58,7 @@ export default function Formulario() {
         sx={{ height: 1 }}
         native
         autoFocus
+        disabled={isRowSelected(id)} // Deshabilitar si la fila está seleccionada
       >
         <option>Profesor con permiso de edición</option>
         <option>Profesor sin permiso de edición</option>
@@ -73,19 +71,16 @@ export default function Formulario() {
   };
 
   const generarDatosTutores = () => {
-
-
     const data = tutores.map((tutor) => ({
       id: tutor.cuil,
       cuil: tutor.cuil,
       nombre: tutor.detalle_persona.nombre,
       apellido: tutor.detalle_persona.apellido,
       mail: tutor.detalle_persona.mail,
-      rol: "Profesor sin permiso de edición"
+      rol: tutor.rol || 'Profesor sin permiso de edición', // Añadir rol si no existe
     }));
-
-    return data
-  }
+    return data;
+  };
 
   const rows = generarDatosTutores();
 
@@ -102,7 +97,6 @@ export default function Formulario() {
       width: 180,
     }
   ];
-
 
   useEffect(() => {
     (async () => {
@@ -122,8 +116,6 @@ export default function Formulario() {
         const listaTutores = await getTutores();
         setTutores(listaTutores);
 
-
-
       } catch (error) {
         setError(true);
       }
@@ -132,10 +124,7 @@ export default function Formulario() {
 
   const onSubmit = (data) => {
     console.log("Datos:", data);
-
-
   }
-
 
   return (
     <>
@@ -148,12 +137,10 @@ export default function Formulario() {
           <div className='select-ministerio'>
             <Autocomplete options={ministerios.map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"}
               getValue={(value) => {
-                setValue("ministerio", value); // Actualiza el valor del formulario
+                setValue("ministerio", value);
 
-                // Encuentra el ministerio seleccionado
                 const ministerioSeleccionado = ministerios.find(ministerio => ministerio.nombre === value);
 
-                // Si se encuentra el ministerio, actualiza las áreas
                 if (ministerioSeleccionado) {
                   reset({
                     area: "",
@@ -178,21 +165,16 @@ export default function Formulario() {
               })}
 
             />
-            {
-              errors.ministerio && <p style={{ color: 'red' }}>{errors.ministerio.message}</p>
-            }
-
+            {errors.ministerio && <p style={{ color: 'red' }}>{errors.ministerio.message}</p>}
           </div>
 
           <div className='select-area'>
             <Autocomplete options={areas.map(a => a.nombre)} label={"Seleccione un área"}
               getValue={(value) => {
-                setValue("area", value)
+                setValue("area", value);
 
-                // Encuentra el area seleccionado
                 const areaSeleccionada = areas.find(area => area.nombre === value);
 
-                // Si se encuentra el ministerio, actualiza las áreas
                 if (areaSeleccionada) {
                   reset({
                     curso: '',
@@ -216,38 +198,32 @@ export default function Formulario() {
               })}
 
             />
-            {
-              errors.area && <p style={{ color: 'red' }}>{errors.area.message}</p>
-            }
+            {errors.area && <p style={{ color: 'red' }}>{errors.area.message}</p>}
           </div>
 
           <div className='select-curso'>
             <Autocomplete options={cursos.map(c => c.nombre)} label={"Seleccione un curso"}
               getValue={(value) => {
-                setValue("curso", value)
+                setValue("curso", value);
               }}
               {...register("curso", {
                 validate: (value) => value !== null && value !== "" || "Debe seleccionar un curso"
               })}
             />
-            {
-              errors.curso && <p style={{ color: 'red' }}>{errors.curso.message}</p>
-            }
+            {errors.curso && <p style={{ color: 'red' }}>{errors.curso.message}</p>}
           </div>
-
 
           <div className='select-medio-inscripcion'>
             <Autocomplete options={mediosInscripcion.map(m => m.nombre)} label={"Seleccione medio de inscripción"}
               getValue={(value) => {
-                setValue("medioInscripcion", value); // Actualiza el valor del formulario
+                setValue("medioInscripcion", value);
               }}
               {...register("medioInscripcion", {
                 validate: (value) => value !== null && value !== "" || "Debe seleccionar un medio de inscripción"
               })} />
-            {
-              errors.medioInscripcion && <p style={{ color: 'red' }}>{errors.medioInscripcion.message}</p>
-            }
+            {errors.medioInscripcion && <p style={{ color: 'red' }}>{errors.medioInscripcion.message}</p>}
           </div>
+
           <div className='select-plataforma-dictado'>
             <Autocomplete options={plataformasDictado.map(p => p.nombre)} label={"Seleccione plataforma de dictado"}
               getValue={(value) => {
@@ -256,10 +232,9 @@ export default function Formulario() {
               {...register("plataformaDictado", {
                 validate: (value) => value !== null && value !== "" || "Debe seleccionar una plataforma de dictado"
               })} />
-            {
-              errors.plataformaDictado && <p style={{ color: 'red' }}>{errors.plataformaDictado.message}</p>
-            }
+            {errors.plataformaDictado && <p style={{ color: 'red' }}>{errors.plataformaDictado.message}</p>}
           </div>
+
           <div className='select-tipo-capacitacion'>
             <Autocomplete options={tiposCapacitacions.map(p => p.nombre)} label={"Seleccione tipo de capacitación"}
               getValue={(value) => {
@@ -268,69 +243,59 @@ export default function Formulario() {
               {...register("tiposCapacitacion", {
                 validate: (value) => value !== null && value !== "" || "Debe seleccionar una plataforma de dictado"
               })} />
-            {
-              errors.tiposCapacitacions && <p style={{ color: 'red' }}>{errors.tiposCapacitacions.message}</p>
-            }
+            {errors.tiposCapacitacions && <p style={{ color: 'red' }}>{errors.tiposCapacitacions.message}</p>}
           </div>
-          <div className='input'>
 
+          <div className='input'>
             <TextField label={"Cupo"} getValue={(value) => setValue("cupo", value)}
               {...register("cupo", {
                 validate: (value) => value !== null && value !== "" && value > 0 || "Cupo inválido"
               })} />
+            {errors.cupo && <p style={{ color: 'red' }}>{errors.cupo.message}</p>}
 
-            {
-              errors.cupo && <p style={{ color: 'red' }}>{errors.cupo.message}</p>
-            }
             <TextField label={"Cantidad de horas"} getValue={(value) => setValue("horas", value)}
               {...register("horas", {
                 validate: (value) => value !== null && value !== "" && value > 0 || "Cantidad de horas inválidas"
               })} />
-
-            {
-              errors.horas && <p style={{ color: 'red' }}>{errors.horas.message}</p>
-            }
+            {errors.horas && <p style={{ color: 'red' }}>{errors.horas.message}</p>}
           </div>
 
           <div className='tutores'>
-
             <DataGrid rows={rows} columns={columns}
               autoHeight
               checkboxSelection
               disableRowSelectionOnClick
               loading={rows.length === 0}
               onRowSelectionModelChange={(newRowSelectionModel) => {
-              
                 setRowSelectionModel(newRowSelectionModel);
 
                 const listaTutores = newRowSelectionModel.map((id) =>
                   rows.find((row) => row.id === id)
                 );
-            
+
                 const tutores = listaTutores.map((tutor) => ({
                   name: `${tutor.nombre} ${tutor.apellido}`,
                   rol: tutor.rol,
                   initials: `${tutor.nombre[0]}${tutor.apellido[0]}`,
                 }));
-            
-                setTutoresSeleccionados(tutores);
 
+                setTutoresSeleccionados(tutores);
               }}
               rowSelectionModel={rowSelectionModel}
             />
 
-
-            <TutoresSeleccionados tutors={tutoresSeleccionados}/>
-
-
-
+            <TutoresSeleccionados tutors={tutoresSeleccionados} />
           </div>
+
+          <div className='cohortes'>
+            <Cohortes></Cohortes>
+          </div>
+
           <div className='submit'>
             <Button mensaje={"Registrar"} type={"submit"} />
           </div>
         </div>
       </form>
-
     </>
   );
 }

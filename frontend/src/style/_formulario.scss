@@ -8,11 +8,14 @@
         "select-medio-inscripcion select-plataforma-dictado  select-tipo-capacitacion"
         "input . ."
         "tutores tutores tutores"
+        "cohortes cohortes cohortes"
        
         "submit submit submit";
     grid-gap: 20px;
-    margin-left: 250px;
-    margin-right: 250px;
+    margin-left: 50px;
+    margin-right: 50px;
+
+    
 
     .select-ministerio {
         grid-area: select-ministerio;
@@ -55,6 +58,11 @@
       
    }
 
+   .cohortes {
+       grid-area: cohortes;
+      
+   }
+
    
     .submit {
         grid-area: submit;
@@ -72,7 +80,7 @@
     }
 }
 
-@media (max-width: 1375px) {
+/* @media (max-width: 1375px) {
     .grid-container-formulario {
       grid-template-columns: 1fr;
       grid-template-areas:
@@ -104,4 +112,4 @@
         }
       }
     }
-  }
+  } */

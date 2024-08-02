@@ -1,0 +1,61 @@
+.container-cohorte {
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .cohortes {
+        display: grid;
+        grid-template-columns: 1/2fr 1fr 1fr 1fr 1fr 5%;
+        grid-template-rows: auto;
+        grid-template-areas:
+            "titulo titulo titulo titulo titulo titulo"
+            "label insc-desde insc-hasta curso-desde curso-hasta icon" 
+            "diver diver diver diver diver diver"
+            "btnEnviar btnEnviar btnEnviar btnEnviar btnEnviar btnEnviar";
+        grid-gap: 20px;
+
+        .insc-desde {
+            grid-area: insc-desde;
+           
+        }
+        .insc-hasta {
+            grid-area: insc-hasta;
+        }
+        .curso-desde {
+            grid-area: curso-desde;
+        }
+        .curso-hasta {
+            grid-area: curso-hasta;
+        }
+        .select-medio-inscripcion {
+            grid-area: select-medio-inscripcion;
+        }
+        .select-plataforma-dictado {
+            grid-area: select-plataforma-dictado;
+        }
+        .select-tipo-capacitacion {
+            grid-area: select-tipo-capacitacion;
+        }
+        .btnEnviar {
+            grid-area: btnEnviar;
+        }
+        .icon {
+            grid-area: icon;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+
+        .label {
+            grid-area: label;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .diver {
+            grid-area: diver;
+        }
+    }
+}
