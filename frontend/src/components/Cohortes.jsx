@@ -1,5 +1,4 @@
 import React from 'react';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import Fecha from './Fecha';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal';
 import Button from '../components/UIElements/FabAlargado';
@@ -14,13 +13,11 @@ const Cohorte = () => {
 
     const mensajeDesdeInscripcion = "Fecha de Inscripción desde";
     const mensajeHastaInscripcion = "Fecha de Inscripción hasta";
-    const getFechaDesdeInscripcion = "01/01/2024";
-    const getFechaHastaInscripcion = "01/01/2024";
+  
 
     const mensajeDesdeCursada = "Fecha de Cursada desde";
     const mensajeHastaCursada = "Fecha de Cursada hasta";
-    const getFechaDesdeCursada = "01/01/2024";
-    const getFechaHastaCursada = "01/01/2024";
+
 
 
 
@@ -99,7 +96,7 @@ const Cohorte = () => {
     //Use State
 
     const [cohortes, setCohortes] = useState([]);
-    const [listaCohortesFechas, setListaCohortesFechas] = useState([]);
+   
 
     return (
         <>
