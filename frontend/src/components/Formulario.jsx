@@ -295,6 +295,9 @@ export default function Formulario() {
             <Button mensaje={"Registrar"} type={"submit"} />
           </div>
         </div>
+        {
+          console.log("Primer commit!!")
+        }
       </form>
     </>
   );
