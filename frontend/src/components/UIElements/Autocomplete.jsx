@@ -1,7 +1,7 @@
-import React, { useState, forwardRef } from "react";
+
 import { Autocomplete, TextField } from "@mui/material";
 
-const Select = forwardRef(({ label, options, getValue }, ref) => {
+const Select = ({ label, options, getValue, value }) => {
 
 
   return (
@@ -9,15 +9,15 @@ const Select = forwardRef(({ label, options, getValue }, ref) => {
       disablePortal
       id="combo-box-demo"
       options={options}
-  
+      value={value}
       onChange={(event, newValue) => {
    
         getValue(newValue);
       }}
       sx={{ width: '100%' }}
-      renderInput={(params) => <TextField {...params} label={label} ref={ref} />}
+      renderInput={(params) => <TextField {...params} label={label} />}
     />
   );
-});
+};
 
 export default Select;

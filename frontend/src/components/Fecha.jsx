@@ -5,9 +5,9 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal';
 import dayjs from 'dayjs';
 import TextField from '@mui/material/TextField';
-import {Typography} from '@mui/material';
+import { Typography } from '@mui/material';
 
-const Fecha = forwardRef(({ mensaje, getFecha, id, fieldFecha, value, ...props }, ref) => {
+const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   const [selectedDate, setSelectedDate] = useState(null);
 
   const handleDateChange = (newDate) => {
@@ -18,20 +18,22 @@ const Fecha = forwardRef(({ mensaje, getFecha, id, fieldFecha, value, ...props }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en">
-      <div ref={ref}>
-        
+      <div>
+
         <Typography variant="body1">{mensaje}</Typography>
         <DatePicker
           sx={{ width: '100%', height: '100%' }}
-          value={value ? dayjs(value) : null} 
+          value={value ? dayjs(value) : null}
           onChange={handleDateChange}
-          renderInput={(params) => <TextField {...params} {...props} />}
+          slots={{
+            textField: (params) => <TextField {...params} />,
+          }}
           inputFormat="DD/MM/YYYY"
           format="DD/MM/YYYY" // Set the format here
         />
       </div>
     </LocalizationProvider>
   );
-});
+};
 
 export default Fecha;

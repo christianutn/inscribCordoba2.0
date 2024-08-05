@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { forwardRef } from 'react';
 
-const Input = forwardRef(({ label, getValue, type }, ref) => {
+const Input = ({ label, getValue, type, value }) => {
   return (
     <Box
       sx={{
@@ -20,11 +20,11 @@ const Input = forwardRef(({ label, getValue, type }, ref) => {
             shrink: true,
           }}
           onChange={(event) => getValue(event.target.value)}
-          ref={ref}
+          value={value}
         />
       </div>
     </Box>
   );
-});
+};
 
 export default Input;
