@@ -288,16 +288,13 @@ export default function Formulario() {
           </div>
 
           <div className='cohortes'>
-            <Cohortes></Cohortes>
+            <Cohortes register = {register} errors = {errors} setValue = {setValue}></Cohortes>
           </div>
 
           <div className='submit'>
             <Button mensaje={"Registrar"} type={"submit"} />
           </div>
         </div>
-        {
-          console.log("tecer commit!!")
-        }
       </form>
     </>
   );

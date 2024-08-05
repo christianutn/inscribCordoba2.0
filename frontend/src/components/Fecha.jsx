@@ -7,13 +7,13 @@ import dayjs from 'dayjs';
 import TextField from '@mui/material/TextField';
 import {Typography} from '@mui/material';
 
-const Fecha = forwardRef(({ mensaje, getFecha, id, ...props }, ref) => {
+const Fecha = forwardRef(({ mensaje, getFecha, id, fieldFecha, value, ...props }, ref) => {
   const [selectedDate, setSelectedDate] = useState(null);
 
   const handleDateChange = (newDate) => {
     const formattedDate = newDate ? dayjs(newDate).format('YYYY-MM-DD') : null;
     setSelectedDate(newDate);
-    getFecha(formattedDate, id); // Enviar la fecha formateada al componente padre
+    getFecha(formattedDate, id, fieldFecha); // Enviar la fecha formateada al componente padre
   };
 
   return (
@@ -23,7 +23,7 @@ const Fecha = forwardRef(({ mensaje, getFecha, id, ...props }, ref) => {
         <Typography variant="body1">{mensaje}</Typography>
         <DatePicker
           sx={{ width: '100%', height: '100%' }}
-          value={selectedDate}
+          value={value ? dayjs(value) : null} 
           onChange={handleDateChange}
           renderInput={(params) => <TextField {...params} {...props} />}
           inputFormat="DD/MM/YYYY"
