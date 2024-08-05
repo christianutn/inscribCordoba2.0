@@ -91,7 +91,7 @@ export const postInstancia = async (req, res, next) => {
             });
 
             if (instanciaExistente) {
-                const error = new Error("La instancia ya existe");
+                const error = new Error(`La instancia para el curso ${curso} con fecha inicio de curso ${fecha_inicio_curso} ya existe`);
                 error.statusCode = 400;
                 throw error;
             }
