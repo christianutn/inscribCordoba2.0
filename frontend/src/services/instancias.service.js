@@ -6,7 +6,7 @@ export const postInstancias = async (newInstancia) => {
 
         const {selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes} = newInstancia
 
-        console.log("DATOS ENVIADOS:" , {selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes})
+        
         const response = await fetch(URL, {
             method: "POST",
             headers: {
@@ -26,14 +26,11 @@ export const postInstancias = async (newInstancia) => {
                 cohortes: cohortes
             })
         })
-
-
-
         const data = await response.json();
-
         if(response.status !== 201) {
             throw new Error(data.message || "Error al registrar instancia")
         }
+        
         return data
     } catch (error) {
         throw error

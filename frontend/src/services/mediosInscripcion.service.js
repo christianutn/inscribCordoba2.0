@@ -8,7 +8,14 @@ export const getMediosInscripcion = async () => {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`}
         });
-        const data = await response.json()
+
+        const data = await response.json();
+        if(response.status !== 200) {
+            
+            throw new Error(data.message || "Error al obtener los medios de inscripción");
+        }
+        
+        
         return data
     } catch (error) {
         throw error

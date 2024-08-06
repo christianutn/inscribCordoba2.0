@@ -10,6 +10,10 @@ export const getTiposCapacitacion = async () => {
             }
         });
         const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error(data.message || "Error al obtener los tipos de capacitaciones");
+        }
+        
         return data
     } catch (error) {
         throw error

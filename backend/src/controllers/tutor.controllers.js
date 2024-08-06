@@ -4,17 +4,36 @@ import Tutor from "../models/tutor.models.js";
 
 
 export const getTutores = async (req, res, next) => {
+
+    const { rol, area } = req.user.user
+    let tutores = [];
     try {
-        const tutores = await Tutor.findAll({
-            include: [
-                {
-                    model: Persona, as: 'detalle_persona'
+        if (rol === "ADM") {
+            tutores = await Tutor.findAll({
+                include: [
+                    {
+                        model: Persona, as: 'detalle_persona'
+                    },
+                    {
+                        model: Area, as: 'detalle_area'
+                    }
+                ]
+            });
+        } else {
+            tutores = await Tutor.findAll({
+                where: {
+                    area: area
                 },
-                {
-                    model: Area, as: 'detalle_area'
-                }
-            ]
-        });
+                include: [
+                    {
+                        model: Persona, as: 'detalle_persona'
+                    },
+                    {
+                        model: Area, as: 'detalle_area'
+                    }
+                ]
+            });
+        }
         if (tutores.length === 0) {
             const error = new Error("No existen tutores");
             error.statusCode = 404;

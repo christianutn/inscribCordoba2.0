@@ -17,6 +17,8 @@ import validarFecha from '../services/validarFechas.js';
 import { postInstancias } from "../services/instancias.service.js";
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
+import { Divider } from '@mui/material';
+import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
 
 
 export default function Formulario() {
@@ -90,6 +92,7 @@ export default function Formulario() {
   };
 
   const generarDatosTutores = () => {
+
     const data = tutores.map((tutor) => ({
       id: tutor.cuil,
       cuil: tutor.cuil,
@@ -101,19 +104,19 @@ export default function Formulario() {
     return data;
   };
 
-  const rows = generarDatosTutores();
+  const rows = generarDatosTutores()
 
   const columns = [
-    { field: 'cuil', headerName: 'Cuil', flex:1 },
-    { field: 'nombre', headerName: 'Nombre', flex:1 },
-    { field: 'apellido', headerName: 'Apellido', flex:1 },
-    { field: 'mail', headerName: 'Mail', flex:1},
+    { field: 'cuil', headerName: 'Cuil', flex: 1 },
+    { field: 'nombre', headerName: 'Nombre', flex: 1 },
+    { field: 'apellido', headerName: 'Apellido', flex: 1 },
+    { field: 'mail', headerName: 'Mail', flex: 1 },
     {
       field: 'rol',
       headerName: 'Rol del tutor',
       renderEditCell: renderSelectEditInputCell,
       editable: true,
-      flex:1
+      flex: 1
     }
   ];
 
@@ -136,7 +139,7 @@ export default function Formulario() {
         setTutores(listaTutores);
 
       } catch (error) {
-        setError(true);
+        setError(error.message || "Error al cargar los datos");
       }
     })();
   }, []);
@@ -295,6 +298,7 @@ export default function Formulario() {
 
                 } else {
                   setAreas([]);
+                  setCursos([]);
                 }
 
               }}
@@ -336,7 +340,7 @@ export default function Formulario() {
 
           </div>
 
-          <div className='select-medio-inscripcion'> 
+          <div className='select-medio-inscripcion'>
             <Autocomplete options={mediosInscripcion.map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion}
               getValue={(value) => {
                 setSelectMedioInscripcion(value);
@@ -373,7 +377,11 @@ export default function Formulario() {
 
           </div>
 
+
+
           <div className='tutores'>
+            <SubtituloPrincipal texto='Selección de tutores' />
+            <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
             <DataGrid rows={rows} columns={columns}
               autoHeight
               checkboxSelection

@@ -12,14 +12,14 @@ export const getMinisterios = async () => {
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`}
         });
 
-        
+        const data = await response.json()
         if(response.status !== 200){
 
-            const error = new Error("No existen ministerios");
+            const error = new Error(data.message || "No existen ministerios");
             error.statusCode = 404;
             throw error;
         }
-        const data = await response.json()
+        
        
 
         return data

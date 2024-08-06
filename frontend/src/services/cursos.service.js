@@ -10,6 +10,10 @@ export const getCursos = async () => {
             }
         });
         const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error("No se encontraron los cursos");
+        }
+        
         return data
     } catch (error) {
         throw error

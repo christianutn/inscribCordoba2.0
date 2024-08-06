@@ -10,6 +10,14 @@ export const getTutores = async () => {
             }
         });
         const data = await response.json();
+        if(response.status !== 200) {
+            const error = await response.json();
+            throw new Error(error.message || "Error al obtener los tutores");
+        }
+
+        
+        
+        
         return data
     } catch (error) {
         throw error

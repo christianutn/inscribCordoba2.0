@@ -56,11 +56,11 @@ const inicializarPassport = () => {
                 done(null, false);
             }
 
-            const { rol } = req.body
+            const { rol, area } = req.body
             //Asegurar que contrasenia sea uan cadena si no es una cadena convertirla a string
             contrasenia = String(contrasenia)
             const contraseniaHash = createHash(contrasenia)
-            const nuevoUsuario = await Usuario.create({ cuil, contrasenia: contraseniaHash, rol });
+            const nuevoUsuario = await Usuario.create({ cuil, contrasenia: contraseniaHash, rol, area });
 
             done(null, nuevoUsuario);
 
