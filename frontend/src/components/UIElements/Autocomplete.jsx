@@ -10,6 +10,7 @@ const Select = ({ label, options, getValue, value }) => {
       id="combo-box-demo"
       options={options}
       value={value}
+     
       onChange={(event, newValue) => {
    
         getValue(newValue);

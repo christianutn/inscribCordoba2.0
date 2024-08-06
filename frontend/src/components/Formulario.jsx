@@ -19,6 +19,7 @@ import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Divider } from '@mui/material';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
+import {validarOrdenFechas} from "../services/validarOrdenFechas.js";
 
 
 export default function Formulario() {
@@ -222,6 +223,11 @@ export default function Formulario() {
         if (!validarFecha(cohorte.fechaInscripcionDesde) || !validarFecha(cohorte.fechaInscripcionHasta) || !validarFecha(cohorte.fechaCursadaDesde) || !validarFecha(cohorte.fechaCursadaHasta)) {
           throw new Error("Debe completar las fechas");
         }
+
+        if(validarOrdenFechas([cohorte.fechaInscripcionDesde, cohorte.fechaInscripcionHasta, cohorte.fechaCursadaDesde, cohorte.fechaCursadaHasta]) === false){
+          throw new Error("Fechas de cohorte no válidas. Las fechas no son coherentes");
+        }
+        
       })
 
       const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes });
