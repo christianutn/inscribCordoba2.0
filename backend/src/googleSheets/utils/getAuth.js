@@ -1,7 +1,7 @@
 import { google } from 'googleapis';
 import 'dotenv/config';
 
-console.log("Prueba");
+
 
 const authorize = new google.auth.GoogleAuth({
   credentials: {
@@ -12,7 +12,7 @@ const authorize = new google.auth.GoogleAuth({
 });
 
 // Función para probar la autenticación y obtener datos de la hoja de cálculo
-async function testAuthentication() {
+/* async function testAuthentication() {
   try {
     const auth = await authorize.getClient();
     const sheets = google.sheets({ version: 'v4', auth });
@@ -28,7 +28,11 @@ async function testAuthentication() {
     console.log('Datos de la hoja:', response.data.values);
   } catch (error) {
     console.error('Error al autenticar o acceder a la hoja de cálculo:', error);
+    
   }
 }
 
 testAuthentication();
+ */
+
+export default authorize

@@ -7,6 +7,7 @@ import validarFormatoFecha from "../utils/validarFormatoFecha.js";
 import Persona from "../models/persona.models.js";
 import sequelize from "../config/database.js";
 import TutoresXInstancia from "../models/tutorXInstancia.models.js";
+import {agregarFilasGoogleSheets} from "../googleSheets/services/agregarFilasGoogleSheets.js";
 
 
 export const getInstancias = async (req, res, next) => {
@@ -51,7 +52,7 @@ export const getInstancias = async (req, res, next) => {
 export const postInstancia = async (req, res, next) => {
     const t = await sequelize.transaction(); // Declaramos transacción
     try {
-        const { curso, estado, cohortes, tutores } = req.body;
+        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, estado, cohortes, tutores} = req.body;
 
         // Buscamos el curso una vez y reutilizamos el resultado
         const dataCurso = await Curso.findOne({
@@ -106,7 +107,7 @@ export const postInstancia = async (req, res, next) => {
                 estado: estado
             }, { transaction: t });
 
-            console.log("Instancia creada:", instancia);
+            
 
             // Procesamos cada tutor asociado a la instancia
             for (let j = 0; j < tutores.length; j++) {
@@ -132,7 +133,7 @@ export const postInstancia = async (req, res, next) => {
                 console.log("Tutor creado: ", tutorXInstancia);
             }
         }
-
+        agregarFilasGoogleSheets({...req.body, codCurso: dataCurso.cod});
         // Confirmamos transacción
         await t.commit();
         res.status(201).json({ message: "Instancias y tutores creados exitosamente" });
