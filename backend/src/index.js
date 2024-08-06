@@ -4,6 +4,7 @@ import inicializarPassport from "../src/config/passport.js"
 import cors from "cors";
 import sequelize from "./config/database.js";
 import associateModels from "./models/asociateModelos.js";
+import 'dotenv/config'; 
 
 
 

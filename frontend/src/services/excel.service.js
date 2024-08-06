@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 
-export const descargarExcel = async (data, cabecera) => {
+export const descargarExcel = async (data, cabecera, nameFile) => {
     try {
         
 
@@ -25,7 +25,7 @@ export const descargarExcel = async (data, cabecera) => {
         const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'cursos.xlsx';
+        link.download = nameFile ||'archivoDescargado.xlsx';
         link.click();
         
         // Limpiar el URL del objeto

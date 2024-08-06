@@ -4,10 +4,14 @@ import 'dotenv/config';
 
 export const getDataRange = async (googleSheets, auth, sheetName, range) => {
 
-  const data = await googleSheets.spreadsheets.values.get({
-    auth,
-    spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEETS_ID,
-    range: `${sheetName}!${range}`,
-  });
-  return data
+  try {
+    const response = await googleSheets.spreadsheets.values.get({
+      auth,
+      spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEETS_ID,
+      range: `${sheetName}!${range}`,
+    });
+    return response.data.values
+  } catch (error) {
+    throw error
+  }
 }

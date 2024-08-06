@@ -52,7 +52,7 @@ const Cursos = () => {
             { header: 'PlataformaDictado', key: 'PlataformaDictado', width: 30 },
             { header: 'TipoCapacitacion', key: 'TipoCapacitacion', width: 20 }
         ];
-        await descargarExcel(data ,cabecera);
+        await descargarExcel(data ,cabecera, "Cursos");
     }
 
     const generarDatosCurso = () => {

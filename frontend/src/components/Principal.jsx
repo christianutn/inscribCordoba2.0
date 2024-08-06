@@ -21,6 +21,7 @@ import Formulario from './Formulario';
 import { DataProviderTutores } from "../components/context/Formulario.context.jsx"
 import ClassIcon from '@mui/icons-material/Class';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import Cronograma from "./Cronograma.jsx"
 
 
 import Cursos from "./Cursos.jsx"
@@ -93,7 +94,7 @@ export default function Principal() {
       case "Formulario":
         return <DataProviderTutores><Formulario /></DataProviderTutores>; // Renderiza tu componente específico
       case "Calendario":
-        return <h1>Calendario</h1>
+        return <Cronograma/>
       case "Cursos":
         return <Cursos/>
       default:

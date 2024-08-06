@@ -1,0 +1,16 @@
+.container-cronograma {
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .cabecera {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .cronograma {
+        height: 400px;
+        width: 100%;
+    }
+}
