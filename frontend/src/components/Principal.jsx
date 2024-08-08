@@ -18,13 +18,12 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import Formulario from './Formulario';
-import { DataProviderTutores } from "../components/context/Formulario.context.jsx"
 import ClassIcon from '@mui/icons-material/Class';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import Cronograma from "./Cronograma.jsx"
-
-
 import Cursos from "./Cursos.jsx"
+import UpdateIcon from '@mui/icons-material/Update';
+import AltaBajaModificion from './AltaBajaModificion.jsx';
 
 const drawerWidth = 240;
 
@@ -92,11 +91,13 @@ export default function Principal() {
   const mostrarOpcion = () => {
     switch (opcionSeleccionada) {
       case "Formulario":
-        return <DataProviderTutores><Formulario /></DataProviderTutores>; // Renderiza tu componente específico
+        return <Formulario />
       case "Calendario":
         return <Cronograma/>
       case "Cursos":
         return <Cursos/>
+      case "AltaBajaModificion":
+        return <AltaBajaModificion/>
       default:
         return <h1>Bienvenido</h1> // Mensaje por defecto o componente
     }
@@ -143,17 +144,19 @@ export default function Principal() {
         </DrawerHeader>
         <Divider />
         <List>
-          {[["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["Cursos", "Cursos"]].map((item, index) => (
+          {[["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["Cursos", "Cursos"], ["ABM", "AltaBajaModificion"]].map((item, index) => (
             <ListItem key={index} disablePadding>
               <ListItemButton onClick={() => handleListItemClick(item[1])}>
                 <ListItemIcon>
                   {index === 0 && <EditCalendarIcon />}
                   {index === 1 && <CalendarMonthIcon />}
                   {index === 2 && <ClassIcon />}
+                  {index === 3 && <UpdateIcon />}
                 </ListItemIcon>
                 <ListItemText primary={item[0]} />
               </ListItemButton>
             </ListItem>
+            
           ))}
         </List>
         <Divider />
