@@ -78,3 +78,51 @@ export const getMinisterioByCod = async (req, res, next) => {
 
     }
 }
+
+
+
+export const putMinisterio = async (req, res, next) => {
+    try {
+        console.log(req.body)
+        let {cod, nombre, newCod} =  req.body
+
+        if (cod == "" || cod == null || cod == undefined) {
+
+            const error = new Error("El código no es valido");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        if (nombre == "" || nombre == null || nombre == undefined) {
+
+            const error = new Error("El nombre no es valido");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        
+
+        nombre = nombre.trim()
+        cod = cod.trim()
+        newCod = newCod ? newCod.trim() : null
+       
+
+        const area = await Ministerio.update({cod: newCod || cod, nombre: nombre}, {
+            where: {
+                cod: cod
+            }
+        });
+
+        if(area == 0){
+
+            const error = new Error("No existen datos para actualizar");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        res.status(200).json(area);
+    } catch (error) {
+        console.log(error)
+        next(error);
+    }
+}

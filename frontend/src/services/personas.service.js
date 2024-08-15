@@ -1,6 +1,7 @@
-const URL = "http://localhost:4000/api/cursos";
+const URL = "http://localhost:4000/api/personas"
 
-export const getCursos = async () => {
+
+export const getPersonas = async () => {
     try {
         const response = await fetch(URL, {
             method: "GET",
@@ -10,18 +11,17 @@ export const getCursos = async () => {
             }
         });
         const data = await response.json();
-        if(response.status !== 200) {
-            throw new Error("No se encontraron los cursos");
+        if (response.status !== 200) {
+            const error = await response.json();
+            throw new Error(error.message || "Error al obtener las personas");
         }
-        
         return data
     } catch (error) {
         throw error
     }
 }
 
-
-export const postCurso = async (req, res, next) => {
+export const postPersona = async (persona) => {
     try {
         const response = await fetch(URL, {
             method: "POST",
@@ -29,25 +29,23 @@ export const postCurso = async (req, res, next) => {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
             },
-            body: JSON.stringify(req.body)
+            body: JSON.stringify(persona)
         });
         const data = await response.json();
-        if(response.status !== 200) {
-            throw new Error(data.message || "Error al registrar el curso");
+        if (response.status !== 201) {
+            const error = await response.json();
+            throw new Error(error.message || "Error al registrar la persona");
         }
-        
         return data
     } catch (error) {
         throw error
     }
 }
 
+export const putPersona = async (persona) => {
 
-export const putCurso = async (curso) => {
+    console.log("PERSONA: ", persona)
     try {
-
-        console.log("PUT CURSO", curso)
-        
         const response = await fetch(URL, {
             method: "PUT",
             headers: {
@@ -55,18 +53,19 @@ export const putCurso = async (curso) => {
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
             },
             body: JSON.stringify({
-                ...curso
+                ...persona
             })
         });
 
-
-        const data = await response.json();
-        if(response.status !== 200) {
-            throw new Error(data.message || "Error al registrar el curso");
-        }
         
+        if (response.status !== 200) {
+            const error = await response.json();
+            throw new Error(error.message || "Error al actualizar la persona");
+        }
+        const data = await response.json();
         return data
     } catch (error) {
+        
         throw error
     }
 }

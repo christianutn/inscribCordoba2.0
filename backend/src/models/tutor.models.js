@@ -11,7 +11,8 @@ const tutor = sequelize.define("tutores", {
         type: DataTypes.STRING(15)
     },
     esReferente: {
-        type: DataTypes.CHAR(1)
+        type: DataTypes.CHAR(1),
+        allowNull: true
     }
 },
 {

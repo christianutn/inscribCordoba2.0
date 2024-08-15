@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 
-const TituloPrincipal = ({texto}) => {
+const TituloPrincipal = ({texto, fontWeight}) => {
     return (
         <Typography
             className="titulo-principal"
@@ -8,7 +8,7 @@ const TituloPrincipal = ({texto}) => {
             color="text.primary"
             sx={{
                 fontFamily: 'Roboto, sans-serif',
-                fontWeight: 'bold'
+                fontWeight: fontWeight || 'bold'
             }}
         >
             {texto}

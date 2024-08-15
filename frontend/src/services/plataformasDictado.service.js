@@ -19,3 +19,23 @@ export const getPlataformasDictado = async () => {
         throw error
     }
 }
+
+export const putPlataformaDictado = async (plataformaDictado) => {
+    try {
+        const response = await fetch(URL, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({...plataformaDictado})
+        });
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error(data.message || "Error al actualizar la plataforma de dictado");
+        }
+        return data
+    } catch (error) {
+        throw error
+    }
+}

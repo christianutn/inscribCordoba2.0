@@ -43,25 +43,62 @@ export const getCursos = async (req, res, next) => {
 export const postCurso = async (req, res, next) => {
     try {
 
-        const {cod, nombre, cupo, cantidad_horas, medio_inscripcion,  plataforma_dictado, tipo_capacitacion, area } = req.body;
+        const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area } = req.body;
 
         console.log("DATOS DEL BODY: ", req.body);
 
-        const existe = await cursoModel.findOne({where: {cod: cod}});
-        if(existe) throw new Error("El Código ya existe");
-        if(cod.length > 15 ) throw new Error("El Código no es valido debe ser menor a 15 caracteres");
-        if(cupo < 1 || isNaN(cupo)) throw new Error("El cupo debe ser mayor a 0");
-        if(cantidad_horas < 1 || isNaN(cantidad_horas)) throw new Error("La cantidad de horas debe ser mayor a 0");
-        if(medio_inscripcion.length > 15) throw new Error("El medio de inscripción no es valido debe ser menor a 15 caracteres");
-        if(plataforma_dictado.length > 15) throw new Error("La plataforma de dictado no es valido debe ser menor a 15 caracteres");
-        if(tipo_capacitacion.length > 15) throw new Error("El tipo de capacitación no es valido debe ser menor a 15 caracteres");
-        if(area.length > 15) throw new Error("El area no es valido debe ser menor a 15 caracteres");
-        if(nombre.length > 100) throw new Error("El nombre no es valido debe ser menor a 100 caracteres");
-        if(nombre.length === 0) throw new Error("El nombre no puede ser vacío");
-        
+        const existe = await cursoModel.findOne({ where: { cod: cod } });
+        if (existe) throw new Error("El Código ya existe");
+        if (cod.length > 15) throw new Error("El Código no es valido debe ser menor a 15 caracteres");
+        if (cupo < 1 || isNaN(cupo)) throw new Error("El cupo debe ser mayor a 0");
+        if (cantidad_horas < 1 || isNaN(cantidad_horas)) throw new Error("La cantidad de horas debe ser mayor a 0");
+        if (medio_inscripcion.length > 15) throw new Error("El medio de inscripción no es valido debe ser menor a 15 caracteres");
+        if (plataforma_dictado.length > 15) throw new Error("La plataforma de dictado no es valido debe ser menor a 15 caracteres");
+        if (tipo_capacitacion.length > 15) throw new Error("El tipo de capacitación no es valido debe ser menor a 15 caracteres");
+        if (area.length > 15) throw new Error("El area no es valido debe ser menor a 15 caracteres");
+        if (nombre.length > 100) throw new Error("El nombre no es valido debe ser menor a 100 caracteres");
+        if (nombre.length === 0) throw new Error("El nombre no puede ser vacío");
+
         const response = await cursoModel.create(req.body);
 
         res.status(200).json(response)
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+export const updateCurso = async (req, res, next) => {
+    try {
+
+        const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area } = req.body;
+
+        if(!cod || !nombre || !cupo || !cantidad_horas || !medio_inscripcion || !plataforma_dictado || !tipo_capacitacion || !area) throw new Error("Hay campos vacios");
+
+        //EL cupo y cantida de horas deben ser enteros no debe admitir decimales. También debe sen mayor a 0
+        if(cupo < 1 || isNaN(cupo)) throw new Error("El cupo debe ser mayor a 0");
+        if(cantidad_horas < 1 || isNaN(cantidad_horas)) throw new Error("La cantidad de horas debe ser mayor a 0");
+
+        //cupo debe ser un entero
+        if(!Number.isInteger(Number(cupo))) throw new Error("El cupo debe ser un entero");
+        if(!Number.isInteger(Number(cantidad_horas))) throw new Error("La cantidad de horas debe ser un entero");
+        //convertir un string en entero
+
+       const result = await cursoModel.update(
+            { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area },
+            {
+                where: {
+                    cod: cod,
+                },
+            },
+        );
+        
+        if (result[0] === 0) {
+            throw new Error("No hubo actualización de datos");
+        }
+        res.status(200).json({ message: "Se actualizo correctamente el curso" })
+
 
     } catch (error) {
         next(error)

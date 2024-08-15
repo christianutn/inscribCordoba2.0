@@ -23,3 +23,30 @@ export const getTutores = async () => {
         throw error
     }
 }
+
+
+export const putTutores = async (tutor) => {
+    try {
+        const response = await fetch(URL, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({
+                ...tutor
+            })
+        });
+        const data = await response.json()
+        if (response.status !== 200) {
+            const error = new Error(response.message || "Error al actualizar el tutor");
+            error.statusCode = 404;
+            throw error;
+        }
+
+
+        return data
+    } catch (error) {
+        throw error
+    }
+}

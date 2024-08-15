@@ -1,6 +1,6 @@
-const URL = "http://localhost:4000/api/tiposCapacitacion";
+const URL = "http://localhost:4000/api/areas";
 
-export const getTiposCapacitacion = async () => {
+export const getAreas = async () => {
     try {
         const response = await fetch(URL, {
             method: "GET",
@@ -11,7 +11,7 @@ export const getTiposCapacitacion = async () => {
         });
         const data = await response.json();
         if(response.status !== 200) {
-            throw new Error(data.message || "Error al obtener los tipos de capacitaciones");
+            throw new Error("No se encontraron las áreas");
         }
         
         return data
@@ -20,8 +20,7 @@ export const getTiposCapacitacion = async () => {
     }
 }
 
-
-export const putTiposCapacitacion = async (tipoCapacitacion) => {
+export const putArea = async (area) => {
     try {
         const response = await fetch(URL, {
             method: "PUT",
@@ -29,12 +28,15 @@ export const putTiposCapacitacion = async (tipoCapacitacion) => {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
             },
-            body: JSON.stringify({...tipoCapacitacion})
+            body: JSON.stringify({
+                ...area
+            })
         });
         const data = await response.json();
         if(response.status !== 200) {
-            throw new Error(data.message || "Error al actualizar la plataforma de dictado");
+            throw new Error("No se pudo modificar la dirección");
         }
+        
         return data
     } catch (error) {
         throw error

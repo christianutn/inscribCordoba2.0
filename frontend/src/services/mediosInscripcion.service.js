@@ -21,3 +21,27 @@ export const getMediosInscripcion = async () => {
         throw error
     }
 }
+
+
+export const putMedioInscripcion = async (medioInscripcion) => {
+    try {
+        const response = await fetch(URL, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({
+                ...medioInscripcion
+            })
+        });
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error(data.message || "Error al actualizar el medio de inscripción");
+        }
+        
+        return data
+    } catch (error) {
+        throw error
+    }
+}
