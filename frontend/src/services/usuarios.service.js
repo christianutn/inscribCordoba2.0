@@ -19,3 +19,44 @@ export const getUsuarios = async () => {
         throw error
     }
 }
+
+
+export const putUsuarios = async (usuario) => {
+    try {
+        const response = await fetch(URL, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({...usuario})
+        });
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error( data.message || "No se encontraron usuarios");
+        }
+        
+        return data
+    } catch (error) {
+        throw error
+    }
+}
+
+export const deleteUsuario = async (cuil) => {
+    try {
+        const response = await fetch(`${URL}/${cuil}`, {    
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        });
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error(data.message || "No se encontraron usuarios");
+        }
+        return data
+    } catch (error) {
+        throw error
+    }
+}

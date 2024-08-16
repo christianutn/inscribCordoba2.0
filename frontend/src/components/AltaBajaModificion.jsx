@@ -22,6 +22,7 @@ import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
 import Alert from '@mui/material/Alert';
+import {descargarExcel} from "../services/excel.service.js";
 
 const AltaBajaModificion = () => {
     const options = ["Cursos", "Ministerios", "Áreas", "Personas", "Tutores", "Medios de Inscripción", "Plataformas de Dictado", "Tipos de Capacitación", "Usuarios"];
@@ -83,11 +84,14 @@ const AltaBajaModificion = () => {
 
         })()
 
-
-
-
-
     }, [selectOption]);
+
+
+    const handleDescargarExcel = async () => {
+        console.log("dataAMostrar:", dataAMostrar);
+        console.log("columns:", columns);
+        await descargarExcel(dataAMostrar ,columns, "Reporte");
+    }
 
 
     const [columns, setColumns] = useState([]);
@@ -105,8 +109,22 @@ const AltaBajaModificion = () => {
 
     const handleActionClick = async (action, params) => {
         if (action === 'borrar') {
-            console.log(`Handle ${action} click`, params);
-            const object = params.row;
+            try {
+                console.log("Borrando:", params.id);
+                setCargando(true);
+                await deleteRow(params.id, selectOption);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setSelectOption("");
+                setSuccess(true);
+                setError(null);
+            } catch (error){
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setError(error.message || "Error al cargar los datos");
+                setSuccess(false);
+            } finally {
+                setCargando(false);
+            }
         } else {
             try {
                 console.log("PARAMS:", params);
@@ -128,7 +146,10 @@ const AltaBajaModificion = () => {
                         : undefined,
                     codMinisterio: params.row.ministerio
                         ? ministerios.find(m => m.nombre === params.row.ministerio)?.cod
-                        : undefined
+                        : undefined,
+                    codRol: params.row.rol
+                        ? roles.find(r => r.nombre === params.row.rol)?.cod
+                        : undefined,
 
                 };
 
@@ -387,15 +408,27 @@ const AltaBajaModificion = () => {
                     break
                 case "Usuarios":
 
-
-
                     setColumns([
-
-                        { field: 'cuil', headerName: 'Cuil', flex: 1, editable: true },
-                        { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
-                        { field: 'apellido', headerName: 'Apellido', flex: 1, editable: true },
-                        { field: 'mail', headerName: 'Mail', flex: 1, editable: true },
-                        { field: 'celular', headerName: 'Celular', flex: 1, editable: true },
+                        { field: 'cuil', headerName: 'CUIL', width: 150, editable: true },
+                        { field: 'nombre', headerName: 'Nombre', width: 150, editable: true },
+                        { field: 'apellido', headerName: 'Apellido', width: 150, editable: true },
+                        { field: 'mail', headerName: 'Email', width: 200, editable: true },
+                        { field: 'celular', headerName: 'Celular', width: 150, editable: true },
+                        {
+                            field: 'area',
+                            headerName: 'Área',
+                            width: 180,
+                            editable: true,
+                            renderEditCell: (params) => (
+                                <SelectEditInputCell
+                                    id={params.id}
+                                    value={params.value}
+                                    field={params.field}
+                                    options={areas.map((area) => ({ value: area.nombre, label: area.nombre }))}
+                                    api={params.api}
+                                />
+                            ),
+                        },
                         {
                             field: 'rol',
                             headerName: 'Rol del Usuario',
@@ -416,18 +449,23 @@ const AltaBajaModificion = () => {
                                 />
                             ),
                         },
+
+
                     ]);
 
                     // Formateo de los datos para el DataGrid
-                    setDataAMostrar(usuarios.map((usuario, index) => ({
-                        id: index, // El DataGrid necesita un ID único para cada fila
-                        cuil: usuario.cuil,
-                        nombre: usuario.detalle_persona.nombre,
-                        apellido: usuario.detalle_persona.apellido,
-                        mail: usuario.detalle_persona.mail,
-                        celular: usuario.detalle_persona.celular,
-                        rol: usuario.detalle_rol.nombre,
+                    setDataAMostrar(usuarios.map((u) => ({
+                        id: u.cuil,
+                        cuil: u.cuil,
+                        nombre: u.detalle_persona.nombre,
+                        apellido: u.detalle_persona.apellido,
+                        mail: u.detalle_persona.mail,
+                        celular: u.detalle_persona ? u.detalle_persona.celular : 'Sin celular',
+                        area: u.area ? u.detalle_area.nombre : 'Sin área',
+                        rol: u.detalle_rol.nombre
                     })));
+
+
 
                     break
 
@@ -479,11 +517,14 @@ const AltaBajaModificion = () => {
                         Seleccione una opción para cargar los datos correspondientes.
                     </Alert>
 
-                    <Autocomplete options={options} label={"Seleccione una Opción"} value={selectOption} getValue={handleSelectOption} />
 
+                    <Autocomplete options={options} label={"Seleccione una Opción"} value={selectOption} getValue={handleSelectOption} />
+                    
+                    <BotonCircular icon="descargar" onClick={handleDescargarExcel} />
                     <DataGrid columns={[...columns, actionColumn]} rows={dataAMostrar} autoHeight autowidth />
                 </div>
             )}
+           
 
 
         </>

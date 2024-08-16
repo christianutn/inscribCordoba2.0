@@ -104,3 +104,27 @@ export const updateCurso = async (req, res, next) => {
         next(error)
     }
 }
+
+
+export const deleteCurso = async (req, res, next) => {
+    try {
+        const { cod } = req.params;
+
+        console.log("ID: ", cod);
+
+        if (!cod) {
+            throw new Error("El ID del curso es requerido");
+        }
+        const response = await cursoModel.destroy({
+            where: {
+                cod
+            }
+        });
+        if (response === 0) {
+            throw new Error("No se pudo borrar el curso");
+        }
+        res.status(200).json({ message: "Se borro correctamente el curso" })
+    } catch (error) {
+        next(error)
+    }
+}

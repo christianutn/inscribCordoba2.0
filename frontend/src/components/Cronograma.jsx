@@ -46,15 +46,8 @@ const Cronograma = () => {
     }, []);
 
     const handleDescargarExcel = async () => {
-        // Convert columns and rows to the format expected by descargarExcel
-        const formattedColumns = columns.map(col => ({
-            header: col.headerName,
-            key: col.field
-        }));
-
-
         // Call descargarExcel with the formatted data
-        await descargarExcel(rows, formattedColumns, "Cronograma");
+        await descargarExcel(rows, columns, "Cronograma");
     };
 
     if (loading) {

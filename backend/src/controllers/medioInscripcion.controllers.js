@@ -1,6 +1,7 @@
 import medioInscripcionModel from "../models/medioInscripcion.models.js";
 
 
+
 export const getMediosInscripcion = async (req, res, next) => {
     try {
         const mediosInscripcion = await medioInscripcionModel.findAll();
@@ -63,3 +64,65 @@ export const putMedioInscripcion = async (req, res, next) => {
 }
 
 
+export const postMedioInscripcion = async (req, res, next) => {
+    try {
+        let {cod, nombre} = req.body;
+        if(!cod){
+            const error = new Error("El código no es válido");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        if(!nombre){
+            const error = new Error("El nombre no es válido");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        cod = cod.trim();
+        nombre = nombre.trim();
+        
+        const existeMedioInscripcion = await medioInscripcionModel.findOne({where: {cod}});
+        if(existeMedioInscripcion){
+            const error = new Error("El medio de inscripción ya existe");
+            error.statusCode = 409;
+            throw error;
+        }
+
+        const existeNombre = await medioInscripcionModel.findOne({where: {nombre}});
+        if(existeNombre){
+            const error = new Error("El nombre ya existe");
+            error.statusCode = 409;
+            throw error;
+        }
+        const newMedioInscripcion = await medioInscripcionModel.create({cod, nombre});
+        
+        res.status(200).json(newMedioInscripcion);
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const deleteMedioInscripcion = async (req, res, next) => {
+    try {
+        const {cod} = req.params
+        if(!cod){
+            const error = new Error("El código no es válido");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const medioInscripcion = await medioInscripcionModel.destroy({where: {cod}});
+        
+        if(medioInscripcion === 0){
+            const error = new Error("No se encontraron coincidencias para borrar");
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json(medioInscripcion);
+    } catch (error) {
+        next(error);
+    }
+}

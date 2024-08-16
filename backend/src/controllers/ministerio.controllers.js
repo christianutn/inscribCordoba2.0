@@ -126,3 +126,64 @@ export const putMinisterio = async (req, res, next) => {
         next(error);
     }
 }
+
+export const deleteMinisterio = async (req, res, next) => {
+    try {
+        const {cod} = req.params
+
+        if (cod == "" || cod == null || cod == undefined) {
+            const error = new Error("El código no es valido");
+            error.statusCode = 400;
+            throw error;
+        }
+        const ministerio = await Ministerio.destroy({
+            where: {
+                cod: cod
+            }
+        });
+
+        if(ministerio == 0){
+            const error = new Error("No existen datos para eliminar");
+            error.statusCode = 400;
+            throw error;
+        }
+        res.status(200).json(ministerio);
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const postMinisterio = async (req, res, next) => {
+    try {
+        let {cod, nombre} = req.body
+
+        if (cod == "" || cod == null || cod == undefined) {
+            const error = new Error("El código no es valido");
+            error.statusCode = 400;
+            throw error;
+        }
+        if (nombre == "" || nombre == null || nombre == undefined) {
+            const error = new Error("El nombre no es valido");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        nombre = nombre.trim()
+        cod = cod.trim()
+        
+
+
+        const area = await Ministerio.create({cod: newCod || cod, nombre: nombre});
+
+        if(!area){
+            const error = new Error("No se pudo crear el Ministerio");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        res.status(200).json(area);
+    } catch (error) {
+        next(error);
+    }
+}

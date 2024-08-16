@@ -42,3 +42,24 @@ export const putArea = async (area) => {
         throw error
     }
 }
+
+export const deleteArea = async (codArea) => {
+    try {
+        const response = await fetch(`${URL}/${codArea}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        });
+
+        const data = await response.json()
+        if (response.status !== 200) {
+            const error = new Error(response.message || "No es posible borrar el área");
+            error.statusCode = 404;
+            throw error;
+        }
+    } catch (error) {
+        throw error
+    }
+}

@@ -103,7 +103,7 @@ export const putTutores = async (req, res, next) => {
             { where: { cuil: cuil }, transaction: t } // Aseguramos que se incluya la transacción
         );
 
-        if(updatePersona[0] === 0 && updateTutor[0] === 0){
+        if (updatePersona[0] === 0 && updateTutor[0] === 0) {
             const error = new Error("No se encontraron datos para actualizar");
             error.statusCode = 404;
             throw error;
@@ -119,3 +119,90 @@ export const putTutores = async (req, res, next) => {
         next(error);
     }
 };
+
+
+export const postTutor = async (req, res, next) => {
+    
+    try {
+    
+        let { cuil, area, esReferente } = req.body;
+
+        
+
+        if (!cuil || cuil.length !== 11 ) {
+            const error = new Error("Datos inválidos: no cumplen con los requisitos");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        if(!area || area == "" || area == null || area == undefined){
+            const error = new Error("Area inválida");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        if(!esReferente || esReferente == "" || esReferente == null || esReferente == undefined){
+            const error = new Error("Es referente inválido");
+            error.statusCode = 400;
+            throw error;
+        }
+        // Limpieza de datos
+        cuil = cuil.trim();
+        area = area.trim();
+        esReferente = esReferente.trim();
+
+        if (!validarCuil(cuil)) {
+            const error = new Error("El CUIL no es válido");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        
+
+        esReferente = esReferente === "Si" ? 1 : esReferente === "No" ? 0 : null;
+
+        // Actualización de Tutor
+        const altaTutor = await Tutor.create(
+            {cuil: cuil ,area: area, esReferente: esReferente }
+        );
+
+        if (!altaTutor) {
+            const error = new Error("No se encontraron datos para actualizar");
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({ message: "Tutor creado correctamente" });
+
+    } catch (error) {
+        // Revertimos la transacción en caso de error
+        await t.rollback();
+        next(error);
+    }
+}
+
+
+export const deleteTutor = async (req, res, next) => {
+    try {
+        const { cuil } = req.params;
+
+        if (!cuil) {
+            const error = new Error("El CUIL no puede estar vacío");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const tutor = await Tutor.destroy({ where: { cuil: cuil } });
+
+        if (tutor === 0) {
+            const error = new Error("No se encontraron datos para borrar");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        res.status(200).json({ message: "Tutor borrado correctamente" });
+
+        
+    } catch (error) {
+        next(error);
+    }
+}

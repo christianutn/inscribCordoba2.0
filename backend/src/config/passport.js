@@ -66,7 +66,7 @@ const inicializarPassport = () => {
             done(null, nuevoUsuario);
 
         } catch (error) {
-            console.log(error)
+            
             done(error)
         }
     }));

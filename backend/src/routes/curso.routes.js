@@ -1,4 +1,4 @@
-import {getCursos, postCurso, updateCurso} from "../controllers/curso.controllers.js";
+import {getCursos, postCurso, updateCurso, deleteCurso} from "../controllers/curso.controllers.js";
 import {Router} from "express";
 
 
@@ -10,6 +10,9 @@ cursoRouter.get("/", getCursos)
 cursoRouter.post("/", postCurso)
 
 cursoRouter.put("/", updateCurso)
+
+
+cursoRouter.delete("/:cod", deleteCurso)
 
 
 export default cursoRouter

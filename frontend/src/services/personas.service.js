@@ -69,3 +69,23 @@ export const putPersona = async (persona) => {
         throw error
     }
 }
+
+export const deletePersona = async (cuil) => {
+    try {
+        const response = await fetch(`${URL}/${cuil}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        });
+        const data = await response.json();
+        if (response.status !== 200) {
+            const error = await response.json();
+            throw new Error(error.message || "Error al eliminar la persona");
+        }
+        return data
+    } catch (error) {
+        throw error
+    }
+}

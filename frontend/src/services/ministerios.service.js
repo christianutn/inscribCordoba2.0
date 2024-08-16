@@ -55,3 +55,49 @@ export const putMinisterios = async (ministerio) => {
         throw error
     }
 }
+
+export const postMinisterios = async (ministerio) => {
+    try {
+        const response = await fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({
+                ...ministerio
+            })
+        });
+        const data = await response.json()
+        if (response.status !== 200) {
+            const error = new Error(response.message || "Error al crear el ministerio");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        return data
+    } catch (error) {
+        throw error
+    }
+}
+
+export const deleteMinisterio = async (codMinisterios) => {
+    try {
+        const response = await fetch(`${URL}/${codMinisterios}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        });
+
+        const data = await response.json()
+        if (response.status !== 200) {
+            const error = new Error(response.message || "Error al borrar el ministerio");
+            error.statusCode = 404;
+            throw error;
+        }
+    } catch (error) {
+        throw error
+    }
+}

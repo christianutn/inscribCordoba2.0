@@ -30,9 +30,16 @@ export const postPersona = async (req, res, next) => {
         nombre = nombre.trim()
         apellido = apellido.trim()
         mail = mail.trim()
-        celular = celular.trim()
+        
+        if (celular === undefined || celular === "" || celular == "Sin celular") {
+            celular = null
+        }else{
+            celular = celular.trim()
+        }
+            
 
-        if (cuil.length !== 11 || nombre.length === 0 || apellido.length === 0 || mail.length === 0 || celular.length === 0) {
+
+        if (cuil.length !== 11 || nombre.length === 0 || apellido.length === 0 || mail.length === 0) {
 
             const error = new Error("Datos inválidos: no cumplen con los requsitos");
             error.statusCode = 400;
@@ -40,13 +47,13 @@ export const postPersona = async (req, res, next) => {
         }
 
         if (!validarCuil(cuil)) {
-            const error = new Error("El CUIL no es valido");
+            const error = new Error("El CUIL no es válido");
             error.statusCode = 400;
             throw error;
         }
 
         if (!validarEmail(mail)) {
-            const error = new Error("El mail no es valido");
+            const error = new Error("El mail no es válido");
             error.statusCode = 400;
             throw error;
         }
@@ -63,6 +70,12 @@ export const postPersona = async (req, res, next) => {
 
 
         const persona = await Persona.create({ cuil, nombre, apellido, mail, celular });
+
+        if (!persona) {
+            const error = new Error("No se pudo crear la persona");
+            error.statusCode = 500;
+            throw error
+        }
         res.status(201).json(persona)
     } catch (error) {
         console.log(error)
@@ -132,6 +145,30 @@ export const putPersona = async (req, res, next) => {
         res.status(200).json({ message: `Los datos de ${nombre} ${apellido} han sido actualizados con exito` })
     } catch (error) {
         console.log(error.message)
+        next(error)
+    }
+}
+
+
+export const deletePersona = async (req, res, next) => {
+    try {
+        const {cuil} = req.params;
+        console.log("CUIL:", cuil)
+        if(cuil.length !== 11) {
+            const error = new Error("El CUIL no es válido");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const persona = await Persona.destroy({where: {cuil: cuil}});
+
+        if (persona === 0) {
+            const error = new Error("No se encontro la persona");
+            error.statusCode = 400;
+            throw error;
+        }
+        res.status(200).json({message: "Persona eliminada con éxito"})
+    } catch (error) {
         next(error)
     }
 }

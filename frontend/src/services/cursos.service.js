@@ -70,3 +70,26 @@ export const putCurso = async (curso) => {
         throw error
     }
 }
+
+
+export const deleteCurso = async (cuil) => {
+    try {
+        console.log("DELETE CURSO", cuil)
+        const response = await fetch(`${URL}/${cuil}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        });
+        console.log("REsponse delete:", response)
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error(data.message || "Error al registrar el curso");
+        }
+        
+        return data
+    } catch (error) {
+        throw error
+    }
+}

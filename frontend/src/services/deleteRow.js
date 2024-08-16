@@ -1,46 +1,41 @@
-import { putCurso } from "./cursos.service.js";
+import { deleteCurso } from "./cursos.service.js";
+import {deleteMinisterio} from "./ministerios.service.js";
+import {deleteArea} from "./areas.service.js";
+import {deletePersona} from "./personas.service.js";
+import {deleteTutor} from "./tutores.service.js";
+import {deleteMedioInscripcion} from "./mediosInscripcion.service.js";
+import {deletePlataformaDictado} from "./plataformasDictado.service.js";
+import {deleteUsuario} from "./usuarios.service.js"
 
-export const deleteRow = async (row, option) => {
-    console.log("ROWS:", {
-        cod: row.cod,
-        nombre: row.nombre,
-        cupo: row.cupo,
-        cantidad_horas: row.horas,
-        medio_inscripcion: row.codMedioInscripcion,
-        plataforma_dictado: row.codPlataformaDictado,
-        tipo_capacitacion: row.codTipoCapacitacion,
-        area: row.area
-    })
+
+export const deleteRow = async (identificador, option) => {
+
     try {
         switch (option) {
             case 'Cursos':
-                //cupo debe ser un entero
-                if (!Number.isInteger(Number(row.cupo))) throw new Error("El cupo debe ser un entero");
-                if (!Number.isInteger(Number(row.horas))) throw new Error("La cantidad de horas debe ser un entero");
-                await putCurso({
-                    cod: row.cod,
-                    nombre: row.nombre,
-                    cupo: row.cupo,
-                    cantidad_horas: row.horas,
-                    medio_inscripcion: row.codMedioInscripcion,
-                    plataforma_dictado: row.codPlataformaDictado,
-                    tipo_capacitacion: row.codTipoCapacitacion,
-                    area: row.codArea
-                })
+                await deleteCurso(identificador);
+            
                 break;
             case "Ministerios":
+                await deleteMinisterio(identificador);
                 break;
             case "Áreas":
+                await deleteArea(identificador);
                 break
             case "Personas":
+                await deletePersona(identificador);
                 break
             case "Tutores":
+                await deleteTutor(identificador);
                 break
             case "Medios de Inscripción":
+                await deleteMedioInscripcion(identificador);
                 break
             case "Plataformas de Dictado":
+                await deletePlataformaDictado(identificador);
                 break
             case "Usuarios":
+                await deleteUsuario(identificador);
                 break
 
             default:
