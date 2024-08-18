@@ -22,7 +22,7 @@ import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
 import Alert from '@mui/material/Alert';
-import {descargarExcel} from "../services/excel.service.js";
+import { descargarExcel } from "../services/excel.service.js";
 
 const AltaBajaModificion = () => {
     const options = ["Cursos", "Ministerios", "Áreas", "Personas", "Tutores", "Medios de Inscripción", "Plataformas de Dictado", "Tipos de Capacitación", "Usuarios"];
@@ -90,8 +90,14 @@ const AltaBajaModificion = () => {
     const handleDescargarExcel = async () => {
         console.log("dataAMostrar:", dataAMostrar);
         console.log("columns:", columns);
-        await descargarExcel(dataAMostrar ,columns, "Reporte");
+        await descargarExcel(dataAMostrar, columns, "Reporte");
     }
+
+    const handleAgregar = async () => {
+        console.log("agregando");
+    
+        
+    };
 
 
     const [columns, setColumns] = useState([]);
@@ -117,7 +123,7 @@ const AltaBajaModificion = () => {
                 setSelectOption("");
                 setSuccess(true);
                 setError(null);
-            } catch (error){
+            } catch (error) {
 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 setError(error.message || "Error al cargar los datos");
@@ -519,12 +525,15 @@ const AltaBajaModificion = () => {
 
 
                     <Autocomplete options={options} label={"Seleccione una Opción"} value={selectOption} getValue={handleSelectOption} />
-                    
-                    <BotonCircular icon="descargar" onClick={handleDescargarExcel} />
+                    <div className="cabecera">
+                        <BotonCircular icon="descargar"  onClick={handleDescargarExcel} />
+                        <BotonCircular icon="agregar" onClick={handleAgregar} />
+                    </div>
+
                     <DataGrid columns={[...columns, actionColumn]} rows={dataAMostrar} autoHeight autowidth />
                 </div>
             )}
-           
+
 
 
         </>

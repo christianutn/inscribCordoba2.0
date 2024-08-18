@@ -3,4 +3,10 @@
     flex-direction: column;
     gap: 20px;
 
+    .cabecera {
+        display: flex;
+        flex-direction: row;
+        width: 10%;
+    }
+
 }
