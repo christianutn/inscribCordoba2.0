@@ -60,3 +60,22 @@ export const deleteUsuario = async (cuil) => {
         throw error
     }
 }
+
+export const getMyUser = async () => {
+    try {
+        const response = await fetch(`${URL}/myuser`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        });
+        const data = await response.json();
+        if(response.status !== 200) {
+            return false
+        }
+        return data
+    } catch (error) {
+        return false
+    }
+}

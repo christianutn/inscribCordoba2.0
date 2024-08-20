@@ -64,3 +64,25 @@ export const deleteMedioInscripcion = async (cod) => {
         throw error
     }
 }
+
+export const postMedioInscripcion = async (medioInscripcion) => {
+    try {
+        const response = await fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({
+                ...medioInscripcion
+            })
+        });
+        const data = await response.json();
+        if(response.status !== 201) {
+            throw new Error(data.message || "Error al crear el medio de inscripción");
+        }
+        return data
+    } catch (error) {
+        throw error
+    }
+}

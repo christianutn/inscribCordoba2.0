@@ -34,5 +34,14 @@
         background-color: $CBA_DarkOrange
       }
     }
+
+    .fab-volver {
+      background-color: $CBA_Orange; /* Naranja para editar */
+      color: white;
+  
+      &:hover {
+        background-color: #f57c00;
+      }
+    }
   }
   

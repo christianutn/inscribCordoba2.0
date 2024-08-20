@@ -6,6 +6,7 @@ import {deleteTutor} from "./tutores.service.js";
 import {deleteMedioInscripcion} from "./mediosInscripcion.service.js";
 import {deletePlataformaDictado} from "./plataformasDictado.service.js";
 import {deleteUsuario} from "./usuarios.service.js"
+import {deleteTiposCapacitacion} from "./tiposCapacitacion.service.js"
 
 
 export const deleteRow = async (identificador, option) => {
@@ -36,6 +37,9 @@ export const deleteRow = async (identificador, option) => {
                 break
             case "Usuarios":
                 await deleteUsuario(identificador);
+                break
+            case "Tipos de Capacitación":
+                await deleteTiposCapacitacion(identificador);
                 break
 
             default:

@@ -33,8 +33,8 @@ export const postPersona = async (persona) => {
         });
         const data = await response.json();
         if (response.status !== 201) {
-            const error = await response.json();
-            throw new Error(error.message || "Error al registrar la persona");
+            
+            throw new Error(data.message || "Error al registrar la persona");
         }
         return data
     } catch (error) {

@@ -18,5 +18,7 @@ const validarFecha = (fecha) => {
            fechaObjeto.getDate() === dia;
   }
 
+  
+
 
   export default validarFecha

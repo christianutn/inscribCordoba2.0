@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -23,7 +24,9 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import Cronograma from "./Cronograma.jsx"
 import Cursos from "./Cursos.jsx"
 import UpdateIcon from '@mui/icons-material/Update';
+import { getMyUser } from "../services/usuarios.service.js";
 import AltaBajaModificion from './AltaBajaModificion.jsx';
+import BotonCircular from "./UIElements/BotonCircular.jsx";
 
 const drawerWidth = 240;
 
@@ -72,6 +75,24 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 export default function Principal() {
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    (async () => {
+
+      const user = await getMyUser();
+      
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+    }
+
+
+    )();
+  }, [navigate]); // Asegúrate de incluir `navigate` en las dependencias
+
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [opcionSeleccionada, setOpcionSeleccionada] = useState('');
@@ -93,20 +114,20 @@ export default function Principal() {
       case "Formulario":
         return <Formulario />
       case "Calendario":
-        return <Cronograma/>
+        return <Cronograma />
       case "Cursos":
-        return <Cursos/>
+        return <Cursos />
       case "AltaBajaModificion":
-        return <AltaBajaModificion/>
+        return <AltaBajaModificion />
       default:
         return <h1>Bienvenido</h1> // Mensaje por defecto o componente
     }
   };
 
   return (
-    
+
     <Box sx={{ display: 'flex' }}>
-      
+
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>
@@ -122,6 +143,17 @@ export default function Principal() {
           <Typography variant="h6" noWrap component="div">
             InscribCórdoba
           </Typography>
+          <div style={{ width: 60, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+            <BotonCircular icon={"logout"} onClick={() => {
+              // Elimina cualquier token o información de usuario almacenada (localStorage, sessionStorage, etc.)
+              localStorage.removeItem('jwt');  // o sessionStorage.removeItem('token');
+
+              // Redirigir al usuario a la página de inicio de sesión
+              navigate('/login');
+            }} />
+          </div>
+
+
         </Toolbar>
       </AppBar>
       <Drawer
@@ -156,17 +188,17 @@ export default function Principal() {
                 <ListItemText primary={item[0]} />
               </ListItemButton>
             </ListItem>
-            
+
           ))}
         </List>
         <Divider />
-        
+
       </Drawer>
-      <Main open={open} style={{marginTop: '3%'}}>
+      <Main open={open} style={{ marginTop: '3%' }}>
         {mostrarOpcion()}
       </Main>
     </Box>
 
-    
+
   );
 }

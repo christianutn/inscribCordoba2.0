@@ -21,15 +21,16 @@ export const getCursos = async () => {
 }
 
 
-export const postCurso = async (req, res, next) => {
+export const postCurso = async (curso) => {
     try {
+        console.log("POST CURSO", curso)
         const response = await fetch(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
             },
-            body: JSON.stringify(req.body)
+            body: JSON.stringify({...curso})
         });
         const data = await response.json();
         if(response.status !== 200) {
@@ -93,3 +94,5 @@ export const deleteCurso = async (cuil) => {
         throw error
     }
 }
+
+

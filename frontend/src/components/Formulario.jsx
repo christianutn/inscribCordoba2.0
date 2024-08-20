@@ -8,6 +8,7 @@ import { getMediosInscripcion } from "../services/mediosInscripcion.service.js";
 import { getPlataformasDictado } from "../services/plataformasDictado.service.js";
 import { getTiposCapacitacion } from "../services/tiposCapacitacion.service.js";
 import { getTutores } from "../services/tutores.service.js";
+import {getMyUser} from "../services/usuarios.service.js";
 import Alert from '@mui/material/Alert';
 import Select from '@mui/material/Select';
 import { DataGrid, useGridApiContext } from '@mui/x-data-grid';
@@ -20,10 +21,12 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { Divider } from '@mui/material';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
 import {validarOrdenFechas} from "../services/validarOrdenFechas.js";
+import { useNavigate } from 'react-router-dom';
 
 
 export default function Formulario() {
 
+  const navigate = useNavigate();
 
   const [ministerios, setMinisterios] = useState([]);
   const [areas, setAreas] = useState([]);
@@ -124,6 +127,15 @@ export default function Formulario() {
   useEffect(() => {
     (async () => {
       try {
+
+        const user = await getMyUser(); 
+        
+
+        if(!user.cuil) {
+          navigate("/login");
+          return
+        }
+
         const listaMinisterios = await getMinisterios();
         setMinisterios(listaMinisterios);
 
@@ -171,43 +183,43 @@ export default function Formulario() {
     setCargando(true);
     try {
 
-      if (selectMinisterio === "") {
+      if (!selectMinisterio) {
 
         throw new Error("Debe seleccionar un ministerio");
 
 
       }
 
-      if (selectArea === "") {
+      if (!selectArea) {
 
         throw new Error("Debe seleccionar una area");
 
       }
 
-      if (selectCurso === "") {
+      if (!selectCurso) {
         throw new Error("Debe seleccionar un curso");
 
       }
 
-      if (selectTipoCapacitacion === "") {
+      if (!selectTipoCapacitacion) {
         throw new Error("Debe seleccionar un tipo de capacitación");
       }
 
-      if (selectPlataformaDictado === "") {
+      if (!selectPlataformaDictado) {
         throw new Error("Debe seleccionar una plataforma de dictado");
       }
 
 
-      if (selectMedioInscripcion === "") {
+      if (!selectMedioInscripcion) {
         throw new Error("Debe seleccionar un medio de inscripción");
       }
 
-      if (cupo === "" || cupo <= 0) {
+      if (!cupo || cupo <= 0) {
         throw new Error("Debe seleccionar un cupo");
       }
 
 
-      if (horas === "" || horas <= 0) {
+      if (!horas|| horas <= 0) {
         throw new Error("Debe seleccionar una hora");
       }
 

@@ -97,7 +97,7 @@ export const postMedioInscripcion = async (req, res, next) => {
         }
         const newMedioInscripcion = await medioInscripcionModel.create({cod, nombre});
         
-        res.status(200).json(newMedioInscripcion);
+        res.status(201).json(newMedioInscripcion);
 
     } catch (error) {
         next(error);

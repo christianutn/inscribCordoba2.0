@@ -1,7 +1,7 @@
 import areaModel from "../models/area.models.js";
 import Ministerio from "../models/ministerio.models.js"; // Importa el modelo de Ministerio
 import Curso from "../models/curso.models.js";
-import tratarNombres from "../utils/tratarNombres.js";
+
 
 export const getAreas = async (req, res, next) => {
     try {
@@ -65,11 +65,18 @@ export const putArea = async (req, res, next) => {
         cod = cod.trim()
         newCod = newCod ? newCod.trim() : null
 
+
         const area = await areaModel.update({cod: newCod || cod, nombre: nombre, ministerio: ministerio}, {
             where: {
                 cod: cod
             }
         });
+
+        if (area == 0) {
+            const error = new Error("No hubo cambios para actualizar");
+            error.statusCode = 404;
+            throw error;
+        }
 
 
         res.status(200).json(area);
@@ -82,23 +89,24 @@ export const putArea = async (req, res, next) => {
 
 export const postArea = async (req, res, next) => {
     try {
+        console.log(req.body)
         let {cod, nombre, ministerio} = req.body;
 
-        if (cod == "" || cod == null || cod == undefined) {
+        if (!cod) {
 
             const error = new Error("El código no es valido");
             error.statusCode = 400;
             throw error;
         }
 
-        if (nombre == "" || nombre == null || nombre == undefined) {
+        if (!nombre) {
 
             const error = new Error("El nombre no es valido");
             error.statusCode = 400;
             throw error;
         }
 
-        if (ministerio == "" || ministerio == null || ministerio == undefined) {
+        if (!ministerio) {
 
             const error = new Error("El ministerio no es válido");
             error.statusCode = 400;
@@ -111,7 +119,7 @@ export const postArea = async (req, res, next) => {
 
         const existeArea = await areaModel.findOne({where: {cod: cod}});
         if (existeArea) {
-            const error = new Error(`El area ${cod} ya existe`);
+            const error = new Error(`El área con el código ${cod} ya existe`);
             error.statusCode = 400;
             throw error;
         }
@@ -123,7 +131,7 @@ export const postArea = async (req, res, next) => {
             throw error;
         }
         const area = await areaModel.create({cod: cod, nombre: nombre, ministerio: ministerio});
-        res.status(200).json(area);
+        res.status(201).json(area);
 
     } catch (error) {
         next(error);

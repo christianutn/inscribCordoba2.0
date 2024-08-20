@@ -136,3 +136,12 @@ export const deleteUsuario = async (req, res, next) => {
         next(error);
     }
 }
+
+export const getMyUser = async (req, res, next) => {
+    try {
+        const usuario = req.user.user
+        res.status(200).json(usuario)
+    } catch (error) {
+        next(error)
+    }
+}

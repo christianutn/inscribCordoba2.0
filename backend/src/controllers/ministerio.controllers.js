@@ -156,6 +156,7 @@ export const deleteMinisterio = async (req, res, next) => {
 
 export const postMinisterio = async (req, res, next) => {
     try {
+        console.log("Ministerios:",  req.body)
         let {cod, nombre} = req.body
 
         if (cod == "" || cod == null || cod == undefined) {
@@ -174,7 +175,7 @@ export const postMinisterio = async (req, res, next) => {
         
 
 
-        const area = await Ministerio.create({cod: newCod || cod, nombre: nombre});
+        const area = await Ministerio.create({cod: cod, nombre: nombre});
 
         if(!area){
             const error = new Error("No se pudo crear el Ministerio");

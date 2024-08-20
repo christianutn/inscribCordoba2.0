@@ -1,11 +1,12 @@
 import { putCurso } from "./cursos.service.js";
-import {putPersona} from "./personas.service.js"
-import {putArea} from "./areas.service.js"
-import {putMinisterios} from "./ministerios.service.js"
-import {putTutores} from "./tutores.service.js"
-import {putMedioInscripcion} from "./mediosInscripcion.service.js"
-import {putPlataformaDictado} from "./plataformasDictado.service.js"
-import {putUsuarios} from "./usuarios.service.js"
+import { putPersona } from "./personas.service.js"
+import { putArea } from "./areas.service.js"
+import { putMinisterios } from "./ministerios.service.js"
+import { putTutores } from "./tutores.service.js"
+import { putMedioInscripcion } from "./mediosInscripcion.service.js"
+import { putPlataformaDictado } from "./plataformasDictado.service.js"
+import { putUsuarios } from "./usuarios.service.js"
+import { putTiposCapacitacion } from "./tiposCapacitacion.service.js"
 
 
 export const updateRow = async (row, option) => {
@@ -30,7 +31,7 @@ export const updateRow = async (row, option) => {
                     plataforma_dictado: row.codPlataformaDictado,
                     tipo_capacitacion: row.codTipoCapacitacion,
                     area: row.codArea
-                    
+
                 })
                 break;
             case "Ministerios":
@@ -53,24 +54,24 @@ export const updateRow = async (row, option) => {
                     cuil: row.id,
                     nombre: row.nombre,
                     apellido: row.apellido,
-                    mail: row.mail || "",     
+                    mail: row.mail || "",
                     celular: row.celular,
                     newCuil: row.cuil
                 })
                 break
             case "Tutores":
 
-            await putTutores({
-                cuil: row.id,
-                nombre: row.nombre,
-                apellido: row.apellido,
-                mail: row.mail || "",     
-                celular: row.celular,
-                newCuil: row.cuil,
-                area: row.codArea,
-                esReferente: row.esReferente
-            })
-                
+                await putTutores({
+                    cuil: row.id,
+                    nombre: row.nombre,
+                    apellido: row.apellido,
+                    mail: row.mail || "",
+                    celular: row.celular,
+                    newCuil: row.cuil,
+                    area: row.codArea,
+                    esReferente: row.esReferente
+                })
+
                 break
             case "Medios de Inscripción":
 
@@ -78,7 +79,7 @@ export const updateRow = async (row, option) => {
                     cod: row.id,
                     nombre: row.nombre,
                     newCod: row.cod
-                   
+
                 })
                 break
             case "Plataformas de Dictado":
@@ -87,7 +88,7 @@ export const updateRow = async (row, option) => {
                     cod: row.id,
                     nombre: row.nombre,
                     newCod: row.cod
-                   
+
                 })
                 break
             case "Usuarios":
@@ -95,11 +96,21 @@ export const updateRow = async (row, option) => {
                     cuil: row.id,
                     nombre: row.nombre,
                     apellido: row.apellido,
-                    mail: row.mail || "",     
+                    mail: row.mail || "",
                     celular: row.celular,
                     newCuil: row.cuil,
                     area: row.codArea,
                     rol: row.codRol
+
+                })
+                break
+            case "Tipos de Capacitación":
+            
+
+                await putTiposCapacitacion({
+                    cod: row.id,
+                    nombre: row.nombre,
+                    newCod: row.cod
 
                 })
                 break

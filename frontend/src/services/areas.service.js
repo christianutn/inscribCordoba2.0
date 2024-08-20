@@ -33,8 +33,9 @@ export const putArea = async (area) => {
             })
         });
         const data = await response.json();
+        
         if(response.status !== 200) {
-            throw new Error("No se pudo modificar la dirección");
+            throw new Error(`${data.message}` || "No es posible actualizar el registro");
         }
         
         return data
@@ -59,6 +60,29 @@ export const deleteArea = async (codArea) => {
             error.statusCode = 404;
             throw error;
         }
+    } catch (error) {
+        throw error
+    }
+}
+
+
+export const postArea = async (area) => {
+    try {
+        const response = await fetch(URL, {
+            method: "POST", 
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({
+                ...area
+            })
+        });
+        const data = await response.json();
+        if(response.status !== 201) {   
+            throw new Error(`${data.message}` || "No es posible registrar el registro");
+        }
+        return data
     } catch (error) {
         throw error
     }

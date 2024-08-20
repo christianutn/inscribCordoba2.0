@@ -23,8 +23,13 @@ import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import { descargarExcel } from "../services/excel.service.js";
+import AltaCurso from "../components/FormulariosAlta/AltaCurso.jsx";
+import { useNavigate } from "react-router-dom";
+
 
 const AltaBajaModificion = () => {
+
+    const navigate = useNavigate();
     const options = ["Cursos", "Ministerios", "Áreas", "Personas", "Tutores", "Medios de Inscripción", "Plataformas de Dictado", "Tipos de Capacitación", "Usuarios"];
 
     // Use state
@@ -94,9 +99,41 @@ const AltaBajaModificion = () => {
     }
 
     const handleAgregar = async () => {
-        console.log("agregando");
-    
-        
+
+        switch (selectOption) {
+            case 'Cursos':
+                navigate('/cursos/alta');
+                break;
+            case "Ministerios":
+                navigate('/ministerios/alta');
+                break;
+            case "Áreas":
+                navigate("/areas/alta")
+                break
+            case "Personas":
+                navigate('/personas/alta');
+                break
+            case "Tutores":
+                navigate('/tutores/alta');   
+                break
+            case "Medios de Inscripción":
+                navigate('/mediosInscripciones/alta');
+                break
+            case "Plataformas de Dictado":
+                navigate('/plataformasDictados/alta');
+                break
+            case "Usuarios":
+
+                break
+            case "Tipos de Capacitación":
+                navigate('/tiposCapacitaciones/alta');
+                break
+
+            default:
+                break;
+        }
+
+
     };
 
 
@@ -526,7 +563,7 @@ const AltaBajaModificion = () => {
 
                     <Autocomplete options={options} label={"Seleccione una Opción"} value={selectOption} getValue={handleSelectOption} />
                     <div className="cabecera">
-                        <BotonCircular icon="descargar"  onClick={handleDescargarExcel} />
+                        <BotonCircular icon="descargar" onClick={handleDescargarExcel} />
                         <BotonCircular icon="agregar" onClick={handleAgregar} />
                     </div>
 

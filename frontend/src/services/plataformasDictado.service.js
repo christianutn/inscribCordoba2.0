@@ -58,4 +58,23 @@ export const deletePlataformaDictado = async (cod) => {
         throw error
     }
 }
-    
+
+export const postPlataformaDictado = async (plataformaDictado) => {
+    try {
+        const response = await fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({...plataformaDictado})
+        });
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error(data.message || "Error al crear la plataforma de dictado");
+        }
+        return data
+    } catch (error) {
+        throw error
+    }
+}

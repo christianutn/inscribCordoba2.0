@@ -1,7 +1,8 @@
 
-import {getUsuario, postUsuario, putUsuario, deleteUsuario} from "../controllers/usuario.controllers.js";
+import {getUsuario, postUsuario, putUsuario, deleteUsuario, getMyUser} from "../controllers/usuario.controllers.js";
 import {Router} from "express";
 import passport from "passport";
+
 
 const usuarioRouter = Router();
 
@@ -15,6 +16,10 @@ usuarioRouter.put("/", putUsuario)
 
 
 usuarioRouter.delete("/:cuil", deleteUsuario)
+
+usuarioRouter.get("/myuser", passport.authenticate('jwt', {session:false}), getMyUser)
+
+
 
 export default usuarioRouter
 
