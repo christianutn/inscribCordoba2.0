@@ -4,6 +4,7 @@
     grid-template-rows: auto;
     grid-template-areas:
         "titulo titulo titulo"
+        "divider divider divider"
         "select-ministerio select-area  select-curso"
         "select-medio-inscripcion select-plataforma-dictado  select-tipo-capacitacion"
         "input . ."
@@ -77,6 +78,9 @@
     .titulo {
         grid-area: titulo;
         
+    }
+    .divider {
+        grid-area: divider;
     }
 }
 

@@ -9,9 +9,9 @@ import Button from "../UIElements/Button.jsx";
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
-import {getMinisterios} from "../../services/ministerios.service.js";
+import { getMinisterios } from "../../services/ministerios.service.js";
 import Autocomplete from "../../components/UIElements/Autocomplete.jsx";
-import { postMinisterios } from "../../services/ministerios.service.js";
+import { postTutores } from "../../services/tutores.service.js";
 const AltaTutores = () => {
 
     const navigate = useNavigate();
@@ -21,12 +21,16 @@ const AltaTutores = () => {
     const [cargando, setCargando] = useState(false);
     const [codigo, setCodigo] = useState("");
     const [nombre, setNombre] = useState("");
+    const [cuil, setCuil] = useState("");
+    const [esReferente, setEsReferente] = useState("");
 
     const [ministerios, setMinisterios] = useState([]);
     const [areas, setAreas] = useState([]);
 
     const [selectMinisterio, setSelectMinisterio] = useState("");
     const [selectArea, setSelectArea] = useState("");
+
+
 
     useEffect(() => {
         (async () => {
@@ -54,21 +58,25 @@ const AltaTutores = () => {
     }, []);
 
     const limpiarFormulario = () => {
-        setCodigo("");
-        setNombre("");
+        setSelectMinisterio("");
+        setSelectArea("");
+        setCuil("");
+        setEsReferente("");
     }
 
     const validarDatos = () => {
-        if (!codigo) {
-            throw new Error("El código es requerido");
+        if (!cuil) {
+            throw new Error("El cuil es requerido");
+        } else if (cuil.length !== 11) {
+            throw new Error("El cuil debe ser de 11 caracteres");
         }
 
-        if (codigo.length > 15) {
-            throw new Error("El código no puede ser mayor a 15 caracteres");
+        if (!selectArea) {
+            throw new Error("El área es requerida");
         }
 
-        if (!nombre) {
-            throw new Error("El nombre es requerido");
+        if (!esReferente) {
+            throw new Error("El referente es requerido");
         }
     }
 
@@ -79,9 +87,10 @@ const AltaTutores = () => {
             validarDatos();
 
             //Función para agregar
-            await postMinisterios({
-                cod: codigo,
-                nombre: nombre
+            await postTutores({
+                cuil: cuil,
+                area: areas.find(area => area.nombre === selectArea)?.cod,
+                esReferente: esReferente
             });
 
 
@@ -131,12 +140,41 @@ const AltaTutores = () => {
                         <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
                     </div>
 
-                    <div className="codigo">
-                        <TextField label={"Código"} type={"text"} getValue={(value) => setCodigo(value)} value={codigo} />
+                    <div className="ministerio">
+                        <Autocomplete
+                            label={"Seleccione un ministerio"}
+                            options={ministerios.map(ministerio => ministerio.nombre)}
+                            value={selectMinisterio}
+                            getValue={(value) => {
+                                setSelectMinisterio(value);
+                                setSelectArea("")
+                                const ministerioSeleccionado = ministerios.find(ministerio => ministerio.nombre === value);
+
+                                if (ministerioSeleccionado) {
+                                    setAreas(ministerioSeleccionado.detalle_areas)
+
+                                } else {
+                                    setAreas([]);
+                                }
+
+                            }}
+                        />
                     </div>
 
-                    <div className="nombre">
-                        <TextField label={"Nombre"} type={"text"} getValue={(value) => setNombre(value)} value={nombre} />
+                    <div className="area">
+                        <Autocomplete options={areas.map(a => a.nombre)} label={"Seleccione un área"} value={selectArea}
+                            getValue={(value) => {
+                                setSelectArea(value);
+
+                            }}
+                        />
+                    </div>
+                    <div className="cuil">
+                        <TextField label={"Cuil"} type={"text"} getValue={(value) => setCuil(value)} value={cuil} />
+                    </div>
+                    <div className="referente">
+                        <Autocomplete options={["Si", "No"]} label={"Referente"}
+                            getValue={(value) => setEsReferente(value)} value={esReferente} />
                     </div>
                     <div className="volver">
                         <BotonCircular icon={"volver"} onClick={() => navigate("/principal")}></BotonCircular>

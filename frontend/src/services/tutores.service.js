@@ -70,3 +70,28 @@ export const deleteTutor = async (cuil) =>{
         throw error
     }
 }
+
+export const postTutores = async (tutor) => {
+    try {
+        console.log("tutor:", tutor)
+        const response = await fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({
+                ...tutor
+            })
+        });
+        const data = await response.json();
+        if (response.status !== 201) {
+            const error = new Error(data.message || "Error al crear el tutor");
+            error.statusCode = 404;
+            throw error;
+        }
+        return data
+    } catch (error) {
+        throw error
+    }
+}

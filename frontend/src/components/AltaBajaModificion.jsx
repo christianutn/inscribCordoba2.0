@@ -91,6 +91,20 @@ const AltaBajaModificion = () => {
 
     }, [selectOption]);
 
+    useEffect(() => {
+        setTimeout(() => {
+            setSuccess(false);
+        }, 3000);
+    }, [success]);
+
+    useEffect(() => {
+        if (error) {
+            setTimeout(() => {
+                setError(null);
+            }, 3000);
+        }
+    }, [error]);
+
 
     const handleDescargarExcel = async () => {
         console.log("dataAMostrar:", dataAMostrar);
@@ -556,9 +570,9 @@ const AltaBajaModificion = () => {
                 <div className="container-abm">
                     <Titulo texto="Alta, Baja y Modificación" />
                     <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
-                    <Alert severity="info" sx={{ mt: 2, mb: 2 }}>
+                    {/* <Alert severity="info" sx={{ mt: 2, mb: 2 }}>
                         Seleccione una opción para cargar los datos correspondientes.
-                    </Alert>
+                    </Alert> */}
 
 
                     <Autocomplete options={options} label={"Seleccione una Opción"} value={selectOption} getValue={handleSelectOption} />

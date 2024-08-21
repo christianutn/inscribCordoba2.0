@@ -94,7 +94,7 @@ const Cohorte = ({getCohortes}) => {
 
                         </div>
                         <div className="insc-hasta">
-                            <Fecha mensaje={mensajeHastaInscripcion} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaInscripcionHasta" value={cohorte.fechaCursadaHasta} />
+                            <Fecha mensaje={mensajeHastaInscripcion} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaInscripcionHasta" value={cohorte.fechaInscripcionHasta} />
 
                         </div>
                         <div className="curso-desde">
@@ -110,6 +110,9 @@ const Cohorte = ({getCohortes}) => {
                         <div className='diver'>
                             <Divider />
                         </div>
+                        {
+                            console.log(cohortes)
+                        }
                        
                     </div>
 
@@ -124,4 +127,4 @@ const Cohorte = ({getCohortes}) => {
     );
 };
 
-export default Cohorte;
+export default Cohorte; 

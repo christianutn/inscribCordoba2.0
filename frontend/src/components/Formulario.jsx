@@ -8,7 +8,7 @@ import { getMediosInscripcion } from "../services/mediosInscripcion.service.js";
 import { getPlataformasDictado } from "../services/plataformasDictado.service.js";
 import { getTiposCapacitacion } from "../services/tiposCapacitacion.service.js";
 import { getTutores } from "../services/tutores.service.js";
-import {getMyUser} from "../services/usuarios.service.js";
+import { getMyUser } from "../services/usuarios.service.js";
 import Alert from '@mui/material/Alert';
 import Select from '@mui/material/Select';
 import { DataGrid, useGridApiContext } from '@mui/x-data-grid';
@@ -20,8 +20,9 @@ import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Divider } from '@mui/material';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
-import {validarOrdenFechas} from "../services/validarOrdenFechas.js";
+import { validarOrdenFechas } from "../services/validarOrdenFechas.js";
 import { useNavigate } from 'react-router-dom';
+
 
 
 export default function Formulario() {
@@ -128,10 +129,10 @@ export default function Formulario() {
     (async () => {
       try {
 
-        const user = await getMyUser(); 
-        
+        const user = await getMyUser();
 
-        if(!user.cuil) {
+
+        if (!user.cuil) {
           navigate("/login");
           return
         }
@@ -219,7 +220,7 @@ export default function Formulario() {
       }
 
 
-      if (!horas|| horas <= 0) {
+      if (!horas || horas <= 0) {
         throw new Error("Debe seleccionar una hora");
       }
 
@@ -236,10 +237,10 @@ export default function Formulario() {
           throw new Error("Debe completar las fechas");
         }
 
-        if(validarOrdenFechas([cohorte.fechaInscripcionDesde, cohorte.fechaInscripcionHasta, cohorte.fechaCursadaDesde, cohorte.fechaCursadaHasta]) === false){
+        if (validarOrdenFechas([cohorte.fechaInscripcionDesde, cohorte.fechaInscripcionHasta, cohorte.fechaCursadaDesde, cohorte.fechaCursadaHasta]) === false) {
           throw new Error("Fechas de cohorte no válidas. Las fechas no son coherentes");
         }
-        
+
       })
 
       const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes });
@@ -300,6 +301,10 @@ export default function Formulario() {
       <form >
         <div className='grid-container-formulario'>
           <div className='titulo'><Titulo texto='Formulario de inscripción' /></div>
+          <div className='divider'>
+            <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} />
+          </div>
+
 
           <div className='select-ministerio'>
             <Autocomplete options={ministerios.map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio}

@@ -129,20 +129,28 @@ export const postTutor = async (req, res, next) => {
 
         
 
-        if (!cuil || cuil.length !== 11 ) {
-            const error = new Error("Datos inválidos: no cumplen con los requisitos");
+        if (!cuil) {
+            const error = new Error("EL cuil es requerido");
+            error.statusCode = 400;
+            throw error;
+        } else if (cuil.length !== 11) {
+            const error = new Error("El CUIL debe ser de 11 caracteres sin guíones");
             error.statusCode = 400;
             throw error;
         }
 
-        if(!area || area == "" || area == null || area == undefined){
-            const error = new Error("Area inválida");
+        if(!area){
+            const error = new Error("EL área es requerida");
             error.statusCode = 400;
             throw error;
         }
 
-        if(!esReferente || esReferente == "" || esReferente == null || esReferente == undefined){
-            const error = new Error("Es referente inválido");
+        if(!esReferente){
+            const error = new Error("El referente es requerido");
+            error.statusCode = 400;
+            throw error;
+        } else if(esReferente !== "Si" && esReferente !== "No"){
+            const error = new Error("El referente debe ser Si o No");
             error.statusCode = 400;
             throw error;
         }
@@ -161,6 +169,14 @@ export const postTutor = async (req, res, next) => {
 
         esReferente = esReferente === "Si" ? 1 : esReferente === "No" ? 0 : null;
 
+        //Verificamos si la persona no existe
+        const persona = await Persona.findOne({ where: { cuil: cuil } });
+        if (!persona) {
+            const error = new Error(`La persona con el cuil ${cuil} no existe. Debe crear primero a la persona`);
+            error.statusCode = 404;
+            throw error;
+        }
+
         // Actualización de Tutor
         const altaTutor = await Tutor.create(
             {cuil: cuil ,area: area, esReferente: esReferente }
@@ -171,11 +187,10 @@ export const postTutor = async (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
-        res.status(200).json({ message: "Tutor creado correctamente" });
+        res.status(201).json({ message: "Tutor creado correctamente" });
 
     } catch (error) {
-        // Revertimos la transacción en caso de error
-        await t.rollback();
+        
         next(error);
     }
 }
