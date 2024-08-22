@@ -26,6 +26,7 @@ export const getTutores = async () => {
 
 
 export const putTutores = async (tutor) => {
+    console.log("Tutores: ", tutor)
     try {
         const response = await fetch(URL, {
             method: "PUT",

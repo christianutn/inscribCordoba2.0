@@ -53,7 +53,7 @@ export const putArea = async (req, res, next) => {
             throw error;
         }
 
-        if (ministerio == "" || ministerio == null || ministerio == undefined) {
+        if (!ministerio) {
 
             const error = new Error("El ministerio no es válido");
             error.statusCode = 400;

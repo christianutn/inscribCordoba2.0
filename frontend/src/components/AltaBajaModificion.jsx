@@ -32,12 +32,26 @@ const AltaBajaModificion = () => {
     const navigate = useNavigate();
     const options = ["Cursos", "Ministerios", "Áreas", "Personas", "Tutores", "Medios de Inscripción", "Plataformas de Dictado", "Tipos de Capacitación", "Usuarios"];
 
+    const convertirAPropiedadConfig = (opcion) => {
+        switch (opcion) {
+            case 'Cursos': return 'cursos';
+            case "Ministerios": return 'ministerios';
+            case "Áreas": return 'areas';
+            case "Personas": return 'personas';
+            case "Tutores": return 'tutores';
+            case "Medios de Inscripción": return 'mediosInscripcion';
+            case "Plataformas de Dictado": return 'plataformasDictado';
+            case "Tipos de Capacitación": return 'tiposCapacitaciones';
+            case "Usuarios": return 'usuarios';
+        }
+    }
     // Use state
     const [selectOption, setSelectOption] = useState("");
     const [dataAMostrar, setDataAMostrar] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
+    const [configuraciones, setConfiguraciones] = useState({});
 
     // Use effect
 
@@ -52,192 +66,38 @@ const AltaBajaModificion = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [cursos, setCursos] = useState([]);
 
+    // Estructura base para setear configuraciones
     useEffect(() => {
-        if (cargando !== true) {
-            setCargando(true);
-        }
-
+        setCargando(true);
         (async () => {
             const cursos = await getCursos();
-            setCursos(cursos);
+            
             const ministerios = await getMinisterios();
-            setMinisterios(ministerios);
+            
             const areas = await getAreas();
-            setAreas(areas);
             const personas = await getPersonas();
-            setPersonas(personas);
             const tutores = await getTutores();
-            setTutores(tutores);
             const tiposCapacitaciones = await getTiposCapacitacion();
-            setTiposCapacitaciones(tiposCapacitaciones);
             const mediosInscripcion = await getMediosInscripcion();
-            setMediosInscripciones(mediosInscripcion);
             const plataformasDictado = await getPlataformasDictado();
-            setPlataformasDictado(plataformasDictado);
-            const roles = await getRoles();
-            setRoles(roles);
             const usuarios = await getUsuarios();
-            setUsuarios(usuarios)
+            const roles = await getRoles();
+            setCursos(cursos);
+            setMinisterios(ministerios);
+            setAreas(areas);
+            setPersonas(personas);
+            setTutores(tutores);
+            setTiposCapacitaciones(tiposCapacitaciones);
+            setMediosInscripciones(mediosInscripcion);
+            setPlataformasDictado(plataformasDictado);
+            setRoles(roles);
+            setUsuarios(usuarios);
+            
 
-            if (success) {
-                await getDatosAMostrar(selectOption);
-
-            }
-
-            setCargando(false);
-
-
-        })()
-
-    }, [selectOption]);
-
-    useEffect(() => {
-        setTimeout(() => {
-            setSuccess(false);
-        }, 3000);
-    }, [success]);
-
-    useEffect(() => {
-        if (error) {
-            setTimeout(() => {
-                setError(null);
-            }, 3000);
-        }
-    }, [error]);
-
-
-    const handleDescargarExcel = async () => {
-        console.log("dataAMostrar:", dataAMostrar);
-        console.log("columns:", columns);
-        await descargarExcel(dataAMostrar, columns, "Reporte");
-    }
-
-    const handleAgregar = async () => {
-
-        switch (selectOption) {
-            case 'Cursos':
-                navigate('/cursos/alta');
-                break;
-            case "Ministerios":
-                navigate('/ministerios/alta');
-                break;
-            case "Áreas":
-                navigate("/areas/alta")
-                break
-            case "Personas":
-                navigate('/personas/alta');
-                break
-            case "Tutores":
-                navigate('/tutores/alta');   
-                break
-            case "Medios de Inscripción":
-                navigate('/mediosInscripciones/alta');
-                break
-            case "Plataformas de Dictado":
-                navigate('/plataformasDictados/alta');
-                break
-            case "Usuarios":
-
-                break
-            case "Tipos de Capacitación":
-                navigate('/tiposCapacitaciones/alta');
-                break
-
-            default:
-                break;
-        }
-
-
-    };
-
-
-    const [columns, setColumns] = useState([]);
-    const actionColumn = {
-        field: 'Accion',
-        headerName: '',
-        flex: 1,
-        renderCell: (params) => (
-            <Box sx={{ display: 'flex', gap: 1, width: '60px', flexDirection: 'row' }}>
-                <BotonCircular icon="editar" height={40} width={40} onClick={() => handleActionClick('editar', params)} />
-                <BotonCircular icon="borrar" height={40} width={40} onClick={() => handleActionClick('borrar', params)} />
-            </Box>
-        ),
-    };
-
-    const handleActionClick = async (action, params) => {
-        if (action === 'borrar') {
-            try {
-                console.log("Borrando:", params.id);
-                setCargando(true);
-                await deleteRow(params.id, selectOption);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                setSelectOption("");
-                setSuccess(true);
-                setError(null);
-            } catch (error) {
-
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                setError(error.message || "Error al cargar los datos");
-                setSuccess(false);
-            } finally {
-                setCargando(false);
-            }
-        } else {
-            try {
-                console.log("PARAMS:", params);
-                setCargando(true);
-
-                const updatedRow = {
-                    ...params.row,
-                    codPlataformaDictado: params.row.plataformaDictado
-                        ? plataformasDictado.find(p => p.nombre === params.row.plataformaDictado)?.cod
-                        : undefined,
-                    codMedioInscripcion: params.row.medioInscripcion
-                        ? mediosInscripcion.find(m => m.nombre === params.row.medioInscripcion)?.cod
-                        : undefined,
-                    codTipoCapacitacion: params.row.tipoCapacitacion
-                        ? tiposCapacitaciones.find(t => t.nombre === params.row.tipoCapacitacion)?.cod
-                        : undefined,
-                    codArea: params.row.area
-                        ? areas.find(a => a.nombre === params.row.area)?.cod
-                        : undefined,
-                    codMinisterio: params.row.ministerio
-                        ? ministerios.find(m => m.nombre === params.row.ministerio)?.cod
-                        : undefined,
-                    codRol: params.row.rol
-                        ? roles.find(r => r.nombre === params.row.rol)?.cod
-                        : undefined,
-
-                };
-
-                await updateRow(updatedRow, selectOption);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                setSelectOption("");
-                setSuccess(true);
-                setError(null);
-
-                // Si la acción fue exitosa, vuelve a obtener los datos
-
-            } catch (error) {
-
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                setError(error.message || "Error al cargar los datos");
-                setSuccess(false);
-            } finally {
-                setCargando(false);
-            }
-        }
-    };
-
-
-    const getDatosAMostrar = async (selectOption) => {
-        setCargando(true);
-        try {
-            switch (selectOption) {
-
-                case "Cursos":
-
-                    setColumns([
+            setConfiguraciones((prevConfiguraciones) => ({
+                ...prevConfiguraciones,
+                cursos: {
+                    columns: [
                         { field: 'cod', headerName: 'Código', with: 20 },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
                         { field: 'cupo', headerName: 'Cupo', with: 20, editable: true },
@@ -289,9 +149,8 @@ const AltaBajaModificion = () => {
                         { field: 'horas', headerName: 'Horas', with: 5, editable: true },
                         { field: 'area', headerName: 'Area', width: 180 },
                         { field: 'ministerio', headerName: 'Ministerio', width: 180 }
-                    ]);
-
-                    setDataAMostrar(cursos.map((e) => ({
+                    ],
+                    rows: cursos.map((e) => ({
                         id: e.cod, // El DataGrid necesita un ID específico para cada fila
                         cod: e.cod,
                         nombre: e.nombre,
@@ -303,67 +162,51 @@ const AltaBajaModificion = () => {
                         area: e.detalle_area.nombre,
                         ministerio: e.detalle_area.detalle_ministerio.nombre
 
-                    })));
-                    break;
-
-                case "Ministerios":
-
-
-
-                    setColumns([
+                    }))
+                },
+                ministerios: {
+                    columns: [
                         { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
-                    ]);
-
-                    // Formateo de los datos para el DataGrid
-                    setDataAMostrar(ministerios.map((e, index) => ({
+                    ],
+                    rows: ministerios.map((e, index) => ({
                         id: e.cod, // El DataGrid necesita un ID único para cada fila
                         cod: e.cod,
                         nombre: e.nombre
-                    })));
-                    break;
-
-                case "Áreas":
-
-
-                    setColumns([
+                    }))
+                },
+                areas: {
+                    columns: [
                         { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
                         { field: 'ministerio', headerName: 'Ministerio', flex: 1 },
-                    ]);
-
-                    // Formateo de los datos para el DataGrid
-                    setDataAMostrar(areas.map((e, index) => ({
+                    ],
+                    rows: areas.map((e, index) => ({
                         id: e.cod, // El DataGrid necesita un ID único para cada fila
                         cod: e.cod,
                         nombre: e.nombre,
                         ministerio: e.detalle_ministerio.nombre
-                    })));
-                    break;
-
-                case "Personas":
-                    setColumns([
+                    }))
+                },
+                personas: {
+                    columns: [
                         { field: 'cuil', headerName: 'CUIL', width: 150, editable: true },
                         { field: 'nombre', headerName: 'Nombre', width: 150, editable: true },
                         { field: 'apellido', headerName: 'Apellido', width: 150, editable: true },
                         { field: 'mail', headerName: 'Email', width: 200, editable: true },
                         { field: 'celular', headerName: 'Celular', width: 150, editable: true },
-                    ]);
-
-
-
-                    setDataAMostrar(personas.map((persona) => ({
+                    ],
+                    rows: personas.map((persona) => ({
                         id: persona.cuil,
                         cuil: persona.cuil,
                         nombre: persona.nombre,
                         apellido: persona.apellido,
                         mail: persona.mail,
                         celular: persona.celular || "Sin celular",
-                    })));
-                    break
-
-                case "Tutores":
-                    setColumns([
+                    }))
+                },
+                tutores: {
+                    columns: [
                         { field: 'cuil', headerName: 'CUIL', width: 150, editable: true },
                         { field: 'nombre', headerName: 'Nombre', width: 150, editable: true },
                         { field: 'apellido', headerName: 'Apellido', width: 150, editable: true },
@@ -399,11 +242,8 @@ const AltaBajaModificion = () => {
                                 />
                             ),
                         },
-
-                    ]);
-
-                    // Formateo de los datos para el DataGrid
-                    setDataAMostrar(tutores.map((tutor, index) => ({
+                    ],
+                    rows: tutores.map((tutor) => ({
                         id: tutor.cuil,
                         cuil: tutor.cuil,
                         nombre: tutor.detalle_persona.nombre,
@@ -411,61 +251,44 @@ const AltaBajaModificion = () => {
                         mail: tutor.detalle_persona.mail,
                         celular: tutor.detalle_persona.celular || 'Sin celular',
                         area: tutor.detalle_area.nombre,
-                        esReferente: tutor.esReferente == "1" ? "Si" : "No"
-                    })));
-
-
-
-                    break
-                case "Medios de Inscripción":
-
-
-
-                    setColumns([
+                        esReferente: tutor.esReferente ? "Si" : "No",
+                    }))
+                },
+                mediosInscripcion: {
+                    columns:[
                         { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
-                    ]);
-
-                    // Formateo de los datos para el DataGrid
-                    setDataAMostrar(mediosInscripcion.map((e) => ({
+                    ],
+                    rows: mediosInscripcion.map((e) => ({
                         id: e.cod, // El DataGrid necesita un ID único para cada fila
                         cod: e.cod,
                         nombre: e.nombre
-                    })));
-                    break
-                case "Tipos de Capacitación":
-
-
-                    setColumns([
-                        { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
-                        { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
-                    ]);
-
-                    // Formateo de los datos para el DataGrid
-                    setDataAMostrar(tiposCapacitaciones.map((e, index) => ({
-                        id: e.cod, // El DataGrid necesita un ID único para cada fila
-                        cod: e.cod,
-                        nombre: e.nombre
-                    })));
-                    break
-                case "Plataformas de Dictado":
-
-
-                    setColumns([
+                    }))
+                },
+                plataformasDictado: {
+                    columns:[
                         { field: 'cod', headerName: 'Código de Plataforma', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
-                    ]);
-
-                    // Formateo de los datos para el DataGrid
-                    setDataAMostrar(plataformasDictado.map((plataforma, index) => ({
+                    ],
+                    rows: plataformasDictado.map((plataforma, index) => ({
                         id: plataforma.cod, // El DataGrid necesita un ID único para cada fila
                         cod: plataforma.cod,
                         nombre: plataforma.nombre
-                    })));
-                    break
-                case "Usuarios":
-
-                    setColumns([
+                    }))
+                },
+                tiposCapacitaciones: {
+                    columns:[
+                        { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
+                        { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
+                    ],
+                    rows: tiposCapacitaciones.map((e, index) => ({
+                        id: e.cod, // El DataGrid necesita un ID único para cada fila
+                        cod: e.cod,
+                        nombre: e.nombre
+                    }))
+                },
+                usuarios: {
+                    columns:[
                         { field: 'cuil', headerName: 'CUIL', width: 150, editable: true },
                         { field: 'nombre', headerName: 'Nombre', width: 150, editable: true },
                         { field: 'apellido', headerName: 'Apellido', width: 150, editable: true },
@@ -506,12 +329,10 @@ const AltaBajaModificion = () => {
                                 />
                             ),
                         },
-
-
-                    ]);
-
-                    // Formateo de los datos para el DataGrid
-                    setDataAMostrar(usuarios.map((u) => ({
+    
+    
+                    ],
+                    rows: usuarios.map((u) => ({
                         id: u.cuil,
                         cuil: u.cuil,
                         nombre: u.detalle_persona.nombre,
@@ -520,26 +341,209 @@ const AltaBajaModificion = () => {
                         celular: u.detalle_persona ? u.detalle_persona.celular : 'Sin celular',
                         area: u.area ? u.detalle_area.nombre : 'Sin área',
                         rol: u.detalle_rol.nombre
-                    })));
+                    }))
+                },
+                // Configuraciones adicionales para otras entidades
+            }));
 
-
-
-                    break
-
-                default:
-                    setDataAMostrar([]);
-                    break;
-            }
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        } finally {
             setCargando(false);
+        })();
+    }, []);
+
+    useEffect(() => {
+        setTimeout(() => {
+            setSuccess(false);
+        }, 3000);
+    }, [success]);
+
+    useEffect(() => {
+        if (error) {
+            setTimeout(() => {
+                setError(null);
+            }, 3000);
+        }
+    }, [error]);
+
+
+    const handleDescargarExcel = async () => {
+        console.log("dataAMostrar:", dataAMostrar);
+        console.log("columns:", columns);
+        await descargarExcel(dataAMostrar, columns, "Reporte");
+    }
+
+    const handleAgregar = async () => {
+
+        switch (selectOption) {
+            case 'Cursos':
+                navigate('/cursos/alta');
+                break;
+            case "Ministerios":
+                navigate('/ministerios/alta');
+                break;
+            case "Áreas":
+                navigate("/areas/alta")
+                break
+            case "Personas":
+                navigate('/personas/alta');
+                break
+            case "Tutores":
+                navigate('/tutores/alta');
+                break
+            case "Medios de Inscripción":
+                navigate('/mediosInscripciones/alta');
+                break
+            case "Plataformas de Dictado":
+                navigate('/plataformasDictados/alta');
+                break
+            case "Usuarios":
+
+                break
+            case "Tipos de Capacitación":
+                navigate('/tiposCapacitaciones/alta');
+                break
+
+            default:
+                break;
+        }
+
+
+    };
+
+
+    const [columns, setColumns] = useState([]);
+    const actionColumn = {
+        field: 'Accion',
+        headerName: '',
+        flex: 1,
+        renderCell: (params) => (
+            <Box sx={{ display: 'flex', gap: 1, width: '60px', flexDirection: 'row' }}>
+                <BotonCircular icon="editar" height={40} width={40} onClick={() => handleActionClick('editar', params)} />
+                <BotonCircular icon="borrar" height={40} width={40} onClick={() => handleActionClick('borrar', params)} />
+            </Box>
+        ),
+    };
+
+
+    const deleteRowDeConfiguraciones = (propiedad, id) => {
+        console.log("propiedad:", propiedad, "id:", id);
+        setConfiguraciones((prevConfiguraciones) => {
+            // Filtra las filas para excluir la fila con el id especificado
+            const updatedRows = prevConfiguraciones[propiedad].rows.filter((row) => row.id !== id);
+    
+            // Devuelve el estado actualizado con las filas modificadas
+            return {
+                ...prevConfiguraciones,
+                [propiedad]: {
+                    ...prevConfiguraciones[propiedad],
+                    rows: updatedRows
+                }
+            };
+        });
+    };
+
+    const updateRowDeConfiguraciones = (propiedad, id, updatedRow) => {
+        setConfiguraciones((prevConfiguraciones) => {
+            // Actualiza la fila especificada con los nuevos datos
+            const updatedRows = prevConfiguraciones[propiedad].rows.map((row) => {
+                if (row.id === id) {
+                    // Si updatedRow.cod existe, actualiza el id a updatedRow.cod
+                    const newId = updatedRow.cod ? updatedRow.cod : updatedRow.cuil;
+                    return { ...row, ...updatedRow, id: newId }; // Actualiza el id a newId
+                }
+                return row;
+            });
+    
+            // Devuelve el estado actualizado con las filas modificadas
+            return {
+                ...prevConfiguraciones,
+                [propiedad]: {
+                    ...prevConfiguraciones[propiedad],
+                    rows: updatedRows
+                }
+            };
+        });
+        
+    
+        console.log("propiedad:", propiedad, "id:", id, "updatedRow:", updatedRow);
+    };
+    
+    
+    
+
+    const handleActionClick = async (action, params) => {
+        if (action === 'borrar') {
+            try {
+                console.log("Borrando:", params.id);
+                setCargando(true);
+                await deleteRow(params.id, selectOption);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                setSuccess(true);
+                setError(null);
+                deleteRowDeConfiguraciones(convertirAPropiedadConfig(selectOption), params.id);
+                
+            } catch (error) {
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setError(error.message || "Error al cargar los datos");
+                setSuccess(false);
+            } finally {
+                setCargando(false);
+            }
+        } else {
+            try {
+                console.log("PARAMS:", params);
+                console.log("Ministerios: ", ministerios)
+                setCargando(true);
+
+                const updatedRow = {
+                    ...params.row,
+                    codPlataformaDictado: params.row.plataformaDictado
+                        ? plataformasDictado.find(p => p.nombre === params.row.plataformaDictado)?.cod
+                        : undefined,
+                    codMedioInscripcion: params.row.medioInscripcion
+                        ? mediosInscripcion.find(m => m.nombre === params.row.medioInscripcion)?.cod
+                        : undefined,
+                    codTipoCapacitacion: params.row.tipoCapacitacion
+                        ? tiposCapacitaciones.find(t => t.nombre === params.row.tipoCapacitacion)?.cod
+                        : undefined,
+                    codArea: params.row.area
+                        ? areas.find(a => a.nombre === params.row.area)?.cod
+                        : undefined,
+                    codMinisterio: params.row.ministerio
+                        ? ministerios.find(m => m.nombre === params.row.ministerio)?.cod
+                        : undefined,
+                    codRol: params.row.rol
+                        ? roles.find(r => r.nombre === params.row.rol)?.cod
+                        : undefined,
+
+                };
+
+                await updateRow(updatedRow, selectOption);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                updateRowDeConfiguraciones(convertirAPropiedadConfig(selectOption), params.id, params.row);
+                
+                setSuccess(true);
+                setError(null);
+
+                // Si la acción fue exitosa, vuelve a obtener los datos
+
+            } catch (error) {
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setError(error.message || "Error al cargar los datos");
+                setSuccess(false);
+            } finally {
+                setCargando(false);
+            }
         }
     };
 
+
+
     const handleSelectOption = (value) => {
         setSelectOption(value);
-        getDatosAMostrar(value);
+
     };
 
 
@@ -581,7 +585,12 @@ const AltaBajaModificion = () => {
                         <BotonCircular icon="agregar" onClick={handleAgregar} />
                     </div>
 
-                    <DataGrid columns={[...columns, actionColumn]} rows={dataAMostrar} autoHeight autowidth />
+                    <DataGrid
+                        columns={configuraciones && configuraciones[convertirAPropiedadConfig(selectOption)] ? [...configuraciones[convertirAPropiedadConfig(selectOption)].columns, actionColumn] : []}
+                        rows={configuraciones && configuraciones[convertirAPropiedadConfig(selectOption)] ? configuraciones[convertirAPropiedadConfig(selectOption)].rows : []}
+                        autoHeight
+                        autoWidth
+                    />
                 </div>
             )}
 

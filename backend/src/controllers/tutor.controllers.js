@@ -127,6 +127,7 @@ export const postTutor = async (req, res, next) => {
     
         let { cuil, area, esReferente } = req.body;
 
+        console.log(req.body)
         
 
         if (!cuil) {

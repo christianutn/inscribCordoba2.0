@@ -22,6 +22,7 @@ export const getAreas = async () => {
 
 export const putArea = async (area) => {
     try {
+        console.log(area)
         const response = await fetch(URL, {
             method: "PUT",
             headers: {

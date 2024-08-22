@@ -11,10 +11,8 @@ import { putTiposCapacitacion } from "./tiposCapacitacion.service.js"
 
 export const updateRow = async (row, option) => {
     console.log("ROWS:", {
-        cod: row.areaOriginal,
-        nombre: row.nombre,
-        ministerio: row.codMinisterio,
-        newCod: row.codArea
+        row: row,
+        opcion: option
     })
     try {
         switch (option) {
@@ -74,7 +72,7 @@ export const updateRow = async (row, option) => {
 
                 break
             case "Medios de Inscripción":
-
+                
                 await putMedioInscripcion({
                     cod: row.id,
                     nombre: row.nombre,

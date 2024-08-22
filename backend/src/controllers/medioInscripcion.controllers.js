@@ -22,7 +22,7 @@ export const getMediosInscripcion = async (req, res, next) => {
 
 export const putMedioInscripcion = async (req, res, next) => {
     try {
-        
+        console.log("Medio de inscripcion: ", req.body)
         let {cod, nombre, newCod} =  req.body
 
         if (cod == "" || cod == null || cod == undefined) {
