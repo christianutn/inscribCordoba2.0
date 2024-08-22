@@ -23,7 +23,6 @@ import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import { descargarExcel } from "../services/excel.service.js";
-import AltaCurso from "../components/FormulariosAlta/AltaCurso.jsx";
 import { useNavigate } from "react-router-dom";
 
 
