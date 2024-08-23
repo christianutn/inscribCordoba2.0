@@ -20,3 +20,11 @@ export const getDatosCronograma = async (req, res, next) => {
         throw error
     }
 }
+
+export const validarFecha = async (req, res, next) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
