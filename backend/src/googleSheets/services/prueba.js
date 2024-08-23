@@ -2,7 +2,7 @@ import { getDataRange } from "../utils/getDataRange.js";
 import authorize from "../utils/getAuth.js";
 import { google } from 'googleapis';
 
-export const getMatrizFechas = async (fecha) => {
+const getMatrizFechas = async (fecha) => {
     try {
 
         //Obtiene autorización
@@ -12,7 +12,7 @@ export const getMatrizFechas = async (fecha) => {
         const data = await getDataRange(googleSheets, auth, "principal", "B:X");
 
         const matrizFechas = Array.from({ length: 12 }, () =>
-            Array.from({ length: 31 }, () => ({ cantCupo: 0, cantCursos: 0, esPosible: true })));
+            Array.from({ length: 31 }, () => ({ cantCupo: 0, cantCursos: 0, esPosible: true, cantCursosMensual: 0, cantCupoMensual: 0, mes: null, dia: null })));
 
 
         if (data && data.length > 0) {
@@ -42,7 +42,7 @@ export const getMatrizFechas = async (fecha) => {
 
                 //console.log(fechaInicioCursada, mesUTC, diaUTC);
 
-                if ( estado != "SUSPENDIDO" && estado != "CANCELADO") {
+                if (estado != "Cerrado" && estado != "SUSPENDIDO" && estado != "CANCELADO") {
                     // Ahora, accede a la matriz utilizando los valores UTC
                     matrizFechas[mesUTC - 1][diaUTC - 1].cantCupo += parseInt(cupo, 10) || 0;
                     matrizFechas[mesUTC - 1][diaUTC - 1].cantCursos += 1;
@@ -60,6 +60,12 @@ export const getMatrizFechas = async (fecha) => {
 
         //Contar la cantidad de cursos por mes de matriz
 
+        const fechaAValidar = new Date(fecha);
+
+        const mesAValidar = fechaAValidar.getUTCMonth();
+
+
+
 
         for (let i = 0; i < 12; i++) {
             let totalCursosMensual = 0;
@@ -70,15 +76,18 @@ export const getMatrizFechas = async (fecha) => {
 
                 totalCuposMensual += matrizFechas[i][j].cantCupo;
 
+                matrizFechas[i][j].cantCursosMensual += totalCursosMensual;
+                matrizFechas[i][j].cantCupoMensual += totalCuposMensual;
+                matrizFechas[i][j].mes = i + 1;
+                matrizFechas[i][j].dia = j + 1;
+
                 if ((totalCursosMensual > 45 || totalCuposMensual > 60000) && !esMesInvalido) {
 
                     for (let m = 0; m < 31; m++) {
                         esMesInvalido = true;
                         matrizFechas[i][m].esPosible = false;
                     }
-
-                    return matrizFechas;
-                } else {
+                } else if (!esMesInvalido) {
                     if (matrizFechas[i][j].cantCupo > 10000) {
                         matrizFechas[i][j].esPosible = false;
                     }
@@ -89,16 +98,27 @@ export const getMatrizFechas = async (fecha) => {
                     }
                 }
 
-            } //Cierre ciclo for de días
-        } //Cierrre ciclo for de meses
 
-        
-        return matrizFechas
+
+
+
+            }
+
+            
+
+
+
+        }
+
+        console.log(matrizFechas)
+
+
 
     } catch (error) {
         throw error
     }
 }
 
-const res = await getMatrizFechas();
+const res = await getMatrizFechas()
 
+console.log(res)

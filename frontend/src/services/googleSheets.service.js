@@ -25,3 +25,25 @@ export const getCronograma = async () => {
     }
 
 }
+
+export const getMatrizFechas = async () => {
+    try {
+        const response = await fetch(URL + "/matrizFechas", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+        }); 
+
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error("No se encontraron los datos");
+        }
+        
+        return data
+        
+    } catch (error) {
+        throw error
+    }
+}

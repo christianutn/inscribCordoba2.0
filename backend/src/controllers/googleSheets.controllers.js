@@ -1,5 +1,6 @@
 import {getCronograma} from "../googleSheets/services/getCronograma.js";
 import Area from "../models/area.models.js";
+import {getMatrizFechas} from "../googleSheets/services/getMatrizFechas.js";
 export const getDatosCronograma = async (req, res, next) => {
 
     try {
@@ -21,10 +22,12 @@ export const getDatosCronograma = async (req, res, next) => {
     }
 }
 
-export const validarFecha = async (req, res, next) => {
+export const getFechasParaValidar = async (req, res, next) => {
     try {
+        const matrizFecha = await getMatrizFechas();
+        res.status(200).json(matrizFecha)
         
     } catch (error) {
-        
+        next(error)
     }
 }

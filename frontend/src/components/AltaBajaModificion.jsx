@@ -365,9 +365,8 @@ const AltaBajaModificion = () => {
 
 
     const handleDescargarExcel = async () => {
-        console.log("dataAMostrar:", dataAMostrar);
-        console.log("columns:", columns);
-        await descargarExcel(dataAMostrar, columns, "Reporte");
+        
+        await descargarExcel(configuraciones[convertirAPropiedadConfig(selectOption)].rows, configuraciones[convertirAPropiedadConfig(selectOption)].columns, "Reporte");
     }
 
     const handleAgregar = async () => {
