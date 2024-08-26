@@ -18,7 +18,7 @@ import validarFecha from '../services/validarFechas.js';
 import { postInstancias } from "../services/instancias.service.js";
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
-import { Divider } from '@mui/material';
+import  Divider  from '@mui/material/Divider';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
 import { validarOrdenFechas } from "../services/validarOrdenFechas.js";
 import { useNavigate } from 'react-router-dom';
@@ -278,14 +278,14 @@ export default function Formulario() {
       {
         error &&
 
-        <Alert variant="filled" severity="error" sx={{ width: '100%' }} >
+        <Alert className='alert' variant="filled" severity="error">
           {error}
         </Alert>
 
       }
       {
         success &&
-        <Alert variant="filled" severity="success" sx={{ width: '100%' }} >
+        <Alert className='alert' variant="filled" severity="success"  >
           Formulario enviado exitosamente
         </Alert>
       }

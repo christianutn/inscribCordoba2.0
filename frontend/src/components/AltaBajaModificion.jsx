@@ -26,11 +26,14 @@ import { descargarExcel } from "../services/excel.service.js";
 import { useNavigate } from "react-router-dom";
 
 
+
+
 const AltaBajaModificion = () => {
 
     const navigate = useNavigate();
     const options = ["Cursos", "Ministerios", "Áreas", "Personas", "Tutores", "Medios de Inscripción", "Plataformas de Dictado", "Tipos de Capacitación", "Usuarios"];
-
+    
+    
     const convertirAPropiedadConfig = (opcion) => {
         switch (opcion) {
             case 'Cursos': return 'cursos';
@@ -70,9 +73,9 @@ const AltaBajaModificion = () => {
         setCargando(true);
         (async () => {
             const cursos = await getCursos();
-            
+
             const ministerios = await getMinisterios();
-            
+
             const areas = await getAreas();
             const personas = await getPersonas();
             const tutores = await getTutores();
@@ -91,13 +94,13 @@ const AltaBajaModificion = () => {
             setPlataformasDictado(plataformasDictado);
             setRoles(roles);
             setUsuarios(usuarios);
-            
+
 
             setConfiguraciones((prevConfiguraciones) => ({
                 ...prevConfiguraciones,
                 cursos: {
                     columns: [
-                        { field: 'cod', headerName: 'Código', with: 20 },
+                        { field: 'cod', headerName: 'Código', with: 20},
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
                         { field: 'cupo', headerName: 'Cupo', with: 20, editable: true },
                         {
@@ -254,7 +257,7 @@ const AltaBajaModificion = () => {
                     }))
                 },
                 mediosInscripcion: {
-                    columns:[
+                    columns: [
                         { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
                     ],
@@ -265,7 +268,7 @@ const AltaBajaModificion = () => {
                     }))
                 },
                 plataformasDictado: {
-                    columns:[
+                    columns: [
                         { field: 'cod', headerName: 'Código de Plataforma', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
                     ],
@@ -276,7 +279,7 @@ const AltaBajaModificion = () => {
                     }))
                 },
                 tiposCapacitaciones: {
-                    columns:[
+                    columns: [
                         { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
                     ],
@@ -287,7 +290,7 @@ const AltaBajaModificion = () => {
                     }))
                 },
                 usuarios: {
-                    columns:[
+                    columns: [
                         { field: 'cuil', headerName: 'CUIL', width: 150, editable: true },
                         { field: 'nombre', headerName: 'Nombre', width: 150, editable: true },
                         { field: 'apellido', headerName: 'Apellido', width: 150, editable: true },
@@ -328,8 +331,8 @@ const AltaBajaModificion = () => {
                                 />
                             ),
                         },
-    
-    
+
+
                     ],
                     rows: usuarios.map((u) => ({
                         id: u.cuil,
@@ -365,7 +368,7 @@ const AltaBajaModificion = () => {
 
 
     const handleDescargarExcel = async () => {
-        
+
         await descargarExcel(configuraciones[convertirAPropiedadConfig(selectOption)].rows, configuraciones[convertirAPropiedadConfig(selectOption)].columns, "Reporte");
     }
 
@@ -413,10 +416,11 @@ const AltaBajaModificion = () => {
         field: 'Accion',
         headerName: '',
         flex: 1,
+        minWidth: 120, // Ajusta el valor según sea necesario
         renderCell: (params) => (
-            <Box sx={{ display: 'flex', gap: 1, width: '60px', flexDirection: 'row' }}>
-                <BotonCircular icon="editar" height={40} width={40} onClick={() => handleActionClick('editar', params)} />
-                <BotonCircular icon="borrar" height={40} width={40} onClick={() => handleActionClick('borrar', params)} />
+            <Box  className='box-btn-circular'>
+                <BotonCircular className='boton-circular' icon="editar" height={40} width={40} onClick={() => handleActionClick('editar', params)} />
+                <BotonCircular className='boton-circular' icon="borrar" height={40} width={40} onClick={() => handleActionClick('borrar', params)} />
             </Box>
         ),
     };
@@ -427,7 +431,7 @@ const AltaBajaModificion = () => {
         setConfiguraciones((prevConfiguraciones) => {
             // Filtra las filas para excluir la fila con el id especificado
             const updatedRows = prevConfiguraciones[propiedad].rows.filter((row) => row.id !== id);
-    
+
             // Devuelve el estado actualizado con las filas modificadas
             return {
                 ...prevConfiguraciones,
@@ -450,7 +454,7 @@ const AltaBajaModificion = () => {
                 }
                 return row;
             });
-    
+
             // Devuelve el estado actualizado con las filas modificadas
             return {
                 ...prevConfiguraciones,
@@ -460,13 +464,13 @@ const AltaBajaModificion = () => {
                 }
             };
         });
-        
-    
+
+
         console.log("propiedad:", propiedad, "id:", id, "updatedRow:", updatedRow);
     };
-    
-    
-    
+
+
+
 
     const handleActionClick = async (action, params) => {
         if (action === 'borrar') {
@@ -475,11 +479,11 @@ const AltaBajaModificion = () => {
                 setCargando(true);
                 await deleteRow(params.id, selectOption);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                
+
                 setSuccess(true);
                 setError(null);
                 deleteRowDeConfiguraciones(convertirAPropiedadConfig(selectOption), params.id);
-                
+
             } catch (error) {
 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -520,7 +524,7 @@ const AltaBajaModificion = () => {
                 await updateRow(updatedRow, selectOption);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 updateRowDeConfiguraciones(convertirAPropiedadConfig(selectOption), params.id, params.row);
-                
+
                 setSuccess(true);
                 setError(null);
 
@@ -570,25 +574,35 @@ const AltaBajaModificion = () => {
                 </Backdrop>
             ) : (
                 <div className="container-abm">
-                    <Titulo texto="Alta, Baja y Modificación" />
-                    <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
-                    {/* <Alert severity="info" sx={{ mt: 2, mb: 2 }}>
-                        Seleccione una opción para cargar los datos correspondientes.
-                    </Alert> */}
+                    <Titulo className="titulo-principal" texto="Alta, Baja y Modificación" />
+                    <Divider className="divider" sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
+                    {
+                        !selectOption &&
+                        <Alert severity="info" sx={{ mt: 2, mb: 2 }}>
+                            Seleccione una opción para cargar los datos correspondientes.
+                        </Alert>
+                    }
 
 
-                    <Autocomplete options={options} label={"Seleccione una Opción"} value={selectOption} getValue={handleSelectOption} />
-                    <div className="cabecera">
-                        <BotonCircular icon="descargar" onClick={handleDescargarExcel} />
-                        <BotonCircular icon="agregar" onClick={handleAgregar} />
-                    </div>
+                    <Autocomplete className="opcion" options={options} label={"Seleccione una Opción"} value={selectOption} getValue={handleSelectOption} />
+                    {
+                        selectOption &&
+                        <div className="btn">
+                            <BotonCircular icon="descargar" onClick={handleDescargarExcel} />
+                            <BotonCircular icon="agregar" onClick={handleAgregar} />
+                        </div>
+                    }
 
-                    <DataGrid
-                        columns={configuraciones && configuraciones[convertirAPropiedadConfig(selectOption)] ? [...configuraciones[convertirAPropiedadConfig(selectOption)].columns, actionColumn] : []}
-                        rows={configuraciones && configuraciones[convertirAPropiedadConfig(selectOption)] ? configuraciones[convertirAPropiedadConfig(selectOption)].rows : []}
-                        autoHeight
-                        autoWidth
-                    />
+                    {
+                        selectOption &&
+
+                        <DataGrid className="datagrid"
+                            columns={configuraciones && configuraciones[convertirAPropiedadConfig(selectOption)] ? [...configuraciones[convertirAPropiedadConfig(selectOption)].columns, actionColumn] : []}
+                            rows={configuraciones && configuraciones[convertirAPropiedadConfig(selectOption)] ? configuraciones[convertirAPropiedadConfig(selectOption)].rows : []}
+                            autoHeight
+                            autoWidth
+                        />
+                    }
                 </div>
             )}
 

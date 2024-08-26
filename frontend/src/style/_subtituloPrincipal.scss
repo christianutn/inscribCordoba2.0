@@ -1,0 +1,22 @@
+.subtitulo-principal {
+    font-family: 'Roboto, sans-serif';
+    font-weight: bold; /* Establece el peso de fuente por defecto */
+
+    /* Si necesitas aplicar un peso de fuente específico basado en una clase adicional */
+    &.font-weight-light {
+        font-weight: 300;
+    }
+
+    &.font-weight-normal {
+        font-weight: 400;
+    }
+
+    &.font-weight-bold {
+        font-weight: 700;
+    }
+
+    @media (max-width: 500px) {
+        font-size: 15px !important; /* Aumenta la especificidad y fuerza la aplicación con !important */
+        
+    }
+}

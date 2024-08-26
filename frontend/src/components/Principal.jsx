@@ -22,11 +22,12 @@ import Formulario from './Formulario';
 import ClassIcon from '@mui/icons-material/Class';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import Cronograma from "./Cronograma.jsx"
-import Cursos from "./Cursos.jsx"
 import UpdateIcon from '@mui/icons-material/Update';
 import { getMyUser } from "../services/usuarios.service.js";
 import AltaBajaModificion from './AltaBajaModificion.jsx';
 import BotonCircular from "./UIElements/BotonCircular.jsx";
+import Button from "./UIElements/Button.jsx";
+import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
 
 const drawerWidth = 240;
 
@@ -77,16 +78,26 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 export default function Principal() {
 
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     (async () => {
 
-      const user = await getMyUser();
-      
-      if (!user) {
+      const res = await getMyUser();
+      setUser(res);
+
+      if (!res) {
         navigate('/login');
         return;
       }
+
+      if (res.rol === "ADM") {
+        setOpcionesAMostrar([["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"]])
+      } else if (res.rol === "REF") {
+        setOpcionesAMostrar([["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"]])
+      }
+
+
     }
 
 
@@ -96,6 +107,8 @@ export default function Principal() {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [opcionSeleccionada, setOpcionSeleccionada] = useState('');
+  const [opcionesAMostrar, setOpcionesAMostrar] = useState([]);
+
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -115,8 +128,6 @@ export default function Principal() {
         return <Formulario />
       case "Calendario":
         return <Cronograma />
-      case "Cursos":
-        return <Cursos />
       case "AltaBajaModificion":
         return <AltaBajaModificion />
       default:
@@ -143,15 +154,6 @@ export default function Principal() {
           <Typography variant="h6" noWrap component="div">
             InscribCórdoba
           </Typography>
-          <div style={{ width: 60, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
-            <BotonCircular icon={"logout"} onClick={() => {
-              // Elimina cualquier token o información de usuario almacenada (localStorage, sessionStorage, etc.)
-              localStorage.removeItem('jwt');  // o sessionStorage.removeItem('token');
-
-              // Redirigir al usuario a la página de inicio de sesión
-              navigate('/login');
-            }} />
-          </div>
 
 
         </Toolbar>
@@ -176,7 +178,7 @@ export default function Principal() {
         </DrawerHeader>
         <Divider />
         <List>
-          {[["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["Cursos", "Cursos"], ["ABM", "AltaBajaModificion"]].map((item, index) => (
+          {opcionesAMostrar.map((item, index) => (
             <ListItem key={index} disablePadding>
               <ListItemButton onClick={() => handleListItemClick(item[1])}>
                 <ListItemIcon>
@@ -192,6 +194,18 @@ export default function Principal() {
           ))}
         </List>
         <Divider />
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' }}>
+          {console.log(user)}
+
+          <Button mensaje={"Cerrar Sesión"}
+            hanldeOnClick={() => {
+              // Elimina cualquier token o información de usuario almacenada (localStorage, sessionStorage, etc.)
+              localStorage.removeItem('jwt');  // o sessionStorage.removeItem('token');
+
+              // Redirigir al usuario a la página de inicio de sesión
+              navigate('/login');
+            }}></Button>
+        </div>
 
       </Drawer>
       <Main open={open} style={{ marginTop: '3%' }}>

@@ -68,7 +68,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en">
-      <div>
+      <div className='container-fecha'>
 
         <Typography variant="body1">{mensaje}</Typography>
         <DatePicker
@@ -78,7 +78,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
           slots={{
             textField: (params) => <TextField {...params} />,
           }}
-          inputFormat="DD/MM/YYYY"
+          inputFormat="DD/MM/YYYY"  
           format="DD/MM/YYYY" // Set the format here
           shouldDisableDate={shouldDisableDate}
         />

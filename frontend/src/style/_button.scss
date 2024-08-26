@@ -1,0 +1,10 @@
+.button {
+    width: 100%; /* Esto equivale a `sx={{ width: width || "100%" }}` */
+       /* Si quieres que el ancho sea responsivo, puedes agregar media queries */
+    @media (max-width: 500px) {
+        width: 100%; /* Ajusta el ancho para pantallas pequeñas */
+
+    }
+
+    /* Otras personalizaciones que desees añadir */
+}

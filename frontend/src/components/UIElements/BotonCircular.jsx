@@ -30,28 +30,24 @@ export default function FloatingActionButton({ onClick, icon, width, height, jus
   };
 
   return (
-    <Box className="boton-circular"
-    sx={{ 
-      display: 'flex', 
-      justifyContent: justifyContent ||'flex-end', 
-      alignItems: alignItems ||'flex-end',
-      '& > :not(style)': { m: 1 },
-      width:'100%',
-    }}
-    >
+    <div className='boton-circular'>
       <Fab
         className={getClassForIcon(icon)}
         aria-label={icon}
         onClick={onClick}
-        sx={{ width: width || 50, height: height || 50, backgroundColor: '#d9534f', color: 'white' }}
+        style={{
+          width: width || 50,
+          height: height || 50,
+
+        }}
       >
         {icon === 'agregar' && <AddIcon />}
         {icon === 'editar' && <EditNoteIcon />}
         {icon === 'borrar' && <DeleteForeverIcon />}
         {icon === 'descargar' && <DownloadForOfflineIcon />}
-        {icon === 'logout' && <GppBadIcon/>}
-        {icon === 'volver' && <KeyboardReturnIcon/>}
+        {icon === 'logout' && <GppBadIcon />}
+        {icon === 'volver' && <KeyboardReturnIcon />}
       </Fab>
-    </Box>
+    </div>
   );
 }

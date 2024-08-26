@@ -3,6 +3,8 @@
     .fab-agregar {
       background-color: $CBA_Info; /* Verde para agregar */
       color: white;
+      width: 40px;
+      height: 40px;
   
       &:hover {
         background-color: #0469a0;
@@ -12,6 +14,9 @@
     .fab-editar {
       background-color: $CBA_Orange; /* Naranja para editar */
       color: white;
+    
+      
+      
   
       &:hover {
         background-color: #f57c00;
@@ -21,6 +26,7 @@
     .fab-borrar {
       background-color: $CBA_Error; /* Rojo para borrar */
       color: white;
+      
       &:hover {
         background-color: #d32f2f;
       }
@@ -30,6 +36,7 @@
     .fab-descargar {
       background-color: $CBA_Orange; /* Rojo para borrar */
       color: white;
+     
       &:hover {
         background-color: $CBA_DarkOrange
       }
@@ -38,10 +45,13 @@
     .fab-volver {
       background-color: $CBA_Orange; /* Naranja para editar */
       color: white;
+      
   
       &:hover {
         background-color: #f57c00;
       }
     }
   }
+
+
   

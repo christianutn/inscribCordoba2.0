@@ -13,13 +13,12 @@ const Input = ({ label, getValue, type, value, width }) => {
     >
       <div>
         <TextField
-          sx={{ width: "100%" }}
+          className="custom-textfield"
           id="outlined-number"
           label={label}
-          type={type||"number"}
+          type={type || "number"}
           InputLabelProps={{
             shrink: true,
-            sx: { fontSize: "20px" }, // Ajusta este valor según el tamaño que desees
           }}
           onChange={(event) => getValue(event.target.value)}
           value={value}

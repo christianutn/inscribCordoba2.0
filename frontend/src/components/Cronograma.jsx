@@ -6,6 +6,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import { descargarExcel } from "../services/excel.service.js";
 import Titulo from "../components/fonts/TituloPrincipal.jsx";
+import Divider from '@mui/material/Divider';
 
 const Cronograma = () => {
     const [cronograma, setCronograma] = useState([]);
@@ -63,6 +64,7 @@ const Cronograma = () => {
 
             <div className="cabecera">
                 <Titulo texto="Cronograma" />
+                <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
                 <BotonCircular icon="descargar" onClick={handleDescargarExcel} alignItems={"flex-start"} justifyContent={"flex-start"}/>
             </div>
 

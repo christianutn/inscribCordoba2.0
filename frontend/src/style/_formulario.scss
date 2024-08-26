@@ -10,110 +10,62 @@
         "input . ."
         "tutores tutores tutores"
         "cohortes cohortes cohortes"
-       
         "submit submit submit";
     grid-gap: 20px;
     margin-left: 50px;
     margin-right: 50px;
 
-    
-
-    .select-ministerio {
-        grid-area: select-ministerio;
-    }
-
-    .select-area {
-        grid-area: select-area;
-    }
-
-    .select-curso {
-        grid-area: select-curso;
-    }
-
-    .select-tipo-capacitacion {
-        grid-area: select-tipo-capacitacion;
-    }
-
-  
-
-    .select-medio-inscripcion {
-        grid-area: select-medio-inscripcion;
-    }
-
+    .select-ministerio { grid-area: select-ministerio; }
+    .select-area { grid-area: select-area; }
+    .select-curso { grid-area: select-curso; }
+    .select-tipo-capacitacion { grid-area: select-tipo-capacitacion; }
+    .select-medio-inscripcion { grid-area: select-medio-inscripcion; }
     .input {
         grid-area: input;
-        //Tiene que estar uno al lado del otro de izquierda a derecha
         display: flex;
         flex-direction: row;
         gap: 10px;
-        
-        
     }
+    .tutores { grid-area: tutores; display: flex; flex-direction: column; }
+    .cohortes { grid-area: cohortes; }
+    .submit { grid-area: submit; }
+    .select-plataforma-dictado { grid-area: select-plataforma-dictado; }
+    .titulo { grid-area: titulo; }
+    .divider { grid-area: divider; }
 
-   .tutores{
-       grid-area: tutores;
-
-       display: flex;
-       flex-direction: column;
-    
-      
-   }
-
-   .cohortes {
-       grid-area: cohortes;
-      
-   }
-
-   
-    .submit {
-        grid-area: submit;
-    }
-
-   
-
-    .select-plataforma-dictado {
-        grid-area: select-plataforma-dictado;
-    }
-
-    .titulo {
-        grid-area: titulo;
-        
-    }
-    .divider {
-        grid-area: divider;
+    // Media query para pantallas pequeñas
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "titulo"
+            "select-ministerio"
+            "select-area"
+            "select-curso"
+            "select-medio-inscripcion"
+            "select-plataforma-dictado"
+            "select-tipo-capacitacion"
+            "tutores"
+            "input"
+            "cohortes"
+            "submit";
+        margin-left: 20px;
+        margin-right: 20px;
+        .select-ministerio { grid-area: select-ministerio; }
+        .select-area { grid-area: select-area; }
+        .select-curso { grid-area: select-curso; }
+        .select-tipo-capacitacion { grid-area: select-tipo-capacitacion; }
+        .select-medio-inscripcion { grid-area: select-medio-inscripcion; }
+        .input {
+            grid-area: input;
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+        }
+        .tutores { grid-area: tutores; display: flex; flex-direction: column; }
+        .cohortes { grid-area: cohortes; }
+        .submit { grid-area: submit; }
+        .select-plataforma-dictado { grid-area: select-plataforma-dictado; }
+        .titulo { grid-area: titulo; }
+        .divider { grid-area: divider; }
     }
 }
-
-/* @media (max-width: 1375px) {
-    .grid-container-formulario {
-      grid-template-columns: 1fr;
-      grid-template-areas:
-        "titulo"
-        "select-ministerio"
-        "select-area"
-        "select-curso"
-        "select-medio-inscripcion"
-        "select-plataforma-dictado"
-        "select-tipo-capacitacion"
-        "input"
-        "submit";
-      margin-left: 20px;
-      margin-right: 20px;
-      margin-top: 25px;
-
-      .titulo-principal{
-        font-size: 20px;
-      }
-
-      .input{
-       
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-
-        > * {
-            width: 100%;
-        }
-      }
-    }
-  } */
