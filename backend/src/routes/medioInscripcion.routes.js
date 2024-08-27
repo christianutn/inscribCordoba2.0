@@ -1,14 +1,16 @@
 import {getMediosInscripcion, putMedioInscripcion, postMedioInscripcion, deleteMedioInscripcion} from "../controllers/medioInscripcion.controllers.js"
 import {Router} from "express"
+import autorizar from "../utils/autorizar.js"
+import passport from "passport";
 
 const medioInscripcionRouter = Router();
 
-medioInscripcionRouter.get("/", getMediosInscripcion)
+medioInscripcionRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getMediosInscripcion)
 
-medioInscripcionRouter.put("/", putMedioInscripcion)
+medioInscripcionRouter.put("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']),putMedioInscripcion)
 
-medioInscripcionRouter.post("/", postMedioInscripcion)
+medioInscripcionRouter.post("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), postMedioInscripcion)
 
-medioInscripcionRouter.delete("/:cod", deleteMedioInscripcion)
+medioInscripcionRouter.delete("/:cod", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), deleteMedioInscripcion)
 
 export default medioInscripcionRouter

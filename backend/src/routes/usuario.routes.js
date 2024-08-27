@@ -2,18 +2,16 @@
 import {getUsuario, postUsuario, putUsuario, deleteUsuario, getMyUser} from "../controllers/usuario.controllers.js";
 import {Router} from "express";
 import passport from "passport";
-
+import autorizar from "../utils/autorizar.js"
 
 const usuarioRouter = Router();
 
 
-usuarioRouter.get("/", getUsuario)
+usuarioRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), getUsuario)
 
-usuarioRouter.post("/registrar", passport.authenticate('registrar', {session: false}), postUsuario);
+usuarioRouter.post("/registrar", passport.authenticate('jwt', {session: false}), autorizar(['ADM']),  postUsuario);
 
-
-usuarioRouter.put("/", putUsuario)
-
+usuarioRouter.put("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), putUsuario)
 
 usuarioRouter.delete("/:cuil", deleteUsuario)
 

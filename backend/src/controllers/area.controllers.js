@@ -36,7 +36,7 @@ export const getAreas = async (req, res, next) => {
 
 export const putArea = async (req, res, next) => {
     try {
-        console.log(req.body)
+        
         let {cod, nombre, ministerio, newCod} =  req.body
 
         if (cod == "" || cod == null || cod == undefined) {
@@ -81,7 +81,7 @@ export const putArea = async (req, res, next) => {
 
         res.status(200).json(area);
     } catch (error) {
-        console.log(error)
+        
         next(error);
     }
 }
@@ -89,7 +89,7 @@ export const putArea = async (req, res, next) => {
 
 export const postArea = async (req, res, next) => {
     try {
-        console.log(req.body)
+        
         let {cod, nombre, ministerio} = req.body;
 
         if (!cod) {

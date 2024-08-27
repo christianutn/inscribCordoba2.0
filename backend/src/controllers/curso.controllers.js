@@ -45,8 +45,7 @@ export const postCurso = async (req, res, next) => {
 
         const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area } = req.body;
 
-        console.log("DATOS DEL BODY: ", req.body);
-
+    
         const existe = await cursoModel.findOne({ where: { cod: cod } });
         if (existe) throw new Error("El Código ya existe");
         if (cod.length > 15) throw new Error("El Código no es valido debe ser menor a 15 caracteres");
@@ -110,7 +109,7 @@ export const deleteCurso = async (req, res, next) => {
     try {
         const { cod } = req.params;
 
-        console.log("ID: ", cod);
+       
 
         if (!cod) {
             throw new Error("El ID del curso es requerido");

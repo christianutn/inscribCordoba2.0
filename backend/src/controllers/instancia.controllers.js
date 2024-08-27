@@ -7,7 +7,8 @@ import validarFormatoFecha from "../utils/validarFormatoFecha.js";
 import Persona from "../models/persona.models.js";
 import sequelize from "../config/database.js";
 import TutoresXInstancia from "../models/tutorXInstancia.models.js";
-import {agregarFilasGoogleSheets} from "../googleSheets/services/agregarFilasGoogleSheets.js";
+import { agregarFilasGoogleSheets } from "../googleSheets/services/agregarFilasGoogleSheets.js";
+import { esInstanciaExistente } from "../googleSheets/services/esInstanciaExistente.js";
 
 
 export const getInstancias = async (req, res, next) => {
@@ -52,7 +53,7 @@ export const getInstancias = async (req, res, next) => {
 export const postInstancia = async (req, res, next) => {
     const t = await sequelize.transaction(); // Declaramos transacción
     try {
-        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, estado, cohortes, tutores} = req.body;
+        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, estado, cohortes, tutores } = req.body;
 
         // Buscamos el curso una vez y reutilizamos el resultado
         const dataCurso = await Curso.findOne({
@@ -84,15 +85,26 @@ export const postInstancia = async (req, res, next) => {
             }
 
             // Verificamos si la instancia ya existe
-            const instanciaExistente = await instanciaModel.findOne({
+            const instanciaExistenteBD = await instanciaModel.findOne({
                 where: {
                     curso: dataCurso.cod,
                     fecha_inicio_curso
                 }
             });
+            if (instanciaExistenteBD) {
+                const error = new Error(`La instancia para el curso ${curso} con fecha inicio de curso ${fecha_inicio_curso} ya existe en nuestra base de datos`);
+                error.statusCode = 400;
+                throw error;
+            }
+
+            //Formato de fecha debe ser yyyy-mm-dd
+           
+            const instanciaExistente = await esInstanciaExistente(dataCurso.cod, fecha_inicio_curso);
+
+
 
             if (instanciaExistente) {
-                const error = new Error(`La instancia para el curso ${curso} con fecha inicio de curso ${fecha_inicio_curso} ya existe`);
+                const error = new Error(`La instancia para el curso ${curso} con fecha inicio de curso ${fecha_inicio_curso} ya existe en nuestro cronograma`);
                 error.statusCode = 400;
                 throw error;
             }
@@ -107,7 +119,7 @@ export const postInstancia = async (req, res, next) => {
                 estado: estado
             }, { transaction: t });
 
-            
+
 
             // Procesamos cada tutor asociado a la instancia
             for (let j = 0; j < tutores.length; j++) {
@@ -130,10 +142,10 @@ export const postInstancia = async (req, res, next) => {
                     fecha_inicio_curso
                 }, { transaction: t });
 
-                console.log("Tutor creado: ", tutorXInstancia);
+               
             }
         }
-        agregarFilasGoogleSheets({...req.body, codCurso: dataCurso.cod});
+        agregarFilasGoogleSheets({ ...req.body, codCurso: dataCurso.cod });
         // Confirmamos transacción
         await t.commit();
         res.status(201).json({ message: "Instancias y tutores creados exitosamente" });

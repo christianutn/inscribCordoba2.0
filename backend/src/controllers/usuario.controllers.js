@@ -43,7 +43,7 @@ export const postUsuario = async (req, res, next) => {
         }
         res.status(200).json(req.user)
     } catch (error) {
-        console.log("sssssiiiii")
+       
         next(error)
     }
 }
@@ -53,7 +53,7 @@ export const postUsuario = async (req, res, next) => {
 export const putUsuario = async (req, res, next) => {
     const t = await sequelize.transaction(); // Iniciamos la transacción
     try {
-        console.log("PERSONA:", req.body);
+       
 
         let { cuil, nombre, apellido, mail, celular, newCuil, area, rol } = req.body;
 

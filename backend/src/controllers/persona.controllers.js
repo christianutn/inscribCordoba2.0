@@ -23,7 +23,7 @@ export const getPersonas = async (req, res, next) => {
 export const postPersona = async (req, res, next) => {
     try {
 
-        console.log("PERSONA :", req.body)
+        
         let { cuil, nombre, apellido, mail, celular } = req.body
 
         cuil = cuil.trim()
@@ -78,7 +78,7 @@ export const postPersona = async (req, res, next) => {
         }
         res.status(201).json(persona)
     } catch (error) {
-        console.log(error)
+      
         next(error)
     }
 }
@@ -87,7 +87,7 @@ export const postPersona = async (req, res, next) => {
 export const putPersona = async (req, res, next) => {
     try {
 
-        console.log("PERSONA :", req.body)
+   
         let { cuil, nombre, apellido, mail, celular, newCuil } = req.body
 
         // Limpieza de datos
@@ -144,7 +144,7 @@ export const putPersona = async (req, res, next) => {
         }
         res.status(200).json({ message: `Los datos de ${nombre} ${apellido} han sido actualizados con exito` })
     } catch (error) {
-        console.log(error.message)
+   
         next(error)
     }
 }
@@ -153,7 +153,7 @@ export const putPersona = async (req, res, next) => {
 export const deletePersona = async (req, res, next) => {
     try {
         const {cuil} = req.params;
-        console.log("CUIL:", cuil)
+       
         if(cuil.length !== 11) {
             const error = new Error("El CUIL no es válido");
             error.statusCode = 400;

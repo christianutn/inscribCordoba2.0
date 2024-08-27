@@ -11,8 +11,7 @@ export const appendRows = async (googleSheets, sheetName, startColumn, endColumn
         });
 
         const lastRow = response.data.values ? response.data.values.length + 1 : 2;
-        // console.log("LastRow: ", lastRow)
-        // console.log("Datos Array", response.data.values)
+ 
 
         const range = `${sheetName}!${startColumn}${lastRow}:${endColumn}`;
 

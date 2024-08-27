@@ -20,7 +20,7 @@ export const getTiposCapacitacion = async (req, res, next) => {
 
 
 export const putTiposCapacitacion = async (req, res, next) => {
-    console.log("req.body:", req.body)
+    
     try {
         
         let {cod, nombre, newCod} =  req.body
@@ -87,7 +87,7 @@ export const postTiposCapacitacion = async (req, res, next) => {
         }
         nombre = nombre.trim()
         cod = cod.trim()    
-        console.log(req.body)
+     
         const tipo_capacitacion = await tipoCapacitacionModel.create({cod: cod, nombre: nombre});
         res.status(201).json(tipo_capacitacion);
     } catch (error) {

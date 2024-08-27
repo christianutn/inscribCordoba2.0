@@ -53,7 +53,7 @@ export const getTutores = async (req, res, next) => {
 export const putTutores = async (req, res, next) => {
     const t = await sequelize.transaction(); // Iniciamos la transacción
     try {
-        console.log("PERSONA:", req.body);
+      
 
         let { cuil, nombre, apellido, mail, celular, newCuil, area, esReferente } = req.body;
 
@@ -127,7 +127,6 @@ export const postTutor = async (req, res, next) => {
     
         let { cuil, area, esReferente } = req.body;
 
-        console.log(req.body)
         
 
         if (!cuil) {

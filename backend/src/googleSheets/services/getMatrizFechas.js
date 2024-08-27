@@ -40,7 +40,7 @@ export const getMatrizFechas = async (fecha) => {
                 let mesUTC = fechaInicioCursada.getUTCMonth() + 1; // Sumar 1 porque los meses están indexados desde 0
                 let diaUTC = fechaInicioCursada.getUTCDate();
 
-                //console.log(fechaInicioCursada, mesUTC, diaUTC);
+                
 
                 if ( estado != "SUSPENDIDO" && estado != "CANCELADO") {
                     // Ahora, accede a la matriz utilizando los valores UTC
@@ -56,7 +56,7 @@ export const getMatrizFechas = async (fecha) => {
 
         }
 
-        //console.log(matrizFechas)
+     
 
         //Contar la cantidad de cursos por mes de matriz
 

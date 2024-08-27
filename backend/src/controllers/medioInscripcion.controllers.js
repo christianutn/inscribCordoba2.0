@@ -22,7 +22,7 @@ export const getMediosInscripcion = async (req, res, next) => {
 
 export const putMedioInscripcion = async (req, res, next) => {
     try {
-        console.log("Medio de inscripcion: ", req.body)
+        
         let {cod, nombre, newCod} =  req.body
 
         if (cod == "" || cod == null || cod == undefined) {
@@ -44,7 +44,7 @@ export const putMedioInscripcion = async (req, res, next) => {
         nombre = nombre.trim()
         cod = cod.trim()
         newCod = newCod ? newCod.trim() : null
-        console.log(req.body)
+        
         const medioInscripcion = await medioInscripcionModel.update({cod: newCod || cod, nombre: nombre}, {
             where: {
                 cod: cod

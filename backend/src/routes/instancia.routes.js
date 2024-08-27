@@ -1,14 +1,16 @@
 import {getInstancias, postInstancia, deleteInstancia} from "../controllers/instancia.controllers.js";
 import { Router } from "express";
+import autorizar from "../utils/autorizar.js"
+import passport from "passport";
 
 const instanciaRouter = Router();
 
 
-instanciaRouter.get("/", getInstancias)
+instanciaRouter.get("/",passport.authenticate('jwt', {session: false}), autorizar(['ADM']), getInstancias)
 
-instanciaRouter.post("/", postInstancia)
+instanciaRouter.post("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), postInstancia)
 
-instanciaRouter.delete("/", deleteInstancia)
+instanciaRouter.delete("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), deleteInstancia)
 
 
 

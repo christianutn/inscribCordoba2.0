@@ -1,0 +1,90 @@
+.container-alta-usuario {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "titulo titulo titulo"
+        "divider divider divider"
+        "cuil rol area"
+        "volver volver volver"
+        "enviar enviar enviar";
+    grid-gap: 20px;
+    margin-left: 50px;
+    margin-right: 50px;
+
+    .titulo {
+        grid-area: titulo;
+    }
+
+    .divider {
+        grid-area: divider;
+    }
+
+    .rol {
+        grid-area: rol;
+    }
+
+    .area {
+        grid-area: area;
+    }
+
+    .cuil {
+        grid-area: cuil;
+    }
+
+    .volver {
+        grid-area: volver;
+    }
+
+
+    .enviar {
+        grid-area: enviar;
+    }
+
+    @media (max-width: 500px) {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+            "titulo"
+            "divider"
+            "cuil"
+            "rol"
+            "area"
+            "volver"
+            "enviar";
+        grid-gap: 20px;
+        margin-left: 50px;
+        margin-right: 50px;
+
+        .titulo {
+            grid-area: titulo;
+        }
+
+        .divider {
+            grid-area: divider;
+        }
+
+        .rol {
+            grid-area: rol;
+        }
+
+        .area {
+            grid-area: area;
+        }
+
+        .cuil {
+            grid-area: cuil;
+        }
+
+        .volver {
+            grid-area: volver;
+        }
+
+
+        .enviar {
+            grid-area: enviar;
+        }
+    }
+
+}

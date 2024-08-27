@@ -397,7 +397,7 @@ const AltaBajaModificion = () => {
                 navigate('/plataformasDictados/alta');
                 break
             case "Usuarios":
-
+                navigate("/usuarios/alta");
                 break
             case "Tipos de Capacitación":
                 navigate('/tiposCapacitaciones/alta');

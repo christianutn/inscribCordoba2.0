@@ -5,10 +5,10 @@ import autorizar from "../utils/autorizar.js"
 
 const areaRouter = Router();
 
-areaRouter.get("/", passport.authenticate('jwt', {session:false}), getAreas)
-areaRouter.put("/",  putArea)
-areaRouter.post("/",  postArea)
-areaRouter.delete("/:cod",  deleteArea)
+areaRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getAreas)
+areaRouter.put("/",  passport.authenticate('jwt', {session: false}), autorizar(['ADM']),putArea)
+areaRouter.post("/",  passport.authenticate('jwt', {session: false}), autorizar(['ADM']), postArea)
+areaRouter.delete("/:cod",  passport.authenticate('jwt', {session: false}), autorizar(['ADM']),deleteArea)
 
 
 

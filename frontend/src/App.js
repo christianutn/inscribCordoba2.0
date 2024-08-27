@@ -10,6 +10,7 @@ import AltaMediosInscripcion from "./components/FormulariosAlta/AltaMedioInscrip
 import AltaArea from "./components/FormulariosAlta/AltaArea";
 import AltaPersona from "./components/FormulariosAlta/AltaPersonas";
 import AltaTutores from "./components/FormulariosAlta/AltaTutores";
+import RegistrosTutores from "./components/RegistrosTutores";
 
 
 
@@ -29,6 +30,7 @@ function App() {
         <Route path="/areas/alta" element={<AltaArea />} />
         <Route path="/personas/alta" element={<AltaPersona />} />
         <Route path="/tutores/alta" element={<AltaTutores />} />
+        <Route path="/usuarios/alta" element={<RegistrosTutores />} />
 
         
       </Routes>

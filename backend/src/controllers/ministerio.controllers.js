@@ -83,7 +83,7 @@ export const getMinisterioByCod = async (req, res, next) => {
 
 export const putMinisterio = async (req, res, next) => {
     try {
-        console.log(req.body)
+        
         let {cod, nombre, newCod} =  req.body
 
         if (cod == "" || cod == null || cod == undefined) {
@@ -122,7 +122,7 @@ export const putMinisterio = async (req, res, next) => {
 
         res.status(200).json(area);
     } catch (error) {
-        console.log(error)
+       
         next(error);
     }
 }
@@ -156,7 +156,7 @@ export const deleteMinisterio = async (req, res, next) => {
 
 export const postMinisterio = async (req, res, next) => {
     try {
-        console.log("Ministerios:",  req.body)
+        
         let {cod, nombre} = req.body
 
         if (cod == "" || cod == null || cod == undefined) {
