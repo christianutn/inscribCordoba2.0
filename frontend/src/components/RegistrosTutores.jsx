@@ -12,7 +12,8 @@ import Alert from '@mui/material/Alert';
 import TextField from "./UIElements/TextField.jsx";
 import { getRoles } from "../services/roles.service.js"
 import Autocomplete from "./UIElements/Autocomplete.jsx";
-import { getAreas } from "../services/areas.service.js"
+import { getAreas } from "../services/areas.service.js";
+import {postUser} from "../services/usuarios.service.js"
 
 const RegistrosTutores = () => {
 
@@ -25,6 +26,7 @@ const RegistrosTutores = () => {
     const [areas, setAreas] = useState([]);
     const [seletedRol, setSelectedRol] = useState(null);
     const [selectedArea, setSelectedArea] = useState(null);
+    const [cuil, setCuil] = useState(null);
 
 
     useEffect(() => {
@@ -57,7 +59,9 @@ const RegistrosTutores = () => {
     }, []);
 
     const limpiarFormulario = () => {
-
+        setCuil("");
+        setSelectedRol(null);
+        setSelectedArea(null);
     }
 
 
@@ -68,6 +72,12 @@ const RegistrosTutores = () => {
 
 
             //Función para agregar
+            await postUser({
+                cuil: cuil,
+                area: areas.find(area => area.nombre === selectedArea)?.cod,
+                rol: roles.find(rol => rol.nombre === seletedRol)?.cod,
+                contrasenia: cuil
+            });
 
             setSuccess(true);
             setError(false);
@@ -116,7 +126,7 @@ const RegistrosTutores = () => {
                     </div>
 
                     <div className="cuil">
-                        <TextField label="Cuil" ></TextField>
+                        <TextField label="Cuil" value={cuil} getValue={(value) => setCuil(value)}></TextField>
                     </div>
                     <div className="rol">
                         <Autocomplete

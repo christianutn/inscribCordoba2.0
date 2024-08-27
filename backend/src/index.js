@@ -17,7 +17,7 @@ const initSequelize = async () => {
         console.log('Connection to the database has been established successfully.');
 
         // Sincronización de modelos
-        //await sequelize.sync({ alter: true }); // Opciones como 'alter: true' pueden ser útiles para aplicaciones en desarrollo
+        // await sequelize.sync({ alter: true }); // Opciones como 'alter: true' pueden ser útiles para aplicaciones en desarrollo
         associateModels();
         console.log('All models were synchronized successfully.');
     } catch (error) {

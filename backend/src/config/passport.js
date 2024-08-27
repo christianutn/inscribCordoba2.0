@@ -45,7 +45,7 @@ const inicializarPassport = () => {
     }))
 
 
-    passport.use("registrar", new LocalStrategy({
+ /*    passport.use("registrar", new LocalStrategy({
         usernameField: 'cuil', // Cambia esto al campo que usas para el nombre de usuario
         passwordField: 'contrasenia', // Cambia esto al campo que usas para la contraseña
         passReqToCallback: true //Opción para tomar datos del body
@@ -61,15 +61,15 @@ const inicializarPassport = () => {
             //Asegurar que contrasenia sea uan cadena si no es una cadena convertirla a string
             contrasenia = String(contrasenia)
             const contraseniaHash = createHash(contrasenia)
-            const nuevoUsuario = await Usuario.create({ cuil, contrasenia: contraseniaHash, rol, area });
-
+            const nuevoUsuario = await Usuario.create({ cuil:cuil, contrasenia: contraseniaHash, rol:rol, area:area, necesitaCbiContrasenia: "1" });
+            
             done(null, nuevoUsuario);
 
         } catch (error) {
             
             done(error)
         }
-    }));
+    })); */
 
 
     passport.use("login", new LocalStrategy({

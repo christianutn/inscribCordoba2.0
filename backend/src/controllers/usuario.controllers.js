@@ -7,6 +7,7 @@ import validarCuil from "../utils/validarCuil.js"
 import validarEmail from "../utils/validarMail.js";
 import tratarNombres from "../utils/tratarNombres.js";
 import Usuario from "../models/usuario.models.js";
+import { createHash } from "../utils/bcrypt.js"
 export const getUsuario = async (req, res, next) => {
     try {
         const usuarios = await usuarioModel.findAll({
@@ -36,18 +37,49 @@ export const getUsuario = async (req, res, next) => {
     }
 }
 
-export const postUsuario = async (req, res, next) => {
+/* export const postUsuario = async (req, res, next) => {
     try {
         if(!req.user){
             res.status(400).json(req.user)
         }
-        res.status(200).json(req.user)
+        res.status(201).json(req.user)
     } catch (error) {
        
         next(error)
     }
-}
+} */
 
+
+export const postUsuario = async (req, res, next) => {
+    try {
+
+        let {cuil, contrasenia, rol, area} = req.body;
+        const usuario = await Usuario.findOne({ where: { cuil: cuil } });
+        
+        if (usuario) {
+            const error = new Error("El usuario ya existe");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        //Asegurar que contrasenia sea uan cadena si no es una cadena convertirla a string
+        contrasenia = String(contrasenia)
+        const contraseniaHash = createHash(contrasenia)
+        const nuevoUsuario = await Usuario.create({ cuil:cuil, contrasenia: contraseniaHash, rol:rol, area:area, necesitaCbioContrasenia: "1" });
+        
+        if(!nuevoUsuario){
+            const error = new Error("No se pudo crear el usuario");            
+            error.statusCode = 400;
+            throw error;
+        }
+
+        res.status(201).json(nuevoUsuario)
+
+    } catch (error) {
+        
+        next(error)
+    }
+}
 
 
 export const putUsuario = async (req, res, next) => {
@@ -143,5 +175,32 @@ export const getMyUser = async (req, res, next) => {
         res.status(200).json(usuario)
     } catch (error) {
         next(error)
+    }
+}
+
+export const updateContrasenia = async (req, res, next) => {
+    try {
+        let {cuil, newContrasenia} = req.body
+
+        //Asegurar que contrasenia sea uan cadena si no es una cadena convertirla a string
+        newContrasenia = String(newContrasenia)
+        const contraseniaHash = createHash(newContrasenia)
+
+        //Actualizar el usuario
+
+        const updateUsuario = await Usuario.update(
+            {contrasenia: contraseniaHash, necesitaCbioContrasenia: "0"},
+            { where: { cuil: cuil } }
+        );
+
+        if(updateUsuario[0] === 0){
+            const error = new Error("No se encontraron datos para actualizar");
+            error.statusCode = 404;
+            throw error;            
+        }
+        res.status(200).json({ message: "Contrasenia actualizada correctamente" });
+
+    } catch (error) {
+        throw error 
     }
 }

@@ -26,6 +26,10 @@ const Usuario = sequelize.define("usuarios", {
     },
     area: {
         type: DataTypes.STRING(15)
+    },
+    necesitaCbioContrasenia: {
+        type: DataTypes.CHAR(1),
+        allowNull: true
     }
 },{
     timestamps: false,

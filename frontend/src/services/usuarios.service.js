@@ -79,3 +79,26 @@ export const getMyUser = async () => {
         return false
     }
 }
+
+
+export const postUser = async (user) => {
+    try {
+        
+        const response = await fetch(`${URL}/registrar`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({...user})
+        });
+        const data = await response.json();
+        if(response.status !== 201) {
+            throw new Error( data.message || "No fue posible el alta del usuario");
+        }
+        
+        return data
+    } catch (error) {
+        throw error
+    }
+}
