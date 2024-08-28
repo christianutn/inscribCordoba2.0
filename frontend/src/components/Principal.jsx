@@ -86,9 +86,16 @@ export default function Principal() {
       const res = await getMyUser();
       setUser(res);
 
+      console.log("USUARIOS: ", res)
+
       if (!res) {
         navigate('/login');
         return;
+      }
+
+      if (res.necesitaCbioContrasenia == "1") {
+        navigate('/cambiarContrasenia');
+        return
       }
 
       if (res.rol === "ADM") {

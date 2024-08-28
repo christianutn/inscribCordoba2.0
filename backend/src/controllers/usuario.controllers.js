@@ -55,6 +55,14 @@ export const postUsuario = async (req, res, next) => {
 
         let {cuil, contrasenia, rol, area} = req.body;
         const usuario = await Usuario.findOne({ where: { cuil: cuil } });
+
+        //Validar que el cuil no exista
+        const existePersona = await Persona.findOne({ where: { cuil: cuil } })
+        if (!existePersona) {
+            const error = new Error(`La persona con el cuil ${cuil} no existe.`);
+            error.statusCode = 400;
+            throw error;
+        }
         
         if (usuario) {
             const error = new Error("El usuario ya existe");
@@ -180,27 +188,30 @@ export const getMyUser = async (req, res, next) => {
 
 export const updateContrasenia = async (req, res, next) => {
     try {
-        let {cuil, newContrasenia} = req.body
+        let { nuevaContrasenia } = req.body;
+        const cuil = req.user.user.cuil;
 
-        //Asegurar que contrasenia sea uan cadena si no es una cadena convertirla a string
-        newContrasenia = String(newContrasenia)
-        const contraseniaHash = createHash(newContrasenia)
+        // Asegurar que la contraseña sea una cadena, si no es, convertirla a string
+        nuevaContrasenia = String(nuevaContrasenia);
+        const contraseniaHash = createHash(nuevaContrasenia);
 
-        //Actualizar el usuario
 
+        // Actualizar solo la contraseña del usuario
         const updateUsuario = await Usuario.update(
-            {contrasenia: contraseniaHash, necesitaCbioContrasenia: "0"},
+            { contrasenia: contraseniaHash, necesitaCbioContrasenia: 0 },
             { where: { cuil: cuil } }
         );
 
-        if(updateUsuario[0] === 0){
+        if (updateUsuario[0] === 0) {
             const error = new Error("No se encontraron datos para actualizar");
             error.statusCode = 404;
-            throw error;            
+            throw error;
         }
-        res.status(200).json({ message: "Contrasenia actualizada correctamente" });
+
+        
+        res.status(200).json({ message: "Contraseña actualizada correctamente" });
 
     } catch (error) {
-        throw error 
+        next(error);
     }
-}
+};

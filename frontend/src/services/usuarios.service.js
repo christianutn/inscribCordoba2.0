@@ -102,3 +102,24 @@ export const postUser = async (user) => {
         throw error
     }
 }
+
+export const cambiarContrasenia = async (nuevaContrasenia) => {
+    try {
+        const response = await fetch(`${URL}/contrasenia`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({nuevaContrasenia: nuevaContrasenia})
+        });
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error( data.message || "No fue posible el cambio de contraseña");
+        }
+        
+        return true
+    } catch (error) {
+        throw error
+    }
+}

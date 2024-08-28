@@ -1,5 +1,5 @@
 
-import {getUsuario, postUsuario, putUsuario, deleteUsuario, getMyUser} from "../controllers/usuario.controllers.js";
+import {getUsuario, postUsuario, putUsuario, deleteUsuario, getMyUser, updateContrasenia} from "../controllers/usuario.controllers.js";
 import {Router} from "express";
 import passport from "passport";
 import autorizar from "../utils/autorizar.js"
@@ -16,6 +16,8 @@ usuarioRouter.put("/", passport.authenticate('jwt', {session: false}), autorizar
 usuarioRouter.delete("/:cuil", deleteUsuario)
 
 usuarioRouter.get("/myuser", passport.authenticate('jwt', {session:false}), getMyUser)
+
+usuarioRouter.put("/contrasenia", passport.authenticate('jwt', {session:false}), updateContrasenia)
 
 
 
