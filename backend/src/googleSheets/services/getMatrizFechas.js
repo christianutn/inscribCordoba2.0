@@ -2,7 +2,7 @@ import { getDataRange } from "../utils/getDataRange.js";
 import authorize from "../utils/getAuth.js";
 import { google } from 'googleapis';
 
-export const getMatrizFechas = async (fecha) => {
+export const getMatrizFechas = async () => {
     try {
 
         //Obtiene autorización
@@ -100,5 +100,5 @@ export const getMatrizFechas = async (fecha) => {
     }
 }
 
-const res = await getMatrizFechas();
+
 

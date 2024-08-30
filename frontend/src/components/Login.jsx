@@ -63,7 +63,7 @@ const Login = () => {
         if (mensajeDeError) {
             timer = setTimeout(() => {
                 setMensajeDeError(null); // Oculta el mensaje después 1.2 segundos
-            }, 1200); // cantidad de segundos 
+            }, 3000); // cantidad de segundos 
         }
         return () => clearTimeout(timer); // Limpia el temporizador si el componente se desmonta
     }, [mensajeDeError]);

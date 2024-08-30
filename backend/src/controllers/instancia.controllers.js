@@ -9,6 +9,7 @@ import sequelize from "../config/database.js";
 import TutoresXInstancia from "../models/tutorXInstancia.models.js";
 import { agregarFilasGoogleSheets } from "../googleSheets/services/agregarFilasGoogleSheets.js";
 import { esInstanciaExistente } from "../googleSheets/services/esInstanciaExistente.js";
+import { getMatrizFechas } from "../googleSheets/services/getMatrizFechas.js";
 
 
 export const getInstancias = async (req, res, next) => {
@@ -55,6 +56,9 @@ export const postInstancia = async (req, res, next) => {
     try {
         const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, estado, cohortes, tutores } = req.body;
 
+        //Buscamos matriz de fechas para verificar si una fecha cumple o no con las reglas de negocio
+        const matrizFechas = await getMatrizFechas();
+
         // Buscamos el curso una vez y reutilizamos el resultado
         const dataCurso = await Curso.findOne({
             where: {
@@ -84,7 +88,7 @@ export const postInstancia = async (req, res, next) => {
                 throw error;
             }
 
-            // Verificamos si la instancia ya existe
+            // Verificamos si la instancia ya existe en la BD
             const instanciaExistenteBD = await instanciaModel.findOne({
                 where: {
                     curso: dataCurso.cod,
@@ -97,10 +101,25 @@ export const postInstancia = async (req, res, next) => {
                 throw error;
             }
 
+            //Verificamos si la fecha existe en el excel
             //Formato de fecha debe ser yyyy-mm-dd
-           
+
             const instanciaExistente = await esInstanciaExistente(dataCurso.cod, fecha_inicio_curso);
 
+            //Verificamos si la fecha_inicio_curso es posible y cumple con todas las reglas de restricciones
+
+            //El formato de las fechas es yyyy-mm-dd
+
+            let fechaArray = fecha_inicio_curso.split("-")
+            
+            let mes = parseInt(fechaArray[1], 10) -1;
+            let dia = parseInt(fechaArray[2], 10) -1;
+
+            if (!matrizFechas[mes][dia].esPosible) {
+                const error = new Error("La fecha no es posible");
+                error.statusCode = 400;
+                throw error;
+            }
 
 
             if (instanciaExistente) {
@@ -108,6 +127,8 @@ export const postInstancia = async (req, res, next) => {
                 error.statusCode = 400;
                 throw error;
             }
+
+
 
             // Creamos la instancia
             const instancia = await instanciaModel.create({
@@ -142,7 +163,7 @@ export const postInstancia = async (req, res, next) => {
                     fecha_inicio_curso
                 }, { transaction: t });
 
-               
+
             }
         }
         agregarFilasGoogleSheets({ ...req.body, codCurso: dataCurso.cod });

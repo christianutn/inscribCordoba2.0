@@ -234,21 +234,13 @@ export default function Formulario() {
       }
       cohortes.forEach((cohorte) => {
         if (!validarFecha(cohorte.fechaInscripcionDesde) || !validarFecha(cohorte.fechaInscripcionHasta) || !validarFecha(cohorte.fechaCursadaDesde) || !validarFecha(cohorte.fechaCursadaHasta)) {
-          throw new Error("Debe completar las fechas");
+          throw new Error("Todos los campos tipo fecha deben estar completos");
         }
 
-        if (validarOrdenFechas([cohorte.fechaInscripcionDesde, cohorte.fechaInscripcionHasta, cohorte.fechaCursadaDesde, cohorte.fechaCursadaHasta]) === false) {
-          throw new Error("Fechas de cohorte no válidas. Las fechas no son coherentes");
-        }
-
+        validarOrdenFechas([cohorte.fechaInscripcionDesde, cohorte.fechaInscripcionHasta, cohorte.fechaCursadaDesde, cohorte.fechaCursadaHasta]);
       })
 
       const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes });
-
-
-      console.log("Instancia creada:", newInstancia);
-
-
 
       limpiarFormulario();
       window.scrollTo({ top: 0, behavior: 'smooth' });
