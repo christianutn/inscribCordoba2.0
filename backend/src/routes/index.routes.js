@@ -15,6 +15,7 @@ import loginRouter from "./login.routes.js";
 import tutorRouter from "./tutor.routes.js";
 import tipoRolTutor from "./tipoRolTutor.routes.js";
 import googleSheetsRouter from "./googeSheets.routes.js";
+import restriccionesFechasInicioCursada from "./restriccionesFechasInicioCursada.routes.js";
 
 
 
@@ -42,4 +43,7 @@ router.use("/login", loginRouter)
 router.use("/tutores", tutorRouter)
 router.use("/tiposRolTutor", tipoRolTutor)
 router.use("/googleSheets", googleSheetsRouter)
+
+
+router.use("/restricciones", restriccionesFechasInicioCursada)
 export default router

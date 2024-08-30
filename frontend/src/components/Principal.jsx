@@ -28,6 +28,8 @@ import AltaBajaModificion from './AltaBajaModificion.jsx';
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Button from "./UIElements/Button.jsx";
 import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
+import GavelIcon from '@mui/icons-material/Gavel';
+import RestriccionesFechasInicioCursada from "../components/RestriccionesFechasInicioCursada.jsx";
 
 const drawerWidth = 240;
 
@@ -99,7 +101,7 @@ export default function Principal() {
       }
 
       if (res.rol === "ADM") {
-        setOpcionesAMostrar([["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"]])
+        setOpcionesAMostrar([["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"], ["Restricciones de Fechas de inicio de Cursada", "RestriccionesFechasInicioCursada"]])
       } else if (res.rol === "REF") {
         setOpcionesAMostrar([["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"]])
       }
@@ -137,6 +139,8 @@ export default function Principal() {
         return <Cronograma />
       case "AltaBajaModificion":
         return <AltaBajaModificion />
+      case "RestriccionesFechasInicioCursada":
+        return <RestriccionesFechasInicioCursada />
       default:
         return <h1>Bienvenido</h1> // Mensaje por defecto o componente
     }
@@ -192,7 +196,8 @@ export default function Principal() {
                   {index === 0 && <EditCalendarIcon />}
                   {index === 1 && <CalendarMonthIcon />}
                   {index === 2 && <ClassIcon />}
-                  {index === 3 && <UpdateIcon />}
+                  {index === 3 && <GavelIcon />}
+              
                 </ListItemIcon>
                 <ListItemText primary={item[0]} />
               </ListItemButton>
