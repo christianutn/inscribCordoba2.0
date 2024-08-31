@@ -3,7 +3,7 @@ import authorize from "../utils/getAuth.js";
 import { google } from 'googleapis';
 import ControlDataFechaInicioCursada from "../../models/controlDataFechaInicioCursada.models.js";
 
-export const getMatrizFechas = async () => {
+export const getMatrizFechas = async (aplicaRestricciones) => {
     try {
         const auth = authorize;
         const googleSheets = google.sheets({ version: 'v4', auth });
@@ -50,9 +50,15 @@ export const getMatrizFechas = async () => {
         marcarNoPosibles(matrizFechas, mesActual, diaActual);
 
         // Verifica límites y bloqueos
-        verificarLimites(matrizFechas, mesActual, controlData);
 
-        console.log("Matriz de fechas:", matrizFechas);
+        if (aplicaRestricciones) {
+            verificarLimites(matrizFechas, mesActual, controlData);
+        }
+
+
+
+
+
 
         return matrizFechas;
 

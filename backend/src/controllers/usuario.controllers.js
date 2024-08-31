@@ -37,18 +37,6 @@ export const getUsuario = async (req, res, next) => {
     }
 }
 
-/* export const postUsuario = async (req, res, next) => {
-    try {
-        if(!req.user){
-            res.status(400).json(req.user)
-        }
-        res.status(201).json(req.user)
-    } catch (error) {
-       
-        next(error)
-    }
-} */
-
 
 export const postUsuario = async (req, res, next) => {
     try {
@@ -95,7 +83,7 @@ export const putUsuario = async (req, res, next) => {
     try {
        
 
-        let { cuil, nombre, apellido, mail, celular, newCuil, area, rol } = req.body;
+        let { cuil, nombre, apellido, mail, celular, newCuil, area, rol, esExcepcionParaFechas } = req.body;
 
         // Normalizar valores de entrada
         if (celular === "Sin celular" || celular === "") {
@@ -120,6 +108,20 @@ export const putUsuario = async (req, res, next) => {
             throw error;
         }
 
+        
+        if(!esExcepcionParaFechas){
+            const error = new Error("El referente es requerido");
+            error.statusCode = 400;
+            throw error;
+        } else if(esExcepcionParaFechas !== "Si" && esExcepcionParaFechas !== "No"){
+            const error = new Error("El referente debe ser Si o No");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        esExcepcionParaFechas = esExcepcionParaFechas.trim()
+        esExcepcionParaFechas = esExcepcionParaFechas === "Si" ? 1 : esExcepcionParaFechas === "No" ? 0 : null;
+
        
 
         // Limpieza de datos
@@ -128,7 +130,7 @@ export const putUsuario = async (req, res, next) => {
         nombre = tratarNombres(nombre.trim());
         apellido = tratarNombres(apellido.trim());
         mail = mail.trim();
-        area = area.trim();
+       
         celular = celular ? celular.trim() : null;
 
         // Actualización de Persona
@@ -139,7 +141,7 @@ export const putUsuario = async (req, res, next) => {
 
         // Actualización de Tutor
         const updateUsuario = await Usuario.update(
-            { cuil: newCuil || cuil, area: area, rol: rol },
+            { cuil: newCuil || cuil, area: area, rol: rol, esExcepcionParaFechas: esExcepcionParaFechas },
             { where: { cuil: cuil }, transaction: t } // Aseguramos que se incluya la transacción
         );
 

@@ -52,130 +52,99 @@ export const getInstancias = async (req, res, next) => {
 }
 
 export const postInstancia = async (req, res, next) => {
-    const t = await sequelize.transaction(); // Declaramos transacción
+    const t = await sequelize.transaction(); // Inicia una transacción
+
     try {
-        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, estado, cohortes, tutores } = req.body;
+        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, cohortes, tutores } = req.body;
+        const aplicaRestricciones = req.user.user.esExcepcionParaFechas == 0;
 
-        //Buscamos matriz de fechas para verificar si una fecha cumple o no con las reglas de negocio
-        const matrizFechas = await getMatrizFechas();
+        // Obtener matriz de fechas para verificar las reglas de negocio
+        const matrizFechas = await getMatrizFechas(aplicaRestricciones);
 
-        // Buscamos el curso una vez y reutilizamos el resultado
-        const dataCurso = await Curso.findOne({
-            where: {
-                nombre: curso
-            }
-        });
+        // Obtener el curso basado en el nombre proporcionado
+        const dataCurso = await Curso.findOne({ where: { nombre: curso } });
 
         if (!dataCurso) {
-            const error = new Error("No existe el curso");
-            error.statusCode = 404;
-            throw error;
+            throw crearError(404, "No existe el curso");
         }
 
-        // Procesamos cada cohorte
-        for (let index = 0; index < cohortes.length; index++) {
-            let c = cohortes[index];
-            let fecha_inicio_inscripcion = c.fechaInscripcionDesde;
-            let fecha_fin_inscripcion = c.fechaInscripcionHasta;
-            let fecha_inicio_curso = c.fechaCursadaDesde;
-            let fecha_fin_curso = c.fechaCursadaHasta;
-            let estado = c.estado || "PEND";
+        // Procesar cada cohorte
+        for (const cohorte of cohortes) {
+            const { fechaInscripcionDesde, fechaInscripcionHasta, fechaCursadaDesde, fechaCursadaHasta, estado = "PEND" } = cohorte;
 
-            // Validación de formato de fecha
-            if (!validarFormatoFecha(fecha_inicio_inscripcion) || !validarFormatoFecha(fecha_fin_inscripcion) || !validarFormatoFecha(fecha_inicio_curso) || !validarFormatoFecha(fecha_fin_curso)) {
-                const error = new Error("Formato de fecha inválido");
-                error.statusCode = 400;
-                throw error;
+            // Validar el formato de las fechas
+            if (![fechaInscripcionDesde, fechaInscripcionHasta, fechaCursadaDesde, fechaCursadaHasta].every(validarFormatoFecha)) {
+                throw crearError(400, "Formato de fecha inválido");
             }
 
-            // Verificamos si la instancia ya existe en la BD
+            // Verificar si la instancia ya existe en la BD
             const instanciaExistenteBD = await instanciaModel.findOne({
                 where: {
                     curso: dataCurso.cod,
-                    fecha_inicio_curso
+                    fecha_inicio_curso: fechaCursadaDesde,
                 }
             });
+
             if (instanciaExistenteBD) {
-                const error = new Error(`La instancia para el curso ${curso} con fecha inicio de curso ${fecha_inicio_curso} ya existe en nuestra base de datos`);
-                error.statusCode = 400;
-                throw error;
+                throw crearError(400, `La instancia para el curso ${curso} con fecha de inicio ${fechaCursadaDesde} ya existe en nuestra base de datos`);
             }
 
-            //Verificamos si la fecha existe en el excel
-            //Formato de fecha debe ser yyyy-mm-dd
+            // Verificar si la fecha de inicio del curso cumple con las reglas de restricciones
+            const [year, month, day] = fechaCursadaDesde.split("-").map(Number);
+            const mes = month - 1;
+            const dia = day - 1;
 
-            const instanciaExistente = await esInstanciaExistente(dataCurso.cod, fecha_inicio_curso);
-
-            //Verificamos si la fecha_inicio_curso es posible y cumple con todas las reglas de restricciones
-
-            //El formato de las fechas es yyyy-mm-dd
-
-            let fechaArray = fecha_inicio_curso.split("-")
-            
-            let mes = parseInt(fechaArray[1], 10) -1;
-            let dia = parseInt(fechaArray[2], 10) -1;
-
-            if (!matrizFechas[mes][dia].esPosible) {
-                const error = new Error("La fecha no es posible");
-                error.statusCode = 400;
-                throw error;
+            if (!matrizFechas[mes][dia]?.esPosible) {
+                throw crearError(400, "La fecha no es posible");
             }
 
-
-            if (instanciaExistente) {
-                const error = new Error(`La instancia para el curso ${curso} con fecha inicio de curso ${fecha_inicio_curso} ya existe en nuestro cronograma`);
-                error.statusCode = 400;
-                throw error;
-            }
-
-
-
-            // Creamos la instancia
+            // Crear la instancia
             const instancia = await instanciaModel.create({
                 curso: dataCurso.cod,
-                fecha_inicio_inscripcion: fecha_inicio_inscripcion,
-                fecha_fin_inscripcion: fecha_fin_inscripcion,
-                fecha_inicio_curso: fecha_inicio_curso,
-                fecha_fin_curso: fecha_fin_curso,
+                fecha_inicio_inscripcion: fechaInscripcionDesde,
+                fecha_fin_inscripcion: fechaInscripcionHasta,
+                fecha_inicio_curso: fechaCursadaDesde,
+                fecha_fin_curso: fechaCursadaHasta,
                 estado: estado
             }, { transaction: t });
 
-
-
-            // Procesamos cada tutor asociado a la instancia
-            for (let j = 0; j < tutores.length; j++) {
-                let existeTutor = await Persona.findOne({
-                    where: {
-                        cuil: tutores[j].cuil
-                    }
-                });
+            // Procesar cada tutor asociado a la instancia
+            for (const tutor of tutores) {
+                const existeTutor = await Persona.findOne({ where: { cuil: tutor.cuil } });
 
                 if (!existeTutor) {
-                    const error = new Error("El tutor no existe");
-                    error.statusCode = 404;
-                    throw error;
+                    throw crearError(404, "El tutor no existe");
                 }
 
-                // Creamos la relación de tutor e instancia
-                let tutorXInstancia = await TutoresXInstancia.create({
-                    cuil: tutores[j].cuil,
+                // Crear la relación de tutor e instancia
+                await TutoresXInstancia.create({
+                    cuil: tutor.cuil,
                     curso: dataCurso.cod,
-                    fecha_inicio_curso
+                    fecha_inicio_curso: fechaCursadaDesde
                 }, { transaction: t });
-
-
             }
         }
+
+        // Agregar filas en Google Sheets
         agregarFilasGoogleSheets({ ...req.body, codCurso: dataCurso.cod });
-        // Confirmamos transacción
+
+        // Confirmar transacción
         await t.commit();
         res.status(201).json({ message: "Instancias y tutores creados exitosamente" });
+
     } catch (error) {
-        // Revertimos transacción
+        // Revertir transacción en caso de error
         await t.rollback();
         next(error);
     }
 };
+
+// Función auxiliar para crear errores con un código de estado específico
+function crearError(statusCode, message) {
+    const error = new Error(message);
+    error.statusCode = statusCode;
+    return error;
+}
 
 
 

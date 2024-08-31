@@ -98,7 +98,8 @@ export const updateRow = async (row, option) => {
                     celular: row.celular,
                     newCuil: row.cuil,
                     area: row.codArea,
-                    rol: row.codRol
+                    rol: row.codRol,
+                    esExcepcionParaFechas: row.esExcepcionParaFechas
 
                 })
                 break

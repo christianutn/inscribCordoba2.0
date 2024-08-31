@@ -4,7 +4,6 @@ import TextField from './UIElements/TextField';
 import { getMyUser } from "../services/usuarios.service.js";
 import Titulo from './fonts/TituloPrincipal';
 import { Divider } from "@mui/material";
-import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Button from "./UIElements/Button.jsx";
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -154,11 +153,6 @@ const RestriccionesFechasInicioCursada = () => {
                         getValue={(value) => setSelectedMes(value)} ></Autocomplete>
 
 
-                    </div>
-
-
-                    <div className="volver">
-                        <BotonCircular icon={"volver"} onClick={() => navigate("/principal")}></BotonCircular>
                     </div>
 
                     <div className="enviar">

@@ -30,6 +30,10 @@ const Usuario = sequelize.define("usuarios", {
     necesitaCbioContrasenia: {
         type: DataTypes.CHAR(1),
         allowNull: true
+    },
+    esExcepcionParaFechas: {
+        type: DataTypes.CHAR(1),
+        allowNull: true
     }
 },{
     timestamps: false,

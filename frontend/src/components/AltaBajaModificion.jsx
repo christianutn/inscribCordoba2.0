@@ -331,6 +331,21 @@ const AltaBajaModificion = () => {
                                 />
                             ),
                         },
+                        {
+                            field: 'esExcepcionParaFechas',
+                            headerName: '¿Es excepción para fechas?',
+                            width: 180,
+                            editable: true,
+                            renderEditCell: (params) => (
+                                <SelectEditInputCell
+                                    id={params.id}
+                                    value={params.value}
+                                    field={params.field}
+                                    options={[{ value: "Si", label: "Si" }, { value: "No", label: "No" }]}
+                                    api={params.api}
+                                />
+                            ),
+                        }
 
 
                     ],
@@ -342,7 +357,8 @@ const AltaBajaModificion = () => {
                         mail: u.detalle_persona.mail,
                         celular: u.detalle_persona ? u.detalle_persona.celular : 'Sin celular',
                         area: u.area ? u.detalle_area.nombre : 'Sin área',
-                        rol: u.detalle_rol.nombre
+                        rol: u.detalle_rol.nombre,
+                        esExcepcionParaFechas: u.esExcepcionParaFechas == 1 ? 'Si' : 'No',
                     }))
                 },
                 // Configuraciones adicionales para otras entidades
@@ -494,8 +510,7 @@ const AltaBajaModificion = () => {
             }
         } else {
             try {
-                console.log("PARAMS:", params);
-                console.log("Ministerios: ", ministerios)
+              
                 setCargando(true);
 
                 const updatedRow = {

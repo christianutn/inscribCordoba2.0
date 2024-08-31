@@ -24,7 +24,8 @@ export const getDatosCronograma = async (req, res, next) => {
 
 export const getFechasParaValidar = async (req, res, next) => {
     try {
-        const matrizFecha = await getMatrizFechas();
+        const aplicaRestricciones = req.user.user.esExcepcionParaFechas == 0;
+        const matrizFecha = await getMatrizFechas(aplicaRestricciones);
         res.status(200).json(matrizFecha)
         
     } catch (error) {
