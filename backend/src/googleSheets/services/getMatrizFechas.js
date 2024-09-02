@@ -89,15 +89,15 @@ function verificarLimites(matrizFechas, mesActual, controlData) {
             totalCursosMensual += matrizFechas[i][j].cantCursos;
             totalCuposMensual += matrizFechas[i][j].cantCupo;
 
-            if (totalCursosMensual > controlData.maximoCursosXMes ||
-                totalCuposMensual > controlData.maximoCuposXMes ||
+            if (totalCursosMensual >= controlData.maximoCursosXMes ||
+                totalCuposMensual >= controlData.maximoCuposXMes ||
                 controlData.mesBloqueado == i + 1) {
                 matrizFechas[i].forEach(dia => dia.esPosible = false);
                 break;
             }
 
-            if (matrizFechas[i][j].cantCupo > controlData.maximoCuposXDia ||
-                matrizFechas[i][j].cantCursos > controlData.maximoCursosXDia) {
+            if (matrizFechas[i][j].cantCupo >= controlData.maximoCuposXDia ||
+                matrizFechas[i][j].cantCursos >= controlData.maximoCursosXDia) {
                 matrizFechas[i][j].esPosible = false;
             }
         }

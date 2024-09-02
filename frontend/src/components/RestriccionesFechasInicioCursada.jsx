@@ -125,7 +125,7 @@ const RestriccionesFechasInicioCursada = () => {
             {
                 success &&
                 <Alert variant="filled" severity="success" sx={{ width: '100%' }} >
-                    Formulario enviado exitosamente
+                    Restricciones actualizadas con éxito
                 </Alert>
             }
             {
