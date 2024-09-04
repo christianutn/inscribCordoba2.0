@@ -1,0 +1,47 @@
+.container-alta-persona {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "titulo titulo titulo"
+        "divider divider divider"
+        "cuil apellido nombre"
+        "mail celular ."
+        "volver volver volver"
+        "enviar enviar enviar";
+    grid-gap: 20px;
+    margin-left: 50px;
+    margin-right: 50px;
+
+    .titulo {
+        grid-area: titulo;
+    }
+
+    .divider {
+        grid-area: divider;
+    }
+
+    .apellido {
+        grid-area: apellido;
+    }
+
+    .nombre {
+        grid-area: nombre;
+    }
+
+    .volver {
+        grid-area: volver;
+    }
+
+    .enviar {
+        grid-area: enviar;
+    }
+
+    .mail {
+        grid-area: mail;
+    }
+
+    .celular {
+        grid-area: celular;
+    }
+}

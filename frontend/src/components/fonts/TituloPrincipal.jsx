@@ -1,18 +1,17 @@
 import { Typography } from "@mui/material";
 
-const TituloPrincipal = ({texto}) => {
+
+const TituloPrincipal = ({ texto, fontWeight }) => {
     return (
-        <Typography
+        <Typography 
             className="titulo-principal"
             variant="h3"
             color="text.primary"
-            sx={{
-                fontFamily: 'Roboto Condensed, sans-serif',
-                fontWeight: 'bold'
-            }}
+            style={{ fontWeight: fontWeight || 'bold' }} // Aplicar fontWeight dinámicamente
         >
             {texto}
         </Typography>
     );
 }
-export default TituloPrincipal
+
+export default TituloPrincipal;

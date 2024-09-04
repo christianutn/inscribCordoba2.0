@@ -1,30 +1,31 @@
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import { forwardRef } from 'react';
 
-const Input = forwardRef(({ label, getValue }, ref) => {
+
+const Input = ({ label, getValue, type, value, width }) => {
   return (
     <Box
       sx={{
-        '& .MuiTextField-root': { m: 1, width: '25ch' },
+        '& .MuiTextField-root': { m: 0, width: "100%" },
       }}
       noValidate
       autoComplete="off"
     >
       <div>
         <TextField
+          className="custom-textfield"
           id="outlined-number"
           label={label}
-          type="number"
+          type={type || "number"}
           InputLabelProps={{
             shrink: true,
           }}
           onChange={(event) => getValue(event.target.value)}
-          ref={ref}
+          value={value}
         />
       </div>
     </Box>
   );
-});
+};
 
 export default Input;

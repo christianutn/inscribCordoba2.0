@@ -1,0 +1,28 @@
+.container-restricciones {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .inputs-limites {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+
+        // Asegúrate de que los elementos hijos se dividan el espacio disponible
+        > * {
+            flex: 1; // Cada hijo tomará el mismo ancho
+        }
+    }
+}
+
+// Media query para pantallas pequeñas
+@media (max-width: 600px) { // Puedes ajustar el ancho según tus necesidades
+    .container-restricciones {
+        .inputs-limites {
+            flex-direction: column; // Cambia la dirección de los elementos a columna
+            gap: 20px; // Ajusta el espacio entre los elementos si es necesario
+        }
+
+        
+    }
+}

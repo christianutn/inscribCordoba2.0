@@ -1,0 +1,47 @@
+.container-alta-tutor {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "titulo titulo"
+        "divider divider"
+        "ministerio area"
+        "cuil referente"
+        "volver volver"
+        "enviar enviar";
+    grid-gap: 20px;
+    margin-left: 50px;
+    margin-right: 50px;
+
+    .titulo {
+        grid-area: titulo;
+    }
+
+    .divider {
+        grid-area: divider;
+    }
+
+    .ministerio {
+        grid-area: ministerio;
+    }
+
+    .area {
+        grid-area: area;
+    }
+
+    .cuil {
+        grid-area: cuil;
+    }
+
+    .referente {
+        grid-area: referente;
+    }
+
+    .volver {
+        grid-area: volver;
+    }
+
+    .enviar {
+        grid-area: enviar;
+    }
+}

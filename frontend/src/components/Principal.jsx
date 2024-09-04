@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -18,11 +19,16 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import Formulario from './Formulario';
-import { DataProviderTutores } from "../components/context/Formulario.context.jsx"
 import ClassIcon from '@mui/icons-material/Class';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-
-import Cursos from "./Cursos.jsx"
+import Cronograma from "./Cronograma.jsx"
+import { getMyUser } from "../services/usuarios.service.js";
+import AltaBajaModificion from './AltaBajaModificion.jsx';
+import Button from "./UIElements/Button.jsx";
+import GavelIcon from '@mui/icons-material/Gavel';
+import RestriccionesFechasInicioCursada from "../components/RestriccionesFechasInicioCursada.jsx";
+import Home from "./Home.jsx";
+import HouseIcon from '@mui/icons-material/House';
 
 const drawerWidth = 240;
 
@@ -71,9 +77,46 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 export default function Principal() {
+
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+
+      const res = await getMyUser();
+      setUser(res);
+
+      console.log("USUARIOS: ", res)
+
+      if (!res) {
+        navigate('/login');
+        return;
+      }
+
+      if (res.necesitaCbioContrasenia == "1") {
+        navigate('/cambiarContrasenia');
+        return
+      }
+
+      if (res.rol === "ADM") {
+        setOpcionesAMostrar([["Home", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"], ["Restricciones de Fechas de inicio de Cursada", "RestriccionesFechasInicioCursada"]])
+      } else if (res.rol === "REF") {
+        setOpcionesAMostrar([["Home", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"]])
+      }
+
+
+    }
+
+
+    )();
+  }, [navigate]); // Asegúrate de incluir `navigate` en las dependencias
+
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [opcionSeleccionada, setOpcionSeleccionada] = useState('');
+  const [opcionesAMostrar, setOpcionesAMostrar] = useState([]);
+
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -90,35 +133,63 @@ export default function Principal() {
   const mostrarOpcion = () => {
     switch (opcionSeleccionada) {
       case "Formulario":
-        return <DataProviderTutores><Formulario /></DataProviderTutores>; // Renderiza tu componente específico
+        return <Formulario />
       case "Calendario":
-        return <h1>Calendario</h1> // Puedes reemplazar esto con tu componente real
-      case "Cursos":
-        return <Cursos/>
+        return <Cronograma />
+      case "AltaBajaModificion":
+        return <AltaBajaModificion />
+      case "RestriccionesFechasInicioCursada":
+        return <RestriccionesFechasInicioCursada />
+      case "Home":
+        return <Home />
       default:
-        return <h1>Bienvenido</h1> // Mensaje por defecto o componente
+        return <Home />
     }
   };
 
   return (
+
     <Box sx={{ display: 'flex' }}>
+
       <CssBaseline />
       <AppBar position="fixed" open={open}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{ mr: 2, ...(open && { display: 'none' }) }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{
+                fontSize: '1.25rem',
+              }}
+            >
+              Menú
+            </Typography>
+          </div>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{
+              fontSize: '2rem',
+              flexGrow: 1,
+              textAlign: 'center',
+            }}
           >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
             InscribCórdoba
           </Typography>
         </Toolbar>
       </AppBar>
+
       <Drawer
         sx={{
           width: drawerWidth,
@@ -139,25 +210,42 @@ export default function Principal() {
         </DrawerHeader>
         <Divider />
         <List>
-          {[["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["Cursos", "Cursos"]].map((item, index) => (
+          {opcionesAMostrar.map((item, index) => (
             <ListItem key={index} disablePadding>
               <ListItemButton onClick={() => handleListItemClick(item[1])}>
                 <ListItemIcon>
-                  {index === 0 && <EditCalendarIcon />}
-                  {index === 1 && <CalendarMonthIcon />}
-                  {index === 2 && <ClassIcon />}
+                  {index === 0 && <HouseIcon />}
+                  {index === 1 && <EditCalendarIcon />}
+                  {index === 2 && <CalendarMonthIcon />}
+                  {index === 3 && <ClassIcon />}
+                  {index === 4 && <GavelIcon />}
                 </ListItemIcon>
                 <ListItemText primary={item[0]} />
               </ListItemButton>
             </ListItem>
+
           ))}
         </List>
         <Divider />
-        
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' }}>
+          {console.log(user)}
+
+          <Button mensaje={"Cerrar Sesión"}
+            hanldeOnClick={() => {
+              // Elimina cualquier token o información de usuario almacenada (localStorage, sessionStorage, etc.)
+              localStorage.removeItem('jwt');  // o sessionStorage.removeItem('token');
+
+              // Redirigir al usuario a la página de inicio de sesión
+              navigate('/login');
+            }}></Button>
+        </div>
+
       </Drawer>
-      <Main open={open} style={{marginTop: '3%'}}>
+      <Main open={open} style={{ marginTop: '3%' }}>
         {mostrarOpcion()}
       </Main>
     </Box>
+
+
   );
 }

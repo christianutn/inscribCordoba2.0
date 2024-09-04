@@ -1,0 +1,13 @@
+.container-fecha {
+
+
+    .custom-textfield-fecha {
+    
+        @media (max-width: 500px) {
+            width: 100%;
+            .MuiInputLabel-root {
+                font-size: 8px !important; /* Aumenta la especificidad y fuerza la aplicación con !important */
+            }
+        }
+    }
+}

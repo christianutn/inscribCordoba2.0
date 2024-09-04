@@ -1,53 +1,263 @@
-import Autorizador from './CardAutorizador';
-import CardInfo from './CardInfo';
-import CardFecha from './CardFecha';
-import Tutores from "./CardTutores";
 import Titulo from './fonts/TituloPrincipal';
 import Autocomplete from './UIElements/Autocomplete';
 import TextField from './UIElements/TextField';
-import { useState, useEffect, useContext } from 'react';
-import { useForm } from "react-hook-form";
+import { useState, useEffect } from 'react';
 import Button from "./UIElements/Button";
 import { getMinisterios } from "../services/ministerios.service.js";
+import { getMediosInscripcion } from "../services/mediosInscripcion.service.js";
+import { getPlataformasDictado } from "../services/plataformasDictado.service.js";
+import { getTiposCapacitacion } from "../services/tiposCapacitacion.service.js";
+import { getTutores } from "../services/tutores.service.js";
+import { getMyUser } from "../services/usuarios.service.js";
 import Alert from '@mui/material/Alert';
-import { DataContextTutores } from "../components/context/Formulario.context.jsx";
-import BusquedaTutores from './BusquedaTutores.jsx';
+import Select from '@mui/material/Select';
+import { DataGrid, useGridApiContext } from '@mui/x-data-grid';
+import TutoresSeleccionados from './TutoresSeleccionados.jsx';
+import Cohortes from "./Cohortes.jsx";
+import validarFecha from '../services/validarFechas.js';
+import { postInstancias } from "../services/instancias.service.js";
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
+import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
+import { validarOrdenFechas } from "../services/validarOrdenFechas.js";
+import { useNavigate } from 'react-router-dom';
+
+
 
 export default function Formulario() {
-  // Variables de contexto
-  const { tutores, mostrar } = useContext(DataContextTutores);
 
-  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
+  const navigate = useNavigate();
 
   const [ministerios, setMinisterios] = useState([]);
-
   const [areas, setAreas] = useState([]);
-
   const [cursos, setCursos] = useState([]);
-
+  const [mediosInscripcion, setMediosInscripciones] = useState([]);
+  const [plataformasDictado, setPlataformasDictado] = useState([]);
+  const [tiposCapacitaciones, setTiposCapacitaciones] = useState([]);
+  const [tutores, setTutores] = useState([]);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [cargando, setCargando] = useState(false);
 
-  // Logica relacionada al componente de Búsqueda de tutores
-  const [abrirBusqTutores, setBusqTutores] = useState(false);
+  // useState del formuario
 
-  const handleBusqTutores = () => {
-    setBusqTutores(true);
+  const [selectMinisterio, setSelectMinisterio] = useState("");
+  const [selectArea, setSelectArea] = useState("");
+  const [selectCurso, setSelectCurso] = useState("");
+  const [selectMedioInscripcion, setSelectMedioInscripcion] = useState("");
+  const [selectPlataformaDictado, setSelectPlataformaDictado] = useState("");
+  const [selectTipoCapacitacion, setSelectTipoCapacitacion] = useState("");
+  const [cupo, setCupo] = useState("");
+  const [horas, setHoras] = useState("");
+  const [cohortes, setCohortes] = useState([]);
+
+
+  // Data grid de tutores
+  const [rowSelectionModel, setRowSelectionModel] = useState([]);
+  const [tutoresSeleccionados, setTutoresSeleccionados] = useState([]);
+
+  // Función para comprobar si una fila está seleccionada
+  const isRowSelected = (id) => rowSelectionModel.includes(id);
+
+  function SelectEditInputCell(props) {
+    const { id, value, field } = props;
+    const apiRef = useGridApiContext();
+
+    const handleChangeSelect = async (event) => {
+      const newValue = event.target.value;
+      await apiRef.current.setEditCellValue({ id, field, value: newValue });
+      apiRef.current.stopCellEditMode({ id, field });
+
+      setTutores((prevTutores) =>
+        prevTutores.map((tutor) =>
+          tutor.cuil === id ? { ...tutor, rol: newValue } : tutor
+        )
+      );
+    };
+
+    return (
+      <Select
+        value={value}
+        onChange={handleChangeSelect}
+        size="small"
+        sx={{ height: 1 }}
+        native
+        autoFocus
+        disabled={isRowSelected(id)} // Deshabilitar si la fila está seleccionada
+      >
+        <option>Profesor con permiso de edición</option>
+        <option>Profesor sin permiso de edición</option>
+      </Select>
+    );
   }
+
+  const renderSelectEditInputCell = (params) => {
+    return <SelectEditInputCell {...params} />;
+  };
+
+  const generarDatosTutores = () => {
+
+    const data = tutores.map((tutor) => ({
+      id: tutor.cuil,
+      cuil: tutor.cuil,
+      nombre: tutor.detalle_persona.nombre,
+      apellido: tutor.detalle_persona.apellido,
+      mail: tutor.detalle_persona.mail,
+      rol: tutor.rol || 'Profesor sin permiso de edición', // Añadir rol si no existe
+    }));
+    return data;
+  };
+
+  const rows = generarDatosTutores()
+
+  const columns = [
+    { field: 'cuil', headerName: 'Cuil', flex: 1 },
+    { field: 'nombre', headerName: 'Nombre', flex: 1 },
+    { field: 'apellido', headerName: 'Apellido', flex: 1 },
+    { field: 'mail', headerName: 'Mail', flex: 1 },
+    {
+      field: 'rol',
+      headerName: 'Rol del tutor',
+      renderEditCell: renderSelectEditInputCell,
+      editable: true,
+      flex: 1
+    }
+  ];
 
   useEffect(() => {
     (async () => {
       try {
+
+        const user = await getMyUser();
+
+
+        if (!user.cuil) {
+          navigate("/login");
+          return
+        }
+
         const listaMinisterios = await getMinisterios();
         setMinisterios(listaMinisterios);
 
+        const listaMediosInscripciones = await getMediosInscripcion();
+        setMediosInscripciones(listaMediosInscripciones);
+
+        const listaPlataformasDictados = await getPlataformasDictado();
+        setPlataformasDictado(listaPlataformasDictados);
+
+        const listaTiposCapacitacion = await getTiposCapacitacion();
+        setTiposCapacitaciones(listaTiposCapacitacion);
+
+        const listaTutores = await getTutores();
+        setTutores(listaTutores);
+
       } catch (error) {
-        setError(true);
+        setError(error.message || "Error al cargar los datos");
       }
     })();
   }, []);
 
-  const onSubmit = (data) => {
-    console.log("Datos:", data);
+  const limpiarFormulario = () => {
+
+    setAreas([]);
+    setCursos([]);
+
+    setSelectMinisterio("");
+    setSelectArea("");
+    setSelectCurso("");
+    setSelectMedioInscripcion("");
+    setSelectPlataformaDictado("");
+    setSelectTipoCapacitacion("");
+    setCupo("");
+    setHoras("");
+  };
+
+
+  const handleCohortes = (cohortes) => {
+    setCohortes(cohortes)
+  };
+
+  const handleEnviarFormulario = async () => {
+
+    console.log("Formulario enviado: ", { selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes });
+    setCargando(true);
+    try {
+
+      if (!selectMinisterio) {
+
+        throw new Error("Debe seleccionar un ministerio");
+
+
+      }
+
+      if (!selectArea) {
+
+        throw new Error("Debe seleccionar una area");
+
+      }
+
+      if (!selectCurso) {
+        throw new Error("Debe seleccionar un curso");
+
+      }
+
+      if (!selectTipoCapacitacion) {
+        throw new Error("Debe seleccionar un tipo de capacitación");
+      }
+
+      if (!selectPlataformaDictado) {
+        throw new Error("Debe seleccionar una plataforma de dictado");
+      }
+
+
+      if (!selectMedioInscripcion) {
+        throw new Error("Debe seleccionar un medio de inscripción");
+      }
+
+      if (!cupo || cupo <= 0) {
+        throw new Error("Debe seleccionar un cupo");
+      }
+
+
+      if (!horas || horas <= 0) {
+        throw new Error("Debe seleccionar una hora");
+      }
+
+
+      if (tutoresSeleccionados.length === 0) {
+        throw new Error("Debe seleccionar al menos un tutor");
+      }
+
+      if (cohortes.length === 0) {
+        throw new Error("Debe agregar al menos un cohorte");
+      }
+      cohortes.forEach((cohorte) => {
+        if (!validarFecha(cohorte.fechaInscripcionDesde) || !validarFecha(cohorte.fechaInscripcionHasta) || !validarFecha(cohorte.fechaCursadaDesde) || !validarFecha(cohorte.fechaCursadaHasta)) {
+          throw new Error("Todos los campos tipo fecha deben estar completos");
+        }
+
+        validarOrdenFechas([cohorte.fechaInscripcionDesde, cohorte.fechaInscripcionHasta, cohorte.fechaCursadaDesde, cohorte.fechaCursadaHasta]);
+      })
+
+      const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes });
+
+      limpiarFormulario();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Si todo es exitoso, puedes limpiar el error
+      setError(null);
+      setSuccess(true);
+      //
+
+
+    } catch (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setSuccess(false);
+      setError(error.message);
+    } finally {
+      setCargando(false);
+    }
+
 
 
   }
@@ -55,219 +265,174 @@ export default function Formulario() {
 
   return (
     <>
-      <Alert severity="error" sx={{ display: error ? 'block' : 'none', zIndex: 1, width: '100%' }}>{"Mensaje de error"}</Alert>
+
+
       {
-        console.log("AREAS:", areas)
+        error &&
+
+        <Alert className='alert' variant="filled" severity="error">
+          {error}
+        </Alert>
+
       }
       {
-        mostrar === "Formulario" &&
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className='grid-container-formulario'>
-            <div className='titulo'><Titulo texto='Formulario de inscripción' /></div>
+        success &&
+        <Alert className='alert' variant="filled" severity="success"  >
+          Formulario enviado exitosamente
+        </Alert>
+      }
+      {
+        cargando && <Backdrop
+          sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={cargando}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      }
 
-            <div className='select-ministerio'>
-              <Autocomplete options={ministerios.map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"}
-                getValue={(value) => {
-                  setValue("ministerio", value); // Actualiza el valor del formulario
-
-                  // Encuentra el ministerio seleccionado
-                  const ministerioSeleccionado = ministerios.find(ministerio => ministerio.nombre === value);
-
-                  // Si se encuentra el ministerio, actualiza las áreas
-                  if (ministerioSeleccionado) {
-                    reset({
-                      area: "",
-                      curso: "",
-                      medioInscripcion: '',
-                      plataformaDictado: '',
-                      cupo: '',
-                      horas: '',
-                      fechaInscripcionDesde: "",
-                      fechaInscripcionHasta: "",
-                      fechaCursadaDesde: "",
-                      fechaCursadaHasta: ""
-                    });
-                    setAreas(ministerioSeleccionado.detalle_areas);
-                  } else {
-                    setAreas([]);
-                  }
-
-                }}
-                {...register("ministerio", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un ministerio"
-                })}
-
-              />
-              {
-                errors.ministerio && <p style={{ color: 'red' }}>{errors.ministerio.message}</p>
-              }
-
-            </div>
-
-            <div className='select-area'>
-              <Autocomplete options={areas.map(a => a.nombre)} label={"Seleccione un área"}
-                getValue={(value) => {
-                  setValue("area", value)
-
-                  // Encuentra el area seleccionado
-                  const areaSeleccionada = areas.find(area => area.nombre === value);
-
-                  // Si se encuentra el ministerio, actualiza las áreas
-                  if (areaSeleccionada) {
-                    reset({
-                      curso: '',
-                      medioInscripcion: '',
-                      plataformaDictado: '',
-                      cupo: '',
-                      horas: '',
-                      fechaInscripcionDesde: "",
-                      fechaInscripcionHasta: "",
-                      fechaCursadaDesde: "",
-                      fechaCursadaHasta: ""
-                    });
-                    setCursos(areaSeleccionada.detalle_cursos);
-                  } else {
-                    setCursos([]);
-                  }
-
-                }}
-                {...register("area", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un área"
-                })}
-
-              />
-              {
-                errors.area && <p style={{ color: 'red' }}>{errors.area.message}</p>
-              }
-            </div>
-
-            <div className='select-curso'>
-              <Autocomplete options={cursos.map(c => c.nombre)} label={"Seleccione un curso"}
-                getValue={(value) => {
-                  setValue("curso", value)
-                }}
-                {...register("curso", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un curso"
-                })}
-              />
-              {
-                errors.curso && <p style={{ color: 'red' }}>{errors.curso.message}</p>
-              }
-            </div>
-
-            <div className='card-autorizador'>
-              <Autorizador />
-            </div>
-            <div className='card-info1'>
-              <CardInfo titulo={"Acumulado cantidad de cupos otorgados"} dato={"10596"} />
-            </div>
-            <div className='card-info2'>
-              <CardInfo titulo={"Acumulado cantidad de inscriptos"} dato={"50632"} />
-            </div>
-            <div className='card-info3'>
-              <CardInfo titulo={"Recomendación para cantidad de cupos"} dato={"6987"} />
-            </div>
-            <div className='select-medio-inscripcion'>
-              <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione medio de inscripción"}
-                getValue={(value) => {
-                  setValue("medioInscripcion", value); // Actualiza el valor del formulario
-                }}
-                {...register("medioInscripcion", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un medio de inscripción"
-                })} />
-              {
-                errors.medioInscripcion && <p style={{ color: 'red' }}>{errors.medioInscripcion.message}</p>
-              }
-            </div>
-            <div className='select-plataforma-dictado'>
-              <Autocomplete options={["Ministerio de Salud", "Ministerio de Educacion", "Ministerio de Defensa Nacional"]} label={"Seleccione plataforma de dictado"}
-                getValue={(value) => {
-                  setValue("plataformaDictado", value);
-                }}
-                {...register("plataformaDictado", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar una plataforma de dictado"
-                })} />
-              {
-                errors.plataformaDictado && <p style={{ color: 'red' }}>{errors.plataformaDictado.message}</p>
-              }
-            </div>
-            <div className='input'>
-              <TextField label={"Cupo"} getValue={(value) => setValue("cupo", value)}
-                {...register("cupo", {
-                  validate: (value) => value !== null && value !== "" || "Debe ingresar cupo"
-                })} />
-
-              {
-                errors.cupo && <p style={{ color: 'red' }}>{errors.cupo.message}</p>
-              }
-              <TextField label={"Cantidad de horas"} getValue={(value) => setValue("horas", value)}
-                {...register("horas", {
-                  validate: (value) => value !== null && value !== "" || "Debe ingresar cantidad de horas"
-                })} />
-
-              {
-                errors.horas && <p style={{ color: 'red' }}>{errors.horas.message}</p>
-              }
-            </div>
-
-            <div className='card-fecha-inscripcion'>
-              <CardFecha
-                titulo={"Fecha de inscripción"}
-                mensajeDesde={"Fecha de inscripción desde"}
-                mensajeHasta={"Fecha de inscripción hasta"}
-                getFechaDesde={(newFecha) => setValue("fechaInscripcionDesde", newFecha)}
-                getFechaHasta={(newFecha) => setValue("fechaInscripcionHasta", newFecha)}
-                errors = {errors}
-                registerDesde={register("fechaInscripcionDesde", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar un fecha de inscripción"
-                })}
-                registerHasta={register("fechaInscripcionHasta", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar una fecha de inscripción"
-                })}
-              />
-              {
-                errors.fechaInscripcionDesde && <p style={{ color: 'red' }}>{errors.fechaInscripcionDesde.message}</p>
-              }
-              {
-                errors.fechaInscripcionHasta && <p style={{ color: 'red' }}>{errors.fechaInscripcionHasta.message}</p>
-              }
-            </div>
-            <div className='card-fechas-cursada'>
-              <CardFecha
-                titulo={"Fecha de Cursada"}
-                mensajeDesde={"Fecha de cursada desde"}
-                mensajeHasta={"Fecha de cursada hasta"}
-                getFechaDesde={(newFecha) => setValue("fechaCursadaDesde", newFecha)}
-                getFechaHasta={(newFecha) => setValue("fechaCursadaHasta", newFecha)}
-                registerDesde={register("fechaCursadaDesde", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar fecha de cursada desde"
-                })}
-                registerHasta={register("fechaCursadaHasta", {
-                  validate: (value) => value !== null && value !== "" || "Debe seleccionar fecha de Cursada hasta"
-                })}
-              />
-
-              {
-                errors.fechaCursadaDesde && <p style={{ color: 'red' }}>{errors.fechaCursadaDesde.message}</p>
-              }
-              {
-                errors.fechaCursadaHasta && <p style={{ color: 'red' }}>{errors.fechaCursadaHasta.message}</p>
-              }
-
-            </div>
-            <div className='card-tutores' >
-              <Tutores onClick={handleBusqTutores} />
-            </div>
-            <div className='submit'>
-              <Button mensaje={"Registrar"} type={"submit"} />
-            </div>
+      <form >
+        <div className='grid-container-formulario'>
+          <div className='titulo'><Titulo texto='Formulario de inscripción' /></div>
+          <div className='divider'>
+            <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} />
           </div>
-        </form>
-      }
-      {
-        mostrar === "BusquedaTutores" &&
-        <BusquedaTutores />
-      }
+
+
+          <div className='select-ministerio'>
+            <Autocomplete options={ministerios.map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio}
+              getValue={(value) => {
+                setSelectMinisterio(value);
+                setSelectArea("")
+                setSelectCurso("")
+
+                const ministerioSeleccionado = ministerios.find(ministerio => ministerio.nombre === value);
+
+                if (ministerioSeleccionado) {
+                  setAreas(ministerioSeleccionado.detalle_areas);
+                  setCursos([]);
+
+                } else {
+                  setAreas([]);
+                  setCursos([]);
+                }
+
+              }}
+
+            />
+
+
+          </div>
+
+          <div className='select-area'>
+            <Autocomplete options={areas.map(a => a.nombre)} label={"Seleccione un área"} value={selectArea}
+              getValue={(value) => {
+                setSelectArea(value);
+                setSelectCurso("")
+
+                const areaSeleccionada = areas.find(area => area.nombre === value);
+
+                if (areaSeleccionada) {
+
+                  setCursos(areaSeleccionada.detalle_cursos);
+                } else {
+                  setCursos([]);
+                }
+
+              }}
+
+
+            />
+
+          </div>
+
+          <div className='select-curso'>
+            <Autocomplete options={cursos.map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso}
+              getValue={(value) => {
+                setSelectCurso(value);
+              }}
+
+            />
+
+          </div>
+
+          <div className='select-medio-inscripcion'>
+            <Autocomplete options={mediosInscripcion.map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion}
+              getValue={(value) => {
+                setSelectMedioInscripcion(value);
+              }}
+            />
+
+          </div>
+
+          <div className='select-plataforma-dictado'>
+            <Autocomplete options={plataformasDictado.map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado}
+              getValue={(value) => {
+                setSelectPlataformaDictado(value);
+              }}
+            />
+
+          </div>
+
+          <div className='select-tipo-capacitacion'>
+            <Autocomplete options={tiposCapacitaciones.map(p => p.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion}
+              getValue={(value) => {
+                setSelectTipoCapacitacion(value);
+              }}
+            />
+
+          </div>
+
+          <div className='input'>
+            <TextField label={"Cupo"} getValue={(value) => setCupo(value)} value={cupo}
+            />
+
+
+            <TextField label={"Cantidad de horas"} getValue={(value) => setHoras(value)} value={horas}
+            />
+
+          </div>
+
+
+
+          <div className='tutores'>
+            <SubtituloPrincipal texto='Selección de tutores' />
+            <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
+            <DataGrid rows={rows} columns={columns}
+              autoHeight
+              checkboxSelection
+              disableRowSelectionOnClick
+              loading={rows.length === 0}
+              onRowSelectionModelChange={(newRowSelectionModel) => {
+                setRowSelectionModel(newRowSelectionModel);
+
+                const listaTutores = newRowSelectionModel.map((id) =>
+                  rows.find((row) => row.id === id)
+                );
+
+                const tutores = listaTutores.map((tutor) => ({
+                  name: `${tutor.nombre} ${tutor.apellido}`,
+                  rol: tutor.rol,
+                  initials: `${tutor.nombre[0]}${tutor.apellido[0]}`,
+                  cuil: tutor.cuil,
+                }));
+
+                setTutoresSeleccionados(tutores);
+              }}
+              rowSelectionModel={rowSelectionModel}
+            />
+
+            <TutoresSeleccionados tutors={tutoresSeleccionados} />
+          </div>
+
+          <div className='cohortes'>
+            <Cohortes getCohortes={handleCohortes}></Cohortes>
+          </div>
+
+          <div className='submit'>
+            <Button mensaje={"Registrar"} type="button" hanldeOnClick={handleEnviarFormulario} />
+          </div>
+        </div>
+      </form>
     </>
   );
 }

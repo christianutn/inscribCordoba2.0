@@ -1,23 +1,24 @@
 
-import {getUsuario, postUsuario} from "../controllers/usuario.controllers.js";
+import {getUsuario, postUsuario, putUsuario, deleteUsuario, getMyUser, updateContrasenia} from "../controllers/usuario.controllers.js";
 import {Router} from "express";
 import passport from "passport";
+import autorizar from "../utils/autorizar.js"
 
 const usuarioRouter = Router();
 
 
-usuarioRouter.get("/", getUsuario)
+usuarioRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), getUsuario)
 
-usuarioRouter.post("/registrar", passport.authenticate('registrar', {session: false}), (req, res, next) => {
-    try {
-        if(!req.user){
-            res.status(400).json(req.user)
-        }
-        res.status(200).json(req.user)
-    } catch (error) {
-        next(error)
-    }
-});
+usuarioRouter.post("/registrar", passport.authenticate('jwt', {session: false}), autorizar(['ADM']),  postUsuario);
+
+usuarioRouter.put("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), putUsuario)
+
+usuarioRouter.delete("/:cuil", deleteUsuario)
+
+usuarioRouter.get("/myuser", passport.authenticate('jwt', {session:false}), getMyUser)
+
+usuarioRouter.put("/contrasenia", passport.authenticate('jwt', {session:false}), updateContrasenia)
+
 
 
 export default usuarioRouter

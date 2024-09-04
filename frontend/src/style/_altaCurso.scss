@@ -1,0 +1,77 @@
+.container-alta-curso {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "titulo titulo titulo"
+        "divider divider divider"
+        "select-ministerio select-area  curso"
+        "select-medio-inscripcion select-plataforma-dictado  select-tipo-capacitacion"
+        "input . ."
+        "volver volver volver"
+        "enviar enviar enviar";
+    grid-gap: 20px;
+    margin-left: 50px;
+    margin-right: 50px;
+
+    
+
+    .select-ministerio {
+        grid-area: select-ministerio;
+        
+    }
+
+    .select-area {
+        grid-area: select-area;
+        
+    }
+
+    .curso {
+        grid-area: curso;
+        
+    }
+
+    .select-tipo-capacitacion {
+        grid-area: select-tipo-capacitacion;
+    }
+
+  
+
+    .select-medio-inscripcion {
+        grid-area: select-medio-inscripcion;
+    }
+
+    .input {
+        grid-area: input;
+        //Tiene que estar uno al lado del otro de izquierda a derecha
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        
+        
+    }
+
+   
+    .volver {
+        grid-area: volver;
+    }
+
+   
+
+    .select-plataforma-dictado {
+        grid-area: select-plataforma-dictado;
+    }
+
+    .titulo {
+        grid-area: titulo;
+        
+    }
+
+    .enviar {
+        grid-area: enviar;
+    }
+
+    .divider {
+        grid-area: divider;
+    }
+}

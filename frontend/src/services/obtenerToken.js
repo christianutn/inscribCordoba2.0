@@ -8,16 +8,17 @@ const obtenerToken = async (cuil, contrasenia) => {
             },
             body: JSON.stringify({ cuil: cuil, contrasenia: contrasenia })
         });
-
-        // Verifica si la respuesta es exitosa
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al iniciar sesión');
-        }
-
         const data = await response.json();
+        // Verifica si la respuesta es exitosa
         
-        return data.token;
+        if (response.status == 429) {
+            
+            const error = new Error('Demasiados intentos de inicio de sesión, por favor intenta nuevamente más tarde');
+            error.statusCode = 429;
+            throw error;
+        } 
+        return data.token
+       
     } catch (error) {
         
         throw error; // Re-lanza el error para que pueda ser manejado por el componente que llama a la función

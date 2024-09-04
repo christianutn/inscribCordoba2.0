@@ -1,0 +1,21 @@
+.custom-select {
+    width: 100%;
+    /* Equivalente a `sx={{ width: '100%' }}` */
+
+    .custom-textfield {
+        width: 100%;
+    
+        .MuiInputLabel-root {
+            font-size: 16px !important; /* Aumenta la especificidad y fuerza la aplicación con !important */
+            
+        }
+    
+        @media (max-width: 500px) {
+            width: 100%;
+            .MuiInputLabel-root {
+                font-size: 13px !important; /* Aumenta la especificidad y fuerza la aplicación con !important */
+            }
+        }
+    }
+
+}

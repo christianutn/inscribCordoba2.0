@@ -8,6 +8,16 @@
         flex-direction: row;
         align-items: center;
         gap: 10px;
+        
+    }
+
+    .opciones {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        //quiero que secoloquen de izquierda a derecha
+        
     }
 
     .data-grid {

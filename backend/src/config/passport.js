@@ -3,6 +3,7 @@ import passportLocal from 'passport-local';
 import Usuario from "../models/usuario.models.js"
 import { createHash, validatePassword } from "../utils/bcrypt.js"
 import jwt from 'passport-jwt'
+import 'dotenv/config';
 
 const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = jwt.Strategy
@@ -42,34 +43,6 @@ const inicializarPassport = () => {
         }
 
     }))
-
-
-    passport.use("registrar", new LocalStrategy({
-        usernameField: 'cuil', // Cambia esto al campo que usas para el nombre de usuario
-        passwordField: 'contrasenia', // Cambia esto al campo que usas para la contraseña
-        passReqToCallback: true //Opción para tomar datos del body
-    }, async function (req, cuil, contrasenia, done) {
-        // Registración aquí
-        try {
-            const usuario = await Usuario.findOne({ where: { cuil: cuil } });
-            if (usuario) {
-                done(null, false);
-            }
-
-            const { rol } = req.body
-            //Asegurar que contrasenia sea uan cadena si no es una cadena convertirla a string
-            contrasenia = String(contrasenia)
-            const contraseniaHash = createHash(contrasenia)
-            const nuevoUsuario = await Usuario.create({ cuil, contrasenia: contraseniaHash, rol });
-
-            done(null, nuevoUsuario);
-
-        } catch (error) {
-            console.log(error)
-            done(error)
-        }
-    }));
-
 
     passport.use("login", new LocalStrategy({
         usernameField: 'cuil', // Cambia esto al campo que usas para el nombre de usuario

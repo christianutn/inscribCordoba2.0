@@ -1,0 +1,17 @@
+import {getRestricciones, putRestriccion} from "../controllers/restriccionesFechasInicioCursada.controllers.js";
+import {Router} from "express";
+import autorizar from "../utils/autorizar.js"
+import passport from "passport";
+
+
+const resticcionesRouter = Router();
+
+
+resticcionesRouter.get("/fechasInicioCursada", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), getRestricciones);
+
+resticcionesRouter.put("/fechasInicioCursada", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), putRestriccion);
+
+
+
+
+export default resticcionesRouter

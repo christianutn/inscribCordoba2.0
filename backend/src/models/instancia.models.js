@@ -3,6 +3,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
 
+
 const Instancia = sequelize.define("instancias", {
     curso: {
         type: DataTypes.STRING(15),

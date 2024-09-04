@@ -11,7 +11,7 @@ const Curso = sequelize.define("cursos", {
         primaryKey: true
     },
     nombre: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING(250),
         allowNull: false
     },
     cupo: {
@@ -19,14 +19,16 @@ const Curso = sequelize.define("cursos", {
         allowNull: false,
         validate: {
             min: 1
-        }
+        },
+        defaultValue: 1
     },
     cantidad_horas: {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
             min: 1
-        }
+        },
+        defaultValue: 1
     },
     medio_inscripcion: {
         type: DataTypes.STRING(15),
