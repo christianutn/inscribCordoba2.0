@@ -16,6 +16,7 @@ import CambioContrasenia from './components/CambioContrasenia';
 
 
 
+
 function App() {
   
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/tutores/alta" element={<AltaTutores />} />
         <Route path="/usuarios/alta" element={<RegistrosTutores />} />
         <Route path="/cambiarContrasenia" element={<CambioContrasenia />} />
+        
 
         
       </Routes>

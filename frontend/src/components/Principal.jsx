@@ -22,14 +22,13 @@ import Formulario from './Formulario';
 import ClassIcon from '@mui/icons-material/Class';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import Cronograma from "./Cronograma.jsx"
-import UpdateIcon from '@mui/icons-material/Update';
 import { getMyUser } from "../services/usuarios.service.js";
 import AltaBajaModificion from './AltaBajaModificion.jsx';
-import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Button from "./UIElements/Button.jsx";
-import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
 import GavelIcon from '@mui/icons-material/Gavel';
 import RestriccionesFechasInicioCursada from "../components/RestriccionesFechasInicioCursada.jsx";
+import Home from "./Home.jsx";
+import HouseIcon from '@mui/icons-material/House';
 
 const drawerWidth = 240;
 
@@ -101,9 +100,9 @@ export default function Principal() {
       }
 
       if (res.rol === "ADM") {
-        setOpcionesAMostrar([["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"], ["Restricciones de Fechas de inicio de Cursada", "RestriccionesFechasInicioCursada"]])
+        setOpcionesAMostrar([["Home", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"], ["Restricciones de Fechas de inicio de Cursada", "RestriccionesFechasInicioCursada"]])
       } else if (res.rol === "REF") {
-        setOpcionesAMostrar([["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"]])
+        setOpcionesAMostrar([["Home", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"]])
       }
 
 
@@ -141,8 +140,10 @@ export default function Principal() {
         return <AltaBajaModificion />
       case "RestriccionesFechasInicioCursada":
         return <RestriccionesFechasInicioCursada />
+      case "Home":
+        return <Home />
       default:
-        return <h1>Bienvenido</h1> // Mensaje por defecto o componente
+        return <Home />
     }
   };
 
@@ -152,23 +153,43 @@ export default function Principal() {
 
       <CssBaseline />
       <AppBar position="fixed" open={open}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{ mr: 2, ...(open && { display: 'none' }) }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{
+                fontSize: '1.25rem',
+              }}
+            >
+              Menú
+            </Typography>
+          </div>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{
+              fontSize: '2rem',
+              flexGrow: 1,
+              textAlign: 'center',
+            }}
           >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
             InscribCórdoba
           </Typography>
-
-
         </Toolbar>
       </AppBar>
+
       <Drawer
         sx={{
           width: drawerWidth,
@@ -193,11 +214,11 @@ export default function Principal() {
             <ListItem key={index} disablePadding>
               <ListItemButton onClick={() => handleListItemClick(item[1])}>
                 <ListItemIcon>
-                  {index === 0 && <EditCalendarIcon />}
-                  {index === 1 && <CalendarMonthIcon />}
-                  {index === 2 && <ClassIcon />}
-                  {index === 3 && <GavelIcon />}
-              
+                  {index === 0 && <HouseIcon />}
+                  {index === 1 && <EditCalendarIcon />}
+                  {index === 2 && <CalendarMonthIcon />}
+                  {index === 3 && <ClassIcon />}
+                  {index === 4 && <GavelIcon />}
                 </ListItemIcon>
                 <ListItemText primary={item[0]} />
               </ListItemButton>
