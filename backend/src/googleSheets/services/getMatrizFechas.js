@@ -63,7 +63,7 @@ export const getMatrizFechas = async (aplicaRestricciones) => {
         return matrizFechas;
 
     } catch (error) {
-        console.error('Error al obtener la matriz de fechas:', error);
+        
         throw error;
     }
 }

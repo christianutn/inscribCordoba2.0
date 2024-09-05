@@ -1,9 +1,52 @@
-.titulo-principal {
-    font-family: 'Roboto, sans-serif';
-    font-weight: bold; /* Establece el peso de fuente por defecto */
+@import url('https://fonts.googleapis.com/css2?family=Laila:wght@400;700&display=swap');
 
-    @media (max-width: 500px) {
-        font-size: 20px !important; /* Aumenta la especificidad y fuerza la aplicación con !important */
-        margin-top: 50px !important;
-    }
+.tittle-principal {
+  font-family: 'Laila', sans-serif !important;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  text-align: center !important;
+ 
+}
+
+.MuiAppBar-root {
+  background-color: #00519C;
+  padding: 0 1rem;
+}
+
+.MuiIconButton-root {
+  color: white;
+}
+
+.MuiTypography-body2 {
+  color: white;
+}
+
+.MuiAvatar-root {
+  background-color: transparent;
+}
+  
+.MuiAvatar-root .MuiSvgIcon-root {
+  color: white;
+}
+
+.welcome-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.text-content {
+  align-items: center; /* Centra verticalmente */
+  justify-content: center;
+  padding-left: 30px;
+}
+
+.image-content {
+  display: flex;
+  align-items: center; /* Centra verticalmente */
+  justify-content: flex-end; /* Alinea a la derecha */
+  height: 75vh; /* Altura del contenedor (ajustable) */
+  padding-right: 0%; /* Mueve hacia la derecha */
 }

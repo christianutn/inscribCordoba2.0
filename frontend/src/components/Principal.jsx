@@ -175,18 +175,22 @@ export default function Principal() {
               Menú
             </Typography>
           </div>
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{
-              fontSize: '2rem',
-              flexGrow: 1,
-              textAlign: 'center',
-            }}
-          >
-            InscribCórdoba
-          </Typography>
+          <div>
+            <Typography
+              className='tittle-principal'
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{
+                fontSize: '2rem',
+                display: 'flex'
+
+              }}
+            >
+              InscribCórdoba
+            </Typography>
+          </div>
+
         </Toolbar>
       </AppBar>
 
