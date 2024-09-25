@@ -1,4 +1,5 @@
-const URL = "http://localhost:4000/api/instancias";
+
+const URL = process.env.REACT_APP_API_URL + "/instancias";
 
 
 export const postInstancias = async (newInstancia) => {

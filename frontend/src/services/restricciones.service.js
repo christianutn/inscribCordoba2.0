@@ -1,4 +1,5 @@
-const URL = "http://localhost:4000/api/restricciones/fechasInicioCursada";
+
+const URL = process.env.REACT_APP_API_URL + "/restricciones/fechasInicioCursada";
 
 export const getRestricciones = async () => {
     try {

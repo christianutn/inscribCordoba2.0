@@ -1,4 +1,5 @@
-const URL = "http://localhost:4000/api/cursos";
+
+const URL = process.env.REACT_APP_API_URL + "/cursos";
 
 export const getCursos = async () => {
     try {
@@ -23,7 +24,7 @@ export const getCursos = async () => {
 
 export const postCurso = async (curso) => {
     try {
-        console.log("POST CURSO", curso)
+        
         const response = await fetch(URL, {
             method: "POST",
             headers: {
@@ -47,7 +48,7 @@ export const postCurso = async (curso) => {
 export const putCurso = async (curso) => {
     try {
 
-        console.log("PUT CURSO", curso)
+        
         
         const response = await fetch(URL, {
             method: "PUT",
@@ -75,7 +76,7 @@ export const putCurso = async (curso) => {
 
 export const deleteCurso = async (cuil) => {
     try {
-        console.log("DELETE CURSO", cuil)
+        
         const response = await fetch(`${URL}/${cuil}`, {
             method: "DELETE",
             headers: {

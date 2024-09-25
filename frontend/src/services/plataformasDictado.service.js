@@ -1,4 +1,5 @@
-const URL = "http://localhost:4000/api/plataformasDictado";
+
+const URL = process.env.REACT_APP_API_URL + "/plataformasDictado";
 
 export const getPlataformasDictado = async () => {
     try {

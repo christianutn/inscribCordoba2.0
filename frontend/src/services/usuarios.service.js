@@ -1,4 +1,5 @@
-const URL = "http://localhost:4000/api/usuarios"
+
+const URL = process.env.REACT_APP_API_URL + "/usuarios";
 
 export const getUsuarios = async () => {
     try {

@@ -1,4 +1,5 @@
-const URL = "http://localhost:4000/api/tiposCapacitacion";
+
+const URL = process.env.REACT_APP_API_URL + "/tiposCapacitacion";
 
 export const getTiposCapacitacion = async () => {
     try {

@@ -1,5 +1,6 @@
 
-const URL = "http://localhost:4000/api/mediosInscripcion";
+
+const URL = process.env.REACT_APP_API_URL + "/mediosInscripcion";
 export const getMediosInscripcion = async () => {
     try {
         const response = await fetch(URL, {
