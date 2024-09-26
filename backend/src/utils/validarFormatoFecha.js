@@ -1,5 +1,5 @@
 const validarFecha = (fecha) => {
-  console.log("La fechas es: ", fecha)
+  
     // Expresión regular para validar el formato AAAA-MM-DD
     const regexFecha = /^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/;
 

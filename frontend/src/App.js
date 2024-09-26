@@ -12,7 +12,7 @@ import AltaPersona from "./components/FormulariosAlta/AltaPersonas";
 import AltaTutores from "./components/FormulariosAlta/AltaTutores";
 import RegistrosTutores from "./components/RegistrosTutores";
 import CambioContrasenia from './components/CambioContrasenia';
-
+import PingTest from "./components/PingTest"; // Sólo a  modo de desarrollo, luego podrá eliminarse no influye con ninguna funcionalidad
 
 
 
@@ -35,6 +35,7 @@ function App() {
         <Route path="/tutores/alta" element={<AltaTutores />} />
         <Route path="/usuarios/alta" element={<RegistrosTutores />} />
         <Route path="/cambiarContrasenia" element={<CambioContrasenia />} />
+        <Route path='/PingTest' element={<PingTest />} />
         
 
         

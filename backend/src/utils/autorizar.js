@@ -8,7 +8,7 @@ const autorizar = (listaDeRolesAceptados) => {
                 error.statusCode = 401;
                 throw error;
             }
-            console.log("rol", req.user.user)
+            
 
             // Verifica si el rol del usuario está en la lista de roles aceptados
             const esAutorizado = listaDeRolesAceptados.includes(req.user.user.rol);

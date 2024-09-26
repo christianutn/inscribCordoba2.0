@@ -51,15 +51,19 @@ const inicializarPassport = () => {
     }, async function (req, cuil, contrasenia, done) {
         // Login
         try {
-
+            console.log("Se comienza proceso de iniciar sesión")
             const usuario = await Usuario.findOne({ where: { cuil: cuil } });
             if (!usuario) {
+                console.log("Usuario no encontrado - Inicio de sesión fallido")
                 done(null, false);
             }
 
             if (!validatePassword(String(contrasenia), usuario.contrasenia)) {
+                console.log("Contrasenya incorrecta - Inicio de sesión fallido")
                 done(null, false);
             }
+
+            console.log("Inicio sesion generado con éxito")
             done(null,usuario);
         } catch (error) {
             done(error)

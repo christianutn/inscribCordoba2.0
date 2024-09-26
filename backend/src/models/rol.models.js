@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
-const plataformasDictado = sequelize.define("roles", {
+const roles = sequelize.define("roles", {
     cod: {
         type: DataTypes.STRING(15),
         primaryKey: true,
@@ -24,4 +24,4 @@ const plataformasDictado = sequelize.define("roles", {
 
 
 
-export default plataformasDictado
+export default roles
