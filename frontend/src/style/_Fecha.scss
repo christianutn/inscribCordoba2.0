@@ -1,13 +1,36 @@
-.container-fecha {
-
-
-    .custom-textfield-fecha {
-    
-        @media (max-width: 500px) {
-            width: 100%;
-            .MuiInputLabel-root {
-                font-size: 8px !important; /* Aumenta la especificidad y fuerza la aplicación con !important */
-            }
-        }
+.fecha-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  .fecha-label {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .fecha-picker {
+    width: 100%;
+  }
+  
+  /* Estilos responsivos */
+  @media screen and (max-width: 600px) {
+    .fecha-container {
+      margin-bottom: 0.5rem;
     }
-}
+  
+    .fecha-label {
+      font-size: 0.9rem;
+    }
+  
+    /* Ajusta el tamaño del campo de texto en pantallas pequeñas */
+    .fecha-picker .MuiInputBase-root {
+      font-size: 0.9rem;
+    }
+  
+    /* Ajusta el tamaño del calendario emergente en pantallas pequeñas */
+    .MuiPickersPopper-root {
+      transform: scale(0.9);
+      transform-origin: top left;
+    }
+  }

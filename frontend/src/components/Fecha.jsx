@@ -8,69 +8,50 @@ import { Typography } from '@mui/material';
 import { getMatrizFechas } from "../services/googleSheets.service";
 
 const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
-
-
-
-
   const [selectedDate, setSelectedDate] = useState(null);
   const [matrizFechas, setMatrizFechas] = useState([]);
-
 
   useEffect(() => {
     (async () => {
       const response = await getMatrizFechas();
+      console.log("Matriz de fechas cargaaaaaaaaaaaaaaaa");
       setMatrizFechas(response);
     })();
   }, []);
+
   const handleDateChange = (newDate) => {
     const formattedDate = newDate ? dayjs(newDate).format('YYYY-MM-DD') : null;
     setSelectedDate(newDate);
-    getFecha(formattedDate, id, fieldFecha); // Enviar la fecha formateada al componente padre
+    getFecha(formattedDate, id, fieldFecha);
   };
 
   const shouldDisableDate = (date) => {
-    // Deshabilitar los fines de semana (sábado y domingo)
-    let isDisabled = false;
-
     const today = dayjs();
-    // Verificar si la fecha es un fin de semana (sábado o domingo)
     const isWeekend = date.day() === 0 || date.day() === 6;
-
-    // Verificar si la fecha es anterior a hoy
     const isBeforeToday = date.isBefore(today, 'day');
 
     if (isWeekend || isBeforeToday) {
       return true;
     }
-   
 
-    if ("fechaCursadaDesde" == fieldFecha) {
+    if (fieldFecha === "fechaCursadaDesde" && matrizFechas) {
+      const fechaAValidar = dayjs(date).format('YYYY-MM-DD').split("-");
+      const claveAnioMes = `${fechaAValidar[0]}-${fechaAValidar[1]}`;
+      const claveDia = `${claveAnioMes}-${fechaAValidar[2]}`;
 
-      // Verificar si la fecha es válida o inválida a través de la matriz de fechas
-      let fechaAValidar = dayjs(date).format('YYYY-MM-DD').split('-');
-      //Quiero el mes y dia de fechaAValidar
-
-      const mes = parseInt(fechaAValidar[1], 10) - 1;
-      const dia = parseInt(fechaAValidar[2], 10) - 1;
-
-      if (matrizFechas[mes] && matrizFechas[mes][dia]) {
-        isDisabled = !matrizFechas[mes][dia].esPosible; //Si es posible la fecha entonces no se deshabilita 
+      if (matrizFechas[claveAnioMes]) {
+        console.log("]Matriz de fecha:", matrizFechas)
+        return matrizFechas[claveAnioMes].invalidarMesAnio || matrizFechas[claveAnioMes][claveDia]?.invalidarDia;
       }
-
-
     }
 
-
-
-
-    return isDisabled
+    return false;
   };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en">
-      <div className='container-fecha'>
-
-        <Typography variant="body1">{mensaje}</Typography>
+      <div className='fecha-container'>
+        <Typography variant="body1" className='fecha-label'>{mensaje}</Typography>
         <DatePicker
           sx={{ width: '100%', height: '100%' }}
           value={value ? dayjs(value) : null}
@@ -78,9 +59,35 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
           slots={{
             textField: (params) => <TextField {...params} />,
           }}
-          inputFormat="DD/MM/YYYY"  
+          inputFormat="DD/MM/YYYY"
           format="DD/MM/YYYY" // Set the format here
           shouldDisableDate={shouldDisableDate}
+          className='fecha-picker'
+          PopperProps={{
+            placement: "bottom-start",
+            modifiers: [
+              {
+                name: "flip",
+                enabled: true,
+                options: {
+                  altBoundary: true,
+                  rootBoundary: "viewport",
+                  padding: 8,
+                },
+              },
+              {
+                name: "preventOverflow",
+                enabled: true,
+                options: {
+                  altAxis: true,
+                  altBoundary: true,
+                  tether: true,
+                  rootBoundary: "viewport",
+                  padding: 8,
+                },
+              },
+            ],
+          }}
         />
       </div>
     </LocalizationProvider>

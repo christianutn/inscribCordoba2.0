@@ -10,6 +10,7 @@ import TutoresXInstancia from "../models/tutorXInstancia.models.js";
 import { agregarFilasGoogleSheets } from "../googleSheets/services/agregarFilasGoogleSheets.js";
 import { esInstanciaExistente } from "../googleSheets/services/esInstanciaExistente.js";
 import { getMatrizFechas } from "../googleSheets/services/getMatrizFechas.js";
+import { getObjFechas } from "../googleSheets/services/getObjFechas.js";
 
 
 export const getInstancias = async (req, res, next) => {
@@ -51,6 +52,125 @@ export const getInstancias = async (req, res, next) => {
     }
 }
 
+export const postInstancia = async (req, res, next) => {
+    const t = await sequelize.transaction();
+
+    try {
+        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, cohortes, tutores } = req.body;
+        const aplicaRestricciones = req.user.user.esExcepcionParaFechas == 0;
+
+        // Obtener objeto de fechas para verificar las reglas de negocio
+        const objFechas = await getObjFechas(aplicaRestricciones);
+
+        const dataCurso = await Curso.findOne({ where: { nombre: curso } });
+        if (!dataCurso) {
+            throw crearError(404, "No existe el curso");
+        }
+
+        for (const cohorte of cohortes) {
+            const { fechaInscripcionDesde, fechaInscripcionHasta, fechaCursadaDesde, fechaCursadaHasta, estado = "PEND" } = cohorte;
+
+            if (![fechaInscripcionDesde, fechaInscripcionHasta, fechaCursadaDesde, fechaCursadaHasta].every(validarFormatoFecha)) {
+                throw crearError(400, "Formato de fecha inválido");
+            }
+
+            const instanciaExistenteBD = await instanciaModel.findOne({
+                where: {
+                    curso: dataCurso.cod,
+                    fecha_inicio_curso: fechaCursadaDesde,
+                }
+            });
+
+            if (instanciaExistenteBD) {
+                throw crearError(400, `La instancia para el curso ${curso} con fecha de inicio ${fechaCursadaDesde} ya existe en nuestra base de datos`);
+            }
+
+            // Verificar restricciones de fecha usando el nuevo formato
+            const claveMesAnio = `${fechaCursadaDesde.split('-')[0]}-${fechaCursadaDesde.split('-')[1]}`;
+            const fechaClave = fechaCursadaDesde;
+
+            // Verificar si el mes está invalidado
+            if (objFechas[claveMesAnio]?.invalidarMesAnio) {
+                throw crearError(400, "Se ha superado el límite mensual de cursos o cupos");
+            }
+
+            // Verificar si el día específico está invalidado
+            if (objFechas[claveMesAnio]?.[fechaClave]?.invalidarDia) {
+                throw crearError(400, "Se ha superado el límite diario de cursos o cupos");
+            }
+
+            // Crear la instancia
+            const instancia = await instanciaModel.create({
+                curso: dataCurso.cod,
+                fecha_inicio_inscripcion: fechaInscripcionDesde,
+                fecha_fin_inscripcion: fechaInscripcionHasta,
+                fecha_inicio_curso: fechaCursadaDesde,
+                fecha_fin_curso: fechaCursadaHasta,
+                estado: estado
+            }, { transaction: t });
+
+            // Procesar tutores
+            for (const tutor of tutores) {
+                const existeTutor = await Persona.findOne({ where: { cuil: tutor.cuil } });
+                if (!existeTutor) {
+                    throw crearError(404, "El tutor no existe");
+                }
+
+                await TutoresXInstancia.create({
+                    cuil: tutor.cuil,
+                    curso: dataCurso.cod,
+                    fecha_inicio_curso: fechaCursadaDesde
+                }, { transaction: t });
+            }
+        }
+
+        agregarFilasGoogleSheets({ ...req.body, codCurso: dataCurso.cod });
+
+        await t.commit();
+        res.status(201).json({ message: "Instancias y tutores creados exitosamente" });
+
+    } catch (error) {
+        await t.rollback();
+        next(error);
+    }
+};
+
+// Función auxiliar para crear errores con un código de estado específico
+function crearError(statusCode, message) {
+    const error = new Error(message);
+    error.statusCode = statusCode;
+    return error;
+}
+
+
+
+export const deleteInstancia = async (req, res, next) => {
+    try {
+        const { curso, fecha_inicio_curso } = req.body;
+
+        const instancia = await instanciaModel.findOne({
+            where: {
+                curso,
+                fecha_inicio_curso
+            }
+        });
+
+        if (!instancia) {
+            const error = new Error("La instancia no existe");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        await instancia.destroy();
+        res.status(200).json({ message: "Instancia eliminada" });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+
+/*
 export const postInstancia = async (req, res, next) => {
     const t = await sequelize.transaction(); // Inicia una transacción
 
@@ -138,36 +258,4 @@ export const postInstancia = async (req, res, next) => {
         next(error);
     }
 };
-
-// Función auxiliar para crear errores con un código de estado específico
-function crearError(statusCode, message) {
-    const error = new Error(message);
-    error.statusCode = statusCode;
-    return error;
-}
-
-
-
-export const deleteInstancia = async (req, res, next) => {
-    try {
-        const { curso, fecha_inicio_curso } = req.body;
-
-        const instancia = await instanciaModel.findOne({
-            where: {
-                curso,
-                fecha_inicio_curso
-            }
-        });
-
-        if (!instancia) {
-            const error = new Error("La instancia no existe");
-            error.statusCode = 404;
-            throw error;
-        }
-
-        await instancia.destroy();
-        res.status(200).json({ message: "Instancia eliminada" });
-    } catch (error) {
-        next(error);
-    }
-}
+*/

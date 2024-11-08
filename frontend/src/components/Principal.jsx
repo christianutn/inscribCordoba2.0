@@ -165,6 +165,7 @@ export default function Principal() {
               <MenuIcon />
             </IconButton>
             <Typography
+              className='tittle-principal'
               variant="h6"
               noWrap
               component="div"
