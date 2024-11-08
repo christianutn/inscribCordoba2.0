@@ -180,7 +180,7 @@ export default function Formulario() {
 
   const handleEnviarFormulario = async () => {
 
-    console.log("Formulario enviado: ", { selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes });
+    
     setCargando(true);
     try {
 

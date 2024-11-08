@@ -14,12 +14,10 @@ const DataGridAbm = ({ datosAMostrar, titulo }) => {
 
     const handleActionClick = (action, params) => {
         if (action === 'borrar') {
-            console.log(`Handle ${action} click`, params);
+            
             const object = params.row;
-            console.log(object);
-        } else {
-            console.log(`Handle ${action} click`, params);
-        }
+            
+        } 
     };
 
     useEffect(() => {
@@ -60,7 +58,7 @@ const DataGridAbm = ({ datosAMostrar, titulo }) => {
                 }
 
             } catch (error) {
-                console.log(error);
+                console.error('Error al cargar los datos:', error);
 
             }
         })();

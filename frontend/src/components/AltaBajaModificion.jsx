@@ -443,7 +443,7 @@ const AltaBajaModificion = () => {
 
 
     const deleteRowDeConfiguraciones = (propiedad, id) => {
-        console.log("propiedad:", propiedad, "id:", id);
+        
         setConfiguraciones((prevConfiguraciones) => {
             // Filtra las filas para excluir la fila con el id especificado
             const updatedRows = prevConfiguraciones[propiedad].rows.filter((row) => row.id !== id);
@@ -482,7 +482,7 @@ const AltaBajaModificion = () => {
         });
 
 
-        console.log("propiedad:", propiedad, "id:", id, "updatedRow:", updatedRow);
+       
     };
 
 
@@ -491,7 +491,7 @@ const AltaBajaModificion = () => {
     const handleActionClick = async (action, params) => {
         if (action === 'borrar') {
             try {
-                console.log("Borrando:", params.id);
+                
                 setCargando(true);
                 await deleteRow(params.id, selectOption);
                 window.scrollTo({ top: 0, behavior: 'smooth' });

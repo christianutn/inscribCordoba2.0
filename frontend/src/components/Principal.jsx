@@ -87,7 +87,7 @@ export default function Principal() {
       const res = await getMyUser();
       setUser(res);
 
-      console.log("USUARIOS: ", res)
+     
 
       if (!res) {
         navigate('/login');
@@ -233,7 +233,7 @@ export default function Principal() {
         </List>
         <Divider />
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' }}>
-          {console.log(user)}
+         
 
           <Button mensaje={"Cerrar Sesión"}
             hanldeOnClick={() => {

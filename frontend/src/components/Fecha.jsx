@@ -14,7 +14,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   useEffect(() => {
     (async () => {
       const response = await getMatrizFechas();
-      console.log("Matriz de fechas cargaaaaaaaaaaaaaaaa");
+      
       setMatrizFechas(response);
     })();
   }, []);
@@ -40,7 +40,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
       const claveDia = `${claveAnioMes}-${fechaAValidar[2]}`;
 
       if (matrizFechas[claveAnioMes]) {
-        console.log("]Matriz de fecha:", matrizFechas)
+        
         return matrizFechas[claveAnioMes].invalidarMesAnio || matrizFechas[claveAnioMes][claveDia]?.invalidarDia;
       }
     }

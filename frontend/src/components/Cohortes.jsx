@@ -110,9 +110,7 @@ const Cohorte = ({getCohortes}) => {
                         <div className='diver'>
                             <Divider />
                         </div>
-                        {
-                            console.log(cohortes)
-                        }
+                       
                        
                     </div>
 
