@@ -16,6 +16,8 @@ import tutorRouter from "./tutor.routes.js";
 import tipoRolTutor from "./tipoRolTutor.routes.js";
 import googleSheetsRouter from "./googeSheets.routes.js";
 import restriccionesFechasInicioCursada from "./restriccionesFechasInicioCursada.routes.js";
+import categoriaChatbotRouter from "./categoriaChatbot.routes.js";
+import diccionarioChatbotRouter from "./diccionarioChatbot.routes.js"
 
 
 
@@ -48,4 +50,8 @@ router.use("/googleSheets", googleSheetsRouter)
 
 
 router.use("/restricciones", restriccionesFechasInicioCursada)
+
+router.use("/categoriaChatbot", categoriaChatbotRouter)
+
+router.use("/diccionarioChatbot", diccionarioChatbotRouter)
 export default router

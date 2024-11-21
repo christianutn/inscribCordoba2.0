@@ -6,7 +6,7 @@ const PingTest = () => {
 
     const testConnection = async () => {
         try {
-            const res = await fetch("http://localhost:4000/api/ping"); // Cambia 'backend' si es necesario
+            const res = await fetch("http://localhost:4001/api/ping"); // Cambia 'backend' si es necesario
             if (!res.ok) throw new Error("Error en la respuesta del servidor");
             const data = await res.json();
             setResponse(data.message);

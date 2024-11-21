@@ -1,0 +1,28 @@
+services:
+  frontend:
+    build: ./frontend
+    container_name: frontend-container
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:4001/api
+    networks:
+      app-network:
+        aliases:
+          - frontend
+
+  backend:
+    build: ./backend
+    container_name: backend-container
+    ports:
+      - "4001:4000"
+    env_file:
+      - ./backend/.env
+    networks:
+      app-network:
+        aliases:
+          - backend
+
+networks:
+  app-network:
+    driver: bridge
