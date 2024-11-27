@@ -8,6 +8,7 @@
         "select-ministerio select-area  select-curso"
         "select-medio-inscripcion select-plataforma-dictado  select-tipo-capacitacion"
         "input . ."
+        "opciones-evento opciones-evento opciones-evento"
         "tutores tutores tutores"
         "cohortes cohortes cohortes"
         "submit submit submit";
@@ -26,6 +27,7 @@
         flex-direction: row;
         gap: 10px;
     }
+    .opciones-evento { grid-area: opciones-evento; }
     .tutores { grid-area: tutores; display: flex; flex-direction: column; }
     .cohortes { grid-area: cohortes; }
     .submit { grid-area: submit; }
@@ -46,6 +48,7 @@
             "select-tipo-capacitacion"
             "tutores"
             "input"
+            "opciones-evento"
             "cohortes"
             "submit";
         margin-left: 20px;

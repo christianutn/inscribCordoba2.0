@@ -18,6 +18,7 @@ const Cronograma = () => {
         (async () => {
             try {
                 const dataCronograma = await getCronograma();
+                
                 setCronograma(dataCronograma);
                 if (dataCronograma.length > 0) {
                     // Set columns using the first row

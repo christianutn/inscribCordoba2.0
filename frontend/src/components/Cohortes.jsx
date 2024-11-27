@@ -6,10 +6,10 @@ import BtnEliminar from '../components/UIElements/BotonCircular';
 import { Divider } from '@mui/material';
 import { Typography } from '@mui/material';
 import { useState } from 'react';
-import validarFecha from "../services/validarFechas.js"
 
 
-const Cohorte = ({getCohortes}) => {
+
+const Cohorte = ({ getCohortes }) => {
 
 
 
@@ -38,7 +38,7 @@ const Cohorte = ({getCohortes}) => {
     };
 
     const eliminarCohorte = (id) => {
-        
+
         setCohortes((prevCohortes) => {
             const updatedCohortes = prevCohortes.filter(cohorte => cohorte.id !== id);
             const reassignedCohortes = updatedCohortes.map((cohorte, index) => ({
@@ -61,7 +61,7 @@ const Cohorte = ({getCohortes}) => {
             )
         );
 
-       
+
     };
 
 
@@ -88,9 +88,9 @@ const Cohorte = ({getCohortes}) => {
                             <Typography variant="body1">{`Cohorte N° ${index + 1}: `}</Typography>
                         </div>
                         <div className="insc-desde">
-                            <Fecha mensaje={mensajeDesdeInscripcion} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaInscripcionDesde" value={cohorte.fechaInscripcionDesde}/>
+                            <Fecha mensaje={mensajeDesdeInscripcion} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaInscripcionDesde" value={cohorte.fechaInscripcionDesde} />
 
-                            
+
 
                         </div>
                         <div className="insc-hasta">
@@ -99,10 +99,10 @@ const Cohorte = ({getCohortes}) => {
                         </div>
                         <div className="curso-desde">
                             <Fecha mensaje={mensajeDesdeCursada} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaCursadaDesde" value={cohorte.fechaCursadaDesde}
-/>
+                            />
                         </div>
                         <div className="curso-hasta">
-                            <Fecha mensaje={mensajeHastaCursada} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaCursadaHasta" value={cohorte.fechaCursadaHasta}/>
+                            <Fecha mensaje={mensajeHastaCursada} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaCursadaHasta" value={cohorte.fechaCursadaHasta} />
                         </div>
                         <div className="icon">
                             <BtnEliminar icon={"borrar"} width={50} height={50} justifyContent={"flex-start"} alignItems={"flex-end"} onClick={() => eliminarCohorte(cohorte.id)} />
@@ -110,16 +110,18 @@ const Cohorte = ({getCohortes}) => {
                         <div className='diver'>
                             <Divider />
                         </div>
-                       
-                       
+
+
                     </div>
 
                 ))}
 
                 <div className='btnEnviar'>
+
                     <Button mensaje={"Agregar Cohorte"} icon={"signoMas"} onClick={agregarCohorte} justifyContent={"flex-start"}></Button>
+
                 </div>
-        
+
             </div>
         </>
     );

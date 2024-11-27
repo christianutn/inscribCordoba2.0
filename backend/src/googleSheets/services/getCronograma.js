@@ -11,7 +11,7 @@ export const getCronograma = async (areaAFiltrar) => {
         const auth = authorize
         const googleSheets = google.sheets({ version: 'v4', auth });
 
-        const data = await getDataRange(googleSheets, auth, "principal", "B:X");
+        const data = await getDataRange(googleSheets, auth, "principal", "B:AC");
 
         if (areaAFiltrar === "todos") {
             return data

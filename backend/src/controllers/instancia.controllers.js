@@ -56,7 +56,7 @@ export const postInstancia = async (req, res, next) => {
     const t = await sequelize.transaction();
 
     try {
-        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, cohortes, tutores } = req.body;
+        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, cohortes, tutores, opciones } = req.body;
         const aplicaRestricciones = req.user.user.esExcepcionParaFechas == 0;
 
         // Obtener objeto de fechas para verificar las reglas de negocio
@@ -123,6 +123,8 @@ export const postInstancia = async (req, res, next) => {
                 }, { transaction: t });
             }
         }
+
+        
 
         agregarFilasGoogleSheets({ ...req.body, codCurso: dataCurso.cod });
 

@@ -7,7 +7,7 @@ export const agregarFilasGoogleSheets = async (newInstancias) => {
        
         
         //Genera nueva fila para agreagr a google sheets
-        const {ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, estado, cohortes, tutores, codCurso} = newInstancias;
+        const {ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, estado, cohortes, tutores, codCurso, opciones} = newInstancias;
 
        
         //Obtiene autorización
@@ -20,8 +20,28 @@ export const agregarFilasGoogleSheets = async (newInstancias) => {
 
         for (let i = 0; i < cohortes.length; i++) {
 
-            let rowNew = [ministerio, area, codCurso, curso, cohortes[i].fechaInscripcionDesde, cohortes[i].fechaInscripcionHasta, cohortes[i].fechaCursadaDesde, cohortes[i].fechaCursadaHasta, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, stringTutores] 
-            const metaData = await appendRows(googleSheets, "principal", "B", "O", rowNew)
+            let rowNew = [
+                ministerio, 
+                area, 
+                codCurso, 
+                curso, 
+                cohortes[i].fechaInscripcionDesde, 
+                cohortes[i].fechaInscripcionHasta, 
+                cohortes[i].fechaCursadaDesde, 
+                cohortes[i].fechaCursadaHasta, 
+                medio_inscripcion, 
+                plataforma_dictado, 
+                tipo_capacitacion, 
+                cupo, 
+                horas, 
+                stringTutores, 
+                opciones.autogestionado ? "Si" : "No", 
+                opciones.edad ? "Si" : "No", 
+                opciones.departamento ? "Si" : "No", 
+                opciones.publicaPCC ? "Si" : "No",
+                opciones.correlatividad ? "Si" : "No",
+            ] 
+            const metaData = await appendRows(googleSheets, "principal", "B", "T", rowNew)
             if (!metaData) {
                 throw new Error('Error al insertar la nueva fila: Fila vacía');
             }

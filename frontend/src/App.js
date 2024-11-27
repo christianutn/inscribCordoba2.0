@@ -15,6 +15,7 @@ import CambioContrasenia from './components/CambioContrasenia';
 import PingTest from "./components/PingTest"; // Sólo a  modo de desarrollo, luego podrá eliminarse no influye con ninguna funcionalidad
 import ChatBoot from './components/ChatBot';
 
+import OpcionesEvento from './components/OpcionesEvento';
 
 
 
@@ -38,6 +39,7 @@ function App() {
         <Route path="/cambiarContrasenia" element={<CambioContrasenia />} />
         <Route path='/PingTest' element={<PingTest />} />
         <Route path='/chatbot' element={<ChatBoot />} />
+        <Route path='/OpcionesEvento' element={<OpcionesEvento />} />
 
         
 
