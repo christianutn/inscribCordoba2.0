@@ -26,12 +26,14 @@ const DiccionarioChat = ({ chatMessages }) => {
         if (newCategory.trim() && !categories.includes(newCategory)) {
             try {
                 const response = await insertCategoriasChatbot({ nombre: newCategory });
+                // if (response.status === '201') {
                 Swal.fire({
                     icon: 'success',
                     title: 'Registro exitoso',
                     text: 'La nueva categoría se registró exitosamente.',
                     confirmButtonText: 'Ok',
                 });
+                // }
                 const categorias = await getCategoriasChatbot();
                 const categoryList = categorias.map((categoria) => ({
                     id: categoria.id,

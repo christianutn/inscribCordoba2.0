@@ -13,11 +13,11 @@ export const insertCategoria = async (req, res, next) => {
     try {
         const { nombre } = req.body;
         console.log(nombre);
-        //const existe = await CategoriaChatbot.findOne({ where: { nombre: nombre } });
-        //console.log(existe);
-        //if (existe) throw new Error("El nombre de la categoría ya existe");
+        const existe = await CategoriaChatbot.findOne({ where: { nombre: nombre } });
+        console.log(existe);
+        if (existe) throw new Error("El nombre de la categoría ya existe");
         const response = await CategoriaChatbot.create({ nombre: nombre });
-        res.status(200).json(response)
+        res.status(201).json(response)
     } catch (error) {
         next(error)
     }

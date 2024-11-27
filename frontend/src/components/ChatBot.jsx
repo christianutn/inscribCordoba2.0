@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getCategoriasChatbot } from "../services/categoriaChatbot.service.js"
 import { getDiccionarioChatbot, getDiccionarioChatbotPuntual } from "../services/diccionarioChatbot.service.js"
 import Swal from 'sweetalert2';
@@ -6,10 +6,12 @@ import Swal from 'sweetalert2';
 const ChatBoot = ({ chatMessages }) => {
     const [newMessage, setNewMessage] = useState("");
     const [messages, setMessages] = useState([]);
-    const [opcionesValidas, setValidas] = useState([]);
     const [estado, setEstado] = useState("1");
     const [estadoPregunta, setEstadoP] = useState("0");
     const [isTyping, setIsTyping] = useState(false); // Nuevo estado
+
+    const chatBoxRef = useRef(null); // Referencia al contenedor de mensajes
+    const lastMessageRef = useRef(null); // Referencia al último mensaje
 
     const handleNewMessageChange = (e) => {
         setNewMessage(e.target.value);
@@ -337,24 +339,134 @@ const ChatBoot = ({ chatMessages }) => {
             console.log("Estado inicial: ", estado);
         })();
     }, []);
+    useEffect(() => {
+        if (lastMessageRef.current) {
+            lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+        if (chatBoxRef.current) {
+            chatBoxRef.current.scrollTo({
+                top: chatBoxRef.current.scrollHeight,
+                behavior: "smooth", // Animación suave
+            });
+        }
+    }, [messages]);
     return (
-        <section style={{ backgroundColor: "#eee" }}>
-            <div className="container py-5 scrollable-div">
+        // <section style={{ backgroundColor: "#eee", height: "100vh", display: "flex", flexDirection: "column" }}>
+        //     <div className="container py-5 flex-grow-1">
+        //         <div className="row d-flex justify-content-center">
+        //             <div className="col-md-12 col-lg-12 col-xl-12">
+        //                 <div className="card" id="chat1" style={{ borderRadius: "15px" }}>
+        //                     <div className="card-header d-flex justify-content-between align-items-center p-3 bg-info text-white border-bottom-0"
+        //                         style={{
+        //                             borderTopLeftRadius: "15px",
+        //                             borderTopRightRadius: "15px",
+        //                         }}
+        //                     >
+        //                         <i className="fas fa-angle-left"></i>
+        //                         <p className="mb-0 fw-bold">Asistencia Campus</p>
+        //                         <i className="fas fa-times"></i>
+        //                     </div>
+        //                     <div className="card-body" style={{ maxHeight: '500px', overflow: "auto" }}>
+        //                         {messages.map((elemento, index) => (
+        //                             elemento.side === 1 ? (
+        //                                 <div key={index} className="d-flex flex-row justify-content-start mb-4">
+        //                                     <img
+        //                                         src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+        //                                         alt="avatar 1"
+        //                                         style={{ width: "45px", height: "100%" }}
+        //                                     />
+        //                                     <div
+        //                                         className="p-3 ms-3"
+        //                                         style={{ borderRadius: "15px", backgroundColor: "rgba(57, 192, 237,.2)" }}
+        //                                     >
+        //                                         <p className="small mb-0" dangerouslySetInnerHTML={{ __html: elemento.menssage }}></p>
+        //                                     </div>
+        //                                 </div>
+        //                             ) : (
+        //                                 <div key={index} className="d-flex flex-row justify-content-end mb-4">
+        //                                     <div
+        //                                         className="p-3 me-3 border"
+        //                                         style={{ borderRadius: "15px", backgroundColor: "#fbfbfb" }}
+        //                                     >
+        //                                         <p className="small mb-0" dangerouslySetInnerHTML={{ __html: elemento.menssage }}></p>
+        //                                     </div>
+        //                                     <img
+        //                                         src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava2-bg.webp"
+        //                                         alt="avatar 2"
+        //                                         style={{ width: "45px", height: "100%" }}
+        //                                     />
+        //                                 </div>
+        //                             )
+        //                         ))}
+        //                         {isTyping && ( // Mostrar "escribiendo" si isTyping es true
+        //                             <div className="d-flex flex-row justify-content-start mb-4">
+        //                                 <img
+        //                                     src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+        //                                     alt="avatar typing"
+        //                                     style={{ width: "45px", height: "100%" }}
+        //                                 />
+        //                                 <div
+        //                                     className="p-3 ms-3"
+        //                                     style={{ borderRadius: "15px", backgroundColor: "rgba(57, 192, 237,.2)" }}
+        //                                 >
+        //                                     <p className="small mb-0"><i>Escribiendo...</i></p>
+        //                                 </div>
+        //                             </div>
+        //                         )}
+        //                         <div className="form-outline">
+        //                             <textarea
+        //                                 className="form-control"
+        //                                 id="textAreaExample"
+        //                                 rows="4"
+        //                                 value={newMessage}
+        //                                 onKeyDown={onKeyDown}
+        //                                 onChange={handleNewMessageChange}
+        //                             ></textarea>
+        //                             <label className="form-label" htmlFor="textAreaExample">Escribí tu pregunta</label>
+        //                         </div>
+        //                         <button
+        //                             type="button"
+        //                             className="btn btn-primary btn-block"
+        //                             onClick={validar}
+        //                             style={{ display: "block" }}
+        //                         >
+        //                             Preguntar
+        //                         </button>
+        //                         <button
+        //                             id="btnPreguntar"
+        //                             type="submit"
+        //                             className="btn btn-primary btn-block"
+        //                             onClick={handleSendMessage}
+        //                             style={{ display: "none" }}
+        //                         >
+        //                             Preguntar
+        //                         </button>
+        //                     </div>
+        //                 </div>
+        //             </div>
+        //         </div>
+        //     </div>
+        // </section>
+        <section style={{ backgroundColor: "#eee", height: "100vh", display: "flex", flexDirection: "column" }}>
+            <div className="container py-5 flex-grow-1">
                 <div className="row d-flex justify-content-center">
                     <div className="col-md-12 col-lg-12 col-xl-12">
-                        <div className="card" id="chat1" style={{ borderRadius: "15px" }}>
-                            <div
-                                className="card-header d-flex justify-content-between align-items-center p-3 bg-info text-white border-bottom-0"
-                                style={{
-                                    borderTopLeftRadius: "15px",
-                                    borderTopRightRadius: "15px",
-                                }}
-                            >
+                        <div className="card" id="chat1" style={{ borderRadius: "15px", height: "100%", display: "flex", flexDirection: "column" }}>
+                            <div className="card-header d-flex justify-content-between align-items-center p-3 bg-info text-white border-bottom-0"
+                                style={{ borderTopLeftRadius: "15px", borderTopRightRadius: "15px", }}>
                                 <i className="fas fa-angle-left"></i>
                                 <p className="mb-0 fw-bold">Asistencia Campus</p>
                                 <i className="fas fa-times"></i>
                             </div>
-                            <div className="card-body" style={{ maxHeight: '500px', overflow: "auto" }}>
+                            <div
+                                className="card-body flex-grow-1"
+                                style={{
+                                    maxHeight: "400px", // Altura máxima del contenedor de mensajes
+                                    overflowY: "auto", // Habilitar desplazamiento vertical
+                                    paddingBottom: "100px" // Espaciado para evitar que los mensajes oculten el área fija
+                                }}
+                                ref={chatBoxRef}
+                            >
                                 {messages.map((elemento, index) => (
                                     elemento.side === 1 ? (
                                         <div key={index} className="d-flex flex-row justify-content-start mb-4">
@@ -365,18 +477,30 @@ const ChatBoot = ({ chatMessages }) => {
                                             />
                                             <div
                                                 className="p-3 ms-3"
-                                                style={{ borderRadius: "15px", backgroundColor: "rgba(57, 192, 237,.2)" }}
+                                                style={{
+                                                    borderRadius: "15px",
+                                                    backgroundColor: "rgba(57, 192, 237, 0.2)",
+                                                }}
                                             >
-                                                <p className="small mb-0" dangerouslySetInnerHTML={{ __html: elemento.menssage }}></p>
+                                                <p
+                                                    className="small mb-0"
+                                                    dangerouslySetInnerHTML={{ __html: elemento.menssage }}
+                                                ></p>
                                             </div>
                                         </div>
                                     ) : (
                                         <div key={index} className="d-flex flex-row justify-content-end mb-4">
                                             <div
                                                 className="p-3 me-3 border"
-                                                style={{ borderRadius: "15px", backgroundColor: "#fbfbfb" }}
+                                                style={{
+                                                    borderRadius: "15px",
+                                                    backgroundColor: "#fbfbfb",
+                                                }}
                                             >
-                                                <p className="small mb-0" dangerouslySetInnerHTML={{ __html: elemento.menssage }}></p>
+                                                <p
+                                                    className="small mb-0"
+                                                    dangerouslySetInnerHTML={{ __html: elemento.menssage }}
+                                                ></p>
                                             </div>
                                             <img
                                                 src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava2-bg.webp"
@@ -386,7 +510,7 @@ const ChatBoot = ({ chatMessages }) => {
                                         </div>
                                     )
                                 ))}
-                                {isTyping && ( // Mostrar "escribiendo" si isTyping es true
+                                {isTyping && (
                                     <div className="d-flex flex-row justify-content-start mb-4">
                                         <img
                                             src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
@@ -395,23 +519,39 @@ const ChatBoot = ({ chatMessages }) => {
                                         />
                                         <div
                                             className="p-3 ms-3"
-                                            style={{ borderRadius: "15px", backgroundColor: "rgba(57, 192, 237,.2)" }}
+                                            style={{
+                                                borderRadius: "15px",
+                                                backgroundColor: "rgba(57, 192, 237, 0.2)",
+                                            }}
                                         >
-                                            <p className="small mb-0"><i>Escribiendo...</i></p>
+                                            <p className="small mb-0">
+                                                <i>Escribiendo...</i>
+                                            </p>
                                         </div>
                                     </div>
                                 )}
-                                <div className="form-outline">
-                                    <textarea
-                                        className="form-control"
-                                        id="textAreaExample"
-                                        rows="4"
-                                        value={newMessage}
-                                        onKeyDown={onKeyDown}
-                                        onChange={handleNewMessageChange}
-                                    ></textarea>
-                                    <label className="form-label" htmlFor="textAreaExample">Escribí tu pregunta</label>
-                                </div>
+                            </div>
+
+                            {/* Área de entrada fija */}
+                            <div className="card-footer text-muted d-flex align-items-center"
+                                style={{
+                                    position: "sticky",
+                                    bottom: "0",
+                                    backgroundColor: "#fff",
+                                    borderTop: "1px solid #ddd",
+                                    padding: "10px",
+                                    zIndex: 10
+                                }}
+                            >
+                                <textarea
+                                    className="form-control me-2"
+                                    id="textAreaExample"
+                                    rows="1"
+                                    value={newMessage}
+                                    onKeyDown={onKeyDown}
+                                    onChange={handleNewMessageChange}
+                                    placeholder="Escribí tu pregunta"
+                                ></textarea>
                                 <button
                                     type="button"
                                     className="btn btn-primary btn-block"

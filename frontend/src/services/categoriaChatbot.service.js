@@ -32,7 +32,8 @@ export const insertCategoriasChatbot = async (categoria) => {
         });
 
         if (response.status !== 201 && response.status !== 200) { // Verificar el estado adecuado para un POST exitoso (normalmente 201)
-            throw new Error("No se pudo insertar la categoría en el chatbot");
+            const errorData = await response.json(); // Intentar obtener los detalles del error del servidor
+            throw new Error(errorData.message || 'Error desconocido al procesar la solicitud.');
         }
 
         const data = await response.json(); // Procesar la respuesta si es necesario
