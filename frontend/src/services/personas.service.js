@@ -45,7 +45,7 @@ export const postPersona = async (persona) => {
 
 export const putPersona = async (persona) => {
 
-    console.log("PERSONA: ", persona)
+   
     try {
         const response = await fetch(URL, {
             method: "PUT",

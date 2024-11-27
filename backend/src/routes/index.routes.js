@@ -26,7 +26,7 @@ import {Router} from "express";
 
 const router = Router();
 
-console.log("Se ejecuta index.routes.js (índice de rutas)");
+
 
 router.use("/areas", areaRouter);
 router.use("/ministerios", ministerioRouter)

@@ -26,7 +26,7 @@ export const getMediosInscripcion = async () => {
 
 export const putMedioInscripcion = async (medioInscripcion) => {
     try {
-        console.log("Medios de inscriociuon: ", medioInscripcion)
+        
         const response = await fetch(URL, {
             method: "PUT",
             headers: {
