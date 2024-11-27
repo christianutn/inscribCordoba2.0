@@ -5,7 +5,7 @@ const URL = process.env.REACT_APP_API_URL + "/instancias";
 export const postInstancias = async (newInstancia) => {
     try {
 
-        const {selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes} = newInstancia
+        const {selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes, opciones} = newInstancia
 
         
         const response = await fetch(URL, {
@@ -24,7 +24,8 @@ export const postInstancias = async (newInstancia) => {
                 cupo: cupo,
                 horas: horas,
                 tutores: tutoresSeleccionados,
-                cohortes: cohortes
+                cohortes: cohortes,
+                opciones: opciones
             })
         })
         const data = await response.json();

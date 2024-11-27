@@ -22,7 +22,7 @@ import Divider from '@mui/material/Divider';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
 import { validarOrdenFechas } from "../services/validarOrdenFechas.js";
 import { useNavigate } from 'react-router-dom';
-
+import OpcionesEvento from './OpcionesEvento.jsx';
 
 
 export default function Formulario() {
@@ -51,6 +51,22 @@ export default function Formulario() {
   const [cupo, setCupo] = useState("");
   const [horas, setHoras] = useState("");
   const [cohortes, setCohortes] = useState([]);
+
+  // OPciones de evento
+
+  const [opciones, setOpciones] = useState({
+    autogestionado: false,
+    edad: false,
+    departamento: false,
+    publicaPCC: false,
+    correlatividad: false
+});
+
+// Función para actualizar los datos desde el hijo
+const manejarCambioOpciones = (nuevaOpciones) => {
+    setOpciones(nuevaOpciones);
+};
+
 
 
   // Data grid de tutores
@@ -180,7 +196,7 @@ export default function Formulario() {
 
   const handleEnviarFormulario = async () => {
 
-    
+
     setCargando(true);
     try {
 
@@ -240,7 +256,7 @@ export default function Formulario() {
         validarOrdenFechas([cohorte.fechaInscripcionDesde, cohorte.fechaInscripcionHasta, cohorte.fechaCursadaDesde, cohorte.fechaCursadaHasta]);
       })
 
-      const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes });
+      const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes, opciones });
 
       limpiarFormulario();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -265,8 +281,7 @@ export default function Formulario() {
 
   return (
     <>
-
-
+      
       {
         error &&
 
@@ -390,6 +405,11 @@ export default function Formulario() {
             <TextField label={"Cantidad de horas"} getValue={(value) => setHoras(value)} value={horas}
             />
 
+
+          </div>
+
+          <div className='opciones-evento'>
+            <OpcionesEvento opciones={opciones} onOpcionesChange={manejarCambioOpciones} />
           </div>
 
 
