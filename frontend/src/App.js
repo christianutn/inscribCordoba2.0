@@ -14,12 +14,13 @@ import RegistrosTutores from "./components/RegistrosTutores";
 import CambioContrasenia from './components/CambioContrasenia';
 import PingTest from "./components/PingTest"; // Sólo a  modo de desarrollo, luego podrá eliminarse no influye con ninguna funcionalidad
 import ChatBoot from './components/ChatBot';
+import DiccionarioChat from './components/Diccionario';
 
 
 
 
 function App() {
-  
+
   return (
     <BrowserRouter>
       <Routes>
@@ -38,10 +39,11 @@ function App() {
         <Route path="/cambiarContrasenia" element={<CambioContrasenia />} />
         <Route path='/PingTest' element={<PingTest />} />
         <Route path='/chatbot' element={<ChatBoot />} />
+        <Route path='/diccionario' element={<DiccionarioChat />} />
 
-        
 
-        
+
+
       </Routes>
     </BrowserRouter>
   );
