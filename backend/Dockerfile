@@ -1,23 +1,20 @@
-# Usa una imagen más ligera basada en Alpine
-FROM node:20-alpine
+# Usar una imagen base de Node.js
+FROM node:20
 
-# Instala las dependencias necesarias para compilar módulos nativos
-RUN apk add --no-cache python3 make g++
-
-# Establece el directorio de trabajo en /app
+# Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copia el archivo package.json y package-lock.json
+# Copiar los archivos package.json y package-lock.json
 COPY package*.json ./
 
-# Instala las dependencias (incluyendo las de desarrollo)
-RUN npm install --production=false
+# Instalar las dependencias
+RUN npm install
 
-# Copia todo el contenido de la carpeta actual al contenedor
+# Copiar el resto de la aplicación
 COPY . .
 
-# Expone el puerto en el que la aplicación está escuchando
+# Exponer el puerto en el que corre la aplicación
 EXPOSE 4000
 
-# Comando por defecto para iniciar la app
+# Comando para iniciar la aplicación
 CMD ["npm", "start"]
