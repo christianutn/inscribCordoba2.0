@@ -27,7 +27,7 @@ export const getTutores = async () => {
 
 
 export const putTutores = async (tutor) => {
-    console.log("Tutores: ", tutor)
+    
     try {
         const response = await fetch(URL, {
             method: "PUT",
@@ -75,7 +75,7 @@ export const deleteTutor = async (cuil) =>{
 
 export const postTutores = async (tutor) => {
     try {
-        console.log("tutor:", tutor)
+       
         const response = await fetch(URL, {
             method: "POST",
             headers: {

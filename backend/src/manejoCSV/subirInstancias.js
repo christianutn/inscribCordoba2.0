@@ -61,7 +61,7 @@ fs.createReadStream('./bd_instancias.csv')
 
             (async () => {
                 let res = await crearInstancia(instancia);
-                console.log(res);
+                
             })();
         });
     });

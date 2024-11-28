@@ -84,7 +84,7 @@ export const deleteCurso = async (cuil) => {
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
             }
         });
-        console.log("REsponse delete:", response)
+        
         const data = await response.json();
         if(response.status !== 200) {
             throw new Error(data.message || "Error al registrar el curso");

@@ -81,7 +81,7 @@ const crearPersona = async (persona) => {
         
         return nuevaPersona;
     } catch (error) {
-        console.log(error);
+        
         return error;
     }
 };

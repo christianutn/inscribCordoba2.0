@@ -10,10 +10,7 @@ import { putTiposCapacitacion } from "./tiposCapacitacion.service.js"
 
 
 export const updateRow = async (row, option) => {
-    console.log("ROWS:", {
-        row: row,
-        opcion: option
-    })
+   
     try {
         switch (option) {
             case 'Cursos':
@@ -119,7 +116,7 @@ export const updateRow = async (row, option) => {
         }
 
     } catch (error) {
-        console.log(error)
+      
         throw error
     }
 }
