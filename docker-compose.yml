@@ -1,28 +1,23 @@
+version: '3'
 services:
   frontend:
-    build: ./frontend
-    container_name: frontend-container
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=http://localhost:4001/api
+      - "3000:80" # Puerto 80 dentro del contenedor (Nginx) será mapeado al puerto 3000 del host
     networks:
-      app-network:
-        aliases:
-          - frontend
+      - red-inscribcordoba
 
   backend:
-    build: ./backend
-    container_name: backend-container
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
-      - "4001:4000"
-    env_file:
-      - ./backend/.env
+      - "4000:4000" # Puerto 4000 del backend será mapeado al mismo puerto en el host
     networks:
-      app-network:
-        aliases:
-          - backend
-
+      - red-inscribcordoba
+    
 networks:
-  app-network:
+  red-inscribcordoba:
     driver: bridge

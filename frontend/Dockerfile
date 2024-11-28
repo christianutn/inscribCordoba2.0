@@ -1,20 +1,32 @@
-# Usa una imagen más ligera basada en Alpine
-FROM node:20-alpine
+# 1. Imagen base de Node.js
+FROM node:20 AS build
 
-# Establece el directorio de trabajo en /app
+# 2. Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copia el archivo package.json y package-lock.json
+# 3. Copiar el package.json y el package-lock.json (si existe) al contenedor
 COPY package*.json ./
 
-# Instala las dependencias (incluyendo devDependencies)
-RUN npm install --production=false
+# 4. Instalar dependencias
+RUN npm install
 
-# Copia todo el contenido de la carpeta actual al contenedor
+# 5. Copiar el resto del código de la aplicación
 COPY . .
 
-# Expone el puerto 3000 (ajústalo si es necesario)
-EXPOSE 3000
+# 6. Construir la aplicación para producción
+RUN npm run build
 
-# Comando por defecto para iniciar la app
-CMD ["npm", "start"]
+# 7. Servir la aplicación usando Nginx
+FROM nginx:alpine
+
+# 8. Copiar los archivos estáticos generados en la carpeta build al directorio de Nginx
+COPY --from=build /app/build /usr/share/nginx/html
+
+# 9. Copiar el archivo de configuración de Nginx personalizado
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# 10. Exponer el puerto 80 para acceder a la aplicación
+EXPOSE 80
+
+# 11. Comando por defecto para iniciar Nginx
+CMD ["nginx", "-g", "daemon off;"]
