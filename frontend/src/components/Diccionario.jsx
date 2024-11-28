@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getCategoriasChatbot, insertCategoriasChatbot } from "../services/categoriaChatbot.service.js";
-import { getDiccionarioChatbot, getDiccionarioChatbotPuntual } from "../services/diccionarioChatbot.service.js";
+import { getDiccionarioChatbot, getDiccionarioChatbotPuntual, insertDiccionarioChatbotPuntual } from "../services/diccionarioChatbot.service.js";
 import { getDiccionarioChatbotnr } from "../services/diccionarioChatbotnr.service.js";
 import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -21,6 +21,7 @@ const DiccionarioChat = ({ chatMessages }) => {
     const [newImage, setNewImage] = useState(null);
     const [unfoundQuestions, setUnfoundQuestions] = useState([]);
     const [registeredQuestions, setRegisteredQuestions] = useState([]);
+    const fileInputRef = useRef(null);
 
     const handleAddCategory = async (e) => {
         console.log("Nueva categoria a registrar", newCategory);
@@ -64,21 +65,31 @@ const DiccionarioChat = ({ chatMessages }) => {
         }
     };
     const handleRegisterQuestion = () => {
+        console.log("Nueva categoria: ", newCategory);
+        console.log("Nueva pregunta: ", newQuestion);
+        console.log("Nueva respuesta: ", newAnswer);
+        console.log("Nueva imagen: ", newImage);
         if (newQuestion.trim() && newAnswer.trim()) {
             setRegisteredQuestions([
                 ...registeredQuestions,
                 { question: newQuestion, answer: newAnswer, image: newImage },
             ]);
+            setNewCategory("0");
             setNewQuestion("");
             setNewAnswer("");
-            setNewImage(null);
+            resetFileInput();
         }
     };
 
     const handleFileChange = (e) => {
         setNewImage(e.target.files[0]);
     };
-
+    const resetFileInput = () => {
+        setNewImage(null); // Limpia el estado
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ""; // Resetea el input
+        }
+    };
     const handleNewMessageChange = (e) => {
         setNewMessage(e.target.value);
     };
@@ -109,23 +120,51 @@ const DiccionarioChat = ({ chatMessages }) => {
             }
         }
     };
-    const validar = (e) => {
-        if (newMessage.trim() === "") {
-            const alertText = estado === "2"
-                ? 'Por favor, escribí tu pregunta antes de continuar.'
-                : 'Por favor, ingresá una de las opciones antes de continuar.';
+    const validar = () => {
+        const categorySelect = document.getElementById("categorySelect");
+        const questionInput = document.getElementById("questionInput");
+        const answerInput = document.getElementById("answerInput");
 
+        // Verificar que se haya seleccionado una categoría válida
+        if (categorySelect.value === "0" || categorySelect.value === "") {
             Swal.fire({
                 icon: 'warning',
                 title: 'Campo vacío',
-                text: alertText,
+                text: 'Por favor, seleccioná una categoría antes de continuar.',
                 confirmButtonText: 'Entendido',
             });
+            categorySelect.focus();
             return;
-        } else {
-            realizarAccionEspecificaBusqueda();
         }
+
+        // Verificar que el campo de pregunta no esté vacío
+        if (questionInput.value.trim() === "") {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campo vacío',
+                text: 'Por favor, escribí tu pregunta antes de continuar.',
+                confirmButtonText: 'Entendido',
+            });
+            questionInput.focus();
+            return;
+        }
+
+        // Verificar que el campo de respuesta no esté vacío
+        if (answerInput.value.trim() === "") {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campo vacío',
+                text: 'Por favor, ingresá una respuesta antes de continuar.',
+                confirmButtonText: 'Entendido',
+            });
+            answerInput.focus();
+            return;
+        }
+
+        // Si todo está bien, proceder con la acción específica
+        realizarAccionEspecificaBusqueda();
     };
+
     const handleSendMessage = async (e) => {
         console.log("Estado inicial: ", estado);
         e.preventDefault();
@@ -374,7 +413,7 @@ const DiccionarioChat = ({ chatMessages }) => {
         return Number.isInteger(valor);
     }
     function realizarAccionEspecificaBusqueda() {
-        var btnBusca = document.getElementById("btnPreguntar");
+        var btnBusca = document.getElementById("btnRegistrar");
         btnBusca.click();
     }
     useEffect(() => {
@@ -488,7 +527,11 @@ const DiccionarioChat = ({ chatMessages }) => {
                                             <div className="mb-3">
                                                 <label htmlFor="categorySelect" className="form-label">Categoría</label>
                                                 <div className="input-group">
-                                                    <select className="form-select" id="categorySelect">
+                                                    <select
+                                                        className="form-select"
+                                                        id="categorySelect"
+                                                        value={newCategory}
+                                                        onChange={(e) => setNewCategory(e.target.value)}>
                                                         {categories.map((category) => (
                                                             <option key={category.id} value={category.id}>
                                                                 {category.nombre}
@@ -531,10 +574,19 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                     type="file"
                                                     className="form-control"
                                                     id="imageInput"
+                                                    ref={fileInputRef}
                                                     onChange={handleFileChange}
                                                 />
                                             </div>
-                                            <button className="btn btn-primary" onClick={handleRegisterQuestion}>
+                                            <button
+                                                type="button"
+                                                className="btn btn-primary btn-block"
+                                                onClick={validar}
+                                                style={{ display: "block" }}
+                                            >
+                                                Registrar Pregunta
+                                            </button>
+                                            <button id="btnRegistrar" className="btn btn-primary" style={{ display: "none" }} onClick={handleRegisterQuestion}>
                                                 Registrar Pregunta
                                             </button>
                                         </div>
@@ -542,14 +594,15 @@ const DiccionarioChat = ({ chatMessages }) => {
                                     {/* Grillas */}
                                     <div className="row"><hr></hr><br></br></div>
                                     <div className="row">
+                                        {/* Preguntas no registradas */}
                                         <div className="col-md-12">
                                             <h5 className="text-primary fw-bold mb-4">Preguntas No Encontradas</h5>
                                             {unfoundQuestions.length === 0 ? (
                                                 <p className="text-muted">No hay preguntas no encontradas</p>
                                             ) : (
-                                                <div className="table-responsive">
-                                                    <table className="table table-bordered table-sm table-striped table-hover rounded-4 shadow-sm">
-                                                        <thead className="table-primary text-center">
+                                                <div className="table-responsive" style={{ borderRadius: "10px", maxHeight: "150px" }}>
+                                                    <table className="table table-bordered table-sm table-striped table-hover rounded-4 shadow-sm" style={{ height: "150px", overflowY: "auto", border: "1px solid #dee2e6", borderRadius: "4px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}>
+                                                        <thead className="table-danger text-center">
                                                             <tr>
                                                                 <th>#</th>
                                                                 <th>Pregunta</th>
@@ -559,7 +612,7 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                         </thead>
                                                         <tbody>
                                                             {unfoundQuestions.map((question, index) => (
-                                                                <tr key={question.id} className={`text-center ${index % 2 === 0 ? "table-light" : "table-secondary"}`}>
+                                                                <tr key={question.id} className={`text-center ${index % 2 === 0 ? "table-light" : "table-default"}`}>
                                                                     <td>{index + 1}</td>
                                                                     <td>{question.pregunta}</td>
                                                                     <td>{question.incidencia}</td>
@@ -586,9 +639,9 @@ const DiccionarioChat = ({ chatMessages }) => {
                                             {registeredQuestions.length === 0 ? (
                                                 <p className="text-muted">No hay preguntas registradas</p>
                                             ) : (
-                                                <div className="table-responsive">
-                                                    <table className="table table-bordered table-sm table-striped table-hover rounded-4 shadow-sm">
-                                                        <thead className="table-dark text-center">
+                                                <div className="table-responsive" style={{ borderRadius: "10px", maxHeight: "150px" }}>
+                                                    <table className="table table-bordered table-sm table-striped table-hover rounded-4 shadow-lg" style={{ height: "150px", overflowY: "auto", border: "1px solid #dee2e6", borderRadius: "4px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}>
+                                                        <thead className="table-success text-center">
                                                             <tr>
                                                                 <th>#</th>
                                                                 <th>Pregunta</th>
@@ -598,7 +651,10 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                         </thead>
                                                         <tbody>
                                                             {registeredQuestions.map((q, index) => (
-                                                                <tr key={index} className={`text-center ${index % 2 === 0 ? "table-light" : "table-secondary"}`}>
+                                                                <tr
+                                                                    key={index}
+                                                                    className={`text-center ${index % 2 === 0 ? "table-light" : "table-default"}`}
+                                                                >
                                                                     <td>{index + 1}</td>
                                                                     <td>{q.question}</td>
                                                                     <td>{q.answer}</td>
@@ -621,6 +677,7 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                 </div>
                                             )}
                                         </div>
+
                                     </div>
 
                                 </div>

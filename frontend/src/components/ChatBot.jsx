@@ -226,6 +226,7 @@ const ChatBoot = ({ chatMessages }) => {
                         setEstado("1");
                         setIsTyping(false);
                         console.log("Estado final: ", estado);
+                        localStorage.setItem('opcionesValidas', JSON.stringify([]));
                         return;
                     }
                     else {
@@ -351,102 +352,6 @@ const ChatBoot = ({ chatMessages }) => {
         }
     }, [messages]);
     return (
-        // <section style={{ backgroundColor: "#eee", height: "100vh", display: "flex", flexDirection: "column" }}>
-        //     <div className="container py-5 flex-grow-1">
-        //         <div className="row d-flex justify-content-center">
-        //             <div className="col-md-12 col-lg-12 col-xl-12">
-        //                 <div className="card" id="chat1" style={{ borderRadius: "15px" }}>
-        //                     <div className="card-header d-flex justify-content-between align-items-center p-3 bg-info text-white border-bottom-0"
-        //                         style={{
-        //                             borderTopLeftRadius: "15px",
-        //                             borderTopRightRadius: "15px",
-        //                         }}
-        //                     >
-        //                         <i className="fas fa-angle-left"></i>
-        //                         <p className="mb-0 fw-bold">Asistencia Campus</p>
-        //                         <i className="fas fa-times"></i>
-        //                     </div>
-        //                     <div className="card-body" style={{ maxHeight: '500px', overflow: "auto" }}>
-        //                         {messages.map((elemento, index) => (
-        //                             elemento.side === 1 ? (
-        //                                 <div key={index} className="d-flex flex-row justify-content-start mb-4">
-        //                                     <img
-        //                                         src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
-        //                                         alt="avatar 1"
-        //                                         style={{ width: "45px", height: "100%" }}
-        //                                     />
-        //                                     <div
-        //                                         className="p-3 ms-3"
-        //                                         style={{ borderRadius: "15px", backgroundColor: "rgba(57, 192, 237,.2)" }}
-        //                                     >
-        //                                         <p className="small mb-0" dangerouslySetInnerHTML={{ __html: elemento.menssage }}></p>
-        //                                     </div>
-        //                                 </div>
-        //                             ) : (
-        //                                 <div key={index} className="d-flex flex-row justify-content-end mb-4">
-        //                                     <div
-        //                                         className="p-3 me-3 border"
-        //                                         style={{ borderRadius: "15px", backgroundColor: "#fbfbfb" }}
-        //                                     >
-        //                                         <p className="small mb-0" dangerouslySetInnerHTML={{ __html: elemento.menssage }}></p>
-        //                                     </div>
-        //                                     <img
-        //                                         src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava2-bg.webp"
-        //                                         alt="avatar 2"
-        //                                         style={{ width: "45px", height: "100%" }}
-        //                                     />
-        //                                 </div>
-        //                             )
-        //                         ))}
-        //                         {isTyping && ( // Mostrar "escribiendo" si isTyping es true
-        //                             <div className="d-flex flex-row justify-content-start mb-4">
-        //                                 <img
-        //                                     src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
-        //                                     alt="avatar typing"
-        //                                     style={{ width: "45px", height: "100%" }}
-        //                                 />
-        //                                 <div
-        //                                     className="p-3 ms-3"
-        //                                     style={{ borderRadius: "15px", backgroundColor: "rgba(57, 192, 237,.2)" }}
-        //                                 >
-        //                                     <p className="small mb-0"><i>Escribiendo...</i></p>
-        //                                 </div>
-        //                             </div>
-        //                         )}
-        //                         <div className="form-outline">
-        //                             <textarea
-        //                                 className="form-control"
-        //                                 id="textAreaExample"
-        //                                 rows="4"
-        //                                 value={newMessage}
-        //                                 onKeyDown={onKeyDown}
-        //                                 onChange={handleNewMessageChange}
-        //                             ></textarea>
-        //                             <label className="form-label" htmlFor="textAreaExample">Escribí tu pregunta</label>
-        //                         </div>
-        //                         <button
-        //                             type="button"
-        //                             className="btn btn-primary btn-block"
-        //                             onClick={validar}
-        //                             style={{ display: "block" }}
-        //                         >
-        //                             Preguntar
-        //                         </button>
-        //                         <button
-        //                             id="btnPreguntar"
-        //                             type="submit"
-        //                             className="btn btn-primary btn-block"
-        //                             onClick={handleSendMessage}
-        //                             style={{ display: "none" }}
-        //                         >
-        //                             Preguntar
-        //                         </button>
-        //                     </div>
-        //                 </div>
-        //             </div>
-        //         </div>
-        //     </div>
-        // </section>
         <section style={{ backgroundColor: "#eee", height: "100vh", display: "flex", flexDirection: "column" }}>
             <div className="container py-5 flex-grow-1">
                 <div className="row d-flex justify-content-center">

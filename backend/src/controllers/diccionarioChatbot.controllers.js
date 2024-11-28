@@ -45,4 +45,16 @@ export const getDiccionarioChatbotPuntual = async (req, res) => {
     }
 };
 
-
+export const insertDiccionarioChatbot = async (req, res, next) => {
+    try {
+        const { newCategory, newQuestion, newAnswer, newImage } = req.body;
+        // console.log(nombre);
+        const existe = await DiccionarioChatbot.findOne({ where: { idCategoria: newCategory, pregunta: newQuestion } });
+        console.log(existe);
+        if (existe) throw new Error("La pregunta ya existe para la categoría seleccionada");
+        const response = await DiccionarioChatbot.create({ pregunta: newQuestion, respuesta: newAnswer, imagen: newImage, idCategoria: newCategory });
+        res.status(201).json(response)
+    } catch (error) {
+        next(error)
+    }
+};
