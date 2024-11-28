@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { getCategoriasChatbot, insertCategoriasChatbot } from "../services/categoriaChatbot.service.js"
-import { getDiccionarioChatbot, getDiccionarioChatbotPuntual } from "../services/diccionarioChatbot.service.js"
+import { getCategoriasChatbot, insertCategoriasChatbot } from "../services/categoriaChatbot.service.js";
+import { getDiccionarioChatbot, getDiccionarioChatbotPuntual } from "../services/diccionarioChatbot.service.js";
+import { getDiccionarioChatbotnr } from "../services/diccionarioChatbotnr.service.js";
 import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -62,7 +63,6 @@ const DiccionarioChat = ({ chatMessages }) => {
             });
         }
     };
-
     const handleRegisterQuestion = () => {
         if (newQuestion.trim() && newAnswer.trim()) {
             setRegisteredQuestions([
@@ -392,10 +392,29 @@ const DiccionarioChat = ({ chatMessages }) => {
                 { id: "0", nombre: "Seleccioná una categoría" },
                 ...categoryList,
             ]);
+
+            const registradas = await getDiccionarioChatbot("", "");
+
+            // Actualizando el estado con las preguntas obtenidas
+            setRegisteredQuestions(registradas.map((question) => ({
+                id: question.id,
+                question: question.pregunta,
+                answer: question.respuesta,
+                image: question.imagen,
+                categoryId: question.idCategoria
+            })));
+
+            try {
+                const noRegistradas = await getDiccionarioChatbotnr();
+                console.log(noRegistradas);
+                // // Llenar el estado con los datos obtenidos
+                setUnfoundQuestions(noRegistradas);
+            }
+            catch (error) { }
         })();
     }, []);
     return (
-        <section style={{ backgroundColor: "#eee", width: "100 %" }}>
+        <section style={{ backgroundColor: "#eee", width: "100 vh", display: "flex", flexDirection: "column" }}>
             <div className="container py-5 scrollable-div">
                 <div className="row d-flex justify-content-center">
                     <div className="col-md-12 col-lg-12 col-xl-12">
@@ -461,7 +480,6 @@ const DiccionarioChat = ({ chatMessages }) => {
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="container mt-4">
                                     {/* Formulario para nuevas preguntas */}
                                     <div className="card mb-4">
@@ -521,46 +539,56 @@ const DiccionarioChat = ({ chatMessages }) => {
                                             </button>
                                         </div>
                                     </div>
-
                                     {/* Grillas */}
+                                    <div className="row"><hr></hr><br></br></div>
                                     <div className="row">
                                         <div className="col-md-12">
-                                            <h5>Preguntas No Encontradas</h5>
+                                            <h5 className="text-primary fw-bold mb-4">Preguntas No Encontradas</h5>
                                             {unfoundQuestions.length === 0 ? (
                                                 <p className="text-muted">No hay preguntas no encontradas</p>
                                             ) : (
                                                 <div className="table-responsive">
-                                                    <table className="table table-striped">
-                                                        <thead>
+                                                    <table className="table table-bordered table-sm table-striped table-hover rounded-4 shadow-sm">
+                                                        <thead className="table-primary text-center">
                                                             <tr>
                                                                 <th>#</th>
                                                                 <th>Pregunta</th>
+                                                                <th>Incidencia</th>
+                                                                <th>Procesada</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {/* {unfoundQuestions.map((question, index) => (
-                                                                <tr key={index}>
+                                                            {unfoundQuestions.map((question, index) => (
+                                                                <tr key={question.id} className={`text-center ${index % 2 === 0 ? "table-light" : "table-secondary"}`}>
                                                                     <td>{index + 1}</td>
-                                                                    <td>{question}</td>
+                                                                    <td>{question.pregunta}</td>
+                                                                    <td>{question.incidencia}</td>
+                                                                    {question.pocesada ? (
+                                                                        <td className="text-success fw-bold">Procesada</td>
+                                                                    ) : (
+                                                                        <td>
+                                                                            <button className="btn btn-warning btn-sm">Procesar</button>
+                                                                        </td>
+                                                                    )}
                                                                 </tr>
-                                                            ))} */}
+                                                            ))}
                                                         </tbody>
                                                     </table>
                                                 </div>
                                             )}
                                         </div>
-
                                     </div>
+                                    <div className="row"><hr></hr><br></br></div>
                                     <div className="row">
                                         {/* Preguntas registradas */}
                                         <div className="col-md-12">
-                                            <h5>Preguntas Registradas</h5>
+                                            <h5 className="text-primary fw-bold mb-4">Preguntas Registradas</h5>
                                             {registeredQuestions.length === 0 ? (
                                                 <p className="text-muted">No hay preguntas registradas</p>
                                             ) : (
                                                 <div className="table-responsive">
-                                                    <table className="table table-striped">
-                                                        <thead>
+                                                    <table className="table table-bordered table-sm table-striped table-hover rounded-4 shadow-sm">
+                                                        <thead className="table-dark text-center">
                                                             <tr>
                                                                 <th>#</th>
                                                                 <th>Pregunta</th>
@@ -569,8 +597,8 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {/* {registeredQuestions.map((q, index) => (
-                                                                <tr key={index}>
+                                                            {registeredQuestions.map((q, index) => (
+                                                                <tr key={index} className={`text-center ${index % 2 === 0 ? "table-light" : "table-secondary"}`}>
                                                                     <td>{index + 1}</td>
                                                                     <td>{q.question}</td>
                                                                     <td>{q.answer}</td>
@@ -579,29 +607,35 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                                             <img
                                                                                 src={URL.createObjectURL(q.image)}
                                                                                 alt="Pregunta"
-                                                                                className="img-thumbnail"
-                                                                                style={{ width: "100px", height: "auto" }}
+                                                                                className="img-fluid img-thumbnail"
+                                                                                style={{ maxWidth: "100px", height: "auto" }}
                                                                             />
                                                                         ) : (
-                                                                            "Sin imagen"
+                                                                            <span className="text-muted">Sin imagen</span>
                                                                         )}
                                                                     </td>
                                                                 </tr>
-                                                            ))} */}
+                                                            ))}
                                                         </tbody>
                                                     </table>
                                                 </div>
                                             )}
                                         </div>
-
                                     </div>
+
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {/* <footer className="bg-dark text-white text-center py-3" style={{ marginTop: "auto", marginBottom: "20px" }}>
+                <div className="container">
+                    <p className="mb-0">&copy; {new Date().getFullYear()} Campus. Todos los derechos reservados.</p>
+                </div>
+            </footer> */}
         </section>
+
     );
 };
 

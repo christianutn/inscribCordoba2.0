@@ -1,6 +1,6 @@
 const URL = process.env.REACT_APP_API_URL + "/diccionarioChatbot";
 const URLP = process.env.REACT_APP_API_URL + "/diccionarioChatbot/Puntual";
-
+console.log(URL);
 export const getDiccionarioChatbot = async (pregunta, idCategoria) => {
     try {
         const response = await fetch(`${URL}?pregunta=${pregunta}&idCategoria=${idCategoria}`, {

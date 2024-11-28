@@ -18,10 +18,11 @@ import googleSheetsRouter from "./googeSheets.routes.js";
 import restriccionesFechasInicioCursada from "./restriccionesFechasInicioCursada.routes.js";
 import categoriaChatbotRouter from "./categoriaChatbot.routes.js";
 import diccionarioChatbotRouter from "./diccionarioChatbot.routes.js"
+import diccionarioChatbotnrRouter from "./diccionarioChatbotnr.routes.js"
 
 
 
-import {Router} from "express";
+import { Router } from "express";
 
 
 const router = Router();
@@ -54,4 +55,5 @@ router.use("/restricciones", restriccionesFechasInicioCursada)
 router.use("/categoriaChatbot", categoriaChatbotRouter)
 
 router.use("/diccionarioChatbot", diccionarioChatbotRouter)
+router.use("/diccionarioChatbotnr", diccionarioChatbotnrRouter)
 export default router
