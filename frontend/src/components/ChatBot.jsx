@@ -132,6 +132,7 @@ const ChatBoot = ({ chatMessages }) => {
                 categorias.forEach((element) => {
                     primerPregunta += `${element.id}) ${element.nombre}\r\n`;
                 });
+                primerPregunta += `x: &#128073; Escribí tu pregunta si no encontrás una opción\r\n`;
                 primerPregunta = primerPregunta.replace(/\r\n/g, "<br>");
                 setMessages((prevMessages) => [
                     ...prevMessages,
@@ -172,6 +173,7 @@ const ChatBoot = ({ chatMessages }) => {
                     categorias.forEach((element) => {
                         primerPregunta += `${element.id}) ${element.nombre}\r\n`;
                     });
+                    primerPregunta += `x: &#128073; Escribí tu pregunta si no encontrás una opción\r\n`;
                     primerPregunta = primerPregunta.replace(/\r\n/g, "<br>");
                     setMessages((prevMessages) => [
                         ...prevMessages,
@@ -261,10 +263,11 @@ const ChatBoot = ({ chatMessages }) => {
             if (newMessage === "0") {
                 setEstado("0");
                 const categorias = await getCategoriasChatbot();
-                let primerPregunta = "";
+                let primerPregunta = "Ingresá una opción:\r\n";
                 categorias.forEach((element) => {
                     primerPregunta += `${element.id}: ${element.nombre}\r\n`;
                 });
+                primerPregunta += `x: &#128073; Escribí tu pregunta si no encontrás una opción\r\n`;
                 primerPregunta = primerPregunta.replace(/\r\n/g, "<br>");
                 setMessages((prevMessages) => [
                     ...prevMessages,
@@ -331,9 +334,11 @@ const ChatBoot = ({ chatMessages }) => {
             const categorias = await getCategoriasChatbot();
             let primerPregunta =
                 "Hola!....soy ChatBoot-Campus, en qué te puedo ayudar??\r\n Ingresá una opción:\r\n";
+
             categorias.forEach((element) => {
                 primerPregunta += `${element.id}) ${element.nombre}\r\n`;
             });
+            primerPregunta += `x: &#128073; Escribí tu pregunta si no encontrás una opción\r\n`;
             primerPregunta = primerPregunta.replace(/\r\n/g, "<br>");
             setMessages([{ side: 1, menssage: primerPregunta }]);
             setEstado("0");

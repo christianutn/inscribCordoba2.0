@@ -1,12 +1,36 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getCategoriasChatbot, insertCategoriasChatbot } from "../services/categoriaChatbot.service.js";
-import { getDiccionarioChatbot, getDiccionarioChatbotPuntual, insertDiccionarioChatbotPuntual } from "../services/diccionarioChatbot.service.js";
+import { getDiccionarioChatbot, insertDiccionarioChatbot } from "../services/diccionarioChatbot.service.js";
 import { getDiccionarioChatbotnr } from "../services/diccionarioChatbotnr.service.js";
 import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
+
 const DiccionarioChat = ({ chatMessages }) => {
+    const { Buffer } = require('buffer');
+    // const [imageBase64, setImageBase64] = useState({})
+    // const convertBlobToBase64 = (blob) => {
+    //     return new Promise((resolve, reject) => {
+    //         const reader = new FileReader();
+    //         reader.onloadend = () => {
+    //             resolve(reader.result.split(',')[1]); // Devuelve solo la parte base64
+    //         };
+    //         reader.onerror = reject;
+    //         reader.readAsDataURL(blob);
+    //     });
+    // };
+    function convertFileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                resolve(reader.result); // Devuelve la cadena base64
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file); // Convierte el archivo a base64
+        });
+    }
+
     const [newMessage, setNewMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [opcionesValidas, setValidas] = useState([]);
@@ -16,6 +40,7 @@ const DiccionarioChat = ({ chatMessages }) => {
 
     const [categories, setCategories] = useState(["General", "Técnica"]);
     const [newCategory, setNewCategory] = useState("");
+    const [newCategoryM, setNewCategoryM] = useState("");
     const [newQuestion, setNewQuestion] = useState("");
     const [newAnswer, setNewAnswer] = useState("");
     const [newImage, setNewImage] = useState(null);
@@ -23,28 +48,23 @@ const DiccionarioChat = ({ chatMessages }) => {
     const [registeredQuestions, setRegisteredQuestions] = useState([]);
     const fileInputRef = useRef(null);
 
+    const [imageBase64, setImageBase64] = useState('');
     const handleAddCategory = async (e) => {
-        console.log("Nueva categoria a registrar", newCategory);
         if (newCategory.trim() && !categories.includes(newCategory)) {
             try {
                 const response = await insertCategoriasChatbot({ nombre: newCategory });
-                // if (response.status === '201') {
                 Swal.fire({
                     icon: 'success',
                     title: 'Registro exitoso',
                     text: 'La nueva categoría se registró exitosamente.',
                     confirmButtonText: 'Ok',
                 });
-                // }
                 const categorias = await getCategoriasChatbot();
                 const categoryList = categorias.map((categoria) => ({
                     id: categoria.id,
                     nombre: categoria.nombre,
                 }));
-                setCategories([
-                    { id: "0", nombre: "Seleccioná una categoría" },
-                    ...categoryList,
-                ]);
+                setNewCategoryM("");
                 return;
             } catch (error) {
                 Swal.fire({
@@ -64,26 +84,72 @@ const DiccionarioChat = ({ chatMessages }) => {
             });
         }
     };
-    const handleRegisterQuestion = () => {
+    const handleRegisterQuestion = async (e) => {
         console.log("Nueva categoria: ", newCategory);
         console.log("Nueva pregunta: ", newQuestion);
         console.log("Nueva respuesta: ", newAnswer);
         console.log("Nueva imagen: ", newImage);
-        if (newQuestion.trim() && newAnswer.trim()) {
-            setRegisteredQuestions([
-                ...registeredQuestions,
-                { question: newQuestion, answer: newAnswer, image: newImage },
-            ]);
+        try {
+            const response = await insertDiccionarioChatbot(
+                {
+                    pregunta: newQuestion,
+                    respuesta: newAnswer,
+                    imagen: newImage,
+                    idCategoria: newCategory
+                });
+            Swal.fire({
+                icon: 'success',
+                title: 'Registro exitoso',
+                text: 'Se registró la nueva pregunta correctamente.',
+                confirmButtonText: 'Ok',
+            });
+            const registradas = await getDiccionarioChatbot("", "");
+
+            // Actualizando el estado con las preguntas obtenidas
+            setRegisteredQuestions(registradas.map((question) => ({
+                id: question.id,
+                question: question.pregunta,
+                answer: question.respuesta,
+                image: question.imagen,
+                categoryId: question.idCategoria
+            })));
+
+            try {
+                const noRegistradas = await getDiccionarioChatbotnr();
+                // // Llenar el estado con los datos obtenidos
+                setUnfoundQuestions(noRegistradas);
+            }
+            catch (error) { }
             setNewCategory("0");
             setNewQuestion("");
             setNewAnswer("");
             resetFileInput();
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: '...Oops',
+                text: error,
+                confirmButtonText: 'Ok',
+            });
+        }
+    };
+    const handleFileChange = (e) => {
+        const file = e.target.files[0]; // Obtén el primer archivo seleccionado
+
+        if (file) {
+            // Convierte el archivo a base64 y guarda la imagen en el estado
+            convertFileToBase64(file).then(base64String => {
+                setImageBase64(base64String);
+            }).catch(error => {
+                console.error('Error al convertir el archivo a base64:', error);
+            });
+
+            // Guarda el archivo completo en el estado (si es necesario)
+            setNewImage(file);
+            console.log('Archivo completo:', file);
         }
     };
 
-    const handleFileChange = (e) => {
-        setNewImage(e.target.files[0]);
-    };
     const resetFileInput = () => {
         setNewImage(null); // Limpia el estado
         if (fileInputRef.current) {
@@ -127,37 +193,37 @@ const DiccionarioChat = ({ chatMessages }) => {
 
         // Verificar que se haya seleccionado una categoría válida
         if (categorySelect.value === "0" || categorySelect.value === "") {
+            categorySelect.focus();
             Swal.fire({
                 icon: 'warning',
                 title: 'Campo vacío',
                 text: 'Por favor, seleccioná una categoría antes de continuar.',
                 confirmButtonText: 'Entendido',
             });
-            categorySelect.focus();
             return;
         }
 
         // Verificar que el campo de pregunta no esté vacío
         if (questionInput.value.trim() === "") {
+            questionInput.focus();
             Swal.fire({
                 icon: 'warning',
                 title: 'Campo vacío',
                 text: 'Por favor, escribí tu pregunta antes de continuar.',
                 confirmButtonText: 'Entendido',
             });
-            questionInput.focus();
             return;
         }
 
         // Verificar que el campo de respuesta no esté vacío
         if (answerInput.value.trim() === "") {
+            answerInput.focus();
             Swal.fire({
                 icon: 'warning',
                 title: 'Campo vacío',
                 text: 'Por favor, ingresá una respuesta antes de continuar.',
                 confirmButtonText: 'Entendido',
             });
-            answerInput.focus();
             return;
         }
 
@@ -165,250 +231,6 @@ const DiccionarioChat = ({ chatMessages }) => {
         realizarAccionEspecificaBusqueda();
     };
 
-    const handleSendMessage = async (e) => {
-        console.log("Estado inicial: ", estado);
-        e.preventDefault();
-        if (newMessage.trim() === "") return;
-
-        const newMessageObject = {
-            side: 2,
-            menssage: newMessage,
-            imagen: null,
-        };
-        setMessages([...messages, newMessageObject]);
-        setNewMessage("");
-
-        // Simula que el bot está escribiendo
-        setIsTyping(true);
-
-        // Lógica para validar si el mensaje es un número entero
-        // if (validarEntero(parseInt(newMessage, 10))) {
-        if (estado === "0") {
-            const datosDeDiccionariosChatbotPorIdCategoria = await getDiccionarioChatbot("", newMessage);
-            let preguntas = "Estas con las opciones que puedo darte:\r\n";
-            preguntas += "0: Volver al menú principal\r\n";
-            const misOpciones = [];
-            if (datosDeDiccionariosChatbotPorIdCategoria.length > 0) {
-                datosDeDiccionariosChatbotPorIdCategoria.forEach((element) => {
-                    preguntas += `${element.id}: ${element.pregunta}\r\n`;
-                    misOpciones.push(element.id.toString());
-                });
-                localStorage.setItem('opcionesValidas', JSON.stringify(misOpciones));
-                preguntas += `x: &#128073; Escribí tu pregunta si no encontrás una opción\r\n`;
-                preguntas = preguntas.replace(/\r\n/g, "<br>");
-                setMessages((prevMessages) => [
-                    ...prevMessages,
-                    {
-                        side: 1,
-                        menssage: preguntas || 'Sin respuesta'
-                    },
-                ]);
-                setEstado("1");
-                setIsTyping(false);
-                console.log("Estado final: ", estado);
-                return;
-            } else {
-                let error = `&#10060; La opción ingresada es incorrecta.\r\nIngrese una de las opciones siguientes:\r\n`;
-                const categorias = await getCategoriasChatbot();
-                categorias.forEach((element) => {
-                    error += `${element.id}: ${element.nombre}\r\n`;
-                });
-                error = error.replace(/\r\n/g, "<br>");
-                setMessages((prevMessages) => [
-                    ...prevMessages,
-                    {
-                        side: 1,
-                        menssage: error || 'Sin respuesta'
-                    },
-                ]);
-                setEstado("0");
-                setIsTyping(false);
-                console.log("Estado final: ", estado);
-                return;
-            }
-        }
-        if (estado === "1") {
-            if (newMessage === "0") {
-                setEstado("0");
-                const categorias = await getCategoriasChatbot();
-                let primerPregunta = "Ingresá una opción:\r\n";
-                categorias.forEach((element) => {
-                    primerPregunta += `${element.id}) ${element.nombre}\r\n`;
-                });
-                primerPregunta = primerPregunta.replace(/\r\n/g, "<br>");
-                setMessages((prevMessages) => [
-                    ...prevMessages,
-                    {
-                        side: 1,
-                        menssage: primerPregunta || 'Sin respuesta'
-                    },
-                ]);
-                setIsTyping(false);
-                setEstadoP("0");
-                console.log("Estado final: ", estado);
-                return;
-            }
-            if (newMessage === "x" || newMessage === "X") {
-                // Acción para "x", cuando el usuario quiera hacer una pregunta personalizada
-                setEstado("2");
-                setEstadoP("1");
-                setMessages((prevMessages) => [
-                    ...prevMessages,
-                    {
-                        side: 1,
-                        menssage: "Por favor, escribí tu pregunta que voy a tratar de responderte, o sino ingresá 0 (cero) para volver al menú principal."
-                    },
-                ]);
-                setIsTyping(false);
-                console.log("Estado final: ", estado);
-                return;
-            }
-            if (estado === "1") {
-                if (estadoPregunta === "0") {
-                    if (newMessage === "0") {
-                        setEstado("0");
-                        const categorias = await getCategoriasChatbot();
-                        let primerPregunta = "Ingresá una opción:\r\n";
-                        categorias.forEach((element) => {
-                            primerPregunta += `${element.id}) ${element.nombre}\r\n`;
-                        });
-                        primerPregunta = primerPregunta.replace(/\r\n/g, "<br>");
-                        setMessages((prevMessages) => [
-                            ...prevMessages,
-                            {
-                                side: 1,
-                                menssage: primerPregunta || 'Sin respuesta'
-                            },
-                        ]);
-                        setIsTyping(false);
-                        setEstadoP("0");
-                        console.log("Estado final: ", estado);
-                        return;
-                    }
-                    if (newMessage === "x" || newMessage === "X") {
-                        // Acción para "x", cuando el usuario quiera hacer una pregunta personalizada
-                        setEstado("2");
-                        setEstadoP("0");
-                        setMessages((prevMessages) => [
-                            ...prevMessages,
-                            {
-                                side: 1,
-                                menssage: "Por favor, escribí tu pregunta que voy a tratar de responderte, o sino ingresá 0 (cero) para volver al menú principal."
-                            },
-                        ]);
-                        setIsTyping(false);
-                        console.log("Estado final: ", estado);
-                        return;
-                    }
-                    if (newMessage != "0" && newMessage != "x" && newMessage != "X") {
-                        // Validación de una opción seleccionada
-                        const opcionesValidas = JSON.parse(localStorage.getItem('opcionesValidas')) || [];
-                        console.log(opcionesValidas);
-                        if (opcionesValidas.includes(newMessage.trim())) {
-                            const preguntaPuntual = await getDiccionarioChatbotPuntual(newMessage);
-                            let respuesta = "";
-                            respuesta += `0: Volver al menú principal\r\n`;
-                            preguntaPuntual.forEach((element) => {
-                                respuesta += `&#9989; ${element.respuesta}\r\n`;
-                            });
-                            respuesta = respuesta.replace(/\r\n/g, "<br>");
-                            setMessages((prevMessages) => [
-                                ...prevMessages,
-                                {
-                                    side: 1,
-                                    menssage: respuesta || 'Sin respuesta'
-                                },
-                            ]);
-                            setEstadoP("1");
-                            setIsTyping(false);
-                            console.log("Estado final: ", estado);
-                            return;
-                        }
-                        else {
-                            let condicion = "Debe ingresar una opción válida";
-                            setMessages((prevMessages) => [
-                                ...prevMessages,
-                                {
-                                    side: 1,
-                                    menssage: condicion || 'Sin respuesta'
-                                },
-                            ]);
-                            setIsTyping(false);
-                            return;
-                        }
-                    }
-                }
-                else {
-                    let condicion = "La única opción válida es 0 (cero)";
-                    setMessages((prevMessages) => [
-                        ...prevMessages,
-                        {
-                            side: 1,
-                            menssage: condicion || 'Sin respuesta'
-                        },
-                    ]);
-                    setIsTyping(false);
-                    return;
-                }
-            }
-        }
-        if (estado === "2") {
-            if (newMessage === "0") {
-                setEstado("0");
-                const categorias = await getCategoriasChatbot();
-                let primerPregunta = "";
-                categorias.forEach((element) => {
-                    primerPregunta += `${element.id}: ${element.nombre}\r\n`;
-                });
-                primerPregunta = primerPregunta.replace(/\r\n/g, "<br>");
-                setMessages((prevMessages) => [
-                    ...prevMessages,
-                    {
-                        side: 1,
-                        menssage: primerPregunta || 'Sin respuesta'
-                    },
-                ]);
-                setIsTyping(false);
-                return;
-            }
-            else {
-                const preguntaPuntual = await getDiccionarioChatbot(newMessage, "");
-                if (preguntaPuntual.length > 0) {
-                    let respuesta = "";
-                    respuesta += `0: Volver al menú principal\r\n`;
-                    preguntaPuntual.forEach((element) => {
-                        respuesta += `&#9989; ${element.respuesta}\r\n`;
-                    });
-                    respuesta = respuesta.replace(/\r\n/g, "<br>");
-                    setMessages((prevMessages) => [
-                        ...prevMessages,
-                        {
-                            side: 1,
-                            menssage: respuesta || 'Sin respuesta'
-                        },
-                    ]);
-                    setIsTyping(false);
-                }
-                else {
-                    let respuesta = "";
-                    respuesta += `0: Volver al menú principal\r\n`;
-                    respuesta += `&#10060;Mis disculpas, no tengo una respuesta concreta para tu pregunta, pero podes escribir a nuestro equipo de administradores que sabrán brindarte una atención mas especializada. Escribinos a <span style='color:blue'>consultascampuscordoba@cba.gov.ar</span>.`;
-                    respuesta = respuesta.replace(/\r\n/g, "<br>");
-                    setMessages((prevMessages) => [
-                        ...prevMessages,
-                        {
-                            side: 1,
-                            menssage: respuesta || 'Sin respuesta'
-                        },
-                    ]);
-                    setIsTyping(false);
-                }
-            }
-        }
-        // Finaliza la simulación de escritura
-        console.log("Estado final: ", estado);
-        setIsTyping(false);
-    };
     function validarEntero(valor) {
         return Number.isInteger(valor);
     }
@@ -433,8 +255,6 @@ const DiccionarioChat = ({ chatMessages }) => {
             ]);
 
             const registradas = await getDiccionarioChatbot("", "");
-
-            // Actualizando el estado con las preguntas obtenidas
             setRegisteredQuestions(registradas.map((question) => ({
                 id: question.id,
                 question: question.pregunta,
@@ -442,10 +262,27 @@ const DiccionarioChat = ({ chatMessages }) => {
                 image: question.imagen,
                 categoryId: question.idCategoria
             })));
-
+            console.log("Registradas ", registeredQuestions)
+            // const fetchImages = async () => {
+            //     const newImageBase64 = {};
+            //     for (let i = 0; i < registeredQuestions.length; i++) {
+            //         const q = registeredQuestions[i];
+            //         if (q.image && q.image instanceof Blob) {
+            //             try {
+            //                 const base64String = await convertBlobToBase64(q.image);
+            //                 newImageBase64[i] = base64String; // Guarda la imagen codificada en base64
+            //                 q.image = base64String;
+            //             } catch (error) {
+            //                 console.error("Error al convertir el Blob a base64:", error);
+            //             }
+            //         }
+            //     }
+            //     setImageBase64(newImageBase64);
+            // };
+            // fetchImages();
+            console.log("Registradas ", registeredQuestions)
             try {
                 const noRegistradas = await getDiccionarioChatbotnr();
-                console.log(noRegistradas);
                 // // Llenar el estado con los datos obtenidos
                 setUnfoundQuestions(noRegistradas);
             }
@@ -495,8 +332,8 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Nombre de la categoría"
-                                                    value={newCategory}
-                                                    onChange={(e) => setNewCategory(e.target.value)}
+                                                    value={newCategoryM}
+                                                    onChange={(e) => setNewCategoryM(e.target.value)}
                                                 />
                                             </div>
                                             <div className="modal-footer">
@@ -600,9 +437,9 @@ const DiccionarioChat = ({ chatMessages }) => {
                                             {unfoundQuestions.length === 0 ? (
                                                 <p className="text-muted">No hay preguntas no encontradas</p>
                                             ) : (
-                                                <div className="table-responsive" style={{ borderRadius: "10px", maxHeight: "150px" }}>
+                                                <div className="table-responsive" style={{ borderRadius: "10px", maxHeight: "250px" }}>
                                                     <table className="table table-bordered table-sm table-striped table-hover rounded-4 shadow-sm" style={{ height: "150px", overflowY: "auto", border: "1px solid #dee2e6", borderRadius: "4px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}>
-                                                        <thead className="table-danger text-center">
+                                                        <thead className="table-danger text-center" style={{ position: "sticky", top: "0", zIndex: "2", backgroundColor: "#f8d7da" }}>
                                                             <tr>
                                                                 <th>#</th>
                                                                 <th>Pregunta</th>
@@ -639,9 +476,9 @@ const DiccionarioChat = ({ chatMessages }) => {
                                             {registeredQuestions.length === 0 ? (
                                                 <p className="text-muted">No hay preguntas registradas</p>
                                             ) : (
-                                                <div className="table-responsive" style={{ borderRadius: "10px", maxHeight: "150px" }}>
+                                                <div className="table-responsive" style={{ borderRadius: "10px", maxHeight: "250px" }}>
                                                     <table className="table table-bordered table-sm table-striped table-hover rounded-4 shadow-lg" style={{ height: "150px", overflowY: "auto", border: "1px solid #dee2e6", borderRadius: "4px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}>
-                                                        <thead className="table-success text-center">
+                                                        <thead className="table-success text-center" style={{ position: "sticky", top: "0", zIndex: "2", backgroundColor: "#f8d7da" }}>
                                                             <tr>
                                                                 <th>#</th>
                                                                 <th>Pregunta</th>
@@ -661,7 +498,7 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                                     <td>
                                                                         {q.image ? (
                                                                             <img
-                                                                                src={URL.createObjectURL(q.image)}
+                                                                                src={`data:image/jpeg;base64,${Buffer.from(q.image).toString('base64')}`}
                                                                                 alt="Pregunta"
                                                                                 className="img-fluid img-thumbnail"
                                                                                 style={{ maxWidth: "100px", height: "auto" }}
@@ -691,7 +528,7 @@ const DiccionarioChat = ({ chatMessages }) => {
                     <p className="mb-0">&copy; {new Date().getFullYear()} Campus. Todos los derechos reservados.</p>
                 </div>
             </footer> */}
-        </section>
+        </section >
 
     );
 };

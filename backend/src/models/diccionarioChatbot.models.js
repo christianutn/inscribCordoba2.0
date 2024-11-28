@@ -16,7 +16,7 @@ const DiccionarioChatbot = sequelize.define('diccionario_chatboot', {
         allowNull: false
     },
     imagen: {
-        type: DataTypes.BLOB,
+        type: DataTypes.BLOB('long'),
         allowNull: true
     },
     idCategoria: {
