@@ -22,7 +22,7 @@ const DiccionarioChatbot = sequelize.define('diccionario_chatboot', {
     idCategoria: {
         type: DataTypes.INTEGER,
         allowNull: false
-    }
+    },
 }, {
     tableName: 'diccionario_chatboot', // Asegura que el nombre de la tabla sea consistente
     timestamps: false, // Evita los campos createdAt y updatedAt si no los necesitas

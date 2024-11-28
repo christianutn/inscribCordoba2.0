@@ -89,6 +89,8 @@ const DiccionarioChat = ({ chatMessages }) => {
         console.log("Nueva pregunta: ", newQuestion);
         console.log("Nueva respuesta: ", newAnswer);
         console.log("Nueva imagen: ", newImage);
+        const formdata = new FormData();
+        formdata.append('image', newImage);
         try {
             const response = await insertDiccionarioChatbot(
                 {
@@ -137,17 +139,21 @@ const DiccionarioChat = ({ chatMessages }) => {
         const file = e.target.files[0]; // Obtén el primer archivo seleccionado
 
         if (file) {
-            // Convierte el archivo a base64 y guarda la imagen en el estado
+            console.log('Archivo recibido:', file);
+
             convertFileToBase64(file).then(base64String => {
+                console.log('Imagen en base64:', base64String);
                 setImageBase64(base64String);
             }).catch(error => {
                 console.error('Error al convertir el archivo a base64:', error);
             });
 
-            // Guarda el archivo completo en el estado (si es necesario)
             setNewImage(file);
-            console.log('Archivo completo:', file);
+            console.log('Archivo completo guardado en el estado:', file);
+        } else {
+            console.log('No se seleccionó ningún archivo.');
         }
+        // setNewImage(e.target.files[0]);
     };
 
     const resetFileInput = () => {
@@ -230,7 +236,6 @@ const DiccionarioChat = ({ chatMessages }) => {
         // Si todo está bien, proceder con la acción específica
         realizarAccionEspecificaBusqueda();
     };
-
     function validarEntero(valor) {
         return Number.isInteger(valor);
     }
@@ -259,7 +264,7 @@ const DiccionarioChat = ({ chatMessages }) => {
                 id: question.id,
                 question: question.pregunta,
                 answer: question.respuesta,
-                image: question.imagen,
+                image: question.image,
                 categoryId: question.idCategoria
             })));
             console.log("Registradas ", registeredQuestions)
@@ -498,14 +503,17 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                                     <td>
                                                                         {q.image ? (
                                                                             <img
-                                                                                src={`data:image/jpeg;base64,${Buffer.from(q.image).toString('base64')}`}
+                                                                                src={`data:${q.mimeType};base64,${btoa(
+                                                                                    new Uint8Array(q.image).reduce((data, byte) => data + String.fromCharCode(byte), '')
+                                                                                )}`}
                                                                                 alt="Pregunta"
-                                                                                className="img-fluid img-thumbnail"
+                                                                                // className="img-fluid img-thumbnail"
                                                                                 style={{ maxWidth: "100px", height: "auto" }}
                                                                             />
                                                                         ) : (
                                                                             <span className="text-muted">Sin imagen</span>
                                                                         )}
+
                                                                     </td>
                                                                 </tr>
                                                             ))}
