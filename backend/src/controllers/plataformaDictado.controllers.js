@@ -1,5 +1,6 @@
 import plataformaDictadoModel from "../models/plataformaDictado.models.js";
-
+import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
+import sequelize from "../config/database.js";
 export const getPlataformasDictado = async (req, res, next) => {
     try {
         const plataformasDictado = await plataformaDictadoModel.findAll();
@@ -20,6 +21,7 @@ export const getPlataformasDictado = async (req, res, next) => {
 
 
 export const putPlataformaDictado = async (req, res, next) => {
+    const t = await sequelize.transaction();
     try {
         
         let {cod, nombre, newCod} =  req.body
@@ -43,6 +45,17 @@ export const putPlataformaDictado = async (req, res, next) => {
         nombre = nombre.trim()
         cod = cod.trim()
         newCod = newCod ? newCod.trim() : null
+
+        //Capturar la plataforma de dictado para luego actualizar en el excel del cronograma
+        const plataformaDictadoAnterior = await plataformaDictadoModel.findOne({ where: { cod } });
+
+        if (!plataformaDictadoAnterior) {
+            throw new Error(`No se encontró un área con el código ${cod}`);
+        }
+
+        const plataformaDictadoAnteriorJSON = plataformaDictadoAnterior.toJSON();
+
+        //Actualizar la plataforma de dictado
         
         const plataforma_dictado = await plataformaDictadoModel.update({cod: newCod || cod, nombre: nombre}, {
             where: {
@@ -55,9 +68,18 @@ export const putPlataformaDictado = async (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
+
+         // Llama a actualizarDatosColumna
+         const resultadoGoogleSheets = await actualizarDatosColumna('Plataforma de dictado', plataformaDictadoAnteriorJSON.nombre, nombre);
+
+         if (!resultadoGoogleSheets.success) {
+             throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
+         }
+
+         await t.commit();
         res.status(200).json(plataforma_dictado);
     } catch (error) {
-        
+        await t.rollback();
         next(error);
     }
 }

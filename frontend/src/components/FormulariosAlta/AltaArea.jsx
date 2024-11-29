@@ -129,7 +129,7 @@ const AltaArea = () => {
 
             <form>
                 <div className='container-alta-area'>
-                    <div className='titulo'><Titulo texto='Alta nuevo curso' /></div>
+                    <div className='titulo'><Titulo texto='Alta de nueva área' /></div>
                     <div className="divider">
                         <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
                     </div>

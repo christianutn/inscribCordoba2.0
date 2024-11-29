@@ -1,5 +1,6 @@
 import tipoCapacitacionModel from "../models/tipoCapacitacion.models.js";
-
+import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
+import sequelize from "../config/database.js";
 
 export const getTiposCapacitacion = async (req, res, next) => {
     try {
@@ -20,7 +21,7 @@ export const getTiposCapacitacion = async (req, res, next) => {
 
 
 export const putTiposCapacitacion = async (req, res, next) => {
-    
+    const t = await sequelize.transaction();
     try {
         
         let {cod, nombre, newCod} =  req.body
@@ -44,6 +45,20 @@ export const putTiposCapacitacion = async (req, res, next) => {
         nombre = nombre.trim()
         cod = cod.trim()
         newCod = newCod ? newCod.trim() : null
+
+        //Capturar el tipo de capacitacion para luego actualizar en el excel del cronograma
+        const tipoCapacitacionAnterior = await tipoCapacitacionModel.findOne({ where: { cod } });
+
+        if (!tipoCapacitacionAnterior) {
+
+            const error = new Error("El tipo de capacitación no existe");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const tipoCapacitacionAnteriorJSON = JSON.parse(JSON.stringify(tipoCapacitacionAnterior));
+
+
         
         const tipo_capacitacion = await tipoCapacitacionModel.update({cod: newCod || cod, nombre: nombre}, {
             where: {
@@ -56,9 +71,17 @@ export const putTiposCapacitacion = async (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
+
+        // Llama a actualizarDatosColumna
+        const resultadoGoogleSheets = await actualizarDatosColumna('Tipo de capacitación', tipoCapacitacionAnteriorJSON.nombre, nombre);
+
+        if (!resultadoGoogleSheets.success) {
+            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
+        }
+        await t.commit();
         res.status(200).json(tipo_capacitacion);
     } catch (error) {
-        
+        await t.rollback();
         next(error);
     }
 }

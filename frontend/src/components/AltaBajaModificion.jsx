@@ -32,8 +32,8 @@ const AltaBajaModificion = () => {
 
     const navigate = useNavigate();
     const options = ["Cursos", "Ministerios", "Áreas", "Personas", "Tutores", "Medios de Inscripción", "Plataformas de Dictado", "Tipos de Capacitación", "Usuarios"];
-    
-    
+
+
     const convertirAPropiedadConfig = (opcion) => {
         switch (opcion) {
             case 'Cursos': return 'cursos';
@@ -100,7 +100,7 @@ const AltaBajaModificion = () => {
                 ...prevConfiguraciones,
                 cursos: {
                     columns: [
-                        { field: 'cod', headerName: 'Código', with: 20},
+                        { field: 'cod', headerName: 'Código', with: 20 },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
                         { field: 'cupo', headerName: 'Cupo', with: 20, editable: true },
                         {
@@ -260,11 +260,27 @@ const AltaBajaModificion = () => {
                     columns: [
                         { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
+                        {
+                            field: 'esVigente',
+                            headerName: '¿Está vigente?',
+                            width: 180,
+                            editable: true,
+                            renderEditCell: (params) => (
+                                <SelectEditInputCell
+                                    id={params.id}
+                                    value={params.value}
+                                    field={params.field}
+                                    options={[{ value: "Si", label: "Si" }, { value: "No", label: "No" }]}
+                                    api={params.api}
+                                />
+                            ),
+                        }
                     ],
                     rows: mediosInscripcion.map((e) => ({
                         id: e.cod, // El DataGrid necesita un ID único para cada fila
                         cod: e.cod,
-                        nombre: e.nombre
+                        nombre: e.nombre,
+                        esVigente: e.esVigente ? "Si" : "No",
                     }))
                 },
                 plataformasDictado: {
@@ -434,7 +450,7 @@ const AltaBajaModificion = () => {
         flex: 1,
         minWidth: 120, // Ajusta el valor según sea necesario
         renderCell: (params) => (
-            <Box  className='box-btn-circular'>
+            <Box className='box-btn-circular'>
                 <BotonCircular className='boton-circular' icon="editar" height={40} width={40} onClick={() => handleActionClick('editar', params)} />
                 <BotonCircular className='boton-circular' icon="borrar" height={40} width={40} onClick={() => handleActionClick('borrar', params)} />
             </Box>
@@ -443,7 +459,7 @@ const AltaBajaModificion = () => {
 
 
     const deleteRowDeConfiguraciones = (propiedad, id) => {
-        
+
         setConfiguraciones((prevConfiguraciones) => {
             // Filtra las filas para excluir la fila con el id especificado
             const updatedRows = prevConfiguraciones[propiedad].rows.filter((row) => row.id !== id);
@@ -482,7 +498,7 @@ const AltaBajaModificion = () => {
         });
 
 
-       
+
     };
 
 
@@ -491,7 +507,7 @@ const AltaBajaModificion = () => {
     const handleActionClick = async (action, params) => {
         if (action === 'borrar') {
             try {
-                
+
                 setCargando(true);
                 await deleteRow(params.id, selectOption);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -510,7 +526,7 @@ const AltaBajaModificion = () => {
             }
         } else {
             try {
-              
+
                 setCargando(true);
 
                 const updatedRow = {

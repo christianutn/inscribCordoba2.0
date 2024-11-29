@@ -16,18 +16,16 @@ const inicializarPassport = () => {
     const cookieExtractor = req => {
 
 
-        //En lugar de tomar de las cookies directamente todo de la peticion
-        let token = req.headers.authorization ? req.headers.authorization : {}
+        // Tomamos el token de los headers de autorización, si existe
+        let token = req.headers.authorization ? req.headers.authorization : '';
 
-        //Si token comienza con Bearer se quita. Se implenta para implementación de Swagger que en autorization devuelve
-        // el req.headers.authorization con el Bearer delante,  distinto a como lo pasamos por poarte del cliente
-        if (token.startsWith('Bearer ')) {
-            token = token.slice(7, token.length)
+        // Verificamos si el token es una cadena y si comienza con 'Bearer '
+        if (typeof token === 'string' && token.startsWith('Bearer ')) {
+            // Si es así, eliminamos la palabra 'Bearer ' del inicio
+            token = token.slice(7, token.length);
         }
 
-
-
-        return token
+        return token;
 
     }
 
@@ -51,20 +49,20 @@ const inicializarPassport = () => {
     }, async function (req, cuil, contrasenia, done) {
         // Login
         try {
-            
+
             const usuario = await Usuario.findOne({ where: { cuil: cuil } });
             if (!usuario) {
-                
+
                 done(null, false);
             }
 
             if (!validatePassword(String(contrasenia), usuario.contrasenia)) {
-                
+
                 done(null, false);
             }
 
-            
-            done(null,usuario);
+
+            done(null, usuario);
         } catch (error) {
             done(error)
         }

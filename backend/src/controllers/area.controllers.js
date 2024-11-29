@@ -1,7 +1,8 @@
 import areaModel from "../models/area.models.js";
 import Ministerio from "../models/ministerio.models.js"; // Importa el modelo de Ministerio
 import Curso from "../models/curso.models.js";
-
+import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
+import sequelize from "../config/database.js";
 
 export const getAreas = async (req, res, next) => {
     try {
@@ -17,7 +18,7 @@ export const getAreas = async (req, res, next) => {
                 {
                     model: Curso,
                     as: 'detalle_cursos'
-                    
+
                 }
             ]
         });
@@ -35,62 +36,52 @@ export const getAreas = async (req, res, next) => {
 }
 
 export const putArea = async (req, res, next) => {
+    const t = await sequelize.transaction();
     try {
-        
-        let {cod, nombre, ministerio, newCod} =  req.body
+        const { cod, nombre, ministerio, newCod } = req.body;
 
-        if (cod == "" || cod == null || cod == undefined) {
-
-            const error = new Error("El código no es valido");
-            error.statusCode = 400;
-            throw error;
+        if (!cod || !nombre || !ministerio) {
+            throw new Error("Datos inválidos: se requiere código, nombre y ministerio.");
         }
 
-        if (nombre == "" || nombre == null || nombre == undefined) {
-
-            const error = new Error("El nombre no es valido");
-            error.statusCode = 400;
-            throw error;
+        const areaActual = await areaModel.findOne({ where: { cod } });
+        if (!areaActual) {
+            throw new Error(`No se encontró un área con el código ${cod}`);
         }
 
-        if (!ministerio) {
+        const areaActualJSON = areaActual.toJSON();
 
-            const error = new Error("El ministerio no es válido");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        nombre = nombre.trim()
-        ministerio = ministerio.trim()
-        cod = cod.trim()
-        newCod = newCod ? newCod.trim() : null
-
-
-        const area = await areaModel.update({cod: newCod || cod, nombre: nombre, ministerio: ministerio}, {
-            where: {
-                cod: cod
-            }
-        });
+        const area = await areaModel.update(
+            { cod: newCod || cod, nombre, ministerio },
+            { where: { cod }, transaction: t }
+        );
 
         if (area == 0) {
-            const error = new Error("No hubo cambios para actualizar");
-            error.statusCode = 404;
-            throw error;
+            throw new Error("No hubo cambios para actualizar.");
         }
 
+        // Llama a actualizarDatosColumna
+        const resultadoGoogleSheets = await actualizarDatosColumna('Area', areaActualJSON.nombre, nombre);
 
-        res.status(200).json(area);
+        if (!resultadoGoogleSheets.success) {
+            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
+        }
+
+        await t.commit();
+        res.status(200).json({ success: true, message: "Área actualizada correctamente.", area });
     } catch (error) {
-        
+        await t.rollback();
+        console.error("Error en putArea:", error.message);
         next(error);
     }
-}
+};
+
 
 
 export const postArea = async (req, res, next) => {
     try {
-        
-        let {cod, nombre, ministerio} = req.body;
+
+        let { cod, nombre, ministerio } = req.body;
 
         if (!cod) {
 
@@ -117,20 +108,20 @@ export const postArea = async (req, res, next) => {
         ministerio = ministerio.trim()
         cod = cod.trim()
 
-        const existeArea = await areaModel.findOne({where: {cod: cod}});
+        const existeArea = await areaModel.findOne({ where: { cod: cod } });
         if (existeArea) {
             const error = new Error(`El área con el código ${cod} ya existe`);
             error.statusCode = 400;
             throw error;
         }
 
-        const existeMinisterio = await Ministerio.findOne({where: {cod: ministerio}});
+        const existeMinisterio = await Ministerio.findOne({ where: { cod: ministerio } });
         if (!existeMinisterio) {
             const error = new Error(`El ministerio ${ministerio} no existe`);
             error.statusCode = 400;
             throw error;
         }
-        const area = await areaModel.create({cod: cod, nombre: nombre, ministerio: ministerio});
+        const area = await areaModel.create({ cod: cod, nombre: nombre, ministerio: ministerio });
         res.status(201).json(area);
 
     } catch (error) {
@@ -140,19 +131,19 @@ export const postArea = async (req, res, next) => {
 
 export const deleteArea = async (req, res, next) => {
     try {
-        const {cod} = req.params
+        const { cod } = req.params
 
-        if(cod == "" || cod == null || cod == undefined) {
+        if (cod == "" || cod == null || cod == undefined) {
             const error = new Error("El código no es válido");
             error.statusCode = 400;
             throw error;
         }
 
-        const area = await areaModel.destroy({where: {cod: cod}});
+        const area = await areaModel.destroy({ where: { cod: cod } });
 
-        if(area == 0) {
+        if (area == 0) {
             const error = new Error(`El area ${cod} no existe`);
-            error.statusCode = 400; 
+            error.statusCode = 400;
             throw error;
         }
         res.status(200).json(area);
