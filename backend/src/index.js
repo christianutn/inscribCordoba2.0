@@ -4,7 +4,7 @@ import inicializarPassport from "../src/config/passport.js"
 import cors from "cors";
 import sequelize from "./config/database.js";
 import associateModels from "./models/asociateModelos.js";
-import 'dotenv/config'; 
+import 'dotenv/config';
 
 
 
@@ -49,7 +49,7 @@ app.get("/api/ping", (req, res) => {
         url: req.originalUrl, // URL original de la solicitud
         headers: req.headers, // Cabeceras de la solicitud
     };
-    
+
     res.status(200).json(responseData);
 });
 
@@ -68,11 +68,11 @@ app.use((err, req, res, next) => {
         method: req.method, // Captura el método de la petición (GET, POST, etc.)
         status: err.statusCode || 500 // Captura el código de estado
     });
-    
+
     res.status(err.statusCode || 500).json({ message: err.message || "Error Interno" });
 });
 
-
+// app.use(express.static(path.join(__dirname, 'dbimages')))
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
 
 

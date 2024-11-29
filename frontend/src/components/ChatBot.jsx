@@ -83,6 +83,22 @@ const ChatBoot = ({ chatMessages }) => {
             let preguntas = "Estas con las opciones que puedo darte:\r\n";
             preguntas += "0: Volver al menú principal\r\n";
             const misOpciones = [];
+            if (newMessage === "x" || newMessage === "X") {
+                // Acción para "x", cuando el usuario quiera hacer una pregunta personalizada
+                setEstado("2");
+                setEstadoP("1");
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    {
+                        side: 1,
+                        menssage: "Por favor, escribí tu pregunta que voy a tratar de responderte, o sino ingresá 0 (cero) para volver al menú principal."
+                    },
+                ]);
+                setEstado("2");
+                setIsTyping(false);
+                console.log("Estado final: ", estado);
+                return;
+            }
             if (datosDeDiccionariosChatbotPorIdCategoria.length > 0) {
                 datosDeDiccionariosChatbotPorIdCategoria.forEach((element) => {
                     preguntas += `${element.id}: ${element.pregunta}\r\n`;
@@ -281,12 +297,12 @@ const ChatBoot = ({ chatMessages }) => {
                 return;
             }
             else {
-                const preguntaPuntual = await getDiccionarioChatbot(newMessage, "");
-                if (preguntaPuntual.length > 0) {
+                if (validarEntero(parseInt(newMessage, 10))) {
+                    const preguntaPuntual = await getDiccionarioChatbotPuntual(newMessage);
                     let respuesta = "";
                     respuesta += `0: Volver al menú principal\r\n`;
                     preguntaPuntual.forEach((element) => {
-                        respuesta += `&#9989; ${element.respuesta}\r\n`;
+                        respuesta += `&#9989; ${element.pregunta}\r\n`;
                     });
                     respuesta = respuesta.replace(/\r\n/g, "<br>");
                     setMessages((prevMessages) => [
@@ -299,18 +315,38 @@ const ChatBoot = ({ chatMessages }) => {
                     setIsTyping(false);
                 }
                 else {
-                    let respuesta = "";
-                    respuesta += `0: Volver al menú principal\r\n`;
-                    respuesta += `&#10060;Mis disculpas, no tengo una respuesta concreta para tu pregunta, pero podes escribir a nuestro equipo de administradores que sabrán brindarte una atención mas especializada. Escribinos a <span style='color:blue'>consultascampuscordoba@cba.gov.ar</span>.`;
-                    respuesta = respuesta.replace(/\r\n/g, "<br>");
-                    setMessages((prevMessages) => [
-                        ...prevMessages,
-                        {
-                            side: 1,
-                            menssage: respuesta || 'Sin respuesta'
-                        },
-                    ]);
-                    setIsTyping(false);
+                    const preguntaPuntual = await getDiccionarioChatbot(newMessage, "");
+                    if (preguntaPuntual.length > 0) {
+                        let respuesta = "";
+                        respuesta += `Estas son las opciones que puedo brindarte respecto al texto que me proporcionaste:\r\n`;
+                        respuesta += `0: Volver al menú principal\r\n`;
+                        preguntaPuntual.forEach((element) => {
+                            respuesta += `${element.id} ${element.pregunta}\r\n`;
+                        });
+                        respuesta = respuesta.replace(/\r\n/g, "<br>");
+                        setMessages((prevMessages) => [
+                            ...prevMessages,
+                            {
+                                side: 1,
+                                menssage: respuesta || 'Sin respuesta'
+                            },
+                        ]);
+                        setIsTyping(false);
+                    }
+                    else {
+                        let respuesta = "";
+                        respuesta += `0: Volver al menú principal\r\n`;
+                        respuesta += `&#10060;Mis disculpas, no tengo una respuesta concreta para tu pregunta, pero podes escribir a nuestro equipo de administradores que sabrán brindarte una atención mas especializada. Escribinos a <span style='color:blue'>consultascampuscordoba@cba.gov.ar</span>.`;
+                        respuesta = respuesta.replace(/\r\n/g, "<br>");
+                        setMessages((prevMessages) => [
+                            ...prevMessages,
+                            {
+                                side: 1,
+                                menssage: respuesta || 'Sin respuesta'
+                            },
+                        ]);
+                        setIsTyping(false);
+                    }
                 }
             }
         }
@@ -357,7 +393,7 @@ const ChatBoot = ({ chatMessages }) => {
         }
     }, [messages]);
     return (
-        <section style={{ backgroundColor: "#eee", height: "100vh", display: "flex", flexDirection: "column" }}>
+        <section style={{ backgroundColor: "transparent", height: "100vh", display: "flex", flexDirection: "column" }}>
             <div className="container py-5 flex-grow-1">
                 <div className="row d-flex justify-content-center">
                     <div className="col-md-12 col-lg-12 col-xl-12">
