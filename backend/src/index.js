@@ -72,7 +72,7 @@ app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({ message: err.message || "Error Interno" });
 });
 
-// app.use(express.static(path.join(__dirname, 'dbimages')))
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
 
 
