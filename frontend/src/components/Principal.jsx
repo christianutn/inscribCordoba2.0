@@ -100,9 +100,9 @@ export default function Principal() {
       }
 
       if (res.rol === "ADM") {
-        setOpcionesAMostrar([["Home", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"], ["Restricciones de Fechas de inicio de Cursada", "RestriccionesFechasInicioCursada"]])
+        setOpcionesAMostrar([["Inicio", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"], ["Restricciones de Fechas de inicio de Cursada", "RestriccionesFechasInicioCursada"]])
       } else if (res.rol === "REF") {
-        setOpcionesAMostrar([["Home", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"]])
+        setOpcionesAMostrar([["Inicio", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"]])
       }
 
 

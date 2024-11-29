@@ -4,6 +4,9 @@ import tipoCapacitacionModel from "../models/tipoCapacitacion.models.js";
 import plataformaDictadoModel from "../models/plataformaDictado.models.js";
 import areaModel from "../models/area.models.js";
 import ministerio from "../models/ministerio.models.js";
+
+import {actualizarDatosColumna} from "../googleSheets/services/actualizarDatosColumna.js";
+import sequelize from "../config/database.js";
 export const getCursos = async (req, res, next) => {
     try {
         const cursos = await cursoModel.findAll({
@@ -69,6 +72,7 @@ export const postCurso = async (req, res, next) => {
 
 
 export const updateCurso = async (req, res, next) => {
+    const t = await sequelize.transaction();
     try {
 
         const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area } = req.body;
@@ -82,7 +86,14 @@ export const updateCurso = async (req, res, next) => {
         //cupo debe ser un entero
         if(!Number.isInteger(Number(cupo))) throw new Error("El cupo debe ser un entero");
         if(!Number.isInteger(Number(cantidad_horas))) throw new Error("La cantidad de horas debe ser un entero");
-        //convertir un string en entero
+        
+        //Buscamos curso antes de actualizar
+        const cursoAntes = await cursoModel.findOne({ where: { cod: cod } });
+        if (!cursoAntes) {
+            throw new Error(`No se encontró un curso con el código ${cod}`);
+        }
+
+        const cursoAntesJSON = cursoAntes.toJSON();
 
        const result = await cursoModel.update(
             { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area },
@@ -95,6 +106,15 @@ export const updateCurso = async (req, res, next) => {
         
         if (result[0] === 0) {
             throw new Error("No hubo actualización de datos");
+        }
+
+         // Si se actualizó correctamente en la base de datos, actualiza Google Sheets
+         console.log("Valor anterior:", cursoAntesJSON.nombre);
+         console.log("Nuevo valor:", nombre);
+        const resultadoGoogleSheets = await actualizarDatosColumna('Nombre del curso', cursoAntesJSON.nombre, nombre);
+
+        if (!resultadoGoogleSheets.success) {
+            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
         }
         res.status(200).json({ message: "Se actualizo correctamente el curso" })
 

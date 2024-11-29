@@ -145,10 +145,10 @@ const RestriccionesFechasInicioCursada = () => {
                     </div>
 
                     <div className="inputs-limites">
-                        <TextField label={"Limite de cursos por mes"} type={"number"} value={maximoCursosMensual} getValue={(value) => setMaximoCursosMensual(value)}></TextField>
-                        <TextField label={"Limite de cupos por mes"} type={"number"} value={maximoCuposMensual} getValue={(value) => setMaximoCuposMensual(value)}></TextField>
-                        <TextField label={"Limite de crusos por día"} type={"number"} value={maximoCursosDiario} getValue={(value) => setMaximoCursosDiario(value)}></TextField>
-                        <TextField label={"Limite de cupos por día"} type={"number"} value={maximoCuposDiario} getValue={(value) => setMaximoCuposDiario(value)}></TextField>
+                        <TextField label={"Límite de cursos por mes"} type={"number"} value={maximoCursosMensual} getValue={(value) => setMaximoCursosMensual(value)}></TextField>
+                        <TextField label={"Límite de cupos por mes"} type={"number"} value={maximoCuposMensual} getValue={(value) => setMaximoCuposMensual(value)}></TextField>
+                        <TextField label={"Límite de crusos por día"} type={"number"} value={maximoCursosDiario} getValue={(value) => setMaximoCursosDiario(value)}></TextField>
+                        <TextField label={"Límite de cupos por día"} type={"number"} value={maximoCuposDiario} getValue={(value) => setMaximoCuposDiario(value)}></TextField>
                         <Autocomplete label={"Mes bloqueado"}  options={listaMeses} value={selectedMes} 
                         getValue={(value) => setSelectedMes(value)} ></Autocomplete>
 

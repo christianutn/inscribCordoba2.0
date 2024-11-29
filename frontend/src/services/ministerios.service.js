@@ -45,9 +45,8 @@ export const putMinisterios = async (ministerio) => {
         });
         const data = await response.json()
         if (response.status !== 200) {
-            const error = new Error(response.message || "Error al actualizar el ministerio");
-            error.statusCode = 404;
-            throw error;
+            throw new Error(`${data.message}` || "No es posible actualizar el registro");
+
         }
 
 

@@ -1,5 +1,6 @@
 import medioInscripcionModel from "../models/medioInscripcion.models.js";
-
+import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
+import sequelize from "../config/database.js";
 
 
 export const getMediosInscripcion = async (req, res, next) => {
@@ -21,9 +22,10 @@ export const getMediosInscripcion = async (req, res, next) => {
 
 
 export const putMedioInscripcion = async (req, res, next) => {
+    const t = await sequelize.transaction();
     try {
         
-        let {cod, nombre, newCod} =  req.body
+        let {cod, nombre, newCod, esVigente} =  req.body
 
         if (cod == "" || cod == null || cod == undefined) {
 
@@ -44,11 +46,24 @@ export const putMedioInscripcion = async (req, res, next) => {
         nombre = nombre.trim()
         cod = cod.trim()
         newCod = newCod ? newCod.trim() : null
+
+        //Antes de actualizar el medio de inscripcion capturamos sus valores
+        //para luego actualar en el excel del cronograma
+
+        const medioInscAnterior = await medioInscripcionModel.findOne({ where: { cod } });
+        if (!medioInscAnterior) {
+            throw new Error(`No se encontró un área con el código ${cod}`);
+        }
+
+        const areaActualJSON = medioInscAnterior.toJSON();
+
+        //Actualizamos medio de inscripción con transacción
         
-        const medioInscripcion = await medioInscripcionModel.update({cod: newCod || cod, nombre: nombre}, {
+        const medioInscripcion = await medioInscripcionModel.update({cod: newCod || cod, nombre: nombre, esVigente: esVigente === "Si" ? 1 : 0}, {
             where: {
                 cod: cod
-            }
+            },
+            transaction: t
         });
 
         if(medioInscripcion[0] === 0){
@@ -56,9 +71,18 @@ export const putMedioInscripcion = async (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
+
+         // Llama a actualizarDatosColumna
+         const resultadoGoogleSheets = await actualizarDatosColumna('Medio de inscripción', medioInscAnterior.nombre, nombre);
+
+         if (!resultadoGoogleSheets.success) {
+            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
+        }
+
+        await t.commit();
         res.status(200).json(medioInscripcion);
     } catch (error) {
-        
+        await t.rollback();
         next(error);
     }
 }

@@ -25,7 +25,8 @@ export const updateRow = async (row, option) => {
                     medio_inscripcion: row.codMedioInscripcion,
                     plataforma_dictado: row.codPlataformaDictado,
                     tipo_capacitacion: row.codTipoCapacitacion,
-                    area: row.codArea
+                    area: row.codArea,
+                    esVigente: row.esVigente
 
                 })
                 break;
@@ -34,6 +35,7 @@ export const updateRow = async (row, option) => {
                     cod: row.id,
                     nombre: row.nombre,
                     newCod: row.cod
+                    
                 })
                 break;
             case "Áreas":
@@ -73,7 +75,8 @@ export const updateRow = async (row, option) => {
                 await putMedioInscripcion({
                     cod: row.id,
                     nombre: row.nombre,
-                    newCod: row.cod
+                    newCod: row.cod,
+                    esVigente: row.esVigente
 
                 })
                 break

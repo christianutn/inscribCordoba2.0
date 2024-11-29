@@ -60,12 +60,12 @@ export default function Formulario() {
     departamento: false,
     publicaPCC: false,
     correlatividad: false
-});
+  });
 
-// Función para actualizar los datos desde el hijo
-const manejarCambioOpciones = (nuevaOpciones) => {
+  // Función para actualizar los datos desde el hijo
+  const manejarCambioOpciones = (nuevaOpciones) => {
     setOpciones(nuevaOpciones);
-};
+  };
 
 
 
@@ -253,7 +253,8 @@ const manejarCambioOpciones = (nuevaOpciones) => {
           throw new Error("Todos los campos tipo fecha deben estar completos");
         }
 
-        validarOrdenFechas([cohorte.fechaInscripcionDesde, cohorte.fechaInscripcionHasta, cohorte.fechaCursadaDesde, cohorte.fechaCursadaHasta]);
+        validarOrdenFechas([cohorte.fechaInscripcionDesde, cohorte.fechaInscripcionHasta, cohorte.fechaCursadaDesde, cohorte.fechaCursadaHasta], opciones.autogestionado);
+
       })
 
       const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes, opciones });
@@ -281,7 +282,7 @@ const manejarCambioOpciones = (nuevaOpciones) => {
 
   return (
     <>
-      
+
       {
         error &&
 
@@ -371,7 +372,7 @@ const manejarCambioOpciones = (nuevaOpciones) => {
           </div>
 
           <div className='select-medio-inscripcion'>
-            <Autocomplete options={mediosInscripcion.map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion}
+            <Autocomplete options={mediosInscripcion.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion}
               getValue={(value) => {
                 setSelectMedioInscripcion(value);
               }}

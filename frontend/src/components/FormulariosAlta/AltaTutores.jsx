@@ -135,7 +135,7 @@ const AltaTutores = () => {
 
             <form>
                 <div className='container-alta-tutor'>
-                    <div className='titulo'><Titulo texto='Alta nuevo curso' /></div>
+                    <div className='titulo'><Titulo texto='Alta nuevo tutor' /></div>
                     <div className="divider">
                         <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
                     </div>

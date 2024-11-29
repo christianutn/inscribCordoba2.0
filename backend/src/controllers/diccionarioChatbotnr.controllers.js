@@ -1,5 +1,4 @@
 import DiccionarioChatbotnr from "../models/diccionarioChatbotnr.models.js";
-import { Op } from "sequelize";
 
 export const getDiccionarioChatbotnr = async (req, res) => {
     try {
