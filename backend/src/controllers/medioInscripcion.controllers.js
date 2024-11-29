@@ -24,7 +24,7 @@ export const getMediosInscripcion = async (req, res, next) => {
 export const putMedioInscripcion = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
-        const t = await sequelize.transaction();
+        
         let {cod, nombre, newCod, esVigente} =  req.body
 
         if (cod == "" || cod == null || cod == undefined) {

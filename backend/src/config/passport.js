@@ -25,7 +25,7 @@ const inicializarPassport = () => {
             token = token.slice(7, token.length);
         }
 
-        return token;
+        return token;   
 
     }
 
