@@ -150,7 +150,22 @@ const AltaBajaModificion = () => {
                         },
                         { field: 'horas', headerName: 'Horas', with: 5, editable: true },
                         { field: 'area', headerName: 'Area', width: 180 },
-                        { field: 'ministerio', headerName: 'Ministerio', width: 180 }
+                        { field: 'ministerio', headerName: 'Ministerio', width: 180 },
+                        {
+                            field: 'esVigente',
+                            headerName: '¿Está vigente?',
+                            width: 180,
+                            editable: true,
+                            renderEditCell: (params) => (
+                                <SelectEditInputCell
+                                    id={params.id}
+                                    value={params.value}
+                                    field={params.field}
+                                    options={[{ value: "Si", label: "Si" }, { value: "No", label: "No" }]}
+                                    api={params.api}
+                                />
+                            ),
+                        }
                     ],
                     rows: cursos.map((e) => ({
                         id: e.cod, // El DataGrid necesita un ID específico para cada fila
@@ -162,7 +177,8 @@ const AltaBajaModificion = () => {
                         tipoCapacitacion: e.detalle_tipoCapacitacion.nombre,
                         horas: e.cantidad_horas,
                         area: e.detalle_area.nombre,
-                        ministerio: e.detalle_area.detalle_ministerio.nombre
+                        ministerio: e.detalle_area.detalle_ministerio.nombre,
+                        esVigente: e.esVigente ? "Si" : "No",
 
                     }))
                 },
@@ -170,11 +186,27 @@ const AltaBajaModificion = () => {
                     columns: [
                         { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
+                        {
+                            field: 'esVigente',
+                            headerName: '¿Está vigente?',
+                            width: 180,
+                            editable: true,
+                            renderEditCell: (params) => (
+                                <SelectEditInputCell
+                                    id={params.id}
+                                    value={params.value}
+                                    field={params.field}
+                                    options={[{ value: "Si", label: "Si" }, { value: "No", label: "No" }]}
+                                    api={params.api}
+                                />
+                            ),
+                        }
                     ],
                     rows: ministerios.map((e, index) => ({
                         id: e.cod, // El DataGrid necesita un ID único para cada fila
                         cod: e.cod,
-                        nombre: e.nombre
+                        nombre: e.nombre,
+                        esVigente: e.esVigente ? "Si" : "No",
                     }))
                 },
                 areas: {
@@ -182,12 +214,29 @@ const AltaBajaModificion = () => {
                         { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
                         { field: 'ministerio', headerName: 'Ministerio', flex: 1 },
+                        {
+                            field: 'esVigente',
+                            headerName: '¿Está vigente?',
+                            width: 180,
+                            editable: true,
+                            renderEditCell: (params) => (
+                                <SelectEditInputCell
+                                    id={params.id}
+                                    value={params.value}
+                                    field={params.field}
+                                    options={[{ value: "Si", label: "Si" }, { value: "No", label: "No" }]}
+                                    api={params.api}
+                                />
+                            ),
+                        }
                     ],
                     rows: areas.map((e, index) => ({
                         id: e.cod, // El DataGrid necesita un ID único para cada fila
                         cod: e.cod,
                         nombre: e.nombre,
-                        ministerio: e.detalle_ministerio.nombre
+                        ministerio: e.detalle_ministerio.nombre,
+                        esVigente: e.esVigente ? "Si" : "No",
+
                     }))
                 },
                 personas: {
@@ -287,22 +336,54 @@ const AltaBajaModificion = () => {
                     columns: [
                         { field: 'cod', headerName: 'Código de Plataforma', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
+                        {
+                            field: 'esVigente',
+                            headerName: '¿Está vigente?',
+                            width: 180,
+                            editable: true,
+                            renderEditCell: (params) => (
+                                <SelectEditInputCell
+                                    id={params.id}
+                                    value={params.value}
+                                    field={params.field}
+                                    options={[{ value: "Si", label: "Si" }, { value: "No", label: "No" }]}
+                                    api={params.api}
+                                />
+                            ),
+                        }
                     ],
                     rows: plataformasDictado.map((plataforma, index) => ({
                         id: plataforma.cod, // El DataGrid necesita un ID único para cada fila
                         cod: plataforma.cod,
-                        nombre: plataforma.nombre
+                        nombre: plataforma.nombre,
+                        esVigente: plataforma.esVigente ? "Si" : "No"
                     }))
                 },
                 tiposCapacitaciones: {
                     columns: [
                         { field: 'cod', headerName: 'Código de tipo de capacitación', flex: 1, editable: true },
                         { field: 'nombre', headerName: 'Nombre', flex: 1, editable: true },
+                        {
+                            field: 'esVigente',
+                            headerName: '¿Está vigente?',
+                            width: 180,
+                            editable: true,
+                            renderEditCell: (params) => (
+                                <SelectEditInputCell
+                                    id={params.id}
+                                    value={params.value}
+                                    field={params.field}
+                                    options={[{ value: "Si", label: "Si" }, { value: "No", label: "No" }]}
+                                    api={params.api}
+                                />
+                            ),
+                        }
                     ],
                     rows: tiposCapacitaciones.map((e, index) => ({
                         id: e.cod, // El DataGrid necesita un ID único para cada fila
                         cod: e.cod,
-                        nombre: e.nombre
+                        nombre: e.nombre,
+                        esVigente: e.esVigente ? "Si" : "No"
                     }))
                 },
                 usuarios: {

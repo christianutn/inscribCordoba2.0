@@ -34,7 +34,8 @@ export const updateRow = async (row, option) => {
                 await putMinisterios({
                     cod: row.id,
                     nombre: row.nombre,
-                    newCod: row.cod
+                    newCod: row.cod,
+                    esVigente: row.esVigente
                     
                 })
                 break;
@@ -43,7 +44,8 @@ export const updateRow = async (row, option) => {
                     cod: row.id,
                     nombre: row.nombre,
                     ministerio: row.codMinisterio,
-                    newCod: row.cod
+                    newCod: row.cod,
+                    esVigente: row.esVigente
                 })
                 break
             case "Personas":
@@ -85,8 +87,8 @@ export const updateRow = async (row, option) => {
                 await putPlataformaDictado({
                     cod: row.id,
                     nombre: row.nombre,
-                    newCod: row.cod
-
+                    newCod: row.cod,
+                    esVigente: row.esVigente
                 })
                 break
             case "Usuarios":
@@ -109,7 +111,8 @@ export const updateRow = async (row, option) => {
                 await putTiposCapacitacion({
                     cod: row.id,
                     nombre: row.nombre,
-                    newCod: row.cod
+                    newCod: row.cod,
+                    esVigente: row.esVigente
 
                 })
                 break

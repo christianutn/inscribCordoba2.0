@@ -38,10 +38,10 @@ export const getAreas = async (req, res, next) => {
 export const putArea = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
-        const { cod, nombre, ministerio, newCod } = req.body;
+        const { cod, nombre, ministerio, newCod, esVigente } = req.body;
 
-        if (!cod || !nombre || !ministerio) {
-            throw new Error("Datos inválidos: se requiere código, nombre y ministerio.");
+        if (!cod || !nombre || !ministerio || !esVigente) {
+            throw new Error("Datos inválidos: se requiere código, nombre, ministerio y si es vigente.");
         }
 
         const areaActual = await areaModel.findOne({ where: { cod } });
@@ -52,7 +52,7 @@ export const putArea = async (req, res, next) => {
         const areaActualJSON = areaActual.toJSON();
 
         const area = await areaModel.update(
-            { cod: newCod || cod, nombre, ministerio },
+            { cod: newCod || cod, nombre, ministerio: ministerio, esVigente: esVigente === "Si" ? 1 : 0   },
             { where: { cod }, transaction: t }
         );
 

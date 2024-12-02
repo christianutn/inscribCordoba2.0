@@ -24,7 +24,7 @@ export const putTiposCapacitacion = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
         
-        let {cod, nombre, newCod} =  req.body
+        let {cod, nombre, newCod, esVigente} =  req.body
 
         if (!cod) {
 
@@ -36,6 +36,12 @@ export const putTiposCapacitacion = async (req, res, next) => {
         if (!nombre) {
 
             const error = new Error("El nombre no es válido");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        if (!esVigente){
+            const error = new Error("Debe ingresarse la vigencia");
             error.statusCode = 400;
             throw error;
         }
@@ -60,10 +66,11 @@ export const putTiposCapacitacion = async (req, res, next) => {
 
 
         
-        const tipo_capacitacion = await tipoCapacitacionModel.update({cod: newCod || cod, nombre: nombre}, {
+        const tipo_capacitacion = await tipoCapacitacionModel.update({cod: newCod || cod, nombre: nombre, esVigente: esVigente === "Si" ? 1 : 0}, {
             where: {
                 cod: cod
-            }
+            },
+            transaction: t
         });
 
         if(tipo_capacitacion[0] === 0){

@@ -86,7 +86,7 @@ export const getMinisterioByCod = async (req, res, next) => {
 export const putMinisterio = async (req, res, next) => {
     const t = await sequelize.transaction(); // Comienza una transacción
     try {
-        let { cod, nombre, newCod } = req.body;
+        let { cod, nombre, newCod, esVigente } = req.body;
 
         // Validaciones básicas
         if (!cod || cod.trim() === "") {
@@ -113,7 +113,7 @@ export const putMinisterio = async (req, res, next) => {
 
         // Realiza la actualización en la base de datos
         const [affectedRows] = await Ministerio.update(
-            { cod: newCod || cod, nombre },
+            { cod: newCod || cod, nombre: nombre, esVigente: esVigente === "Si" ? 1 : 0 },
             {
                 where: { cod },
                 transaction: t,

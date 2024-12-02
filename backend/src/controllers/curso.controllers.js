@@ -75,7 +75,7 @@ export const updateCurso = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
 
-        const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area } = req.body;
+        const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area, esVigente } = req.body;
 
         if(!cod || !nombre || !cupo || !cantidad_horas || !medio_inscripcion || !plataforma_dictado || !tipo_capacitacion || !area) throw new Error("Hay campos vacios");
 
@@ -96,7 +96,7 @@ export const updateCurso = async (req, res, next) => {
         const cursoAntesJSON = cursoAntes.toJSON();
 
        const result = await cursoModel.update(
-            { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area },
+            { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area, esVigente: esVigente === "Si" ? 1 : 0  },
             {
                 where: {
                     cod: cod,
@@ -109,8 +109,7 @@ export const updateCurso = async (req, res, next) => {
         }
 
          // Si se actualizó correctamente en la base de datos, actualiza Google Sheets
-         console.log("Valor anterior:", cursoAntesJSON.nombre);
-         console.log("Nuevo valor:", nombre);
+        
         const resultadoGoogleSheets = await actualizarDatosColumna('Nombre del curso', cursoAntesJSON.nombre, nombre);
 
         if (!resultadoGoogleSheets.success) {

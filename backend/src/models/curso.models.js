@@ -44,6 +44,10 @@ const Curso = sequelize.define("cursos", {
     },
     area: {
         type: DataTypes.STRING(15)
+    },
+    esVigente: {
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
     }
 }, {
     timestamps: false,

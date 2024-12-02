@@ -10,6 +10,10 @@ const Area = sequelize.define('areas', {
     nombre: DataTypes.STRING(250),
     ministerio: {
         type: DataTypes.STRING(15)
+    },
+    esVigente: {
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
     }
 }, {
     timestamps: false

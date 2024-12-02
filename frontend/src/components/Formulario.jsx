@@ -315,7 +315,7 @@ export default function Formulario() {
 
 
           <div className='select-ministerio'>
-            <Autocomplete options={ministerios.map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio}
+            <Autocomplete options={ministerios.filter(ministerio => ministerio.esVigente === 1).map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio}
               getValue={(value) => {
                 setSelectMinisterio(value);
                 setSelectArea("")
@@ -340,7 +340,7 @@ export default function Formulario() {
           </div>
 
           <div className='select-area'>
-            <Autocomplete options={areas.map(a => a.nombre)} label={"Seleccione un área"} value={selectArea}
+            <Autocomplete options={areas.filter(area => area.esVigente === 1).map(area => area.nombre)} label={"Seleccione un área"} value={selectArea}
               getValue={(value) => {
                 setSelectArea(value);
                 setSelectCurso("")
@@ -362,7 +362,7 @@ export default function Formulario() {
           </div>
 
           <div className='select-curso'>
-            <Autocomplete options={cursos.map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso}
+            <Autocomplete options={cursos.filter(c => c.esVigente === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso}
               getValue={(value) => {
                 setSelectCurso(value);
               }}
@@ -381,7 +381,7 @@ export default function Formulario() {
           </div>
 
           <div className='select-plataforma-dictado'>
-            <Autocomplete options={plataformasDictado.map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado}
+            <Autocomplete options={plataformasDictado.filter(p => p.esVigente === 1).map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado}
               getValue={(value) => {
                 setSelectPlataformaDictado(value);
               }}
@@ -390,7 +390,7 @@ export default function Formulario() {
           </div>
 
           <div className='select-tipo-capacitacion'>
-            <Autocomplete options={tiposCapacitaciones.map(p => p.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion}
+            <Autocomplete options={tiposCapacitaciones.filter(t => t.esVigente === 1).map(t => t.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion}
               getValue={(value) => {
                 setSelectTipoCapacitacion(value);
               }}
@@ -401,8 +401,6 @@ export default function Formulario() {
           <div className='input'>
             <TextField label={"Cupo"} getValue={(value) => setCupo(value)} value={cupo}
             />
-
-
             <TextField label={"Cantidad de horas"} getValue={(value) => setHoras(value)} value={horas}
             />
 
