@@ -1,5 +1,5 @@
 import DiccionarioChatbotnr from "../models/diccionarioChatbotnr.models.js";
-
+import sequelize from "../config/database.js";
 export const getDiccionarioChatbotnr = async (req, res) => {
     try {
         const diccionario = await DiccionarioChatbotnr.findAll();
@@ -14,5 +14,26 @@ export const getDiccionarioChatbotnr = async (req, res) => {
 };
 
 
+export const insertDiccionarioChatbotnr = async (req, res, next) => {
+    try {
+        const { pregunta } = req.body;
 
+        // console.log(nombre);
+        const existe = await DiccionarioChatbotnr.findOne({ where: { pregunta: pregunta } });
+        console.log(existe);
+        if (existe) {
+            const response = await DiccionarioChatbotnr.update(
+                { incidencia: sequelize.literal('incidencia + 1') }, // Incrementa el campo 'incidencia'
+                { where: { pregunta: pregunta } }
+            );
+            return res.status(201).json(response)
+        }
+        else {
+            const response = await DiccionarioChatbotnr.create({ pregunta: pregunta, incidencia: 1, pocesada: 0 });
+            return res.status(201).json(response)
+        }
+    } catch (error) {
+        next(error)
+    }
+};
 
