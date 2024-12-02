@@ -61,7 +61,7 @@ const ChatBoot = ({ chatMessages }) => {
         }
     };
     const handleSendMessage = async (e) => {
-        console.log("Estado inicial: ", estado);
+        
         e.preventDefault();
         if (newMessage.trim() === "") return;
 
