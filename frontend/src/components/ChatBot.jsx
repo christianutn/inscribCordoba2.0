@@ -510,6 +510,18 @@ const ChatBoot = ({ chatMessages }) => {
                         }
 
                     }
+                    else {
+                        let condicion = "La única opción válida es 0 (cero)";
+                        setMessages((prevMessages) => [
+                            ...prevMessages,
+                            {
+                                side: 1,
+                                menssage: condicion || 'Sin respuesta'
+                            },
+                        ]);
+                        setIsTyping(false);
+                        return;
+                    }
                 }
                 else {
                     let misOpciones = []; // Array para guardar los ids y secuenciales
@@ -588,6 +600,8 @@ const ChatBoot = ({ chatMessages }) => {
                                     menssage: respuesta || 'Sin respuesta'
                                 },
                             ]);
+
+                            localStorage.setItem('opcionesValidas', JSON.stringify([]));
                             setIsTyping(false);
                             return;
                         } catch (error) {
