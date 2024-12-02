@@ -47,7 +47,7 @@ const DiccionarioChat = ({ chatMessages }) => {
     const [unfoundQuestions, setUnfoundQuestions] = useState([]);
     const [registeredQuestions, setRegisteredQuestions] = useState([]);
     const fileInputRef = useRef(null);
-
+    const [misImagenes, setMisImagenes] = useState([]);
     const [imageBase64, setImageBase64] = useState('');
     const handleAddCategory = async (e) => {
         if (newCategory.trim() && !categories.includes(newCategory)) {
@@ -85,10 +85,10 @@ const DiccionarioChat = ({ chatMessages }) => {
         }
     };
     const handleRegisterQuestion = async (e) => {
-        console.log("Nueva categoria: ", newCategory);
-        console.log("Nueva pregunta: ", newQuestion);
-        console.log("Nueva respuesta: ", newAnswer);
-        console.log("Nueva imagen: ", newImage);
+        // console.log("Nueva categoria: ", newCategory);
+        // console.log("Nueva pregunta: ", newQuestion);
+        // console.log("Nueva respuesta: ", newAnswer);
+        // console.log("Nueva imagen: ", newImage);
         const formdata = new FormData();
         formdata.append('image', newImage);
         try {
@@ -142,16 +142,16 @@ const DiccionarioChat = ({ chatMessages }) => {
             console.log('Archivo recibido:', file);
 
             convertFileToBase64(file).then(base64String => {
-                console.log('Imagen en base64:', base64String);
+                // console.log('Imagen en base64:', base64String);
                 setImageBase64(base64String);
             }).catch(error => {
-                console.error('Error al convertir el archivo a base64:', error);
+                // console.error('Error al convertir el archivo a base64:', error);
             });
 
             setNewImage(file);
-            console.log('Archivo completo guardado en el estado:', file);
+            // console.log('Archivo completo guardado en el estado:', file);
         } else {
-            console.log('No se seleccionó ningún archivo.');
+            // console.log('No se seleccionó ningún archivo.');
         }
         // setNewImage(e.target.files[0]);
     };
@@ -260,32 +260,27 @@ const DiccionarioChat = ({ chatMessages }) => {
             ]);
 
             const registradas = await getDiccionarioChatbot("", "");
-            setRegisteredQuestions(registradas.map((question) => ({
-                id: question.id,
-                question: question.pregunta,
-                answer: question.respuesta,
-                image: question.image,
-                categoryId: question.idCategoria
-            })));
-            console.log("Registradas ", registeredQuestions)
-            // const fetchImages = async () => {
-            //     const newImageBase64 = {};
-            //     for (let i = 0; i < registeredQuestions.length; i++) {
-            //         const q = registeredQuestions[i];
-            //         if (q.image && q.image instanceof Blob) {
-            //             try {
-            //                 const base64String = await convertBlobToBase64(q.image);
-            //                 newImageBase64[i] = base64String; // Guarda la imagen codificada en base64
-            //                 q.image = base64String;
-            //             } catch (error) {
-            //                 console.error("Error al convertir el Blob a base64:", error);
-            //             }
-            //         }
-            //     }
-            //     setImageBase64(newImageBase64);
-            // };
-            // fetchImages();
-            console.log("Registradas ", registeredQuestions)
+            setRegisteredQuestions(
+                (registradas || []).map((question) => ({
+                    id: question.id || null, // Asegúrate de manejar valores nulos o indefinidos
+                    question: question.pregunta || "Sin pregunta",
+                    answer: question.respuesta || "Sin respuesta",
+                    image: question.imagen || null, // Si no hay imagen, asigna null
+                    categoryId: question.idCategoria || null, // Maneja valores nulos
+                }))
+            );
+            console.log(registradas);
+            // console.log("Registradas ", registeredQuestions)
+            // registradas.forEach((element) => {
+            //     const url = URL.createObjectURL(element.imagen);
+            //     // console.log(url);
+            //     misImagenes.push({
+            //         idPregunta: element.id.toString(),
+            //         url: url
+            //     });
+            // });
+            // console.log(registradas)
+            // console.log("Imagenes", misImagenes);
             try {
                 const noRegistradas = await getDiccionarioChatbotnr();
                 // // Llenar el estado con los datos obtenidos
@@ -482,8 +477,20 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                 <p className="text-muted">No hay preguntas registradas</p>
                                             ) : (
                                                 <div className="table-responsive" style={{ borderRadius: "10px", maxHeight: "250px" }}>
-                                                    <table className="table table-bordered table-sm table-striped table-hover rounded-4 shadow-lg" style={{ height: "150px", overflowY: "auto", border: "1px solid #dee2e6", borderRadius: "4px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}>
-                                                        <thead className="table-success text-center" style={{ position: "sticky", top: "0", zIndex: "2", backgroundColor: "#f8d7da" }}>
+                                                    <table
+                                                        className="table table-bordered table-sm table-striped table-hover rounded-4 shadow-lg"
+                                                        style={{
+                                                            height: "150px",
+                                                            overflowY: "auto",
+                                                            border: "1px solid #dee2e6",
+                                                            borderRadius: "4px",
+                                                            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                                                        }}
+                                                    >
+                                                        <thead
+                                                            className="table-success text-center"
+                                                            style={{ position: "sticky", top: "0", zIndex: "2", backgroundColor: "#f8d7da" }}
+                                                        >
                                                             <tr>
                                                                 <th>#</th>
                                                                 <th>Pregunta</th>
@@ -501,24 +508,22 @@ const DiccionarioChat = ({ chatMessages }) => {
                                                                     <td>{q.question}</td>
                                                                     <td>{q.answer}</td>
                                                                     <td>
-                                                                        {q.image ? (
+                                                                        {q.image && q.image.data && ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'].includes(q.image) ? (
                                                                             <img
-                                                                                src={`data:${q.mimeType};base64,${btoa(
-                                                                                    new Uint8Array(q.image).reduce((data, byte) => data + String.fromCharCode(byte), '')
-                                                                                )}`}
+                                                                                src={`data:${q.image};base64,${Buffer.from(q.image).toString('base64')}`}
                                                                                 alt="Pregunta"
-                                                                                // className="img-fluid img-thumbnail"
                                                                                 style={{ maxWidth: "100px", height: "auto" }}
                                                                             />
                                                                         ) : (
-                                                                            <span className="text-muted">Sin imagen</span>
+                                                                            <span className="text-muted">Sin imagen o tipo no compatible</span>
                                                                         )}
-
                                                                     </td>
+
                                                                 </tr>
                                                             ))}
                                                         </tbody>
                                                     </table>
+
                                                 </div>
                                             )}
                                         </div>
