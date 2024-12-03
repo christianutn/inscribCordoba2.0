@@ -1,23 +1,28 @@
-version: '3'
 services:
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    build: ./frontend
+    container_name: inscribcordoba-frontend
     ports:
-      - "3000:80" # Puerto 80 dentro del contenedor (Nginx) será mapeado al puerto 3000 del host
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=https://inscribcordoba.cunix.net/api
     networks:
-      - red-inscribcordoba
+      app-network:
+        aliases:
+          - frontend
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: ./backend
+    container_name: inscribcordoba-backend
     ports:
-      - "4000:4000" # Puerto 4000 del backend será mapeado al mismo puerto en el host
+      - "4001:4000"
+    env_file:
+      - ./backend/.env
     networks:
-      - red-inscribcordoba
-    
+      app-network:
+        aliases:
+          - backend
+
 networks:
-  red-inscribcordoba:
+  app-network:
     driver: bridge
