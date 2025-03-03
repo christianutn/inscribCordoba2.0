@@ -28,6 +28,10 @@ const ControlData = sequelize.define("control_data_fecha_inicio_cursada", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  maximoAcumulado: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 }, {
   tableName: "control_data_fecha_inicio_cursada", // Nombre de la tabla en la base de datos
   timestamps: false, // Desactiva los timestamps si no necesitas createdAt/updatedAt

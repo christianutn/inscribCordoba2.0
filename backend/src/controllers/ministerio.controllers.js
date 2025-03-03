@@ -4,13 +4,40 @@ import Curso from "../models/curso.models.js";
 import {actualizarDatosColumna} from "../googleSheets/services/actualizarDatosColumna.js";
 import sequelize from "../config/database.js";
 
+import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
+import Usuario from "../models/usuario.models.js";
+import { Op } from 'sequelize'; // Importar el operador de Sequelize
+
 export const getMinisterios = async (req, res, next) => {
     try {
         // Obtener los valores del token
-        const { rol, area } = req.user.user;
+        const { rol, area, cuil } = req.user.user;
+
+        // Validar datos del usuario
+        if (!cuil || !rol) {
+            const error = new Error("No se encontraron los datos del usuario (rol o cuil)");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Obtener áreas asignadas al usuario
+        const areasAsignadas = await AreasAsignadasUsuario.findAll({
+            where: { usuario: cuil },
+            include: [
+                {
+                    model: Usuario,
+                    as: 'detalle_usuario'
+                },
+                {
+                    model: Area,
+                    as: 'detalle_area'
+                }
+            ]
+        });
 
         let ministerios;
 
+        // Lógica para obtener ministerios según el rol
         if (rol === "ADM") {
             ministerios = await Ministerio.findAll({
                 include: [
@@ -27,12 +54,32 @@ export const getMinisterios = async (req, res, next) => {
                 ]
             });
         } else {
+            // Validar área para roles no administradores
+            if (!area) {
+                const error = new Error("No se encontraron los datos del usuario (area)");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            // Crear lista de códigos de área
+            const codigosArea = [area];
+            if (areasAsignadas.length > 0) {
+                areasAsignadas.forEach(areaAsignada => {
+                    codigosArea.push(areaAsignada.detalle_area.cod);
+                });
+            } 
+
+            // Obtener ministerios filtrados por áreas asignadas
             ministerios = await Ministerio.findAll({
                 include: [
                     {
                         model: Area,
                         as: 'detalle_areas',
-                        where: { cod: area }, // Filtrar por área específica del usuario
+                        where: {
+                            cod: {
+                                [Op.in]: codigosArea // Filtrar áreas que coincidan con alguno de los códigos en la lista
+                            }
+                        },
                         include: [
                             {
                                 model: Curso,
@@ -44,12 +91,14 @@ export const getMinisterios = async (req, res, next) => {
             });
         }
 
+        // Validar si se encontraron ministerios
         if (ministerios.length === 0) {
             const error = new Error("No existen ministerios");
             error.statusCode = 404;
             throw error;
         }
 
+        // Enviar respuesta exitosa
         res.status(200).json(ministerios);
     } catch (error) {
         next(error);

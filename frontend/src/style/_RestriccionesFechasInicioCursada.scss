@@ -13,16 +13,34 @@
             flex: 1; // Cada hijo tomará el mismo ancho
         }
     }
+
+    .detalle-fechas, .detalle-mes {
+        width: 100%; // Asegura que ambos ocupen el 100% del ancho disponible
+    }
+
+    // Se alinean horizontalmente en pantallas grandes
+    .detalle-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+
+        .detalle-fechas, .detalle-mes {
+            flex: 1 1 45%; // Toman el 45% del ancho en pantallas grandes
+            min-width: 280px; // Asegura que no se vuelvan demasiado pequeños
+        }
+    }
 }
 
 // Media query para pantallas pequeñas
-@media (max-width: 600px) { // Puedes ajustar el ancho según tus necesidades
+@media (max-width: 600px) { 
     .container-restricciones {
-        .inputs-limites {
+        .detalle-container {
             flex-direction: column; // Cambia la dirección de los elementos a columna
             gap: 20px; // Ajusta el espacio entre los elementos si es necesario
         }
 
-        
+        .detalle-fechas, .detalle-mes {
+            width: 100%; // En pantallas pequeñas, cada uno ocupa todo el ancho disponible
+        }
     }
 }

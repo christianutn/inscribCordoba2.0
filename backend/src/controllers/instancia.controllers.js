@@ -11,7 +11,7 @@ import { agregarFilasGoogleSheets } from "../googleSheets/services/agregarFilasG
 import { esInstanciaExistente } from "../googleSheets/services/esInstanciaExistente.js";
 
 import { getObjFechas } from "../googleSheets/services/getObjFechas.js";
-
+import {superaAcumulado} from "../googleSheets/services/superaAcumulado.js";
 
 export const getInstancias = async (req, res, next) => {
     try {
@@ -56,9 +56,19 @@ export const postInstancia = async (req, res, next) => {
     const t = await sequelize.transaction();
 
     try {
-        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, cohortes, tutores, opciones } = req.body;
+        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, cohortes, tutores, opciones, comentario } = req.body;
         const aplicaRestricciones = req.user.user.esExcepcionParaFechas == 0;
 
+        // variable que guarda fecha y hora exacta en horas y minutos nada mas en que se ejecuta
+        const fechaActual = new Date();
+        const fechaActualString = `${fechaActual.getFullYear()}-${fechaActual.getMonth() + 1}-${fechaActual.getDate()} ${fechaActual.getHours()}:${fechaActual.getMinutes()}`;
+
+        // cuil del usaurio que hizo la solicitud
+        const cuilUsuario = req.user.user.cuil;
+
+        // cadena de fechaActualString y cuilUsuario
+        const cadenaSolicitud = `${fechaActualString}-${cuilUsuario}`;
+        
         // Obtener objeto de fechas para verificar las reglas de negocio
         const objFechas = await getObjFechas(aplicaRestricciones);
 
@@ -99,6 +109,11 @@ export const postInstancia = async (req, res, next) => {
                 throw crearError(400, "Se ha superado el límite diario de cursos o cupos");
             }
 
+            // Verificar si el acumulado está invalidado
+            if(await superaAcumulado(objFechas, fechaClave)){
+                throw crearError(400, "Se ha superado el límite acumulado de cursos o cupos");
+            }
+
             // Crear la instancia
             const instancia = await instanciaModel.create({
                 curso: dataCurso.cod,
@@ -126,7 +141,7 @@ export const postInstancia = async (req, res, next) => {
 
         
 
-        agregarFilasGoogleSheets({ ...req.body, codCurso: dataCurso.cod });
+        agregarFilasGoogleSheets({ ...req.body, codCurso: dataCurso.cod, cadenaSolicitud: cadenaSolicitud });
 
         await t.commit();
         res.status(201).json({ message: "Instancias y tutores creados exitosamente" });

@@ -5,16 +5,22 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
-import { getMatrizFechas } from "../services/googleSheets.service";
+import { getMatrizFechas, buscarPosicionFecha } from "../services/googleSheets.service";
+import {getRestricciones} from "../services/restricciones.service.js";
+
 
 const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [matrizFechas, setMatrizFechas] = useState([]);
+  const [maximoAcumulado, setMaximoAcumulado] = useState(0);
 
   useEffect(() => {
     (async () => {
       const response = await getMatrizFechas();
+      const restricciones = await getRestricciones();
       
+      setMaximoAcumulado(restricciones.maximoAcumulado);
+
       setMatrizFechas(response);
     })();
   }, []);
@@ -40,10 +46,33 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
       const claveDia = `${claveAnioMes}-${fechaAValidar[2]}`;
 
       if (matrizFechas[claveAnioMes]) {
-        
+       
+       
+
+        const posInicio = buscarPosicionFecha(claveDia, matrizFechas.listaFechasInicio);
+        const posFin = buscarPosicionFecha(claveDia, matrizFechas.listaFechasFin);
+
+        const acumulado = matrizFechas.listaFechasInicio[posInicio].acumulado - matrizFechas.listaFechasFin[posFin].acumulado;
+
+        console.log("Lista fechas inicio: ", matrizFechas.listaFechasInicio);
+        console.log("Lista fechas fin: ", matrizFechas.listaFechasFin);
+        console.log("Fecha: ", claveDia);
+        console.log("Acumulado: ", acumulado);
+
+        if (acumulado >= maximoAcumulado) {
+          console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+          console.log("Fecha Acumulado: ", fechaAValidar);
+          console.log("Máximo acumulado: ", maximoAcumulado);
+          console.log("Acumulado: ", acumulado);
+          console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+          return true;
+        }
         return matrizFechas[claveAnioMes].invalidarMesAnio || matrizFechas[claveAnioMes][claveDia]?.invalidarDia;
       }
     }
+
+
 
     return false;
   };

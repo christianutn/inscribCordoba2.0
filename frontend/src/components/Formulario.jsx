@@ -23,6 +23,9 @@ import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
 import { validarOrdenFechas } from "../services/validarOrdenFechas.js";
 import { useNavigate } from 'react-router-dom';
 import OpcionesEvento from './OpcionesEvento.jsx';
+import CustomInput from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
+
 
 
 export default function Formulario() {
@@ -51,6 +54,8 @@ export default function Formulario() {
   const [cupo, setCupo] = useState("");
   const [horas, setHoras] = useState("");
   const [cohortes, setCohortes] = useState([]);
+  const [comentario, setComentario] = useState("");
+
 
   // OPciones de evento
 
@@ -59,8 +64,16 @@ export default function Formulario() {
     edad: false,
     departamento: false,
     publicaPCC: false,
-    correlatividad: false
+    correlatividad: false,
+    esNuevoEvento: false
   });
+
+  // Descripcion 
+
+  const [descripcion, setDescripcion] = useState('');
+  const [errorDescripcion, setErrorDescripcion] = useState('');
+
+
 
   // Función para actualizar los datos desde el hijo
   const manejarCambioOpciones = (nuevaOpciones) => {
@@ -187,6 +200,7 @@ export default function Formulario() {
     setSelectTipoCapacitacion("");
     setCupo("");
     setHoras("");
+    setComentario("");
   };
 
 
@@ -257,7 +271,7 @@ export default function Formulario() {
 
       })
 
-      const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes, opciones });
+      const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes, opciones, comentario });
 
       limpiarFormulario();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -411,7 +425,9 @@ export default function Formulario() {
             <OpcionesEvento opciones={opciones} onOpcionesChange={manejarCambioOpciones} />
           </div>
 
+          <div>
 
+          </div>
 
           <div className='tutores'>
             <SubtituloPrincipal texto='Selección de tutores' />
@@ -445,11 +461,42 @@ export default function Formulario() {
 
           <div className='cohortes'>
             <Cohortes getCohortes={handleCohortes}></Cohortes>
+
           </div>
 
           <div className='submit'>
             <Button mensaje={"Registrar"} type="button" hanldeOnClick={handleEnviarFormulario} />
           </div>
+          <Tooltip title="En caso de aplicar restricciones como edad, correlativad, departamento  ó cualquier aclaración relevante, favor de completar el campo de comentario"
+            placement="top"
+            
+            componentsProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: '#333', // Fondo oscuro
+                  color: '#fff', // Texto blanco
+                  fontSize: '16px', // Tamaño de letra más grande
+                  maxWidth: '400px', // Ancho máximo del tooltip
+                  padding: '12px', // Espaciado interno
+                  borderRadius: '8px', // Bordes redondeados
+                },
+              },
+            }}
+          >
+            <div className='comentario'>
+              <CustomInput
+                id="outlined-multiline-static"
+                label="Comentario"
+                multiline
+                rows={4}
+                fullWidth
+                value={comentario}
+                onChange={(event) => setComentario(event.target.value)}
+                inputProps={{ maxLength: 450 }} // Limita a 450 caracteres
+              />
+            </div>
+          </Tooltip>
+
         </div>
       </form>
     </>

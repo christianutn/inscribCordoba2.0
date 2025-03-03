@@ -16,7 +16,7 @@ const OpcionesEvento = ({ opciones, onOpcionesChange }) => {
         onOpcionesChange(nuevoEstado); // Llama al callback para actualizar en el padre
     };
 
-    const { autogestionado, edad, departamento, publicaPCC, correlatividad } = opciones;
+    const { autogestionado, edad, departamento, publicaPCC, correlatividad, esNuevoEvento } = opciones;
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -28,6 +28,18 @@ const OpcionesEvento = ({ opciones, onOpcionesChange }) => {
                             <Tooltip
                                 title="Los estudiantes se matriculan y reciben certificados automáticamente."
                                 placement="right-start"
+                                componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        backgroundColor: '#333', // Fondo oscuro
+                                        color: '#fff', // Texto blanco
+                                        fontSize: '16px', // Tamaño de letra más grande
+                                        maxWidth: '400px', // Ancho máximo del tooltip
+                                        padding: '12px', // Espaciado interno
+                                        borderRadius: '8px', // Bordes redondeados
+                                      },
+                                    },
+                                  }}
                             >
                                 <span>
                                     <Checkbox checked={autogestionado} onChange={handleChange} name="autogestionado" />
@@ -41,6 +53,18 @@ const OpcionesEvento = ({ opciones, onOpcionesChange }) => {
                             <Tooltip
                                 title="Permite inscripciones públicas desde el Portal Campus Córdoba."
                                 placement="right-start"
+                                componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        backgroundColor: '#333', // Fondo oscuro
+                                        color: '#fff', // Texto blanco
+                                        fontSize: '16px', // Tamaño de letra más grande
+                                        maxWidth: '400px', // Ancho máximo del tooltip
+                                        padding: '12px', // Espaciado interno
+                                        borderRadius: '8px', // Bordes redondeados
+                                      },
+                                    },
+                                  }}
                             >
                                 <span>
                                     <Checkbox checked={publicaPCC} onChange={handleChange} name="publicaPCC" />
@@ -54,6 +78,18 @@ const OpcionesEvento = ({ opciones, onOpcionesChange }) => {
                             <Tooltip
                                 title="Habilita restricciones por rango de edad para inscribirse."
                                 placement="right-start"
+                                componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        backgroundColor: '#333', // Fondo oscuro
+                                        color: '#fff', // Texto blanco
+                                        fontSize: '16px', // Tamaño de letra más grande
+                                        maxWidth: '400px', // Ancho máximo del tooltip
+                                        padding: '12px', // Espaciado interno
+                                        borderRadius: '8px', // Bordes redondeados
+                                      },
+                                    },
+                                  }}
                             >
                                 <span>
                                     <Checkbox checked={edad} onChange={handleChange} name="edad" />
@@ -67,6 +103,18 @@ const OpcionesEvento = ({ opciones, onOpcionesChange }) => {
                             <Tooltip
                                 title="Habilita restricciones por departamentos específicos."
                                 placement="right-start"
+                                componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        backgroundColor: '#333', // Fondo oscuro
+                                        color: '#fff', // Texto blanco
+                                        fontSize: '16px', // Tamaño de letra más grande
+                                        maxWidth: '400px', // Ancho máximo del tooltip
+                                        padding: '12px', // Espaciado interno
+                                        borderRadius: '8px', // Bordes redondeados
+                                      },
+                                    },
+                                  }}
                             >
                                 <span>
                                     <Checkbox checked={departamento} onChange={handleChange} name="departamento" />
@@ -81,6 +129,18 @@ const OpcionesEvento = ({ opciones, onOpcionesChange }) => {
                             <Tooltip
                                 title="Habilita restricciones por correlatividad, es decir, que un alumno previemente necesite tener un curso anterior aprobado."
                                 placement="right-start"
+                                componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        backgroundColor: '#333', // Fondo oscuro
+                                        color: '#fff', // Texto blanco
+                                        fontSize: '16px', // Tamaño de letra más grande
+                                        maxWidth: '400px', // Ancho máximo del tooltip
+                                        padding: '12px', // Espaciado interno
+                                        borderRadius: '8px', // Bordes redondeados
+                                      },
+                                    },
+                                  }}
                             >
                                 <span>
                                     <Checkbox checked={correlatividad} onChange={handleChange} name="correlatividad" />
@@ -89,7 +149,34 @@ const OpcionesEvento = ({ opciones, onOpcionesChange }) => {
                         }
                         label="Correlatividad"
                     />
+
+                    <FormControlLabel
+                        control={
+                            <Tooltip
+                                title="Selecciona para indicar que será necesario crear un nuevo evento en Victorius"
+                                placement="right-start"
+                                componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        backgroundColor: '#333', // Fondo oscuro
+                                        color: '#fff', // Texto blanco
+                                        fontSize: '16px', // Tamaño de letra más grande
+                                        maxWidth: '400px', // Ancho máximo del tooltip
+                                        padding: '12px', // Espaciado interno
+                                        borderRadius: '8px', // Bordes redondeados
+                                      },
+                                    },
+                                  }}
+                            >
+                                <span>
+                                    <Checkbox checked={esNuevoEvento} onChange={handleChange} name="esNuevoEvento" />
+                                </span>
+                            </Tooltip>
+                        }
+                        label="Crear nuevo evento en Victorius"
+                    />
                 </FormGroup>
+
             </FormControl>
         </Box>
     );

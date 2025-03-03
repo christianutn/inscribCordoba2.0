@@ -11,6 +11,7 @@ const obtenerToken = async (cuil, contrasenia) => {
             body: JSON.stringify({ cuil: cuil, contrasenia: contrasenia })
         });
         const data = await response.json();
+
         // Verifica si la respuesta es exitosa
         
         if (response.status == 429) {
@@ -28,3 +29,5 @@ const obtenerToken = async (cuil, contrasenia) => {
 };
 
 export default obtenerToken;
+
+

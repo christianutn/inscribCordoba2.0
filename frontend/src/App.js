@@ -15,6 +15,8 @@ import CambioContrasenia from './components/CambioContrasenia';
 import PingTest from "./components/PingTest"; // Sólo a  modo de desarrollo, luego podrá eliminarse no influye con ninguna funcionalidad
 import ChatBoot from './components/ChatBot';
 import DiccionarioChat from './components/Diccionario';
+import AltaAsignacionesAreasUsuario from './components/FormulariosAlta/AltaAsignacionesAreasUsuario';
+import DetalleFechas from './components/DetalleFechas';
 
 
 
@@ -40,6 +42,8 @@ function App() {
         <Route path='/PingTest' element={<PingTest />} />
         <Route path='/chatbot' element={<ChatBoot />} />
         <Route path='/diccionario' element={<DiccionarioChat />} />
+        <Route path='/areasAsignadasUsuario/alta' element={<AltaAsignacionesAreasUsuario />} />
+        <Route path='/detalleFechas' element={<DetalleFechas />} />
 
 
 

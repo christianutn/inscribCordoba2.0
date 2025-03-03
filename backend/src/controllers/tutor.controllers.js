@@ -6,10 +6,23 @@ import validarCuil from "../utils/validarCuil.js"
 import validarEmail from "../utils/validarMail.js";
 import tratarNombres from "../utils/tratarNombres.js";
 
+import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
+import Usuario from "../models/usuario.models.js";
+import { Op } from 'sequelize'; // Importar el operador de Sequelize
+
 
 export const getTutores = async (req, res, next) => {
 
-    const { rol, area } = req.user.user
+    const { rol, area, cuil } = req.user.user
+
+    // validar que no sean inválidos rol o cuil
+    if (!cuil || !rol) {
+        const error = new Error("No se encontraron los datos del usuario (rol o cuil)");
+        error.statusCode = 404;
+        throw error;
+    }
+
+
     let tutores = [];
     try {
         if (rol === "ADM") {
@@ -24,9 +37,38 @@ export const getTutores = async (req, res, next) => {
                 ]
             });
         } else {
+
+            //validamos si area es vacio debemos devolver error
+            if (!area) {
+                const error = new Error("No se encontraron los datos del area");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            // Obtenemos las AreasAsignadasUsuario por cuil
+            const areasAsignadas = await AreasAsignadasUsuario.findAll({
+                where: { usuario: cuil },
+                include: [
+                    {
+                        model: Usuario,
+                        as: 'detalle_usuario'
+                    },
+                    {
+                        model: Area,
+                        as: 'detalle_area'
+                    }
+                ]
+            });
+
+            // creamos una nueva lista el primer elemento es el valor de area, los elementos restantes son los de areasAsignadas
+            const codigosArea = [area, ...areasAsignadas.map(a => a.area)];
+
+            // Buscamos los tutores cuya area estén incluido en codigosArea
             tutores = await Tutor.findAll({
                 where: {
-                    area: area
+                    area: {
+                        [Op.in]: codigosArea
+                    }
                 },
                 include: [
                     {
@@ -37,6 +79,8 @@ export const getTutores = async (req, res, next) => {
                     }
                 ]
             });
+
+            
         }
         if (tutores.length === 0) {
             const error = new Error("No existen tutores");
@@ -53,7 +97,7 @@ export const getTutores = async (req, res, next) => {
 export const putTutores = async (req, res, next) => {
     const t = await sequelize.transaction(); // Iniciamos la transacción
     try {
-      
+
 
         let { cuil, nombre, apellido, mail, celular, newCuil, area, esReferente } = req.body;
 
@@ -122,12 +166,12 @@ export const putTutores = async (req, res, next) => {
 
 
 export const postTutor = async (req, res, next) => {
-    
+
     try {
-    
+
         let { cuil, area, esReferente } = req.body;
 
-        
+
 
         if (!cuil) {
             const error = new Error("EL cuil es requerido");
@@ -139,17 +183,17 @@ export const postTutor = async (req, res, next) => {
             throw error;
         }
 
-        if(!area){
+        if (!area) {
             const error = new Error("EL área es requerida");
             error.statusCode = 400;
             throw error;
         }
 
-        if(!esReferente){
+        if (!esReferente) {
             const error = new Error("El referente es requerido");
             error.statusCode = 400;
             throw error;
-        } else if(esReferente !== "Si" && esReferente !== "No"){
+        } else if (esReferente !== "Si" && esReferente !== "No") {
             const error = new Error("El referente debe ser Si o No");
             error.statusCode = 400;
             throw error;
@@ -165,7 +209,7 @@ export const postTutor = async (req, res, next) => {
             throw error;
         }
 
-        
+
 
         esReferente = esReferente === "Si" ? 1 : esReferente === "No" ? 0 : null;
 
@@ -177,9 +221,17 @@ export const postTutor = async (req, res, next) => {
             throw error;
         }
 
+        //Verificamos si el tutor ya existe
+        const tutor = await Tutor.findOne({ where: { cuil: cuil } });
+        if (tutor) {
+            const error = new Error(`El tutor con el cuil ${cuil} ya existe`);
+            error.statusCode = 404;
+            throw error;
+        }
+
         // Actualización de Tutor
         const altaTutor = await Tutor.create(
-            {cuil: cuil ,area: area, esReferente: esReferente }
+            { cuil: cuil, area: area, esReferente: esReferente }
         );
 
         if (!altaTutor) {
@@ -190,7 +242,7 @@ export const postTutor = async (req, res, next) => {
         res.status(201).json({ message: "Tutor creado correctamente" });
 
     } catch (error) {
-        
+
         next(error);
     }
 }
@@ -216,7 +268,7 @@ export const deleteTutor = async (req, res, next) => {
 
         res.status(200).json({ message: "Tutor borrado correctamente" });
 
-        
+
     } catch (error) {
         next(error);
     }

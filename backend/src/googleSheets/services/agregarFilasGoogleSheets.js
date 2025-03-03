@@ -7,7 +7,7 @@ export const agregarFilasGoogleSheets = async (newInstancias) => {
        
         
         //Genera nueva fila para agreagr a google sheets
-        const {ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, estado, cohortes, tutores, codCurso, opciones} = newInstancias;
+        const {ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, estado, cohortes, tutores, codCurso, opciones, comentario, cadenaSolicitud} = newInstancias;
 
        
         //Obtiene autorización
@@ -40,8 +40,11 @@ export const agregarFilasGoogleSheets = async (newInstancias) => {
                 opciones.departamento ? "Si" : "No", 
                 opciones.publicaPCC ? "Si" : "No",
                 opciones.correlatividad ? "Si" : "No",
+                opciones.esNuevoEvento ? "Si" : "No",
+                comentario,
+                cadenaSolicitud
             ] 
-            const metaData = await appendRows(googleSheets, "principal", "B", "T", rowNew)
+            const metaData = await appendRows(googleSheets, "principal", "B", "W", rowNew)
             if (!metaData) {
                 throw new Error('Error al insertar la nueva fila: Fila vacía');
             }

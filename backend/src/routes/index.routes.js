@@ -19,15 +19,11 @@ import restriccionesFechasInicioCursada from "./restriccionesFechasInicioCursada
 import categoriaChatbotRouter from "./categoriaChatbot.routes.js";
 import diccionarioChatbotRouter from "./diccionarioChatbot.routes.js"
 import diccionarioChatbotnrRouter from "./diccionarioChatbotnr.routes.js"
-
-
+import areasAsignadasUsuarioRouter from "./areasAsignadasUsuario.routes.js";
 
 import { Router } from "express";
 
-
 const router = Router();
-
-
 
 router.use("/areas", areaRouter);
 router.use("/ministerios", ministerioRouter)
@@ -49,11 +45,12 @@ router.use("/tutores", tutorRouter)
 router.use("/tiposRolTutor", tipoRolTutor)
 router.use("/googleSheets", googleSheetsRouter)
 
-
 router.use("/restricciones", restriccionesFechasInicioCursada)
 
 router.use("/categoriaChatbot", categoriaChatbotRouter)
 
 router.use("/diccionarioChatbot", diccionarioChatbotRouter)
 router.use("/diccionarioChatbotnr", diccionarioChatbotnrRouter)
+router.use("/areasAsignadasUsuario", areasAsignadasUsuarioRouter)
+
 export default router

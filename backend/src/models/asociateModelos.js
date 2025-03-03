@@ -15,6 +15,7 @@ import Tutor from "./tutor.models.js";
 import TipoRolTutor from "./tipoRolTutor.models.js";
 import CategoriaChatbot from "./categoriaChatbot.models.js";
 import DiccionarioChatbot from "./diccionarioChatbot.models.js";
+import AreasAsignadasUsuario from "./areasAsignadasUsuario.models.js";
 const associateModels = () => {
     Ministerio.hasMany(Area, { foreignKey: 'ministerio', as: 'detalle_areas' });
     Area.belongsTo(Ministerio, { foreignKey: 'ministerio', as: 'detalle_ministerio' });
@@ -45,7 +46,19 @@ const associateModels = () => {
     Usuario.belongsTo(Rol, { foreignKey: 'rol', as: 'detalle_rol' });
     Usuario.belongsTo(Persona, { foreignKey: 'cuil', as: 'detalle_persona' });
     Usuario.belongsTo(Area, { foreignKey: 'area', as: 'detalle_area' });
-
+    
+    // Areas Asignadas Usuario
+   
+    AreasAsignadasUsuario.belongsTo(Usuario, { 
+        foreignKey: 'usuario',
+        targetKey: 'cuil',
+        as: 'detalle_usuario' 
+    });
+    AreasAsignadasUsuario.belongsTo(Area, { 
+        foreignKey: 'area',
+        targetKey: 'cod',
+        as: 'detalle_area' 
+    });
 
     //Tutor
     Tutor.belongsTo(Persona, { foreignKey: 'cuil', as: 'detalle_persona' });

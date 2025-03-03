@@ -58,7 +58,7 @@ export const postCurso = async (req, res, next) => {
         if (plataforma_dictado.length > 15) throw new Error("La plataforma de dictado no es valido debe ser menor a 15 caracteres");
         if (tipo_capacitacion.length > 15) throw new Error("El tipo de capacitación no es valido debe ser menor a 15 caracteres");
         if (area.length > 15) throw new Error("El area no es valido debe ser menor a 15 caracteres");
-        if (nombre.length > 100) throw new Error("El nombre no es valido debe ser menor a 100 caracteres");
+        if (nombre.length > 250) throw new Error("El nombre no es valido debe ser menor a 250 caracteres");
         if (nombre.length === 0) throw new Error("El nombre no puede ser vacío");
 
         const response = await cursoModel.create(req.body);

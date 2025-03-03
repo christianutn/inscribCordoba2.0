@@ -9,7 +9,10 @@ import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Autocomplete from "../components/UIElements/Autocomplete.jsx";
-import {getRestricciones, putRestriccion} from "../services/restricciones.service.js";
+import { getRestricciones, putRestriccion } from "../services/restricciones.service.js";
+import DetalleFechasPorDia from "./DetalleFechas.jsx";
+import Subtitulo from "./fonts/SubtituloPrincipal.jsx";
+import DetalleMes from "./DetalleMes.jsx";
 
 const RestriccionesFechasInicioCursada = () => {
 
@@ -23,9 +26,10 @@ const RestriccionesFechasInicioCursada = () => {
     const [maximoCuposDiario, setMaximoCuposDiario] = useState("");
     const [maximoCursosMensual, setMaximoCursosMensual] = useState("");
     const [maximoCursosDiario, setMaximoCursosDiario] = useState("");
-    const listaMeses = ["Sin Bloqueo","Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    
-    
+    const [maximoAcumulado, setMaximoAcumulado] = useState("");
+    const listaMeses = ["Sin Bloqueo", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+
 
 
     useEffect(() => {
@@ -46,6 +50,7 @@ const RestriccionesFechasInicioCursada = () => {
                 setMaximoCuposMensual(rest.maximoCuposXMes);
                 setMaximoCursosDiario(rest.maximoCursosXDia);
                 setMaximoCursosMensual(rest.maximoCursosXMes);
+                setMaximoAcumulado(rest.maximoAcumulado);
 
 
 
@@ -66,7 +71,7 @@ const RestriccionesFechasInicioCursada = () => {
     const isValidInteger = (value) => {
         // Convertir el valor a número
         const number = Number(value);
-    
+
         // Verificar si es un número entero y mayor que cero
         return Number.isInteger(number) && number > 0;
     }
@@ -74,16 +79,16 @@ const RestriccionesFechasInicioCursada = () => {
     const validarDatos = () => {
         //Garantizar que los valores sean numéricos y positivos. Ejmplo maximoCuposDiario: 100, maximoCuposMensual: 1000
 
-        if(!isValidInteger(maximoCursosDiario)){
+        if (!isValidInteger(maximoCursosDiario)) {
             throw new Error("El maximo de cursos diarios debe ser un numero entero positivo");
         }
-        if(!isValidInteger(maximoCursosMensual)){
+        if (!isValidInteger(maximoCursosMensual)) {
             throw new Error("El maximo de cursos mensuales debe ser un numero entero positivo");
         }
-        if(!isValidInteger(maximoCuposDiario)){
+        if (!isValidInteger(maximoCuposDiario)) {
             throw new Error("El maximo de cupos diarios debe ser un numero entero positivo");
         }
-        if(!isValidInteger(maximoCuposMensual)){
+        if (!isValidInteger(maximoCuposMensual)) {
             throw new Error("El maximo de cupos mensuales debe ser un numero entero positivo");
         }
     }
@@ -95,7 +100,7 @@ const RestriccionesFechasInicioCursada = () => {
             validarDatos();
 
             //Función para agregar
-            await putRestriccion({ mesBloqueado: listaMeses.indexOf(selectedMes), maximoCursosXDia: maximoCursosDiario, maximoCursosXMes: maximoCursosMensual, maximoCuposXDia: maximoCuposDiario, maximoCuposXMes: maximoCuposMensual });
+            await putRestriccion({ mesBloqueado: listaMeses.indexOf(selectedMes), maximoCursosXDia: maximoCursosDiario, maximoCursosXMes: maximoCursosMensual, maximoCuposXDia: maximoCuposDiario, maximoCuposXMes: maximoCuposMensual, maximoAcumulado: maximoAcumulado });
 
 
             setSuccess(true);
@@ -149,8 +154,9 @@ const RestriccionesFechasInicioCursada = () => {
                         <TextField label={"Límite de cupos por mes"} type={"number"} value={maximoCuposMensual} getValue={(value) => setMaximoCuposMensual(value)}></TextField>
                         <TextField label={"Límite de crusos por día"} type={"number"} value={maximoCursosDiario} getValue={(value) => setMaximoCursosDiario(value)}></TextField>
                         <TextField label={"Límite de cupos por día"} type={"number"} value={maximoCuposDiario} getValue={(value) => setMaximoCuposDiario(value)}></TextField>
-                        <Autocomplete label={"Mes bloqueado"}  options={listaMeses} value={selectedMes} 
-                        getValue={(value) => setSelectedMes(value)} ></Autocomplete>
+                        <TextField label={"Máximo acumulado de cursos"} type={"number"} value={maximoAcumulado} getValue={(value) => setMaximoAcumulado(value)}></TextField>
+                        <Autocomplete label={"Mes bloqueado"} options={listaMeses} value={selectedMes}
+                            getValue={(value) => setSelectedMes(value)} ></Autocomplete>
 
 
                     </div>
@@ -158,8 +164,17 @@ const RestriccionesFechasInicioCursada = () => {
                     <div className="enviar">
                         <Button type="button" mensaje={"Modificar"} hanldeOnClick={handleEnviar}></Button>
                     </div>
-                </div>
 
+                    <div className="detalle-container">
+                        <div className="detalle-fechas">
+                            <DetalleFechasPorDia maximoCuposDiario={maximoCuposDiario} maximoCursosDiario={maximoCursosDiario} maximoAcumulado={maximoAcumulado} />
+                        </div>
+                        <div className="detalle-mes">
+                            <DetalleMes maximoCuposMensual={maximoCuposMensual} maximoCursosMensual={maximoCursosMensual} />
+                        </div>
+                    </div>
+
+                </div>
             </form>
         </>
     )

@@ -15,15 +15,15 @@ export const getRestricciones = async (req, res, next) => {
 
 export const putRestriccion = async (req, res, next) => {
     try {
-        const { maximoCursosXMes, maximoCuposXMes, maximoCuposXDia, maximoCursosXDia, mesBloqueado } = req.body;
+        const { maximoCursosXMes, maximoCuposXMes, maximoCuposXDia, maximoCursosXDia, mesBloqueado, maximoAcumulado } = req.body;
 
-        if(!maximoCursosXMes || !maximoCuposXMes || !maximoCuposXDia || !maximoCursosXDia) {
+        if(!maximoCursosXMes || !maximoCuposXMes || !maximoCuposXDia || !maximoCursosXDia || !maximoAcumulado) {
             const error = new Error("Todos los campos son obligatorios");
             error.statusCode = 404;
             throw error;
         }
 
-        if(maximoCursosXMes < 0 || maximoCuposXMes < 0 || maximoCuposXDia < 0 || maximoCursosXDia < 0) {
+        if(maximoCursosXMes < 0 || maximoCuposXMes < 0 || maximoCuposXDia < 0 || maximoCursosXDia < 0 || maximoAcumulado < 0) {
             const error = new Error("Los valores no pueden ser negativos");
             error.statusCode = 404;
             throw error;
@@ -35,7 +35,7 @@ export const putRestriccion = async (req, res, next) => {
             throw error;
         }
 
-        const esActualizado = await Restricciones.update({ maximoCursosXMes, maximoCuposXMes, maximoCuposXDia, maximoCursosXDia, mesBloqueado }, { where: { id: 1 } });
+        const esActualizado = await Restricciones.update({ maximoCursosXMes, maximoCuposXMes, maximoCuposXDia, maximoCursosXDia, mesBloqueado, maximoAcumulado }, { where: { id: 1 } });
         if(esActualizado[0] === 0) {
             const error = new Error("No se registraron datos para actualizar");
             error.statusCode = 404;
