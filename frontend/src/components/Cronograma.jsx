@@ -17,7 +17,7 @@ const Cronograma = () => {
     useEffect(() => {
         (async () => {
             try {
-                console.log("🔵 Llamando a getCronograma");
+                
                 const dataCronograma = await getCronograma();
                 
                 setCronograma(dataCronograma);

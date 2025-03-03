@@ -54,17 +54,10 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
         const acumulado = matrizFechas.listaFechasInicio[posInicio].acumulado - matrizFechas.listaFechasFin[posFin].acumulado;
 
-        console.log("Lista fechas inicio: ", matrizFechas.listaFechasInicio);
-        console.log("Lista fechas fin: ", matrizFechas.listaFechasFin);
-        console.log("Fecha: ", claveDia);
-        console.log("Acumulado: ", acumulado);
+       
 
         if (acumulado >= maximoAcumulado) {
-          console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-          console.log("Fecha Acumulado: ", fechaAValidar);
-          console.log("Máximo acumulado: ", maximoAcumulado);
-          console.log("Acumulado: ", acumulado);
-          console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+         
 
           return true;
         }

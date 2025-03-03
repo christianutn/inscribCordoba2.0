@@ -7,7 +7,7 @@ let googleSheetsInstance = null;
 
 export const getCronograma = async (areaAFiltrar) => {
     try {
-        console.log("Paso una vez (optimizado)");
+        
 
         // Singleton para la instancia de Google Sheets
         if (!googleSheetsInstance) {
