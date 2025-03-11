@@ -23,7 +23,7 @@ export const getObjFechas = async (aplicaRestricciones) => {
         fechasObj.listaFechasFin = [];
         fechasObj.listaFechasInicio = [];
 
-        
+
 
         // Obtiene los datos de la hoja "principal" desde la columna B a la X.
         const data = await getDataRange(googleSheets, auth, "principal", "B:X");
@@ -42,7 +42,7 @@ export const getObjFechas = async (aplicaRestricciones) => {
                 }), {})
             );
 
-           
+
 
             // Recorre cada fila de datos y actualiza el objeto `fechasObj` con cupos y cursos.
             keyValueArray.forEach(row => {
@@ -80,9 +80,9 @@ export const getObjFechas = async (aplicaRestricciones) => {
                         };
                     }
 
-                    
 
-                  
+
+
 
                     // En el forEach donde se procesa cada fecha:
                     if (aplicaRestricciones) {
@@ -99,8 +99,8 @@ export const getObjFechas = async (aplicaRestricciones) => {
                         );
                         fechasObj[claveMesAnio][fechaClave].cantidadCupoDiario += cupo;
                         fechasObj[claveMesAnio][fechaClave].cantidadCursosDiario += 1;
-                    
-                        
+
+
                         fechasObj[claveMesAnio][fechaClave].invalidarDia = superaLimiteDiario(
                             fechasObj[claveMesAnio][fechaClave].cantidadCupoDiario,
                             fechasObj[claveMesAnio][fechaClave].cantidadCursosDiario,
@@ -113,10 +113,6 @@ export const getObjFechas = async (aplicaRestricciones) => {
                         // Modificar de forma dinámica la lista de fechas fin de curso a través de la función `insertarFechaDeFormaOrdenada`.
                         insertarFechaDeFormaOrdenada(fechasObj.listaFechasFin, fechaFinCursada);
                         insertarFechaDeFormaOrdenada(fechasObj.listaFechasInicio, fechaInicioCursada);
-                        
-                        
-
-                        
                     }
 
                     // 
@@ -127,7 +123,7 @@ export const getObjFechas = async (aplicaRestricciones) => {
 
         fechasObj.listaFechasFin = acumularCantidad(fechasObj.listaFechasFin); // modifica la listaFechasFin agregandole un atributo acumulado que es la suma de las cantidades acumuladas desde el índice 0 hasta el final
         fechasObj.listaFechasInicio = acumularCantidad(fechasObj.listaFechasInicio); // modifica la listaFechasInicio agregandole un atributo acumulado que es la suma de las cantidades acumuladas desde el índice 0 hasta el final
-        
+
         return fechasObj;
     } catch (error) {
         // Lanza el error para que sea manejado por la función que llama.
@@ -162,19 +158,19 @@ const insertarFechaDeFormaOrdenada = (listaFechas, fecha) => {
     while (inicio < fin) {
         const medio = Math.floor((inicio + fin) / 2);
 
-         if (!listaFechas[medio] || !listaFechas[medio].fecha) {
+        if (!listaFechas[medio] || !listaFechas[medio].fecha) {
             // Store fechaClaveFinCurso when no record is found.
             listaFechas[medio] = { fecha: fechaClaveFinCurso, cantidad: 1 };
-             }
+        }
 
 
-       let existingDate = listaFechas[medio].fecha;
-            // Parse existingDate as Date, if not a Date object already.
-      let fechaListaDate = (existingDate instanceof Date) ? existingDate : new Date(Date.UTC(
-                String(existingDate).split('-')[0] ,
-                Number(String(existingDate).split('-')[1]) -1,
-                String(existingDate).split('-')[2],
-                 ));
+        let existingDate = listaFechas[medio].fecha;
+        // Parse existingDate as Date, if not a Date object already.
+        let fechaListaDate = (existingDate instanceof Date) ? existingDate : new Date(Date.UTC(
+            String(existingDate).split('-')[0],
+            Number(String(existingDate).split('-')[1]) - 1,
+            String(existingDate).split('-')[2],
+        ));
 
 
         if (fechaListaDate.getTime() === fecha.getTime()) {
@@ -193,15 +189,19 @@ const insertarFechaDeFormaOrdenada = (listaFechas, fecha) => {
 
 // Función que toma la lista de insertarFechaDeFormaOrdenada y a cada elemento le agrega un atributo acumulado que es la suma de las cantidades acumuladas desde el índice 0 hasta el final
 export const acumularCantidad = (listaFechasFin) => {
-    let acumulado = 0;
-  
-    listaFechasFin.forEach((fecha) => {
-      acumulado += fecha.cantidad;
-      fecha.acumulado = acumulado; // Modify the object directly
-    });
-  
-    return listaFechasFin; // Return the modified array for fluent interface
-  };
+    if (listaFechasFin.length > 0) {
+        let acumulado = 0;
+
+        listaFechasFin.forEach((fecha) => {
+            acumulado += fecha.cantidad;
+            fecha.acumulado = acumulado; // Modify the object directly
+        });
+
+        return listaFechasFin; // Return the modified array for fluent interface
+    } else {
+        return [];
+    }
+};
 
 
 
@@ -213,9 +213,9 @@ export const verificarCursosActivos = (fechasObj, limiteCursosActivos) => {
             if (cursosActivos >= limiteCursosActivos) {
                 fechasObj[claveMesAnio][fechaClave].invalidarDia = true;
             }
-        });        
+        });
     });
-            }
+}
 
 const buscarPosicionFecha = (fecha, ListaFechas) => {
     let inicio = 0;
@@ -224,17 +224,17 @@ const buscarPosicionFecha = (fecha, ListaFechas) => {
         Number(fecha.split('-')[0]),
         Number(fecha.split('-')[1]) - 1,
         Number(fecha.split('-')[2])
-        ));
+    ));
     let resultado = -1; // Inicializamos con -1 por si no hay coincidencias
 
     while (inicio < fin) {
         const medio = Math.floor((inicio + fin) / 2);
         const fechaLista = ListaFechas[medio].fecha;
-            const fechaListaDate = new Date(Date.UTC(
+        const fechaListaDate = new Date(Date.UTC(
             Number(fechaLista.split('-')[0]),
             Number(fechaLista.split('-')[1]) - 1,
             Number(fechaLista.split('-')[2])
-            ));
+        ));
 
 
         if (fechaListaDate.getTime() === fechaBuscada.getTime()) {
@@ -247,8 +247,8 @@ const buscarPosicionFecha = (fecha, ListaFechas) => {
         }
     }
 
-    return resultado === -1 ? 0: resultado // Si no hay coincidencias, retornamos 0. Si no, retornamos la última que fue menor (o la primera)
-};            
+    return resultado === -1 ? 0 : resultado // Si no hay coincidencias, retornamos 0. Si no, retornamos la última que fue menor (o la primera)
+};
 
 
 
@@ -260,19 +260,19 @@ const insertarFecha = (listaFechasFin, fechaFin) => {
     while (inicio < fin) {
         const medio = Math.floor((inicio + fin) / 2);
 
-         if (!listaFechasFin[medio] || !listaFechasFin[medio].fecha) {
+        if (!listaFechasFin[medio] || !listaFechasFin[medio].fecha) {
             // Store fechaClaveFinCurso when no record is found.
             listaFechasFin[medio] = { fecha: fechaClaveFinCurso, cantidad: 1 };
-             }
+        }
 
 
-       let existingDate = listaFechasFin[medio].fecha;
-            // Parse existingDate as Date, if not a Date object already.
-      let fechaListaDate = (existingDate instanceof Date) ? existingDate : new Date(Date.UTC(
-                String(existingDate).split('-')[0] ,
-                Number(String(existingDate).split('-')[1]) -1,
-                String(existingDate).split('-')[2],
-                 ));
+        let existingDate = listaFechasFin[medio].fecha;
+        // Parse existingDate as Date, if not a Date object already.
+        let fechaListaDate = (existingDate instanceof Date) ? existingDate : new Date(Date.UTC(
+            String(existingDate).split('-')[0],
+            Number(String(existingDate).split('-')[1]) - 1,
+            String(existingDate).split('-')[2],
+        ));
 
 
         if (fechaListaDate.getTime() === fechaFin.getTime()) {

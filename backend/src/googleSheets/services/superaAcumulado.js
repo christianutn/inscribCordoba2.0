@@ -17,7 +17,10 @@ export const superaAcumulado = async (objFechas, fechaClave) => {
         const posInicio = buscarPosicionFecha(fechaClave, listaFechasInicio);
         const posFin = buscarPosicionFecha(fechaClave, listaFechasFin);
 
-        const acumulado = listaFechasInicio[posInicio].acumulado - listaFechasFin[posFin].acumulado;
+        const inicioAcumulado = listaFechasInicio[posInicio]?.acumulado ?? 0;
+        const finAcumulado = listaFechasFin[posFin]?.acumulado ?? 0;
+        const acumulado = inicioAcumulado - finAcumulado;
+        if (isNaN(acumulado)) return false;
 
         const controlDataFecha = await ControlDataFechaInicioCursada.findOne({ where: { id: 1 } });
         

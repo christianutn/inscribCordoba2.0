@@ -110,7 +110,7 @@ export const postInstancia = async (req, res, next) => {
             }
 
             // Verificar si el acumulado está invalidado
-            if(await superaAcumulado(objFechas, fechaClave)){
+            if(aplicaRestricciones && await superaAcumulado(objFechas, fechaClave)){
                 throw crearError(400, "Se ha superado el límite acumulado de cursos o cupos");
             }
 

@@ -30,7 +30,7 @@ initSequelize();
 
 app.use(cors());
 
-const PORT = 4000
+const PORT = 4001
 
 //MIdleware
 app.use(express.json());

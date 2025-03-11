@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
 import { getMatrizFechas, buscarPosicionFecha } from "../services/googleSheets.service";
-import {getRestricciones} from "../services/restricciones.service.js";
+import { getRestricciones } from "../services/restricciones.service.js";
 
 
 const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
@@ -18,8 +18,8 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
     (async () => {
       const response = await getMatrizFechas();
       const restricciones = await getRestricciones();
-      
-      setMaximoAcumulado(restricciones.maximoAcumulado);
+
+      setMaximoAcumulado(restricciones.maximoAcumulado === undefined ? false : restricciones.maximoAcumulado);
 
       setMatrizFechas(response);
     })();
@@ -40,28 +40,34 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
       return true;
     }
 
+    if (!matrizFechas.listaFechasFin || !matrizFechas.listaFechasInicio ||
+      matrizFechas.listaFechasFin.length === 0 || matrizFechas.listaFechasInicio.length === 0) {
+      return false;
+    }
+
     if (fieldFecha === "fechaCursadaDesde" && matrizFechas) {
       const fechaAValidar = dayjs(date).format('YYYY-MM-DD').split("-");
       const claveAnioMes = `${fechaAValidar[0]}-${fechaAValidar[1]}`;
       const claveDia = `${claveAnioMes}-${fechaAValidar[2]}`;
 
       if (matrizFechas[claveAnioMes]) {
-       
-       
 
+
+        
         const posInicio = buscarPosicionFecha(claveDia, matrizFechas.listaFechasInicio);
         const posFin = buscarPosicionFecha(claveDia, matrizFechas.listaFechasFin);
 
-        const acumulado = matrizFechas.listaFechasInicio[posInicio].acumulado - matrizFechas.listaFechasFin[posFin].acumulado;
+        if (posInicio === -1 || posFin === -1) return false;
 
-       
+        const acumulado = matrizFechas.listaFechasInicio[posInicio]?.acumulado - matrizFechas.listaFechasFin[posFin]?.acumulado;
 
         if (acumulado >= maximoAcumulado) {
-         
-
           return true;
         }
-        return matrizFechas[claveAnioMes].invalidarMesAnio || matrizFechas[claveAnioMes][claveDia]?.invalidarDia;
+
+        if (matrizFechas[claveAnioMes]?.invalidarMesAnio || matrizFechas[claveAnioMes]?.[claveDia]?.invalidarDia) {
+          return true;
+        }
       }
     }
 
