@@ -467,7 +467,7 @@ export default function Formulario() {
           <div className='submit'>
             <Button mensaje={"Registrar"} type="button" hanldeOnClick={handleEnviarFormulario} />
           </div>
-          <Tooltip title="En caso de aplicar restricciones como edad, correlativad, departamento  ó cualquier aclaración relevante, favor de completar el campo de comentario"
+          <Tooltip title="En caso de aplicar restricciones como edad, correlatividad, departamento  ó cualquier aclaración relevante, favor de completar el campo de comentario"
             placement="top"
             
             componentsProps={{
