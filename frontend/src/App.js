@@ -17,7 +17,7 @@ import ChatBoot from './components/ChatBot';
 import DiccionarioChat from './components/Diccionario';
 import AltaAsignacionesAreasUsuario from './components/FormulariosAlta/AltaAsignacionesAreasUsuario';
 import DetalleFechas from './components/DetalleFechas';
-
+import NuevoEvento from "./components/NuevoEvento"
 
 
 
@@ -44,6 +44,8 @@ function App() {
         <Route path='/diccionario' element={<DiccionarioChat />} />
         <Route path='/areasAsignadasUsuario/alta' element={<AltaAsignacionesAreasUsuario />} />
         <Route path='/detalleFechas' element={<DetalleFechas />} />
+        <Route path='/nuevoEvento' element={<NuevoEvento />} />
+
 
 
 
