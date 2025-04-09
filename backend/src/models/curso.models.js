@@ -1,9 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
-import MedioInscripcion from "./medioInscripcion.models.js";
-import TipoCapacitacion from "./tipoCapacitacion.models.js";
-import PlataformaDictado from "./plataformaDictado.models.js";
-import Area from "./area.models.js";
+
 
 const Curso = sequelize.define("cursos", {
     cod: {
@@ -48,7 +45,11 @@ const Curso = sequelize.define("cursos", {
     esVigente: {
         type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
         allowNull: true
-    }
+    },
+    tiene_evento_creado: {
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
+    },
 }, {
     timestamps: false,
     tableName: 'cursos'

@@ -78,7 +78,7 @@ const crearTutor = async (tutor) => {
         
         return nuevoTutor;
     } catch (error) {
-        console.log(error);
+        
         return error;
     }
 };

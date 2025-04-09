@@ -20,7 +20,10 @@ import categoriaChatbotRouter from "./categoriaChatbot.routes.js";
 import diccionarioChatbotRouter from "./diccionarioChatbot.routes.js"
 import diccionarioChatbotnrRouter from "./diccionarioChatbotnr.routes.js"
 import areasAsignadasUsuarioRouter from "./areasAsignadasUsuario.routes.js";
-
+import perfilRouter from "./perfil.routes.js";
+import AreaTematica from "./areaTematica.routes.js";
+import tipoCertificacionRouter from "./tipoCertificacion.routes.js";
+import eventoRouter from "./evento.routes.js";
 import { Router } from "express";
 
 const router = Router();
@@ -52,5 +55,9 @@ router.use("/categoriaChatbot", categoriaChatbotRouter)
 router.use("/diccionarioChatbot", diccionarioChatbotRouter)
 router.use("/diccionarioChatbotnr", diccionarioChatbotnrRouter)
 router.use("/areasAsignadasUsuario", areasAsignadasUsuarioRouter)
+router.use("/perfiles", perfilRouter)
+router.use("/areasTematicas", AreaTematica)
+router.use("/tiposCertificaciones", tipoCertificacionRouter)
+router.use("/eventos", eventoRouter)
 
 export default router

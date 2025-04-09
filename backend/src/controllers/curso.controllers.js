@@ -4,34 +4,93 @@ import tipoCapacitacionModel from "../models/tipoCapacitacion.models.js";
 import plataformaDictadoModel from "../models/plataformaDictado.models.js";
 import areaModel from "../models/area.models.js";
 import ministerio from "../models/ministerio.models.js";
-
-import {actualizarDatosColumna} from "../googleSheets/services/actualizarDatosColumna.js";
+import { Op } from "sequelize";
+import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
 import sequelize from "../config/database.js";
+import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
+
 export const getCursos = async (req, res, next) => {
     try {
-        const cursos = await cursoModel.findAll({
-            include: [
-                {
-                    model: medioInscripcionModel, as: 'detalle_medioInscripcion'
-                },
-                {
-                    model: tipoCapacitacionModel, as: 'detalle_tipoCapacitacion'
-                },
-                {
-                    model: plataformaDictadoModel, as: 'detalle_plataformaDictado'
-                },
-                {
-                    model: areaModel,
-                    as: 'detalle_area',
-                    include: [
-                        { model: ministerio, as: 'detalle_ministerio' }
-                    ]
-                }
-            ]
+        // Obtener los valores del token
+        const { rol, area, cuil } = req.user.user;
+        // Validar datos del usuario
+        if (!cuil || !rol) {
+            const error = new Error("No se encontraron los datos del usuario (rol o cuil)");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Obtener áreas asignadas al usuario
+        const areasAsignadas = await AreasAsignadasUsuario.findAll({
+            where: { usuario: cuil }
+           
         });
+        let cursos;
+
+        if (rol === "ADM") {
+            cursos = await cursoModel.findAll({
+                include: [
+                    {
+                        model: medioInscripcionModel, as: 'detalle_medioInscripcion'
+                    },
+                    {
+                        model: tipoCapacitacionModel, as: 'detalle_tipoCapacitacion'
+                    },
+                    {
+                        model: plataformaDictadoModel, as: 'detalle_plataformaDictado'
+                    },
+                    {
+                        model: areaModel,
+                        as: 'detalle_area',
+                        include: [
+                            { model: ministerio, as: 'detalle_ministerio' }
+                        ]
+                    }
+                ]
+            });
+        } else {
+            // Validar área para roles no administradores
+            if (!area) {
+                const error = new Error("No se encontraron los datos del usuario (area)");
+                error.statusCode = 404;
+                throw error;
+            }
+            // Crear lista de códigos de área
+            const codigosArea = [area];
+            if (areasAsignadas.length > 0) {
+                areasAsignadas.forEach(areaAsignada => {
+                    codigosArea.push(areaAsignada.area);
+                });
+            }
+            
+            cursos = await cursoModel.findAll({
+                where: {
+                    area: {
+                        [Op.in]: codigosArea // Filtrar áreas que coincidan con alguno de los códigos en la lista
+                    }
+                },
+                include: [
+                    {
+                        model: medioInscripcionModel, as: 'detalle_medioInscripcion'
+                    },
+                    {
+                        model: tipoCapacitacionModel, as: 'detalle_tipoCapacitacion'
+                    },
+                    {
+                        model: plataformaDictadoModel, as: 'detalle_plataformaDictado'
+                    },
+                    {
+                        model: areaModel,
+                        as: 'detalle_area',
+                        include: [
+                            { model: ministerio, as: 'detalle_ministerio' }
+                        ]
+                    }
+                ]
+            });
+        }
 
         if (cursos.length === 0) {
-
             const error = new Error("No existen cursos");
             error.statusCode = 404;
             throw error;
@@ -46,9 +105,9 @@ export const getCursos = async (req, res, next) => {
 export const postCurso = async (req, res, next) => {
     try {
 
-        const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area } = req.body;
+        const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area, tiene_evento_creado } = req.body;
 
-    
+
         const existe = await cursoModel.findOne({ where: { cod: cod } });
         if (existe) throw new Error("El Código ya existe");
         if (cod.length > 15) throw new Error("El Código no es valido debe ser menor a 15 caracteres");
@@ -60,6 +119,7 @@ export const postCurso = async (req, res, next) => {
         if (area.length > 15) throw new Error("El area no es valido debe ser menor a 15 caracteres");
         if (nombre.length > 250) throw new Error("El nombre no es valido debe ser menor a 250 caracteres");
         if (nombre.length === 0) throw new Error("El nombre no puede ser vacío");
+
 
         const response = await cursoModel.create(req.body);
 
@@ -75,41 +135,43 @@ export const updateCurso = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
 
-        const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area, esVigente } = req.body;
+        const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area, esVigente, tiene_evento_creado } = req.body;
 
-        if(!cod || !nombre || !cupo || !cantidad_horas || !medio_inscripcion || !plataforma_dictado || !tipo_capacitacion || !area) throw new Error("Hay campos vacios");
+        if (!cod || !nombre || !cupo || !cantidad_horas || !medio_inscripcion || !plataforma_dictado || !tipo_capacitacion || !area) throw new Error("Hay campos vacios");
 
         //EL cupo y cantida de horas deben ser enteros no debe admitir decimales. También debe sen mayor a 0
-        if(cupo < 1 || isNaN(cupo)) throw new Error("El cupo debe ser mayor a 0");
-        if(cantidad_horas < 1 || isNaN(cantidad_horas)) throw new Error("La cantidad de horas debe ser mayor a 0");
+        if (cupo < 1 || isNaN(cupo)) throw new Error("El cupo debe ser mayor a 0");
+        if (cantidad_horas < 1 || isNaN(cantidad_horas)) throw new Error("La cantidad de horas debe ser mayor a 0");
 
         //cupo debe ser un entero
-        if(!Number.isInteger(Number(cupo))) throw new Error("El cupo debe ser un entero");
-        if(!Number.isInteger(Number(cantidad_horas))) throw new Error("La cantidad de horas debe ser un entero");
-        
+        if (!Number.isInteger(Number(cupo))) throw new Error("El cupo debe ser un entero");
+        if (!Number.isInteger(Number(cantidad_horas))) throw new Error("La cantidad de horas debe ser un entero");
+
         //Buscamos curso antes de actualizar
         const cursoAntes = await cursoModel.findOne({ where: { cod: cod } });
         if (!cursoAntes) {
             throw new Error(`No se encontró un curso con el código ${cod}`);
         }
 
+        
+
         const cursoAntesJSON = cursoAntes.toJSON();
 
-       const result = await cursoModel.update(
-            { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area, esVigente: esVigente === "Si" ? 1 : 0  },
+        const result = await cursoModel.update(
+            { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area, esVigente: esVigente === "Si" ? 1 : 0, tiene_evento_creado: tiene_evento_creado === "Si" ? 1 : 0 },
             {
                 where: {
                     cod: cod,
                 },
             },
         );
-        
+
         if (result[0] === 0) {
             throw new Error("No hubo actualización de datos");
         }
 
-         // Si se actualizó correctamente en la base de datos, actualiza Google Sheets
-        
+        // Si se actualizó correctamente en la base de datos, actualiza Google Sheets
+
         const resultadoGoogleSheets = await actualizarDatosColumna('Nombre del curso', cursoAntesJSON.nombre, nombre);
 
         if (!resultadoGoogleSheets.success) {
@@ -128,7 +190,7 @@ export const deleteCurso = async (req, res, next) => {
     try {
         const { cod } = req.params;
 
-       
+
 
         if (!cod) {
             throw new Error("El ID del curso es requerido");

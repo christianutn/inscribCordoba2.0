@@ -183,7 +183,22 @@ const AltaBajaModificion = () => {
                             {
                                 field: 'esVigente',
                                 headerName: '¿Está vigente?',
-                                width: 180,
+                                width: 20,
+                                editable: true,
+                                renderEditCell: (params) => (
+                                    <SelectEditInputCell
+                                        id={params.id}
+                                        value={params.value}
+                                        field={params.field}
+                                        options={[{ value: "Si", label: "Si" }, { value: "No", label: "No" }]}
+                                        api={params.api}
+                                    />
+                                ),
+                            },
+                            {
+                                field: 'tiene_evento_creado',
+                                headerName: '¿Tiene evento creado?',
+                                width: 20,
                                 editable: true,
                                 renderEditCell: (params) => (
                                     <SelectEditInputCell
@@ -208,6 +223,7 @@ const AltaBajaModificion = () => {
                             area: e.detalle_area.nombre,
                             ministerio: e.detalle_area.detalle_ministerio.nombre,
                             esVigente: e.esVigente ? "Si" : "No",
+                            tiene_evento_creado: e.tiene_evento_creado ? "Si" : "No",
 
                         }))
                     },

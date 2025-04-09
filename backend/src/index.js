@@ -30,8 +30,7 @@ initSequelize();
 
 app.use(cors());
 
-const PORT = 4000
-;
+const PORT = 4000 //Recordar cambiara puerto 4000 al subir cambios
 
 //MIdleware
 app.use(express.json());

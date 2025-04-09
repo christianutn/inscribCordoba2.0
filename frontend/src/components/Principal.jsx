@@ -29,6 +29,8 @@ import GavelIcon from '@mui/icons-material/Gavel';
 import RestriccionesFechasInicioCursada from "../components/RestriccionesFechasInicioCursada.jsx";
 import Home from "./Home.jsx";
 import HouseIcon from '@mui/icons-material/House';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import NuevoEvento from './NuevoEvento.jsx';
 
 const drawerWidth = 240;
 
@@ -100,9 +102,9 @@ export default function Principal() {
       }
 
       if (res.rol === "ADM") {
-        setOpcionesAMostrar([["Inicio", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"], ["Restricciones de Fechas de inicio de Cursada", "RestriccionesFechasInicioCursada"]])
+        setOpcionesAMostrar([["Inicio", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"], ["Restricciones de Fechas de inicio de Cursada", "RestriccionesFechasInicioCursada"], ["Crear Evento", "Eventos"]])
       } else if (res.rol === "REF") {
-        setOpcionesAMostrar([["Inicio", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"]])
+        setOpcionesAMostrar([["Inicio", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["Crear Evento", "Eventos"]])
       }
 
 
@@ -133,7 +135,7 @@ export default function Principal() {
   const mostrarOpcion = () => {
     switch (opcionSeleccionada) {
       case "Formulario":
-        return <Formulario />
+        return <Formulario cerrarNuevoEvento={true} />
       case "Calendario":
         return <Cronograma />
       case "AltaBajaModificion":
@@ -142,6 +144,8 @@ export default function Principal() {
         return <RestriccionesFechasInicioCursada />
       case "Home":
         return <Home />
+      case "Eventos":
+        return <NuevoEvento />
       default:
         return <Home />
     }
@@ -224,6 +228,7 @@ export default function Principal() {
                   {index === 2 && <CalendarMonthIcon />}
                   {index === 3 && <ClassIcon />}
                   {index === 4 && <GavelIcon />}
+                  {index === 5 && <EventAvailableIcon />}
                 </ListItemIcon>
                 <ListItemText primary={item[0]} />
               </ListItemButton>

@@ -16,6 +16,10 @@ import TipoRolTutor from "./tipoRolTutor.models.js";
 import CategoriaChatbot from "./categoriaChatbot.models.js";
 import DiccionarioChatbot from "./diccionarioChatbot.models.js";
 import AreasAsignadasUsuario from "./areasAsignadasUsuario.models.js";
+import TipoCertificacion from "./tipoCertificacion.models.js";
+import AreaTematica from "./areaTematica.models.js";
+import Evento from "./evento.models.js";
+import Perfil from "./perfil.models.js";
 const associateModels = () => {
     Ministerio.hasMany(Area, { foreignKey: 'ministerio', as: 'detalle_areas' });
     Area.belongsTo(Ministerio, { foreignKey: 'ministerio', as: 'detalle_ministerio' });
@@ -69,7 +73,10 @@ const associateModels = () => {
     // Cuando llame a DiccionarioChatbot debo poder acceder a todos los atributos de CategoriaChatbot
     DiccionarioChatbot.belongsTo(CategoriaChatbot, { foreignKey: 'idCategoria', as: 'detalle_categoria' });
 
-
+    // Asociar al modelo Evento los modelos de AreaTematica, TipoCertificacion y Perfil
+    Evento.belongsTo(AreaTematica, { foreignKey: 'area_tematica', as: 'detalle_areaTematica' });
+    Evento.belongsTo(TipoCertificacion, { foreignKey: 'tipo_certificacion', as: 'detalle_tipoCertificacion' });
+    Evento.belongsTo(Perfil, { foreignKey: 'perfil', as: 'detalle_perfil' });
 
 };
 

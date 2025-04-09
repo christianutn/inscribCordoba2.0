@@ -61,13 +61,13 @@ export const postInstancia = async (req, res, next) => {
 
         // variable que guarda fecha y hora exacta en horas y minutos nada mas en que se ejecuta
         const fechaActual = new Date();
-        const fechaActualString = `${fechaActual.getFullYear()}-${fechaActual.getMonth() + 1}-${fechaActual.getDate()} ${fechaActual.getHours()}:${fechaActual.getMinutes()}`;
+        //const fechaActualString = `${fechaActual.getFullYear()}-${fechaActual.getMonth() + 1}-${fechaActual.getDate()} ${fechaActual.getHours()}:${fechaActual.getMinutes()}`;
 
         // cuil del usaurio que hizo la solicitud
         const cuilUsuario = req.user.user.cuil;
 
         // cadena de fechaActualString y cuilUsuario
-        const cadenaSolicitud = `${fechaActualString}-${cuilUsuario}`;
+        const cadenaSolicitud = `${fechaActual.toString()}-${cuilUsuario}`;
         
         // Obtener objeto de fechas para verificar las reglas de negocio
         const objFechas = await getObjFechas(aplicaRestricciones);
@@ -75,6 +75,10 @@ export const postInstancia = async (req, res, next) => {
         const dataCurso = await Curso.findOne({ where: { nombre: curso } });
         if (!dataCurso) {
             throw crearError(404, "No existe el curso");
+        }
+
+        if(!dataCurso.tiene_evento_creado){
+            throw crearError(400, "El curso no tiene evento creado");
         }
 
         for (const cohorte of cohortes) {

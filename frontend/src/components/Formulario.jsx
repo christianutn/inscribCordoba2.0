@@ -25,6 +25,8 @@ import { useNavigate } from 'react-router-dom';
 import OpcionesEvento from './OpcionesEvento.jsx';
 import CustomInput from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
+import NuevoEvento from './NuevoEvento.jsx';
+import Alerta from "./UIElements/Dialog.jsx";
 
 
 
@@ -68,12 +70,13 @@ export default function Formulario() {
     esNuevoEvento: false
   });
 
-  // Descripcion 
-
-  const [descripcion, setDescripcion] = useState('');
-  const [errorDescripcion, setErrorDescripcion] = useState('');
 
 
+
+  //Alerta
+  const [openAlertDialog, setOpenAlertDialog] = useState(false);
+  const [tituloAlerta, setTituloAlerta] = useState('');
+  const [mensajeAlerta, setMensajeAlerta] = useState('');
 
   // Función para actualizar los datos desde el hijo
   const manejarCambioOpciones = (nuevaOpciones) => {
@@ -85,6 +88,9 @@ export default function Formulario() {
   // Data grid de tutores
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
   const [tutoresSeleccionados, setTutoresSeleccionados] = useState([]);
+
+  // Se necesita cargar nuevo evento
+  const [nuevoEvento, setNuevoEvento] = useState(false);
 
   // Función para comprobar si una fila está seleccionada
   const isRowSelected = (id) => rowSelectionModel.includes(id);
@@ -166,6 +172,10 @@ export default function Formulario() {
           return
         }
 
+        if(nuevoEvento) return; // Si se renderiza nuevo evento luego tendremos que recargar ministerios para actualizar los datos del curso por si cambian de selección
+
+
+        limpiarFormulario();
         const listaMinisterios = await getMinisterios();
         setMinisterios(listaMinisterios);
 
@@ -185,7 +195,8 @@ export default function Formulario() {
         setError(error.message || "Error al cargar los datos");
       }
     })();
-  }, []);
+  }, [nuevoEvento]);
+ 
 
   const limpiarFormulario = () => {
 
@@ -203,6 +214,11 @@ export default function Formulario() {
     setComentario("");
   };
 
+  const tiene_el_curso_evento_creado = (codCurso) => {
+    const curso = cursos.find((curso) => curso.cod === codCurso);
+    return curso ? Boolean(curso.tiene_evento_creado) : false;
+};
+
 
   const handleCohortes = (cohortes) => {
     setCohortes(cohortes)
@@ -213,6 +229,8 @@ export default function Formulario() {
 
     setCargando(true);
     try {
+
+
 
       if (!selectMinisterio) {
 
@@ -271,6 +289,18 @@ export default function Formulario() {
 
       })
 
+      const codCurso = cursos.find((curso) => curso.nombre === selectCurso)?.cod;
+      if (!codCurso) {
+        throw new Error("El curso seleccionado no existe al enviar formulario");
+      }
+      if (!tiene_el_curso_evento_creado(codCurso)) {
+        setTituloAlerta("El curso no tiene un evento creado");
+        setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${selectCurso || '(Curso no encontrado)'}'. Por favor, complete primero este formulario y luego podrá cargar 'Nuevas cohortes'`);
+        setOpenAlertDialog(true);
+        setNuevoEvento(true);
+        throw new Error("El curso no tiene un evento creado, por favor cree un evento antes de continuar con la inscripción");
+      }
+
       const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes, opciones, comentario });
 
       limpiarFormulario();
@@ -300,7 +330,7 @@ export default function Formulario() {
       {
         error &&
 
-        <Alert className='alert' variant="filled" severity="error">
+        <Alert className='alert' variant="filled" severity="error" >
           {error}
         </Alert>
 
@@ -320,7 +350,16 @@ export default function Formulario() {
         </Backdrop>
       }
 
-      <form >
+      {
+        // si nuevo envento es true, renderiza el componente de nuevo evento, si es false mostrar formulario
+        nuevoEvento ? <NuevoEvento 
+        setNuevoEvento={setNuevoEvento}
+        setOpenAlertDialog={setOpenAlertDialog}
+        setTituloAlerta={setTituloAlerta}
+        setMensajeAlerta={setMensajeAlerta}
+        selectCurso={selectCurso}
+         /> : 
+        <form >
         <div className='grid-container-formulario'>
           <div className='titulo'><Titulo texto='Formulario de inscripción' /></div>
           <div className='divider'>
@@ -499,6 +538,16 @@ export default function Formulario() {
 
         </div>
       </form>
+        
+      }
+      {
+        <Alerta 
+        openAlertDialog={openAlertDialog} 
+        setOpenAlertDialog={setOpenAlertDialog}
+        titulo = {tituloAlerta}
+        mensaje={mensajeAlerta} />
+      }
+      
     </>
   );
 }

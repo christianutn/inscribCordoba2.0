@@ -78,7 +78,7 @@ fs.createReadStream('./basededatos.csv')
         // Procesar cada fila de resultados
         results.forEach(row => {
 
-            //console.log(row)
+            
             // Reiniciar variables para cada fila
             cod = "";
             nombre = "";
