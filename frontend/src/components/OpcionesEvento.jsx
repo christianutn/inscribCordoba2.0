@@ -150,31 +150,7 @@ const OpcionesEvento = ({ opciones, onOpcionesChange }) => {
                         label="Correlatividad"
                     />
 
-                    <FormControlLabel
-                        control={
-                            <Tooltip
-                                title="Selecciona para indicar que será necesario crear un nuevo evento en Victorius"
-                                placement="right-start"
-                                componentsProps={{
-                                    tooltip: {
-                                      sx: {
-                                        backgroundColor: '#333', // Fondo oscuro
-                                        color: '#fff', // Texto blanco
-                                        fontSize: '16px', // Tamaño de letra más grande
-                                        maxWidth: '400px', // Ancho máximo del tooltip
-                                        padding: '12px', // Espaciado interno
-                                        borderRadius: '8px', // Bordes redondeados
-                                      },
-                                    },
-                                  }}
-                            >
-                                <span>
-                                    <Checkbox checked={esNuevoEvento} onChange={handleChange} name="esNuevoEvento" />
-                                </span>
-                            </Tooltip>
-                        }
-                        label="Crear nuevo evento en Victorius"
-                    />
+                    
                 </FormGroup>
 
             </FormControl>

@@ -66,8 +66,7 @@ export default function Formulario() {
     edad: false,
     departamento: false,
     publicaPCC: false,
-    correlatividad: false,
-    esNuevoEvento: false
+    correlatividad: false
   });
 
 
