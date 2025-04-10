@@ -420,7 +420,7 @@ export default function Formulario() {
                     const codCurso = cursos.find((curso) => curso.nombre === value)?.cod;
                     if (!tiene_el_curso_evento_creado(codCurso)) {
                       setTituloAlerta("El curso no tiene un evento creado");
-                      setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${selectCurso || '(Curso no encontrado)'}'. Por favor, complete primero este formulario y luego podrá cargar 'Nuevas cohortes'`);
+                      setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${value || '(Curso no encontrado)'}'. Por favor, complete primero este formulario y luego podrá cargar 'Nuevas cohortes'`);
                       setOpenAlertDialog(true);
                       setNuevoEvento(true);
                     }
