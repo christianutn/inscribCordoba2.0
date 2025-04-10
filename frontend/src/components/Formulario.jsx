@@ -171,7 +171,7 @@ export default function Formulario() {
           return
         }
 
-        if(nuevoEvento) return; // Si se renderiza nuevo evento luego tendremos que recargar ministerios para actualizar los datos del curso por si cambian de selección
+        if (nuevoEvento) return; // Si se renderiza nuevo evento luego tendremos que recargar ministerios para actualizar los datos del curso por si cambian de selección
 
 
         limpiarFormulario();
@@ -195,7 +195,7 @@ export default function Formulario() {
       }
     })();
   }, [nuevoEvento]);
- 
+
 
   const limpiarFormulario = () => {
 
@@ -216,7 +216,7 @@ export default function Formulario() {
   const tiene_el_curso_evento_creado = (codCurso) => {
     const curso = cursos.find((curso) => curso.cod === codCurso);
     return curso ? Boolean(curso.tiene_evento_creado) : false;
-};
+  };
 
 
   const handleCohortes = (cohortes) => {
@@ -351,202 +351,209 @@ export default function Formulario() {
 
       {
         // si nuevo envento es true, renderiza el componente de nuevo evento, si es false mostrar formulario
-        nuevoEvento ? <NuevoEvento 
-        setNuevoEvento={setNuevoEvento}
-        setOpenAlertDialog={setOpenAlertDialog}
-        setTituloAlerta={setTituloAlerta}
-        setMensajeAlerta={setMensajeAlerta}
-        selectCurso={selectCurso}
-         /> : 
-        <form >
-        <div className='grid-container-formulario'>
-          <div className='titulo'><Titulo texto='Formulario de inscripción' /></div>
-          <div className='divider'>
-            <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} />
-          </div>
+        nuevoEvento ? <NuevoEvento
+          setNuevoEvento={setNuevoEvento}
+          setOpenAlertDialog={setOpenAlertDialog}
+          setTituloAlerta={setTituloAlerta}
+          setMensajeAlerta={setMensajeAlerta}
+          selectCurso={selectCurso}
+        /> :
+          <form >
+            <div className='grid-container-formulario'>
+              <div className='titulo'><Titulo texto='Formulario de inscripción' /></div>
+              <div className='divider'>
+                <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} />
+              </div>
 
 
-          <div className='select-ministerio'>
-            <Autocomplete options={ministerios.filter(ministerio => ministerio.esVigente === 1).map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio}
-              getValue={(value) => {
-                setSelectMinisterio(value);
-                setSelectArea("")
-                setSelectCurso("")
+              <div className='select-ministerio'>
+                <Autocomplete options={ministerios.filter(ministerio => ministerio.esVigente === 1).map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio}
+                  getValue={(value) => {
+                    setSelectMinisterio(value);
+                    setSelectArea("")
+                    setSelectCurso("")
 
-                const ministerioSeleccionado = ministerios.find(ministerio => ministerio.nombre === value);
+                    const ministerioSeleccionado = ministerios.find(ministerio => ministerio.nombre === value);
 
-                if (ministerioSeleccionado) {
-                  setAreas(ministerioSeleccionado.detalle_areas);
-                  setCursos([]);
+                    if (ministerioSeleccionado) {
+                      setAreas(ministerioSeleccionado.detalle_areas);
+                      setCursos([]);
 
-                } else {
-                  setAreas([]);
-                  setCursos([]);
-                }
+                    } else {
+                      setAreas([]);
+                      setCursos([]);
+                    }
 
-              }}
+                  }}
 
-            />
-
-
-          </div>
-
-          <div className='select-area'>
-            <Autocomplete options={areas.filter(area => area.esVigente === 1).map(area => area.nombre)} label={"Seleccione un área"} value={selectArea}
-              getValue={(value) => {
-                setSelectArea(value);
-                setSelectCurso("")
-
-                const areaSeleccionada = areas.find(area => area.nombre === value);
-
-                if (areaSeleccionada) {
-
-                  setCursos(areaSeleccionada.detalle_cursos);
-                } else {
-                  setCursos([]);
-                }
-
-              }}
+                />
 
 
-            />
+              </div>
 
-          </div>
+              <div className='select-area'>
+                <Autocomplete options={areas.filter(area => area.esVigente === 1).map(area => area.nombre)} label={"Seleccione un área"} value={selectArea}
+                  getValue={(value) => {
+                    setSelectArea(value);
+                    setSelectCurso("")
 
-          <div className='select-curso'>
-            <Autocomplete options={cursos.filter(c => c.esVigente === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso}
-              getValue={(value) => {
-                setSelectCurso(value);
-              }}
+                    const areaSeleccionada = areas.find(area => area.nombre === value);
 
-            />
+                    if (areaSeleccionada) {
 
-          </div>
+                      setCursos(areaSeleccionada.detalle_cursos);
+                    } else {
+                      setCursos([]);
+                    }
 
-          <div className='select-medio-inscripcion'>
-            <Autocomplete options={mediosInscripcion.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion}
-              getValue={(value) => {
-                setSelectMedioInscripcion(value);
-              }}
-            />
-
-          </div>
-
-          <div className='select-plataforma-dictado'>
-            <Autocomplete options={plataformasDictado.filter(p => p.esVigente === 1).map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado}
-              getValue={(value) => {
-                setSelectPlataformaDictado(value);
-              }}
-            />
-
-          </div>
-
-          <div className='select-tipo-capacitacion'>
-            <Autocomplete options={tiposCapacitaciones.filter(t => t.esVigente === 1).map(t => t.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion}
-              getValue={(value) => {
-                setSelectTipoCapacitacion(value);
-              }}
-            />
-
-          </div>
-
-          <div className='input'>
-            <TextField label={"Cupo"} getValue={(value) => setCupo(value)} value={cupo}
-            />
-            <TextField label={"Cantidad de horas"} getValue={(value) => setHoras(value)} value={horas}
-            />
+                  }}
 
 
-          </div>
+                />
 
-          <div className='opciones-evento'>
-            <OpcionesEvento opciones={opciones} onOpcionesChange={manejarCambioOpciones} />
-          </div>
+              </div>
 
-          <div>
+              <div className='select-curso'>
+                <Autocomplete options={cursos.filter(c => c.esVigente === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso}
+                  getValue={(value) => {
+                    setSelectCurso(value);
+                    const codCurso = cursos.find((curso) => curso.nombre === value)?.cod;
+                    if (!tiene_el_curso_evento_creado(codCurso)) {
+                      setTituloAlerta("El curso no tiene un evento creado");
+                      setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${selectCurso || '(Curso no encontrado)'}'. Por favor, complete primero este formulario y luego podrá cargar 'Nuevas cohortes'`);
+                      setOpenAlertDialog(true);
+                      setNuevoEvento(true);
+                    }
+                  }}
 
-          </div>
+                />
 
-          <div className='tutores'>
-            <SubtituloPrincipal texto='Selección de tutores' />
-            <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
-            <DataGrid rows={rows} columns={columns}
-              autoHeight
-              checkboxSelection
-              disableRowSelectionOnClick
-              loading={rows.length === 0}
-              onRowSelectionModelChange={(newRowSelectionModel) => {
-                setRowSelectionModel(newRowSelectionModel);
+              </div>
 
-                const listaTutores = newRowSelectionModel.map((id) =>
-                  rows.find((row) => row.id === id)
-                );
+              <div className='select-medio-inscripcion'>
+                <Autocomplete options={mediosInscripcion.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion}
+                  getValue={(value) => {
+                    setSelectMedioInscripcion(value);
+                  }}
+                />
 
-                const tutores = listaTutores.map((tutor) => ({
-                  name: `${tutor.nombre} ${tutor.apellido}`,
-                  rol: tutor.rol,
-                  initials: `${tutor.nombre[0]}${tutor.apellido[0]}`,
-                  cuil: tutor.cuil,
-                }));
+              </div>
 
-                setTutoresSeleccionados(tutores);
-              }}
-              rowSelectionModel={rowSelectionModel}
-            />
+              <div className='select-plataforma-dictado'>
+                <Autocomplete options={plataformasDictado.filter(p => p.esVigente === 1).map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado}
+                  getValue={(value) => {
+                    setSelectPlataformaDictado(value);
+                  }}
+                />
 
-            <TutoresSeleccionados tutors={tutoresSeleccionados} />
-          </div>
+              </div>
 
-          <div className='cohortes'>
-            <Cohortes getCohortes={handleCohortes}></Cohortes>
+              <div className='select-tipo-capacitacion'>
+                <Autocomplete options={tiposCapacitaciones.filter(t => t.esVigente === 1).map(t => t.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion}
+                  getValue={(value) => {
+                    setSelectTipoCapacitacion(value);
+                  }}
+                />
 
-          </div>
+              </div>
 
-          <div className='submit'>
-            <Button mensaje={"Registrar"} type="button" hanldeOnClick={handleEnviarFormulario} />
-          </div>
-          <Tooltip title="En caso de aplicar restricciones como edad, correlatividad, departamento  ó cualquier aclaración relevante, favor de completar el campo de comentario"
-            placement="top"
-            
-            componentsProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: '#333', // Fondo oscuro
-                  color: '#fff', // Texto blanco
-                  fontSize: '16px', // Tamaño de letra más grande
-                  maxWidth: '400px', // Ancho máximo del tooltip
-                  padding: '12px', // Espaciado interno
-                  borderRadius: '8px', // Bordes redondeados
-                },
-              },
-            }}
-          >
-            <div className='comentario'>
-              <CustomInput
-                id="outlined-multiline-static"
-                label="Comentario"
-                multiline
-                rows={4}
-                fullWidth
-                value={comentario}
-                onChange={(event) => setComentario(event.target.value)}
-                inputProps={{ maxLength: 450 }} // Limita a 450 caracteres
-              />
+              <div className='input'>
+                <TextField label={"Cupo"} getValue={(value) => setCupo(value)} value={cupo}
+                />
+                <TextField label={"Cantidad de horas"} getValue={(value) => setHoras(value)} value={horas}
+                />
+
+
+              </div>
+
+              <div className='opciones-evento'>
+                <OpcionesEvento opciones={opciones} onOpcionesChange={manejarCambioOpciones} />
+              </div>
+
+              <div>
+
+              </div>
+
+              <div className='tutores'>
+                <SubtituloPrincipal texto='Selección de tutores' />
+                <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
+                <DataGrid rows={rows} columns={columns}
+                  autoHeight
+                  checkboxSelection
+                  disableRowSelectionOnClick
+                  loading={rows.length === 0}
+                  onRowSelectionModelChange={(newRowSelectionModel) => {
+                    setRowSelectionModel(newRowSelectionModel);
+
+                    const listaTutores = newRowSelectionModel.map((id) =>
+                      rows.find((row) => row.id === id)
+                    );
+
+                    const tutores = listaTutores.map((tutor) => ({
+                      name: `${tutor.nombre} ${tutor.apellido}`,
+                      rol: tutor.rol,
+                      initials: `${tutor.nombre[0]}${tutor.apellido[0]}`,
+                      cuil: tutor.cuil,
+                    }));
+
+                    setTutoresSeleccionados(tutores);
+                  }}
+                  rowSelectionModel={rowSelectionModel}
+                />
+
+                <TutoresSeleccionados tutors={tutoresSeleccionados} />
+              </div>
+
+              <div className='cohortes'>
+                <Cohortes getCohortes={handleCohortes}></Cohortes>
+
+              </div>
+
+              <div className='submit'>
+                <Button mensaje={"Registrar"} type="button" hanldeOnClick={handleEnviarFormulario} />
+              </div>
+              <Tooltip title="En caso de aplicar restricciones como edad, correlatividad, departamento  ó cualquier aclaración relevante, favor de completar el campo de comentario"
+                placement="top"
+
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: '#333', // Fondo oscuro
+                      color: '#fff', // Texto blanco
+                      fontSize: '16px', // Tamaño de letra más grande
+                      maxWidth: '400px', // Ancho máximo del tooltip
+                      padding: '12px', // Espaciado interno
+                      borderRadius: '8px', // Bordes redondeados
+                    },
+                  },
+                }}
+              >
+                <div className='comentario'>
+                  <CustomInput
+                    id="outlined-multiline-static"
+                    label="Comentario"
+                    multiline
+                    rows={4}
+                    fullWidth
+                    value={comentario}
+                    onChange={(event) => setComentario(event.target.value)}
+                    
+                  />
+                </div>
+              </Tooltip>
+
             </div>
-          </Tooltip>
+          </form>
 
-        </div>
-      </form>
-        
       }
       {
-        <Alerta 
-        openAlertDialog={openAlertDialog} 
-        setOpenAlertDialog={setOpenAlertDialog}
-        titulo = {tituloAlerta}
-        mensaje={mensajeAlerta} />
+        <Alerta
+          openAlertDialog={openAlertDialog}
+          setOpenAlertDialog={setOpenAlertDialog}
+          titulo={tituloAlerta}
+          mensaje={mensajeAlerta} />
       }
-      
+
     </>
   );
 }
