@@ -367,7 +367,7 @@ export default function Formulario() {
         /> :
           <form >
             <div className='grid-container-formulario'>
-              <div className='titulo'><Titulo texto='Formulario de inscripción' /></div>
+              <div className='titulo'><Titulo texto='Formulario: Nuevas cohortes' /></div>
               <div className='divider'>
                 <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} />
               </div>
