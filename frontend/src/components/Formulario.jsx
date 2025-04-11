@@ -300,6 +300,13 @@ export default function Formulario() {
         throw new Error("El curso no tiene un evento creado, por favor cree un evento antes de continuar con la inscripción");
       }
 
+      // Si opciones.autogestionado, opciones.correlatividad, opciones.edad, opciones.departamento es true entonces comentario no puede ser vacío
+      if (opciones.correlatividad || opciones.edad || opciones.departamento) {
+        if (!comentario) {
+          throw new Error("Debes especificar un comentario con el detalle de las restricciones seleccionadas en 'Opciones de Evento'");
+        }
+      }
+
       const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes, opciones, comentario });
 
       limpiarFormulario();

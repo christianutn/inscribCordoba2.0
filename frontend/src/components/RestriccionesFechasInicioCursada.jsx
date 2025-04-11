@@ -152,7 +152,7 @@ const RestriccionesFechasInicioCursada = () => {
                     <div className="inputs-limites">
                         <TextField label={"Límite de cursos por mes"} type={"number"} value={maximoCursosMensual} getValue={(value) => setMaximoCursosMensual(value)}></TextField>
                         <TextField label={"Límite de cupos por mes"} type={"number"} value={maximoCuposMensual} getValue={(value) => setMaximoCuposMensual(value)}></TextField>
-                        <TextField label={"Límite de crusos por día"} type={"number"} value={maximoCursosDiario} getValue={(value) => setMaximoCursosDiario(value)}></TextField>
+                        <TextField label={"Límite de cursos por día"} type={"number"} value={maximoCursosDiario} getValue={(value) => setMaximoCursosDiario(value)}></TextField>
                         <TextField label={"Límite de cupos por día"} type={"number"} value={maximoCuposDiario} getValue={(value) => setMaximoCuposDiario(value)}></TextField>
                         <TextField label={"Máximo acumulado de cursos"} type={"number"} value={maximoAcumulado} getValue={(value) => setMaximoAcumulado(value)}></TextField>
                         <Autocomplete label={"Mes bloqueado"} options={listaMeses} value={selectedMes}
