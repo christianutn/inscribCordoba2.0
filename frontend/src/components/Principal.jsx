@@ -90,7 +90,7 @@ export default function Principal() {
       setUser(res);
 
      
-
+      
       if (!res) {
         navigate('/login');
         return;
@@ -143,7 +143,7 @@ export default function Principal() {
       case "RestriccionesFechasInicioCursada":
         return <RestriccionesFechasInicioCursada />
       case "Home":
-        return <Home />
+        return <Home/>
       case "Eventos":
         return <NuevoEvento />
       default:

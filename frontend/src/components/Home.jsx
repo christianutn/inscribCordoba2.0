@@ -10,14 +10,14 @@ import Victorius from './imagenes/victorius.png';
 import LogoFooter from './imagenes/logo_footer.png';
 
 
-const Home = () => {
+const Home = ({nombre}) => {
     return (
         <div className="main-content">
             <div className="home-container">
                 <div className="welcome-section">
                     <Box className="text-content">
                         <Typography variant="h4" className="title">
-                            ¡Bienvenido/a a InscribCórdoba!
+                            {nombre ? `Bienvenido/a a InscribCórdoba, ${nombre}` : "Bienvenido/a a InscribCórdoba"}
                         </Typography>
                         <Typography variant="body1" className="description">
                             InscribCórdoba es la plataforma centralizada para gestionar y planificar todas las capacitaciones que se ofrecen en Campus Córdoba.
