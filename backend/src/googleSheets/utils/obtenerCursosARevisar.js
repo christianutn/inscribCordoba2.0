@@ -2,7 +2,7 @@ import authorize from './getAuth.js';
 import { google } from 'googleapis';
 import { getDataRange } from './getDataRange.js';
 
-const avisarCursosARevisar = async () => {
+const obtenerCursosARevisar = async () => {
   try {
     // Authorizar Google
     const auth = authorize;
@@ -48,7 +48,7 @@ const avisarCursosARevisar = async () => {
       );
     });
 
-    console.log("Cursos a revisar:", cursosARevisar);
+    // console.log("Cursos a revisar:", cursosARevisar);
 
     return cursosARevisar;
 
@@ -59,6 +59,6 @@ const avisarCursosARevisar = async () => {
   }
 };
 
-avisarCursosARevisar();
+obtenerCursosARevisar();
 
-export default avisarCursosARevisar;
+export default obtenerCursosARevisar;

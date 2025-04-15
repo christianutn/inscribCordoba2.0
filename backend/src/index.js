@@ -7,6 +7,7 @@ import associateModels from "./models/asociateModelos.js";
 import 'dotenv/config';
 import cron from "node-cron";
 import envioCorreo from "./utils/enviarCorreo.js";
+import obtenerCursosARevisar from "./googleSheets/utils/obtenerCursosARevisar.js";
 
 
 const app = express();
@@ -73,6 +74,9 @@ app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({ message: err.message || "Error Interno" });
 });
 
+const cursosARevisar = await obtenerCursosARevisar();
+
+
 
 const htmlPrueba = "<h1>¡Hola!</h1><p>Si ves esto, Nodemailer funciona (HTML).</p>"
 
@@ -82,7 +86,7 @@ cron.schedule('0 56 13 * * *', () => {
     // Esta función se ejecutará cada minuto
     const timestamp = new Date().toISOString();
     console.log(`[${timestamp}] CRON TAREA 1 (Cada Minuto): ¡Ejecutando tarea simple!`);
-    envioCorreo(htmlPrueba, "Prueba cron", "christian.bergero.cba@gmail.com");
+    envioCorreo(htmlPrueba, "Prueba cron", "soportecampuscordoba@gmail.com");
     // Aquí podrías, por ejemplo, hacer un log diferente o llamar a una función muy básica
   }, {
     scheduled: true,
