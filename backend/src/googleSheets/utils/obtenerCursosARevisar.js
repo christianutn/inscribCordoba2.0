@@ -25,7 +25,7 @@ const obtenerCursosARevisar = async () => {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
     const fechaObjetivo = new Date(hoy);
-    fechaObjetivo.setDate(hoy.getDate() + 6);
+    fechaObjetivo.setDate(hoy.getDate() + 5);
 
     // Formatear a 'YYYY-MM-DD'
     const fechaObjetivoStr = fechaObjetivo.toISOString().slice(0, 10);
@@ -59,6 +59,6 @@ const obtenerCursosARevisar = async () => {
   }
 };
 
-obtenerCursosARevisar();
+
 
 export default obtenerCursosARevisar;
