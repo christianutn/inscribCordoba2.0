@@ -16,7 +16,7 @@ export const getCronograma = async (areaAFiltrar) => {
         }
 
         // Obtener datos
-        const data = await getDataRange(googleSheetsInstance, null, "principal", "B:AC");
+        const data = await getDataRange(googleSheetsInstance, null, "principal", "B:AF");
         
         // Validación temprana (Early Return Pattern)
         if (!data?.length) return [];
