@@ -45,20 +45,20 @@ function transformarEnObjetosClaveValor(matriz) {
 
 // --- Custom Toolbar Component ---
 function CustomToolbar() {
-  return (
-    <GridToolbarContainer>
-      <GridToolbarColumnsButton />
-      <GridToolbarFilterButton />
-      <GridToolbarDensitySelector />
-      <GridToolbarExport
-         csvOptions={{
-            fileName: 'reporte_mensual_cursos', // Nombre archivo CSV
-            delimiter: ';', // Delimitador
-            utf8WithBom: true, // Para correcta visualización de acentos en Excel
-          }}
-      />
-    </GridToolbarContainer>
-  );
+    return (
+        <GridToolbarContainer>
+            <GridToolbarColumnsButton />
+            <GridToolbarFilterButton />
+            <GridToolbarDensitySelector />
+            <GridToolbarExport
+                csvOptions={{
+                    fileName: 'reporte_mensual_cursos', // Nombre archivo CSV
+                    delimiter: ';', // Delimitador
+                    utf8WithBom: true, // Para correcta visualización de acentos en Excel
+                }}
+            />
+        </GridToolbarContainer>
+    );
 }
 
 // --- Main Report Component ---
@@ -100,7 +100,7 @@ const ReporteCursosCC = () => {
                 const cronograma = transformarEnObjetosClaveValor(rawData);
 
                 if (!cronograma || cronograma.length === 0) {
-                     // Esto no es un error necesariamente, puede que no haya datos
+                    // Esto no es un error necesariamente, puede que no haya datos
                     console.log("No se encontraron datos en el cronograma o la transformación inicial falló.");
                     // No establecer error, simplemente no habrá filas
                 } else {
@@ -190,59 +190,59 @@ const ReporteCursosCC = () => {
             {error && !loading && (
                 <Alert severity="error" sx={{ my: 2 }}>
                     <strong>Error al cargar el reporte:</strong> {error}
-                 </Alert>
+                </Alert>
             )}
 
             {/* Contenido Principal (Tabla) */}
             {!loading && !error && (
-                 <Paper elevation={3} sx={{ height: 'auto', width: '100%', overflow: 'hidden' }}>
-                     {/* Usar height: 'auto' y dejar que DataGrid maneje su altura o poner un minHeight */}
+                <Paper elevation={3} sx={{ height: 'auto', width: '100%', overflow: 'hidden' }}>
+                    {/* Usar height: 'auto' y dejar que DataGrid maneje su altura o poner un minHeight */}
                     <DataGrid
                         rows={rows}
                         columns={columns}
                         loading={loading} // El DataGrid puede mostrar su propio spinner si es necesario
                         localeText={esES.components.MuiDataGrid.defaultProps.localeText} // Textos en español
                         slots={{
-                          toolbar: CustomToolbar, // Usar la barra de herramientas personalizada
+                            toolbar: CustomToolbar, // Usar la barra de herramientas personalizada
                         }}
                         initialState={{
                             pagination: {
                                 paginationModel: { page: 0, pageSize: 12 }, // Mostrar todos los meses
                             },
-                             density: 'compact', // Empezar con densidad compacta
+                            density: 'compact', // Empezar con densidad compacta
                         }}
                         pageSizeOptions={[12, 24]} // Opciones de tamaño
                         autoHeight // Ajusta la altura al contenido
                         // getRowId={(row) => row.id} // No necesario si el campo ID se llama 'id'
-                         sx={{
+                        sx={{
                             // Estilo moderno para cabeceras
-                             '& .MuiDataGrid-columnHeaders': {
-                                 backgroundColor: '#f5f5f5', // Un gris claro
-                                 borderBottom: '1px solid #e0e0e0',
-                                 color: '#333', // Texto más oscuro
-                                 fontWeight: '600', // Un poco más de peso
-                             },
-                             // Estilo Cebra (filas alternas)
+                            '& .MuiDataGrid-columnHeaders': {
+                                backgroundColor: '#f5f5f5', // Un gris claro
+                                borderBottom: '1px solid #e0e0e0',
+                                color: '#333', // Texto más oscuro
+                                fontWeight: '600', // Un poco más de peso
+                            },
+                            // Estilo Cebra (filas alternas)
                             '& .MuiDataGrid-row:nth-of-type(odd)': {
-                              backgroundColor: '#fafafa', // Color ligeramente diferente para filas impares
+                                backgroundColor: '#fafafa', // Color ligeramente diferente para filas impares
                             },
                             // Borde general sutil
                             border: '1px solid #e0e0e0',
                             // Quitar borde de celdas si se prefiere un look más limpio
-                             '& .MuiDataGrid-cell': {
-                               border: 'none',
-                             },
+                            '& .MuiDataGrid-cell': {
+                                border: 'none',
+                            },
                             '& .MuiDataGrid-columnHeader': {
-                               borderRight: '1px solid #e0e0e0' // Línea vertical separadora en headers
+                                borderRight: '1px solid #e0e0e0' // Línea vertical separadora en headers
                             }
-                         }}
-                         // Si no hay filas, muestra un mensaje personalizado
-                         // (Requiere importar NoRowsOverlay o crear uno)
-                         // slots={{
-                         //   noRowsOverlay: () => <div style={{padding: 20, textAlign: 'center'}}>No hay datos para mostrar</div>
-                         // }}
+                        }}
+                    // Si no hay filas, muestra un mensaje personalizado
+                    // (Requiere importar NoRowsOverlay o crear uno)
+                    // slots={{
+                    //   noRowsOverlay: () => <div style={{padding: 20, textAlign: 'center'}}>No hay datos para mostrar</div>
+                    // }}
                     />
-                 </Paper>
+                </Paper>
             )}
         </Container>
     );

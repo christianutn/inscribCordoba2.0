@@ -31,6 +31,8 @@ import Home from "./Home.jsx";
 import HouseIcon from '@mui/icons-material/House';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import NuevoEvento from './NuevoEvento.jsx';
+import ReporteCursos from "./ReporteCursosCC.jsx";
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const drawerWidth = 240;
 
@@ -89,8 +91,8 @@ export default function Principal() {
       const res = await getMyUser();
       setUser(res);
 
-     
-      
+
+
       if (!res) {
         navigate('/login');
         return;
@@ -102,7 +104,7 @@ export default function Principal() {
       }
 
       if (res.rol === "ADM") {
-        setOpcionesAMostrar([["Inicio", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"], ["Restricciones de Fechas de inicio de Cursada", "RestriccionesFechasInicioCursada"], ["Crear Evento", "Eventos"]])
+        setOpcionesAMostrar([["Inicio", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["ABM", "AltaBajaModificion"], ["Restricciones de Fechas de inicio de Cursada", "RestriccionesFechasInicioCursada"], ["Crear Evento", "Eventos"], ["Reporte de cursos", "ReporteCursosIdentifier"]])
       } else if (res.rol === "REF") {
         setOpcionesAMostrar([["Inicio", "Home"], ["Nueva Cohorte", "Formulario"], ["Ver calendario", "Calendario"], ["Crear Evento", "Eventos"]])
       }
@@ -143,9 +145,11 @@ export default function Principal() {
       case "RestriccionesFechasInicioCursada":
         return <RestriccionesFechasInicioCursada />
       case "Home":
-        return <Home/>
+        return <Home />
       case "Eventos":
         return <NuevoEvento />
+      case "ReporteCursosIdentifier":
+        return <ReporteCursos />
       default:
         return <Home />
     }
@@ -229,6 +233,7 @@ export default function Principal() {
                   {index === 3 && <ClassIcon />}
                   {index === 4 && <GavelIcon />}
                   {index === 5 && <EventAvailableIcon />}
+                  {index === 6 && <AssessmentIcon />} {/* O el ícono importado */}
                 </ListItemIcon>
                 <ListItemText primary={item[0]} />
               </ListItemButton>
@@ -238,7 +243,7 @@ export default function Principal() {
         </List>
         <Divider />
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' }}>
-         
+
 
           <Button mensaje={"Cerrar Sesión"}
             hanldeOnClick={() => {

@@ -28,11 +28,7 @@ initSequelize();
 
 app.use(cors());
 
-<<<<<<< HEAD
-const PORT = 4001; //Recordar cambiar a puerto 4000 al subir cambios
-=======
 const PORT = 4001
->>>>>>> origin
 
 // Middleware
 app.use(express.json());
@@ -73,7 +69,7 @@ app.use((err, req, res, next) => {
 enviarCorreoDiarioContolDeCursos(); // Llamada a la función para enviar el correo diario de control de cursos
 
 // --- Programación de la Tarea Cron ---
-    
+
 // Expresión Cron: '0 * * * * *' -> Cada minuto (¡SOLO PARA PRUEBAS!)
 // Cambiar a '0 24 17 * * *' (o lo deseado) para producción (Ej: 17:24 hs Argentina)
 // Zona Horaria: America/Argentina/Buenos_Aires
