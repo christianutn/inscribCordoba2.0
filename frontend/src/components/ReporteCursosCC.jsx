@@ -69,21 +69,22 @@ const ReporteCursosCC = () => {
 
     // Column Definitions (revisar widths si es necesario)
     const columns = [
-        { field: 'mesNombre', headerName: 'Mes', width: 110, sortable: false, filterable: false }, // Usualmente no se filtra/ordena por mes nombre así
-        { field: 'cursosPorMes', headerName: 'Nuevos', type: 'number', width: 90, align: 'right', headerAlign: 'right' },
-        { field: 'cursosActivosAnteriores', headerName: 'Act. Ant.', type: 'number', width: 100, align: 'right', headerAlign: 'right' },
-        { field: 'plataformaExterna', headerName: 'Ext.', type: 'number', width: 70, align: 'right', headerAlign: 'right', description: 'Plataforma Externa' },
-        { field: 'totalCursosAcumulados', headerName: 'Total Act.', type: 'number', width: 100, align: 'right', headerAlign: 'right', description: 'Total Activos en el Mes' },
-        { field: 'canceladosSuspendidos', headerName: 'Canc/Susp.', type: 'number', width: 110, align: 'right', headerAlign: 'right' },
-        { field: 'autogestionados', headerName: 'Autogest.', type: 'number', width: 100, align: 'right', headerAlign: 'right' },
+        { field: 'mesNombre', headerName: 'Mes', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center' },
+        { field: 'cursosPorMes', headerName: 'Nuevos', type: 'number', flex: 1, align: 'center', headerAlign: 'center', description: 'Cursos que comienzan en el mes' },
+        { field: 'cursosActivosAnteriores', headerName: 'Anteriores', type: 'number', flex: 1, align: 'center', headerAlign: 'center', description: 'Cursos activos de meses anteriores' },
+        { field: 'plataformaExterna', headerName: 'Plataforma Externa', type: 'number', flex: 1, align: 'center', headerAlign: 'center', description: 'Plataforma Externa' },
+        { field: 'totalCursosAcumulados', headerName: 'Total Activos', type: 'number', flex: 1, align: 'center', headerAlign: 'center', description: 'Total Activos en el Mes' },
+        { field: 'canceladosSuspendidos', headerName: 'Canc/Susp.', type: 'number', flex: 1, align: 'center', headerAlign: 'center' },
+        { field: 'autogestionados', headerName: 'Autogestionados', type: 'number', flex: 1, align: 'center', headerAlign: 'center' },
         {
             field: 'porcentajeAutogestionados',
             headerName: '% Autog.',
-            width: 90,
-            type: 'number', // Para posible filtrado numérico (aunque el display es string)
-            sortable: false, // Ordenar por strings con '%' no es ideal
-            align: 'right', headerAlign: 'right',
-            renderCell: (params) => params.value != null ? `${parseFloat(params.value).toFixed(1)}%` : '', // Muestra con 1 decimal y %
+            flex: 1,
+            type: 'number',
+            sortable: false,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: (params) => params.value != null ? `${parseFloat(params.value).toFixed(1)}%` : '',
         },
     ];
 
@@ -248,4 +249,5 @@ const ReporteCursosCC = () => {
     );
 }
 
-export default ReporteCursosCC;
+export default ReporteCursosCC; 
+// antes de los cambios
