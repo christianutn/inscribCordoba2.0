@@ -19,7 +19,9 @@ import AltaAsignacionesAreasUsuario from './components/FormulariosAlta/AltaAsign
 import DetalleFechas from './components/DetalleFechas';
 import NuevoEvento from "./components/NuevoEvento"
 import ReporteCursosCC from './components/ReporteCursosCC';
-
+import CrearAviso from './components/CrearAviso';
+import MostrarAvisos from "./components/MostrarAvisos"
+import CardAvisos from "./components/Avisos";
 
 function App() {
 
@@ -46,6 +48,10 @@ function App() {
         <Route path='/detalleFechas' element={<DetalleFechas />} />
         <Route path='/nuevoEvento' element={<NuevoEvento />} />
         <Route path='/reportecursoscc' element={<ReporteCursosCC />} />
+        <Route path='/crearAvisos' element={<CrearAviso />} />
+        <Route path='/mostrarAvisos' element={<MostrarAvisos />} />
+        <Route path='/cardAvisos' element={<CardAvisos />} />
+
 
 
 

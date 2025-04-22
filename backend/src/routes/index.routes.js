@@ -25,6 +25,7 @@ import AreaTematica from "./areaTematica.routes.js";
 import tipoCertificacionRouter from "./tipoCertificacion.routes.js";
 import eventoRouter from "./evento.routes.js";
 import { Router } from "express";
+import AvisoRouter from "./aviso.routes.js"
 
 const router = Router();
 
@@ -59,5 +60,6 @@ router.use("/perfiles", perfilRouter)
 router.use("/areasTematicas", AreaTematica)
 router.use("/tiposCertificaciones", tipoCertificacionRouter)
 router.use("/eventos", eventoRouter)
+router.use("/avisos", AvisoRouter)
 
 export default router
