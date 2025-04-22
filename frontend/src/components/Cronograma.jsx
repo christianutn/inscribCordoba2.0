@@ -33,338 +33,292 @@ import InfoIcon from '@mui/icons-material/Info';
 // --- Custom Components ---
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Titulo from "../components/fonts/TituloPrincipal.jsx";
+import Divider from '@mui/material/Divider';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid';
+import { useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import ClearIcon from '@mui/icons-material/Clear';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 
-// Estilos del modal
-const modalStyle = {
-  position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-  width: '80%', maxWidth: 600, bgcolor: 'background.paper', border: 'none',
-  borderRadius: 2, boxShadow: 24, p: 0, maxHeight: '90vh', display: 'flex', flexDirection: 'column',
-};
-
-// Labels de meses
-const MONTH_NAMES = [
-  "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+const VISIBLE_COLUMN_HEADERS = [
+    "Ministerio", "Area", "Codigo del curso", "Nombre del curso",
+    "Fecha inicio de inscripción", "Fecha fin de inscripción",
+    "Fecha inicio del curso", "Fecha fin del curso"
 ];
+const FILTER_COLUMN_MINISTERIO = "Ministerio";
+const FILTER_COLUMN_AREA = "Area";
+const FILTER_COLUMN_NOMBRE_CURSO = "Nombre del curso";
+const ALL_OPTION_VALUE = '';
+const ALL_OPTION_LABEL = 'Todos';
 
 const Cronograma = () => {
-  // estados
-  const [cursosData, setCursosData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [originalHeaders, setOriginalHeaders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const [allHeaders, setAllHeaders] = useState([]);
+    const [visibleColumns, setVisibleColumns] = useState([]);
+    const [gridRows, setGridRows] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedRowData, setSelectedRowData] = useState(null);
+    const [ministerioFilter, setMinisterioFilter] = useState(ALL_OPTION_VALUE);
+    const [areaFilter, setAreaFilter] = useState(ALL_OPTION_VALUE);
+    const [nombreCursoFilter, setNombreCursoFilter] = useState('');
+    const [filteredRows, setFilteredRows] = useState([]);
+    const [ministerioColIndex, setMinisterioColIndex] = useState(-1);
+    const [areaColIndex, setAreaColIndex] = useState(-1);
+    const [nombreCursoColIndex, setNombreCursoColIndex] = useState(-1);
+    const [ministerioOptions, setMinisterioOptions] = useState([]);
+    const [areaOptions, setAreaOptions] = useState([]);
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedRowData, setSelectedRowData] = useState(null);
+    const theme = useTheme();
 
-  // filtros
-  const [ministerioOptions, setMinisterioOptions] = useState([]);
-  const [areaOptions, setAreaOptions] = useState([]);
-  const [ministerioFilter, setMinisterioFilter] = useState('all');
-  const [areaFilter, setAreaFilter] = useState('all');
-  const [nombreFilter, setNombreFilter] = useState('');
-  const [monthFilter, setMonthFilter] = useState('all');
+    useEffect(() => {
+        (async () => {
+            setLoading(true);
+            try {
+                const dataCronograma = await getCronograma();
 
-  // columnas que vemos
-  const COLUMNAS_VISIBLES = useMemo(() => [
-    "Ministerio","Area","Nombre del curso",
-    "Fecha inicio de inscripción","Fecha fin de inscripción",
-    "Fecha inicio del curso","Fecha fin del curso"
-  ], []);
+                if (dataCronograma && dataCronograma.length > 0) {
+                    const headers = dataCronograma[0];
+                    const dataRows = dataCronograma.slice(1);
+                    setAllHeaders(headers);
 
-  // generar def de columnas para DataGrid
-  const columnsForGrid = useMemo(() => {
-    if (!originalHeaders.length) return [];
-    return originalHeaders
-      .filter(h => COLUMNAS_VISIBLES.includes(h))
-      .map(header => {
-        let flex = 1;
-        if (header === "Nombre del curso") flex = 2.5;
-        if (header === "Ministerio" || header === "Area") flex = 1.5;
-        if (header.toLowerCase().includes("fecha")) flex = 1.2;
-        return { field: header, headerName: header, flex, minWidth: 130 };
-      });
-  }, [originalHeaders]);
+                    const minIndex = headers.findIndex(h => String(h).trim() === FILTER_COLUMN_MINISTERIO);
+                    const areaIndex = headers.findIndex(h => String(h).trim() === FILTER_COLUMN_AREA);
+                    const nombreIndex = headers.findIndex(h => String(h).trim() === FILTER_COLUMN_NOMBRE_CURSO);
+                    setMinisterioColIndex(minIndex);
+                    setAreaColIndex(areaIndex);
+                    setNombreCursoColIndex(nombreIndex);
 
-  // carga inicial
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const dataCronograma = await getCronograma();
-        if (!dataCronograma || dataCronograma.length < 2) {
-          throw new Error("No se recibieron datos válidos del cronograma.");
-        }
-        const headers = dataCronograma[0].map(h => h.trim());
-        setOriginalHeaders(headers);
+                    const columnsToShow = headers
+                        .map((header, index) => ({ header, index }))
+                        .filter(({ header }) => VISIBLE_COLUMN_HEADERS.includes(String(header).trim()))
+                        .map(({ header, index }) => ({ field: `col${index}`, headerName: header, flex: 1, minWidth: 140 }));
+                    setVisibleColumns(columnsToShow);
 
-        const minSet = new Set();
-        const areaSet = new Set();
-        const dataObjs = dataCronograma.slice(1).map((row, idx) => {
-          const obj = { id: idx };
-          headers.forEach((h, i) => {
-            const val = row[i] != null ? String(row[i]).trim() : '';
-            obj[h] = val;
-            if (h === "Ministerio" && val) minSet.add(val);
-            if (h === "Area" && val) areaSet.add(val);
-          });
-          return obj;
-        });
+                    const allFormattedRows = dataRows.map((row, rowIndex) => {
+                        const rowObject = { id: rowIndex };
+                        row.forEach((cell, cellIndex) => { rowObject[`col${cellIndex}`] = cell ?? ''; });
+                        return rowObject;
+                    });
+                    setGridRows(allFormattedRows);
 
-        setCursosData(dataObjs);
-        setFilteredData(dataObjs);
-        setMinisterioOptions(['all', ...Array.from(minSet).sort()]);
-        setAreaOptions(['all', ...Array.from(areaSet).sort()]);
-      } catch (err) {
-        console.error(err);
-        setError(err.message || "Error al cargar datos.");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  // efecto filtros
-  useEffect(() => {
-    let data = cursosData;
-
-    if (ministerioFilter !== 'all') {
-      data = data.filter(c => c["Ministerio"] === ministerioFilter);
-    }
-    if (areaFilter !== 'all') {
-      data = data.filter(c => c["Area"] === areaFilter);
-    }
-    if (nombreFilter.trim()) {
-      const term = nombreFilter.trim().toLowerCase();
-      data = data.filter(c => c["Nombre del curso"]?.toLowerCase().includes(term));
-    }
-    if (monthFilter !== 'all') {
-      data = data.filter(c => {
-        const f = c["Fecha inicio del curso"];
-        if (!f) return false;
-        const d = dayjs(f, 'DD/MM/YYYY');
-        return d.isValid() && d.month() === parseInt(monthFilter, 10);
-      });
-    }
-
-    setFilteredData(data);
-  }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter]);
-
-  // handlers
-  const handleRowDoubleClick = params => {
-    // tomo la fila completa desde cursosData (tiene todos los headers)
-    const full = cursosData.find(c => c.id === params.row.id);
-    setSelectedRowData(full || params.row);
-    setModalOpen(true);
-  };
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setSelectedRowData(null);
-  };
-  const handleDescargarExcel = async () => {
-    if (!filteredData.length) return;
-    setLoading(true);
-    try {
-      const headersVis = columnsForGrid.map(c => c.headerName);
-      await descargarExcel(filteredData, headersVis, "Cronograma_Filtrado");
-    } catch (e) {
-      console.error(e);
-      setError("Error al generar el Excel.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleMinisterioChange = e => setMinisterioFilter(e.target.value);
-  const handleAreaChange = e => setAreaFilter(e.target.value);
-  const handleNombreChange = e => setNombreFilter(e.target.value);
-  const handleMonthChange = e => setMonthFilter(e.target.value);
-
-  // render
-  if (loading && !cursosData.length) {
-    return (
-      <Backdrop open sx={{ zIndex: t => t.zIndex.drawer + 1, color: '#fff' }}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
-    );
-  }
-  if (error) {
-    return (
-      <Box sx={{ display:'flex', justifyContent:'center', alignItems:'center', height:'80vh', p:3 }}>
-        <Paper elevation={3} sx={{ p:4, textAlign:'center' }}>
-          <Typography variant="h6" color="error" gutterBottom>Error</Typography>
-          <Typography>{error}</Typography>
-        </Paper>
-      </Box>
-    );
-  }
-  if (!loading && !cursosData.length) {
-    return (
-      <Box sx={{ display:'flex', justifyContent:'center', alignItems:'center', height:'80vh', p:3 }}>
-        <Paper elevation={3} sx={{ p:4, textAlign:'center' }}>
-          <Typography variant="h6" gutterBottom>No Hay Datos</Typography>
-          <Typography>No se encontraron datos en el cronograma.</Typography>
-        </Paper>
-      </Box>
-    );
-  }
-
-  return (
-    <div style={{ padding: 20 }}>
-      {/* Título y descarga */}
-      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:2, flexWrap:'wrap', gap:2 }}>
-        <Titulo texto="Cronograma" />
-        <BotonCircular
-          icon="descargar"
-          onClick={handleDescargarExcel}
-          tooltip="Descargar Vista Actual"
-          disabled={loading || !filteredData.length}
-        />
-      </Box>
-      <Divider sx={{ mb:3, borderBottomWidth:2 }} />
-
-      {/* Filtros */}
-      <Paper elevation={1} sx={{ p:2, mb:3 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              fullWidth label="Buscar por Nombre del Curso"
-              size="small" value={nombreFilter}
-              onChange={handleNombreChange}
-              disabled={loading}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth size="small" disabled={loading || ministerioOptions.length<=1}>
-              <InputLabel id="ministerio-filter-label">Ministerio</InputLabel>
-              <Select
-                labelId="ministerio-filter-label"
-                value={ministerioFilter}
-                label="Ministerio"
-                onChange={handleMinisterioChange}
-              >
-                {ministerioOptions.map((opt,i)=>(
-                  <MenuItem key={i} value={opt}>{opt==='all'?<em>Todos</em>:opt}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth size="small" disabled={loading || areaOptions.length<=1}>
-              <InputLabel id="area-filter-label">Área</InputLabel>
-              <Select
-                labelId="area-filter-label"
-                value={areaFilter}
-                label="Área"
-                onChange={handleAreaChange}
-              >
-                {areaOptions.map((opt,i)=>(
-                  <MenuItem key={i} value={opt}>{opt==='all'?<em>Todas</em>:opt}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth size="small" disabled={loading}>
-              <InputLabel id="mes-filter-label">Mes Inicio Curso</InputLabel>
-              <Select
-                labelId="mes-filter-label"
-                value={monthFilter}
-                label="Mes Inicio Curso"
-                onChange={handleMonthChange}
-              >
-                <MenuItem value="all"><em>Todos</em></MenuItem>
-                {MONTH_NAMES.map((m,i)=>(
-                  <MenuItem key={i} value={i.toString()}>{m}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-        </Grid>
-      </Paper>
-
-      {/* Procesando */}
-      {loading && cursosData.length>0 && (
-        <Box sx={{ display:'flex', justifyContent:'center', my:2 }}>
-          <CircularProgress size={24} sx={{ mr:1 }} />
-          <Typography>Procesando...</Typography>
-        </Box>
-      )}
-
-      {/* DataGrid */}
-      <Paper elevation={3} sx={{ height:600, width:'100%' }}>
-        <DataGrid
-          rows={filteredData}
-          columns={columnsForGrid}
-          localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-          onRowDoubleClick={handleRowDoubleClick}
-          getRowId={r=>r.id}
-          density="compact"
-          disableSelectionOnClick
-          initialState={{
-            sorting: { sortModel:[{ field:'Fecha inicio del curso', sort:'asc' }] }
-          }}
-          sx={{
-            border:0,
-            '& .MuiDataGrid-columnHeaders':{ backgroundColor:'primary.main', color:'#000', fontWeight:'bold' },
-            '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within':{ outline:'none!important' },
-            '& .MuiDataGrid-row':{ cursor:'pointer' },
-            '& .MuiDataGrid-overlay':{ backgroundColor:'rgba(255,255,255,0.7)' }
-          }}
-          slots={{
-            noRowsOverlay:() => (
-              <Box sx={{ mt:10, display:'flex', justifyContent:'center', alignItems:'center', height:'100%' }}>
-                <Typography>No hay cursos que coincidan con los filtros.</Typography>
-              </Box>
-            )
-          }}
-        />
-      </Paper>
-
-      {/* Modal detalle */}
-      <Modal open={modalOpen} onClose={handleCloseModal}>
-        <Box sx={modalStyle}>
-          {selectedRowData && (
-            <Card sx={{ display:'flex', flexDirection:'column', flexGrow:1, overflow:'hidden' }}>
-              <CardHeader
-                avatar={<InfoIcon color="primary" />}
-                title={selectedRowData["Nombre del curso"]||"Detalle del Curso"}
-                titleTypographyProps={{ variant:'h6', fontWeight:'bold' }}
-                subheader={selectedRowData["Código del curso"]||''}
-                action={<IconButton onClick={handleCloseModal}><CloseIcon/></IconButton>}
-                sx={{ borderBottom:1, borderColor:'divider', pb:1 }}
-              />
-              <CardContent sx={{ overflowY:'auto', flexGrow:1 }}>
-                <List dense>
-                  {originalHeaders.map(h => {
-                    if (h==='id') return null;
-                    const val = selectedRowData[h];
-                    if (val) {
-                      return (
-                        <React.Fragment key={h}>
-                          <ListItem sx={{ py:0.5 }}>
-                            <ListItemText
-                              primary={val}
-                              secondary={h}
-                              primaryTypographyProps={{ fontWeight:500 }}
-                              secondaryTypographyProps={{ fontSize:'0.8rem' }}
-                            />
-                          </ListItem>
-                          <Divider component="li" variant="inset" sx={{ ml:0 }}/>
-                        </React.Fragment>
-                      );
+                    if (minIndex !== -1) {
+                        const uniqueMin = [...new Set(allFormattedRows.map(row => String(row[`col${minIndex}`]).trim()).filter(Boolean))]
+                            .sort((a, b) => a.localeCompare(b));
+                        setMinisterioOptions(uniqueMin);
                     }
-                    return null;
-                  })}
-                </List>
-              </CardContent>
-            </Card>
-          )}
-        </Box>
-      </Modal>
-    </div>
-  );
-};
+
+                } else {
+                    setAllHeaders([]); setVisibleColumns([]); setGridRows([]);
+                    setMinisterioColIndex(-1); setAreaColIndex(-1); setNombreCursoColIndex(-1);
+                    setMinisterioOptions([]); setAreaOptions([]);
+                }
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching cronograma:", error); setLoading(false);
+                setAllHeaders([]); setVisibleColumns([]); setGridRows([]);
+                setMinisterioColIndex(-1); setAreaColIndex(-1); setNombreCursoColIndex(-1);
+                setMinisterioOptions([]); setAreaOptions([]);
+            }
+        })();
+    }, []);
+
+    useEffect(() => {
+        if (gridRows.length === 0 || ministerioColIndex === -1 || areaColIndex === -1) {
+            setAreaOptions([]);
+            return;
+        }
+
+        if (ministerioFilter === ALL_OPTION_VALUE) {
+            setAreaOptions([]);
+            setAreaFilter(ALL_OPTION_VALUE);
+        } else {
+            const relevantRows = gridRows.filter(row => String(row[`col${ministerioColIndex}`]) === ministerioFilter);
+            const uniqueAreas = [...new Set(relevantRows.map(row => String(row[`col${areaColIndex}`]).trim()).filter(Boolean))]
+                .sort((a, b) => a.localeCompare(b));
+            setAreaOptions(uniqueAreas);
+            setAreaFilter(ALL_OPTION_VALUE);
+        }
+    }, [ministerioFilter, gridRows, ministerioColIndex, areaColIndex]);
+
+
+    useEffect(() => {
+        let currentFilteredRows = [...gridRows];
+
+        if (ministerioColIndex !== -1 && ministerioFilter !== ALL_OPTION_VALUE) {
+            currentFilteredRows = currentFilteredRows.filter(row =>
+                String(row[`col${ministerioColIndex}`]) === ministerioFilter
+            );
+        }
+
+        if (areaColIndex !== -1 && areaFilter !== ALL_OPTION_VALUE) {
+            currentFilteredRows = currentFilteredRows.filter(row =>
+                String(row[`col${areaColIndex}`]) === areaFilter
+            );
+        }
+
+        if (nombreCursoColIndex !== -1 && nombreCursoFilter) {
+            currentFilteredRows = currentFilteredRows.filter(row =>
+                String(row[`col${nombreCursoColIndex}`]).toLowerCase().includes(nombreCursoFilter.toLowerCase())
+            );
+        }
+
+        setFilteredRows(currentFilteredRows);
+
+    }, [gridRows, ministerioFilter, areaFilter, nombreCursoFilter, ministerioColIndex, areaColIndex, nombreCursoColIndex]);
+
+
+    const handleRowClick = (params) => { setSelectedRowData(params.row); setModalOpen(true); };
+    const handleCloseModal = () => { setModalOpen(false); setSelectedRowData(null); };
+    const handleDescargarExcel = async () => {
+        if (filteredRows.length === 0 || allHeaders.length === 0) { console.warn("No data available to download."); return; }
+        const excelColumns = allHeaders.map((header, index) => ({ field: `col${index}`, headerName: header }));
+        await descargarExcel(filteredRows, excelColumns, "Cronograma_Filtrado");
+    };
+    const handleClearFilters = () => {
+        setMinisterioFilter(ALL_OPTION_VALUE);
+        setAreaFilter(ALL_OPTION_VALUE);
+        setNombreCursoFilter('');
+    };
+
+
+    if (loading) {
+        return (<Backdrop open={true} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}><CircularProgress color="inherit" /></Backdrop>);
+    }
+
+    return (
+        <div className="container-cronograma" style={{ padding: '20px' }}>
+
+            <div className="cabecera" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <Titulo texto="Cronograma" />
+                <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual (Excel)" />
+            </div>
+            <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} />
+
+            <Box sx={{ mb: 3, p: 2, border: `1px solid ${theme.palette.divider}`, borderRadius: 1 }}>
+                <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} sm={6} md={3}>
+                        <FormControl fullWidth size="small" variant="outlined" disabled={ministerioColIndex === -1 || ministerioOptions.length === 0}>
+                            <InputLabel id="ministerio-filter-label">{FILTER_COLUMN_MINISTERIO}</InputLabel>
+                            <Select
+                                labelId="ministerio-filter-label"
+                                value={ministerioFilter}
+                                label={FILTER_COLUMN_MINISTERIO}
+                                onChange={(e) => setMinisterioFilter(e.target.value)}
+                            >
+                                <MenuItem value={ALL_OPTION_VALUE}><em>{ALL_OPTION_LABEL}</em></MenuItem>
+                                {ministerioOptions.map((option) => (<MenuItem key={option} value={option}>{option}</MenuItem>))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={3}>
+                        <FormControl fullWidth size="small" variant="outlined"
+                            disabled={areaColIndex === -1 || ministerioFilter === ALL_OPTION_VALUE || areaOptions.length === 0}
+                        >
+                            <InputLabel id="area-filter-label">{FILTER_COLUMN_AREA}</InputLabel>
+                            <Select
+                                labelId="area-filter-label"
+                                value={areaFilter}
+                                label={FILTER_COLUMN_AREA}
+                                onChange={(e) => setAreaFilter(e.target.value)}
+                            >
+                                <MenuItem value={ALL_OPTION_VALUE}>
+                                    <em>{ALL_OPTION_LABEL}</em>
+                                </MenuItem>
+                                {areaOptions.map((option) => (
+                                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={4}>
+                        <TextField fullWidth size="small" variant="outlined" label={FILTER_COLUMN_NOMBRE_CURSO} value={nombreCursoFilter} onChange={(e) => setNombreCursoFilter(e.target.value)} disabled={nombreCursoColIndex === -1} />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={2} sx={{ textAlign: { xs: 'right', md: 'left' } }}>
+                        <Button variant="outlined" size="small" onClick={handleClearFilters} startIcon={<ClearIcon />} disabled={ministerioFilter === ALL_OPTION_VALUE && areaFilter === ALL_OPTION_VALUE && !nombreCursoFilter} >
+                            Limpiar
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Box>
+
+            <div className="cronograma" style={{ height: 550, width: '100%' }}>
+                <DataGrid
+                    rows={filteredRows}
+                    columns={visibleColumns}
+                    pageSize={15}
+                    rowsPerPageOptions={[10, 15, 25, 50]}
+                    autoHeight={false}
+                    onRowClick={handleRowClick}
+                    disableSelectionOnClick
+                    density="compact"
+                    localeText={{ noRowsLabel: 'No se encontraron resultados con los filtros aplicados' }}
+                    sx={{
+                        '& .MuiDataGrid-row:hover': { cursor: 'pointer', backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+                        '& .MuiDataGrid-cell': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+                        '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis' }
+                    }}
+                />
+            </div>
+
+            <Dialog open={modalOpen} onClose={handleCloseModal} maxWidth="md" fullWidth aria-labelledby="detail-dialog-title" scroll="paper">
+                <DialogTitle id="detail-dialog-title" sx={{ borderBottom: `1px solid ${theme.palette.divider}`, pb: 1.5 }}>
+                    Detalles Completos del Curso
+                </DialogTitle>
+                <DialogContent sx={{ py: 2, backgroundColor: theme.palette.mode === 'light' ? '#f9f9f9' : '#333' }}>
+                    {selectedRowData && allHeaders.length > 0 ? (
+                        <Box component="dl" sx={{ m: 0 }}>
+                            {allHeaders.map((header, index) => {
+                                const cellValue = selectedRowData[`col${index}`] ?? '';
+                                if (!header) return null;
+                                return (
+                                    <Box
+                                        key={index}
+                                        sx={{
+                                            display: 'grid', gridTemplateColumns: 'minmax(150px, 30%) 1fr',
+                                            gap: theme.spacing(1, 2), alignItems: 'center', py: 1.5, px: 1,
+                                            borderBottom: `1px solid ${theme.palette.divider}`,
+                                            '&:last-of-type': { borderBottom: 'none' },
+                                        }}
+                                    >
+                                        <Typography component="dt" variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary, textAlign: 'left' }}>
+                                            {header}:
+                                        </Typography>
+                                        <Typography component="dd" variant="body1" sx={{ color: theme.palette.text.secondary, textAlign: 'left', wordBreak: 'break-word', m: 0 }}>
+                                            {cellValue === '' ? '-' : String(cellValue)}
+                                        </Typography>
+                                    </Box>
+                                );
+                            })}
+                        </Box>
+                    ) : (
+                        <Typography sx={{ color: 'text.secondary', textAlign: 'center', py: 3 }}>
+                            No hay detalles disponibles para mostrar.
+                        </Typography>
+                    )}
+                </DialogContent>
+                <DialogActions sx={{ p: 2, borderTop: `1px solid ${theme.palette.divider}` }}>
+                    <Button onClick={handleCloseModal} variant="contained" color="primary" autoFocus>
+                        Cerrar
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+        </div>
+    );
+}
 
 export default Cronograma;
