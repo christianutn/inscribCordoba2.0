@@ -45,6 +45,7 @@ const RestriccionesFechasInicioCursada = () => {
                 }
 
                 const rest = await getRestricciones();
+                console.log(rest);
                 setSelectedMes(listaMeses[rest.mesBloqueado]);
                 setMaximoCuposDiario(rest.maximoCuposXDia);
                 setMaximoCuposMensual(rest.maximoCuposXMes);

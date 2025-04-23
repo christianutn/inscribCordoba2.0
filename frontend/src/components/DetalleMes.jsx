@@ -1,119 +1,110 @@
 import React, { useState, useEffect } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
-import { getMatrizFechas } from "../services/googleSheets.service";
+import { getMatrizFechas } from '../services/googleSheets.service';
 
 dayjs.locale('es');
 
-const MonthlySummaryTable = ({ maximoCuposMensual, maximoCursosMensual }) => {
-  const [rows, setRows] = useState([]);
-  const [searchDate, setSearchDate] = useState(null);
+// Registro de componentes de Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+const DetalleMesChart = () => {
   const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: []
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       try {
-        const matrizFechas = await getMatrizFechas();
-        const currentYear = new Date().getFullYear();
-        const monthlyData = {};
+        const matriz = await getMatrizFechas();
+        // extraigo solo claves tipo "YYYY-MM"
+        const mesesClaves = Object.keys(matriz)
+          .filter(k => /^\d{4}-\d{2}$/.test(k))
+          .sort();
 
-        for (let month = 0; month < 12; month++) {
-          const claveMesAnio = `${currentYear}-${String(month + 1).padStart(2, '0')}`;
+        // etiquetas en español, p.e. "enero", "febrero", ...
+        const labels = mesesClaves.map(m =>
+          dayjs(m + '-01').format('MMMM YYYY')
+        );
 
-          let totalCupo = 0;
-          let totalCursos = 0;
+        // datos de cada mes
+        const datosCupo = mesesClaves.map(m => matriz[m].cantidadCupoMensual || 0);
+        const datosCursos = mesesClaves.map(m => matriz[m].cantidadCursosMensual || 0);
 
-          for (let day = 1; day <= 31; day++) {
-            const claveDia = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            if (matrizFechas[claveMesAnio]?.[claveDia]) {
-              totalCupo += matrizFechas[claveMesAnio][claveDia].cantidadCupoDiario || 0;
-              totalCursos += matrizFechas[claveMesAnio][claveDia].cantidadCursosDiario || 0;
+        setChartData({
+          labels,
+          datasets: [
+            {
+              label: 'Total Cupo Mensual',
+              data: datosCupo,
+              backgroundColor: 'rgba(54,162,235,0.5)'
+            },
+            {
+              label: 'Total Cursos Mensual',
+              data: datosCursos,
+              backgroundColor: 'rgba(255,99,132,0.5)'
             }
-          }
-
-          // Solo agregar si hay datos en el mes
-          if (totalCupo || totalCursos) {
-            monthlyData[claveMesAnio] = {
-              id: month,
-              mes: dayjs(`${currentYear}-${month + 1}-01`).format('MMMM YYYY'),
-              cupo: totalCupo,
-              cursos: totalCursos,
-            };
-          }
-        }
-
-        setRows(Object.values(monthlyData));
-        setLoading(false);
+          ]
+        });
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error cargando matriz de fechas:', error);
+      } finally {
         setLoading(false);
       }
-    };
-
-    fetchData();
+    })();
   }, []);
 
-  const columns = [
-    { field: 'mes', headerName: 'Mes', flex: 1 },
-    { field: 'cupo', headerName: 'Total Cupo', flex: 1 },
-    { field: 'cursos', headerName: 'Total Cursos', flex: 1 },
-  ];
-
-  const filteredRows = searchDate
-    ? rows.filter(row => row.mes === dayjs(searchDate).format('MMMM YYYY'))
-    : rows;
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      title: {
+        display: true,
+        text: 'Resumen Mensual de Cupo y Cursos'
+      }
+    },
+    scales: {
+      x: { title: { display: true, text: 'Mes' } },
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Cantidad' }
+      }
+    }
+  };
 
   return (
-    <div style={{ width: '100%' }}>
-      <LocalizationProvider dateAdapter={AdapterDayjs} locale="es">
-        <DatePicker
-          label="Seleccionar mes"
-          views={['year', 'month']}
-          value={searchDate}
-          onChange={(newValue) => setSearchDate(newValue)}
-          slotProps={{ textField: { fullWidth: true, margin: "normal" } }}
-        />
-      </LocalizationProvider>
-
-      <div style={{ height: Math.max(300, filteredRows.length * 50 + 100), width: '100%' }}>
-        <DataGrid
-          rows={filteredRows}
-          columns={columns}
-          pageSize={10}
-          rowsPerPageOptions={[10, 25, 50]}
-          loading={loading}
-          autoHeight
-          getRowClassName={(params) => {
-            const cupo = params.row.cupo;
-            const cursos = params.row.cursos;
-
-            if (cupo >= maximoCuposMensual || cursos >= maximoCursosMensual) {
-              return 'red-row';
-            }
-
-            return 'green-row';
-          }}
-          sx={{
-            '& .red-row': {
-              backgroundColor: 'rgba(255, 0, 0, 0.2)',
-            },
-            '& .green-row': {
-              backgroundColor: 'rgba(0, 255, 0, 0.2)',
-            },
-          }}
-          initialState={{
-            sorting: {
-              sortModel: [{ field: 'mes', sort: 'asc' }],
-            },
-          }}
-        />
-      </div>
-    </div>
+    <Box sx={{ width: '100%', p: 2 }}>
+      {loading ? (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : chartData.labels.length === 0 ? (
+        <Typography>No hay datos mensuales para mostrar.</Typography>
+      ) : (
+        <Bar data={chartData} options={options} />
+      )}
+    </Box>
   );
 };
 
-export default MonthlySummaryTable;
+export default DetalleMesChart;

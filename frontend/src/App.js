@@ -23,6 +23,7 @@ import CrearAviso from './components/CrearAviso';
 import MostrarAvisos from "./components/MostrarAvisos"
 import CardAvisos from "./components/Avisos";
 
+
 function App() {
 
   return (
@@ -51,6 +52,7 @@ function App() {
         <Route path='/crearAvisos' element={<CrearAviso />} />
         <Route path='/mostrarAvisos' element={<MostrarAvisos />} />
         <Route path='/cardAvisos' element={<CardAvisos />} />
+       
 
 
 
