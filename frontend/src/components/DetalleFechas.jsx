@@ -207,14 +207,18 @@ const DetalleFechasChart = () => {
       const infoDia = matriz[mesSeleccionado]?.[claveDia] || {};
       const cupoVal = infoDia.cantidadCupoDiario || 0;
       const cursosVal = infoDia.cantidadCursosDiario || 0;
-      const cursosInicianHoy = infoDia.cantidadCursosInicianHoy || 0;
-      const cursosTerminanHoy = infoDia.cantidadCursosTerminanHoy || 0;
 
-      runningAccumulated += cursosInicianHoy - cursosTerminanHoy;
+      // Cursos cursos activos meses anteriores
+      const posInicio = buscarPosicionFecha(claveDia, matriz.listaFechasInicio);
+      const posFin = buscarPosicionFecha(claveDia, matriz.listaFechasFin);
+
+      const acumulado = posInicio >= 0 && posFin >= 0
+        ? matriz.listaFechasInicio[posInicio].acumulado - matriz.listaFechasFin[posFin].acumulado
+        : 0;
 
       currentDataCupo.push(cupoVal);
       currentDataCursos.push(cursosVal);
-      currentDataAcumulado.push(Math.max(0, runningAccumulated));
+      currentDataAcumulado.push(acumulado);
     }
 
     // Set individual data states
