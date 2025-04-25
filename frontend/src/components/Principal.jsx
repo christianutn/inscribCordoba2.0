@@ -41,6 +41,7 @@ import NuevoEvento from './NuevoEvento.jsx';
 import ReporteCursos from "./ReporteCursosCC.jsx";
 import CrearAviso from './CrearAviso.jsx';
 
+
 import { getMyUser } from "../services/usuarios.service.js";
 
 const drawerWidth = 260;
@@ -200,7 +201,7 @@ export default function Principal() {
       case "ReporteCursosIdentifier": return <ReporteCursos />;
       case "CrearAviso": return <CrearAviso />;
       case "Home":
-      default: return <Home nombre={user?.nombre} />;
+      default: return <Home nombre={user?.nombre} setOpcionSeleccionada={setOpcionSeleccionada} />;
     }
   };
 
