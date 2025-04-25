@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import {
   Box,
-  Paper, // Use Paper to contain tabs and charts
+  Paper,
   Tabs,
   Tab,
   Typography,
@@ -14,7 +14,6 @@ import { getMatrizFechas } from '../services/googleSheets.service';
 
 dayjs.locale('es');
 
-// Reusable TabPanel component
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
   return (
@@ -36,11 +35,10 @@ function TabPanel(props) {
 
 const DetalleMesChart = () => {
   const [loading, setLoading] = useState(true);
-  // Separate states for each data series
   const [dataCupo, setDataCupo] = useState([]);
   const [dataCursos, setDataCursos] = useState([]);
-  const [labels, setLabels] = useState([]); // State for labels
-  const [activeTab, setActiveTab] = useState(0); // State for active tab
+  const [labels, setLabels] = useState([]);
+  const [activeTab, setActiveTab] = useState(0);
 
   const [baseOptions, setBaseOptions] = useState({
     chart: {
@@ -69,7 +67,7 @@ const DetalleMesChart = () => {
     },
     yaxis: {
       title: {
-        text: 'Cantidad', // Default title
+        text: 'Cantidad',
       },
       min: 0,
     },
@@ -78,7 +76,6 @@ const DetalleMesChart = () => {
     },
     tooltip: {
       x: {
-        // Use labels state here
         formatter: function (value, { seriesIndex, dataPointIndex, w }) {
           return labels[dataPointIndex] || '';
         }
@@ -90,11 +87,10 @@ const DetalleMesChart = () => {
       },
     },
     title: {
-      text: 'Resumen Mensual', // Title will be updated
+      text: 'Resumen Mensual',
       align: 'center',
     },
-    legend: { show: false }, // Hide legend for single series
-    // Colors will be set per chart
+    legend: { show: false },
   });
 
   useEffect(() => {
@@ -134,7 +130,7 @@ const DetalleMesChart = () => {
           },
           title: {
             ...prevOptions.title,
-            text: 'Resumen Mensual de Cupo y Cursos', // Restore main title
+            text: 'Resumen Mensual de Cupo y Cursos',
           }
         }));
 

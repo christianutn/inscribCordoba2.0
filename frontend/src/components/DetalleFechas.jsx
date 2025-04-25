@@ -10,8 +10,8 @@ import {
   Typography,
   CircularProgress,
   Grid,
-  Tabs, // <-- Importar Tabs
-  Tab   // <-- Importar Tab
+  Tabs,
+  Tab
 } from '@mui/material';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
@@ -22,7 +22,6 @@ import {
 
 dayjs.locale('es');
 
-// Helper function for TabPanel (optional but good practice)
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
   return (
@@ -34,7 +33,7 @@ function TabPanel(props) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ pt: 3 }}> {/* Add padding top to separate from tabs */}
+        <Box sx={{ pt: 3 }}>
           {children}
         </Box>
       )}
@@ -46,17 +45,16 @@ const DetalleFechasChart = () => {
   const [matriz, setMatriz] = useState(null);
   const [meses, setMeses] = useState([]);
   const [mesSeleccionado, setMesSeleccionado] = useState('');
-  // States for individual data series
   const [dataCupo, setDataCupo] = useState([]);
   const [dataCursos, setDataCursos] = useState([]);
   const [dataAcumulado, setDataAcumulado] = useState([]);
-  const [labels, setLabels] = useState([]); // State for labels
+  const [labels, setLabels] = useState([]);
 
-  const [baseOptions, setBaseOptions] = useState({ // Renamed to baseOptions
+  const [baseOptions, setBaseOptions] = useState({
     chart: {
       type: 'bar',
       height: 450,
-      stacked: false, // No longer stacked by default
+      stacked: false,
       toolbar: {
         show: true
       }
@@ -70,7 +68,7 @@ const DetalleFechasChart = () => {
     dataLabels: {
       enabled: false,
     },
-    stroke: { // Can keep this for single bars too
+    stroke: {
       show: true,
       width: 2,
       colors: ['transparent'],
@@ -90,9 +88,9 @@ const DetalleFechasChart = () => {
       },
       tickAmount: undefined,
     },
-    yaxis: { // Will be customized per chart
+    yaxis: {
       title: {
-        text: 'Cantidad', // Default, will be overridden
+        text: 'Cantidad',
       },
       min: 0,
     },
@@ -102,7 +100,6 @@ const DetalleFechasChart = () => {
     tooltip: {
       x: {
         formatter: function (value, { seriesIndex, dataPointIndex, w }) {
-          // Use labels state here
           return labels[dataPointIndex] || '';
         }
       },
@@ -112,16 +109,15 @@ const DetalleFechasChart = () => {
         },
       },
     },
-    title: { // Main title updated based on month
+    title: {
       text: 'Estadísticas por día',
       align: 'center',
     },
-    legend: { show: false }, // Hide legend for single-series charts
-    // colors: ['#36A2EB', '#FF6384', '#4BC0C0'], // Colors will be set per chart
+    legend: { show: false },
   });
   const [averages, setAverages] = useState({ cupo: 0, cursos: 0, acumulado: 0 });
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(0); // State for active tab index
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -136,15 +132,14 @@ const DetalleFechasChart = () => {
         if (keys.length > 0) {
           setMesSeleccionado(keys[0]);
         } else {
-          setLoading(false); // Stop loading if no months
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching initial data:", error);
         setMatriz({});
         setMeses([]);
-        setLoading(false); // Stop loading on error
+        setLoading(false);
       }
-      // setLoading(false) moved to data processing useEffect or initial load end
     })();
   }, []);
 
@@ -160,11 +155,11 @@ const DetalleFechasChart = () => {
         title: { ...prevOptions.title, text: 'Estadísticas por día' }
       }));
       setAverages({ cupo: 0, cursos: 0, acumulado: 0 });
-      if (meses.length > 0 && mesSeleccionado === '') setLoading(false); // Stop loading if month deselected
+      if (meses.length > 0 && mesSeleccionado === '') setLoading(false);
       return;
     }
 
-    setLoading(true); // Start loading for data processing
+    setLoading(true);
 
     const [year, month] = mesSeleccionado.split('-').map(Number);
     const diasDelMes = dayjs(mesSeleccionado + '-01').daysInMonth();
@@ -207,28 +202,28 @@ const DetalleFechasChart = () => {
       const infoDia = matriz[mesSeleccionado]?.[claveDia] || {};
       const cupoVal = infoDia.cantidadCupoDiario || 0;
       const cursosVal = infoDia.cantidadCursosDiario || 0;
-      const cursosInicianHoy = infoDia.cantidadCursosInicianHoy || 0;
-      const cursosTerminanHoy = infoDia.cantidadCursosTerminanHoy || 0;
 
-      runningAccumulated += cursosInicianHoy - cursosTerminanHoy;
+      const posInicio = buscarPosicionFecha(claveDia, matriz.listaFechasInicio);
+      const posFin = buscarPosicionFecha(claveDia, matriz.listaFechasFin);
 
+      const acumulado = posInicio >= 0 && posFin >= 0
+        ? matriz.listaFechasInicio[posInicio].acumulado - matriz.listaFechasFin[posFin].acumulado
+        : 0;
       currentDataCupo.push(cupoVal);
       currentDataCursos.push(cursosVal);
-      currentDataAcumulado.push(Math.max(0, runningAccumulated));
+      currentDataAcumulado.push(Math.max(acumulado));
     }
 
-    // Set individual data states
     setDataCupo(currentDataCupo);
     setDataCursos(currentDataCursos);
     setDataAcumulado(currentDataAcumulado);
-    setLabels(currentLabels); // Set labels state
+    setLabels(currentLabels);
 
-    // Update base options (xaxis categories and main title)
     setBaseOptions(prevOptions => ({
       ...prevOptions,
       xaxis: {
         ...prevOptions.xaxis,
-        categories: currentLabels, // Use the calculated labels
+        categories: currentLabels,
       },
       title: {
         ...prevOptions.title,
@@ -236,7 +231,6 @@ const DetalleFechasChart = () => {
       },
     }));
 
-    // Calculate averages
     const avg = arr => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
     setAverages({
       cupo: avg(currentDataCupo),
@@ -244,9 +238,9 @@ const DetalleFechasChart = () => {
       acumulado: avg(currentDataAcumulado),
     });
 
-    setLoading(false); // Stop loading after processing
+    setLoading(false);
 
-  }, [matriz, mesSeleccionado, meses]); // Added meses dependency
+  }, [matriz, mesSeleccionado, meses]);
 
   const handleMonthChange = (event) => {
     setMesSeleccionado(event.target.value);
@@ -258,7 +252,6 @@ const DetalleFechasChart = () => {
 
   const chartHeight = baseOptions?.chart?.height || 450;
 
-  // Function to generate specific options for each chart
   const getChartOptions = (yAxisTitle, color) => ({
     ...baseOptions,
     yaxis: {
@@ -267,7 +260,7 @@ const DetalleFechasChart = () => {
         text: yAxisTitle,
       },
     },
-    colors: [color], // Set specific color
+    colors: [color],
   });
 
   return (
@@ -309,7 +302,6 @@ const DetalleFechasChart = () => {
             </Tabs>
           </Box>
 
-          {/* Cupo Diario Panel */}
           <TabPanel value={activeTab} index={0}>
             {dataCupo.length > 0 ? (
               <Box sx={{ width: '100%', overflowX: 'auto' }}>
@@ -324,7 +316,6 @@ const DetalleFechasChart = () => {
             ) : <Typography align="center" sx={{ p: 2 }}>No hay datos de cupo para este mes.</Typography>}
           </TabPanel>
 
-          {/* Cursos Diarios Panel */}
           <TabPanel value={activeTab} index={1}>
             {dataCursos.length > 0 ? (
               <Box sx={{ width: '100%', overflowX: 'auto' }}>
@@ -339,14 +330,13 @@ const DetalleFechasChart = () => {
             ) : <Typography align="center" sx={{ p: 2 }}>No hay datos de cursos diarios para este mes.</Typography>}
           </TabPanel>
 
-          {/* Cursos Acumulados Panel */}
           <TabPanel value={activeTab} index={2}>
             {dataAcumulado.length > 0 ? (
               <Box sx={{ width: '100%', overflowX: 'auto' }}>
                 <ReactApexChart
                   options={getChartOptions('Cursos Acumulados', '#4BC0C0')}
                   series={[{ name: 'Cursos acumulados', data: dataAcumulado }]}
-                  type="bar" // Could be 'line' or 'area' too for accumulated
+                  type="bar"
                   height={chartHeight}
                   width="100%"
                 />
@@ -356,7 +346,6 @@ const DetalleFechasChart = () => {
         </Paper>
       )}
 
-      {/* Promedios Section (Only show if not loading and data exists) */}
       {!loading && mesSeleccionado && (dataCupo.length > 0 || dataCursos.length > 0 || dataAcumulado.length > 0) && (
         <Paper elevation={2} sx={{ mt: 4, p: 2 }}>
           <Typography variant="h6" gutterBottom align="center">
