@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
+// import dayjs from 'dayjs'; // Eliminado
+// import customParseFormat from 'dayjs/plugin/customParseFormat'; // Eliminado
+// import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // Eliminado
+// import isBefore from 'dayjs/plugin/isBefore'; // Eliminado
 import { getCronograma } from "../services/googleSheets.service.js";
 import { descargarExcel } from "../services/excel.service.js";
 import { DataGrid } from '@mui/x-data-grid';
@@ -34,10 +36,13 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Titulo from "../components/fonts/TituloPrincipal.jsx";
 
-dayjs.extend(customParseFormat);
+// dayjs.extend(customParseFormat); // Eliminado
+// dayjs.extend(isSameOrAfter); // Eliminado
+// dayjs.extend(isBefore); // Eliminado
 
 const modalStyle = {
   position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
@@ -51,11 +56,57 @@ const MONTH_NAMES = [
 ];
 const DATE_FORMATS_TO_TRY = ['DD/MM/YYYY', 'D/M/YYYY', 'DD-MM-YYYY', 'D-M-YYYY', 'YYYY-MM-DD'];
 
+// --- FUNCIONES AUXILIARES PARA FECHAS NATIVAS ---
+function parseDateFromString(dateString) {
+  if (!dateString || typeof dateString !== 'string') return null;
+  const trimmedDate = dateString.trim();
+
+  // Formato YYYY-MM-DD (más estándar)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedDate)) {
+    const [year, month, day] = trimmedDate.split('-').map(Number);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      const date = new Date(Date.UTC(year, month - 1, day));
+      // Verificar si la fecha creada es válida y corresponde al input
+      if (!isNaN(date.getTime()) && date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day) {
+        return date;
+      }
+    }
+  }
+
+  // Formatos DD/MM/YYYY o DD-MM-YYYY (y variantes con un dígito)
+  const parts = trimmedDate.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (parts) {
+    const day = parseInt(parts[1], 10);
+    const month = parseInt(parts[2], 10);
+    const year = parseInt(parts[3], 10);
+
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      const date = new Date(Date.UTC(year, month - 1, day));
+      // Verificar si la fecha creada es válida y corresponde al input
+      if (!isNaN(date.getTime()) && date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day) {
+        return date;
+      }
+    }
+  }
+
+  return null; // No se pudo parsear con los formatos esperados
+}
+
+// Resetea la hora a 00:00:00.000 para comparar solo días
+function resetTime(date) {
+  if (!date) return null;
+  const newDate = new Date(date); // Clonar para no mutar original
+  newDate.setUTCHours(0, 0, 0, 0);
+  return newDate;
+}
+// --- FIN FUNCIONES AUXILIARES ---
+
 const Cronograma = () => {
   const [cursosData, setCursosData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [originalHeaders, setOriginalHeaders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
@@ -65,6 +116,7 @@ const Cronograma = () => {
   const [areaFilter, setAreaFilter] = useState('all');
   const [nombreFilter, setNombreFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('all');
+  const [filterActiveNow, setFilterActiveNow] = useState(false);
 
   const COLUMNAS_VISIBLES = useMemo(() => [
     "Ministerio", "Area", "Nombre del curso",
@@ -86,76 +138,108 @@ const Cronograma = () => {
   }, [originalHeaders, COLUMNAS_VISIBLES]);
 
   const isFilterActive = useMemo(() => {
-    return nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all';
-  }, [nombreFilter, ministerioFilter, areaFilter, monthFilter]);
+    return nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || filterActiveNow;
+  }, [nombreFilter, ministerioFilter, areaFilter, monthFilter, filterActiveNow]);
 
   useEffect(() => {
+    setLoading(true);
+    setInitialLoadComplete(false);
+    setError(null);
     (async () => {
-      setLoading(true);
-      setError(null);
       try {
         const dataCronograma = await getCronograma();
         if (!dataCronograma || !Array.isArray(dataCronograma) || dataCronograma.length < 1 || !Array.isArray(dataCronograma[0])) {
           console.warn("Datos del cronograma inválidos o vacíos.");
-          setCursosData([]); setFilteredData([]); setOriginalHeaders([]); setMinisterioOptions(['all']); return;
+          setCursosData([]);
+          setOriginalHeaders([]);
+          setMinisterioOptions(['all']);
+        } else {
+          const headers = dataCronograma[0].map((h, i) => (h ? String(h).trim() : `Columna_${i}`));
+          setOriginalHeaders(headers);
+          const minSet = new Set();
+          const dataObjs = (dataCronograma.length > 1 ? dataCronograma.slice(1) : [])
+            .map((row, idx) => {
+              const obj = { id: idx };
+              if (Array.isArray(row)) {
+                headers.forEach((h, i) => {
+                  const val = row[i] != null ? String(row[i]).trim() : '';
+                  obj[h] = val;
+                  if (h === "Ministerio" && val) minSet.add(val);
+                });
+              } else { console.warn(`Fila ${idx + 1} no es un array:`, row); }
+              return obj;
+            }).filter(obj => Object.keys(obj).length > 1);
+          setCursosData(dataObjs);
+          setMinisterioOptions(['all', ...Array.from(minSet).sort()]);
         }
-        const headers = dataCronograma[0].map((h, i) => (h ? String(h).trim() : `Columna_${i}`));
-        setOriginalHeaders(headers);
-        const minSet = new Set();
-        const dataObjs = (dataCronograma.length > 1 ? dataCronograma.slice(1) : [])
-          .map((row, idx) => {
-            const obj = { id: idx };
-            if (Array.isArray(row)) {
-              headers.forEach((h, i) => {
-                const val = row[i] != null ? String(row[i]).trim() : '';
-                obj[h] = val;
-                if (h === "Ministerio" && val) minSet.add(val);
-              });
-            } else { console.warn(`Fila ${idx + 1} no es un array:`, row); }
-            return obj;
-          }).filter(obj => Object.keys(obj).length > 1);
-        setCursosData(dataObjs); setFilteredData(dataObjs); setMinisterioOptions(['all', ...Array.from(minSet).sort()]);
       } catch (err) {
-        console.error("Error loading data:", err); setError(err.message || "Error al cargar datos.");
-        setCursosData([]); setFilteredData([]); setOriginalHeaders([]); setMinisterioOptions(['all']);
-      } finally { setLoading(false); }
+        console.error("Error loading data:", err);
+        setError(err.message || "Error al cargar datos.");
+        setCursosData([]);
+        setOriginalHeaders([]);
+        setMinisterioOptions(['all']);
+      } finally {
+        setInitialLoadComplete(true);
+      }
     })();
   }, []);
 
   useEffect(() => {
-    if (loading || !cursosData.length) { setAreaOptions(['all']); if (areaFilter !== 'all') setAreaFilter('all'); return; }
+    if (!initialLoadComplete || !cursosData.length) {
+      setAreaOptions(['all']);
+      if (areaFilter !== 'all') setAreaFilter('all');
+      return;
+    }
     let relevantCourses = (ministerioFilter === 'all') ? cursosData : cursosData.filter(c => c["Ministerio"] === ministerioFilter);
     const areasSet = new Set(relevantCourses.map(c => c.Area).filter(Boolean));
     const newAreaOptions = ['all', ...Array.from(areasSet).sort()];
     setAreaOptions(newAreaOptions);
     if (ministerioFilter === 'all' && areaFilter !== 'all') setAreaFilter('all');
     if (ministerioFilter !== 'all' && !newAreaOptions.includes(areaFilter)) setAreaFilter('all');
-  }, [ministerioFilter, areaFilter, cursosData, loading]);
+  }, [ministerioFilter, areaFilter, cursosData, initialLoadComplete]);
 
   useEffect(() => {
-    if (!originalHeaders.length && !cursosData.length) return; // Avoid filtering if no data ever loaded
+    if (!initialLoadComplete) return;
+
     setLoading(true);
     let data = [...cursosData];
+
     if (ministerioFilter !== 'all') data = data.filter(c => c["Ministerio"] === ministerioFilter);
     if (ministerioFilter !== 'all' && areaFilter !== 'all') data = data.filter(c => c["Area"] === areaFilter);
     if (nombreFilter.trim()) data = data.filter(c => c["Nombre del curso"]?.toLowerCase().includes(nombreFilter.trim().toLowerCase()));
     if (monthFilter !== 'all') {
-      const targetMonth = parseInt(monthFilter, 10);
+      const targetMonth = parseInt(monthFilter, 10); // targetMonth es 0-11
       data = data.filter(c => {
-        const fechaInicioStr = c["Fecha inicio del curso"];
-        if (!fechaInicioStr || typeof fechaInicioStr !== 'string' || fechaInicioStr.trim() === '') return false;
-        let parsedDate = null;
-        for (const format of DATE_FORMATS_TO_TRY) {
-          const d = dayjs(fechaInicioStr.trim(), format, true);
-          if (d.isValid()) { parsedDate = d; break; }
-        }
-        return parsedDate ? parsedDate.month() === targetMonth : false;
+        const parsedDate = parseDateFromString(c["Fecha inicio del curso"]);
+        // getMonth() es 0-indexado
+        return parsedDate ? parsedDate.getUTCMonth() === targetMonth : false;
       });
     }
+    if (filterActiveNow) {
+      const todayDate = resetTime(new Date()); // Hoy a las 00:00:00 UTC
+
+      if (todayDate) { // Solo filtrar si obtenemos bien la fecha de hoy
+        data = data.filter(c => {
+          const parsedStartDate = parseDateFromString(c["Fecha inicio del curso"]);
+          const parsedEndDate = parseDateFromString(c["Fecha fin del curso"]);
+
+          const startDateReset = resetTime(parsedStartDate);
+          const endDateReset = resetTime(parsedEndDate);
+
+          if (!startDateReset || !endDateReset) {
+            return false; // No se pueden parsear las fechas, no cumple
+          }
+
+          // inicio < hoy Y fin >= hoy
+          return startDateReset < todayDate && endDateReset >= todayDate;
+        });
+      }
+    }
+
     setFilteredData(data);
-    const timer = setTimeout(() => setLoading(false), 50);
-    return () => clearTimeout(timer);
-  }, [cursosData, originalHeaders, ministerioFilter, areaFilter, nombreFilter, monthFilter]);
+    setLoading(false);
+
+  }, [cursosData, originalHeaders, ministerioFilter, areaFilter, nombreFilter, monthFilter, filterActiveNow, initialLoadComplete]);
 
   const handleRowClick = params => {
     const fullRow = cursosData.find(c => c.id === params.row.id);
@@ -179,11 +263,18 @@ const Cronograma = () => {
   const handleAreaChange = e => setAreaFilter(e.target.value);
   const handleNombreChange = e => setNombreFilter(e.target.value);
   const handleMonthChange = e => setMonthFilter(e.target.value);
+  const handleToggleFilterActiveNow = () => {
+    setFilterActiveNow(prev => !prev);
+  };
   const handleClearFilters = () => {
-    setNombreFilter(''); setMinisterioFilter('all'); setAreaFilter('all'); setMonthFilter('all');
+    setNombreFilter('');
+    setMinisterioFilter('all');
+    setAreaFilter('all');
+    setMonthFilter('all');
+    setFilterActiveNow(false);
   };
 
-  if (loading && !cursosData.length && !error && !originalHeaders.length) {
+  if (!initialLoadComplete && loading) {
     return (
       <Backdrop open sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, color: '#fff' }}>
         <CircularProgress color="inherit" />
@@ -228,10 +319,10 @@ const Cronograma = () => {
 
       <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={3} lg={2.5}>
             <TextField fullWidth label="Buscar por Nombre" variant="outlined" size="small" value={nombreFilter} onChange={handleNombreChange} disabled={loading} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>), }} />
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={2} lg={2}>
             <FormControl fullWidth size="small" variant="outlined" disabled={loading || ministerioOptions.length <= 1}>
               <InputLabel id="ministerio-filter-label">Ministerio</InputLabel>
               <Select labelId="ministerio-filter-label" id="select-ministerio" value={ministerioFilter} label="Ministerio" onChange={handleMinisterioChange} startAdornment={<AccountBalanceIcon sx={{ mr: 1, color: 'action.active', ml: -0.5 }} />}>
@@ -240,7 +331,7 @@ const Cronograma = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={2} lg={2}>
             <FormControl fullWidth size="small" variant="outlined" disabled={loading || ministerioFilter === 'all' || areaOptions.length <= 1}>
               <InputLabel id="area-filter-label">Área</InputLabel>
               <Select labelId="area-filter-label" id="select-area" value={areaFilter} label="Área" onChange={handleAreaChange} startAdornment={<FolderSpecialIcon sx={{ mr: 1, color: 'action.active', ml: -0.5 }} />}>
@@ -250,7 +341,7 @@ const Cronograma = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2} lg={2}>
             <FormControl fullWidth size="small" variant="outlined" disabled={loading}>
               <InputLabel id="mes-filter-label">Mes Inicio Curso</InputLabel>
               <Select labelId="mes-filter-label" id="select-month" value={monthFilter} label="Mes Inicio Curso" onChange={handleMonthChange} startAdornment={<CalendarMonthIcon sx={{ mr: 1, color: 'action.active', ml: -0.5 }} />}>
@@ -259,13 +350,27 @@ const Cronograma = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={12} md={2}>
-            <Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters} disabled={!isFilterActive || loading} startIcon={<ClearAllIcon />} sx={{ height: '40px' }}>Limpiar</Button>
+          <Grid item xs={12} sm={6} md={2} lg={2}>
+            <Button
+              fullWidth
+              variant={filterActiveNow ? "contained" : "outlined"}
+              color="primary"
+              size="medium"
+              onClick={handleToggleFilterActiveNow}
+              disabled={loading}
+              startIcon={<PlayCircleOutlineIcon />}
+              sx={{ height: '40px' }}
+            >
+              En Curso
+            </Button>
+          </Grid>
+          <Grid item xs={12} sm={6} md={1} lg={1.5}>
+            <Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters} disabled={!isFilterActive || loading} startIcon={<ClearAllIcon />} sx={{ height: '40px', minWidth: 'auto', px: 1 }}>Limpiar</Button>
           </Grid>
         </Grid>
       </Paper>
 
-      {loading && (cursosData.length > 0 || originalHeaders.length > 0) && (
+      {loading && initialLoadComplete && (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}>
           <CircularProgress size={20} sx={{ mr: 1 }} />
           <Typography variant="body2" color="text.secondary">Actualizando tabla...</Typography>
@@ -279,7 +384,7 @@ const Cronograma = () => {
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
           onRowClick={handleRowClick}
           getRowId={r => r.id}
-          loading={loading && !cursosData.length && !error && !originalHeaders.length}
+          loading={loading && filteredData.length === 0 && initialLoadComplete}
           density="compact"
           disableRowSelectionOnClick
           initialState={{ sorting: { sortModel: originalHeaders.includes('Fecha inicio del curso') ? [{ field: 'Fecha inicio del curso', sort: 'asc' }] : [] } }}
@@ -295,7 +400,9 @@ const Cronograma = () => {
               <Box sx={{ mt: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', p: 2 }}>
                 <InfoIcon color="action" sx={{ mb: 1, fontSize: '3rem' }} />
                 <Typography align="center">
-                  {(cursosData.length === 0 && originalHeaders.length === 0) ? "No hay datos de cronograma disponibles." : "No hay cursos que coincidan con los filtros seleccionados."}
+                  {(cursosData.length === 0 && originalHeaders.length === 0)
+                    ? "No hay datos de cronograma disponibles."
+                    : "No hay cursos que coincidan con los filtros seleccionados."}
                 </Typography>
               </Box>
             )

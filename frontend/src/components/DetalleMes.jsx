@@ -1,16 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import ReactApexChart from 'react-apexcharts';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import {
+  Box,
+  Paper, // Use Paper to contain tabs and charts
+  Tabs,
+  Tab,
+  Typography,
+  CircularProgress
+} from '@mui/material';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { getMatrizFechas } from '../services/googleSheets.service';
 
 dayjs.locale('es');
 
+// Reusable TabPanel component
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`monthly-chart-tabpanel-${index}`}
+      aria-labelledby={`monthly-chart-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ pt: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
 const DetalleMesChart = () => {
   const [loading, setLoading] = useState(true);
-  const [series, setSeries] = useState([]);
-  const [options, setOptions] = useState({
+  // Separate states for each data series
+  const [dataCupo, setDataCupo] = useState([]);
+  const [dataCursos, setDataCursos] = useState([]);
+  const [labels, setLabels] = useState([]); // State for labels
+  const [activeTab, setActiveTab] = useState(0); // State for active tab
+
+  const [baseOptions, setBaseOptions] = useState({
     chart: {
       type: 'bar',
       height: 400,
@@ -37,7 +69,7 @@ const DetalleMesChart = () => {
     },
     yaxis: {
       title: {
-        text: 'Cantidad',
+        text: 'Cantidad', // Default title
       },
       min: 0,
     },
@@ -45,6 +77,12 @@ const DetalleMesChart = () => {
       opacity: 1,
     },
     tooltip: {
+      x: {
+        // Use labels state here
+        formatter: function (value, { seriesIndex, dataPointIndex, w }) {
+          return labels[dataPointIndex] || '';
+        }
+      },
       y: {
         formatter: function (val) {
           return val;
@@ -52,13 +90,11 @@ const DetalleMesChart = () => {
       },
     },
     title: {
-      text: 'Resumen Mensual de Cupo y Cursos',
+      text: 'Resumen Mensual', // Title will be updated
       align: 'center',
     },
-    legend: {
-      position: 'top',
-    },
-    colors: ['#36A2EB', '#FF6384'],
+    legend: { show: false }, // Hide legend for single series
+    // Colors will be set per chart
   });
 
   useEffect(() => {
@@ -70,65 +106,114 @@ const DetalleMesChart = () => {
           .filter(k => /^\d{4}-\d{2}$/.test(k))
           .sort();
 
-        const labels = mesesClaves.map(m =>
+        if (mesesClaves.length === 0) {
+          setDataCupo([]);
+          setDataCursos([]);
+          setLabels([]);
+          setBaseOptions(prev => ({ ...prev, xaxis: { ...prev.xaxis, categories: [] } }));
+          setLoading(false);
+          return;
+        }
+
+        const currentLabels = mesesClaves.map(m =>
           dayjs(m + '-01').format('MMMM YYYY')
         );
 
-        const datosCupo = mesesClaves.map(m => matriz[m].cantidadCupoMensual || 0);
-        const datosCursos = mesesClaves.map(m => matriz[m].cantidadCursosMensual || 0);
+        const currentDatosCupo = mesesClaves.map(m => matriz[m].cantidadCupoMensual || 0);
+        const currentDatosCursos = mesesClaves.map(m => matriz[m].cantidadCursosMensual || 0);
 
-        setSeries([
-          {
-            name: 'Total Cupo Mensual',
-            data: datosCupo,
-          },
-          {
-            name: 'Total Cursos Mensual',
-            data: datosCursos,
-          },
-        ]);
+        setDataCupo(currentDatosCupo);
+        setDataCursos(currentDatosCursos);
+        setLabels(currentLabels);
 
-        setOptions(prevOptions => ({
+        setBaseOptions(prevOptions => ({
           ...prevOptions,
           xaxis: {
             ...prevOptions.xaxis,
-            categories: labels,
+            categories: currentLabels,
           },
+          title: {
+            ...prevOptions.title,
+            text: 'Resumen Mensual de Cupo y Cursos', // Restore main title
+          }
         }));
 
       } catch (error) {
         console.error('Error cargando matriz de fechas:', error);
-        setSeries([]);
-        setOptions(prevOptions => ({
-          ...prevOptions,
-          xaxis: {
-            ...prevOptions.xaxis,
-            categories: [],
-          },
-        }));
+        setDataCupo([]);
+        setDataCursos([]);
+        setLabels([]);
+        setBaseOptions(prev => ({ ...prev, xaxis: { ...prev.xaxis, categories: [] } }));
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
+  const handleChangeTab = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+
+  const getChartOptions = (yAxisTitle, color) => ({
+    ...baseOptions,
+    yaxis: {
+      ...baseOptions.yaxis,
+      title: {
+        text: yAxisTitle,
+      },
+    },
+    colors: [color],
+  });
+
+  const chartHeight = baseOptions?.chart?.height || 400;
+
   return (
     <Box sx={{ width: '100%', p: 2 }}>
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: chartHeight + 50 }}>
           <CircularProgress />
         </Box>
-      ) : series.length === 0 || series[0]?.data.length === 0 ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-          <Typography>No hay datos mensuales para mostrar.</Typography>
+      ) : labels.length === 0 ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: chartHeight + 50, border: '1px dashed grey', borderRadius: '4px', p: 2, textAlign: 'center' }}>
+          <Typography>No hay datos mensuales disponibles para mostrar.</Typography>
         </Box>
       ) : (
-        <ReactApexChart
-          options={options}
-          series={series}
-          type="bar"
-          height={options.chart.height}
-        />
+        <Paper elevation={1} sx={{ width: '100%' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={activeTab} onChange={handleChangeTab} aria-label="Gráficos de resumen mensual" centered>
+              <Tab label="Cupo Mensual" id="monthly-chart-tab-0" aria-controls="monthly-chart-tabpanel-0" />
+              <Tab label="Cursos Mensuales" id="monthly-chart-tab-1" aria-controls="monthly-chart-tabpanel-1" />
+            </Tabs>
+          </Box>
+
+          <TabPanel value={activeTab} index={0}>
+            {dataCupo.length > 0 ? (
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <ReactApexChart
+                  options={getChartOptions('Total Cupo Mensual', '#36A2EB')}
+                  series={[{ name: 'Total Cupo Mensual', data: dataCupo }]}
+                  type="bar"
+                  height={chartHeight}
+                  width="100%"
+                />
+              </Box>
+            ) : <Typography align="center" sx={{ p: 2 }}>No hay datos de cupo mensual.</Typography>}
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={1}>
+            {dataCursos.length > 0 ? (
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <ReactApexChart
+                  options={getChartOptions('Total Cursos Mensual', '#FF6384')}
+                  series={[{ name: 'Total Cursos Mensual', data: dataCursos }]}
+                  type="bar"
+                  height={chartHeight}
+                  width="100%"
+                />
+              </Box>
+            ) : <Typography align="center" sx={{ p: 2 }}>No hay datos de cursos mensuales.</Typography>}
+          </TabPanel>
+        </Paper>
       )}
     </Box>
   );

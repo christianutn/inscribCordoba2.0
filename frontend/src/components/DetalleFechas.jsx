@@ -9,7 +9,9 @@ import {
   MenuItem,
   Typography,
   CircularProgress,
-  Grid
+  Grid,
+  Tabs, // <-- Importar Tabs
+  Tab   // <-- Importar Tab
 } from '@mui/material';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
@@ -20,16 +22,41 @@ import {
 
 dayjs.locale('es');
 
+// Helper function for TabPanel (optional but good practice)
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`chart-tabpanel-${index}`}
+      aria-labelledby={`chart-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ pt: 3 }}> {/* Add padding top to separate from tabs */}
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
 const DetalleFechasChart = () => {
   const [matriz, setMatriz] = useState(null);
   const [meses, setMeses] = useState([]);
   const [mesSeleccionado, setMesSeleccionado] = useState('');
-  const [series, setSeries] = useState([]);
-  const [options, setOptions] = useState({
+  // States for individual data series
+  const [dataCupo, setDataCupo] = useState([]);
+  const [dataCursos, setDataCursos] = useState([]);
+  const [dataAcumulado, setDataAcumulado] = useState([]);
+  const [labels, setLabels] = useState([]); // State for labels
+
+  const [baseOptions, setBaseOptions] = useState({ // Renamed to baseOptions
     chart: {
       type: 'bar',
       height: 450,
-      stacked: false,
+      stacked: false, // No longer stacked by default
       toolbar: {
         show: true
       }
@@ -43,7 +70,7 @@ const DetalleFechasChart = () => {
     dataLabels: {
       enabled: false,
     },
-    stroke: {
+    stroke: { // Can keep this for single bars too
       show: true,
       width: 2,
       colors: ['transparent'],
@@ -63,9 +90,9 @@ const DetalleFechasChart = () => {
       },
       tickAmount: undefined,
     },
-    yaxis: {
+    yaxis: { // Will be customized per chart
       title: {
-        text: 'Cantidad',
+        text: 'Cantidad', // Default, will be overridden
       },
       min: 0,
     },
@@ -75,7 +102,8 @@ const DetalleFechasChart = () => {
     tooltip: {
       x: {
         formatter: function (value, { seriesIndex, dataPointIndex, w }) {
-          return w.globals.categoryLabels[dataPointIndex] || '';
+          // Use labels state here
+          return labels[dataPointIndex] || '';
         }
       },
       y: {
@@ -84,19 +112,16 @@ const DetalleFechasChart = () => {
         },
       },
     },
-    title: {
+    title: { // Main title updated based on month
       text: 'Estadísticas por día',
       align: 'center',
     },
-    legend: {
-      position: 'top',
-      horizontalAlign: 'center',
-      offsetY: -5
-    },
-    colors: ['#36A2EB', '#FF6384', '#4BC0C0'],
+    legend: { show: false }, // Hide legend for single-series charts
+    // colors: ['#36A2EB', '#FF6384', '#4BC0C0'], // Colors will be set per chart
   });
   const [averages, setAverages] = useState({ cupo: 0, cursos: 0, acumulado: 0 });
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(0); // State for active tab index
 
   useEffect(() => {
     (async () => {
@@ -110,36 +135,44 @@ const DetalleFechasChart = () => {
         setMeses(keys);
         if (keys.length > 0) {
           setMesSeleccionado(keys[0]);
+        } else {
+          setLoading(false); // Stop loading if no months
         }
       } catch (error) {
         console.error("Error fetching initial data:", error);
         setMatriz({});
         setMeses([]);
-      } finally {
-        setLoading(false);
+        setLoading(false); // Stop loading on error
       }
+      // setLoading(false) moved to data processing useEffect or initial load end
     })();
   }, []);
 
   useEffect(() => {
     if (!matriz || !mesSeleccionado || Object.keys(matriz).length === 0) {
-      setSeries([]);
-      setOptions(prevOptions => ({
+      setDataCupo([]);
+      setDataCursos([]);
+      setDataAcumulado([]);
+      setLabels([]);
+      setBaseOptions(prevOptions => ({
         ...prevOptions,
         xaxis: { ...prevOptions.xaxis, categories: [] },
         title: { ...prevOptions.title, text: 'Estadísticas por día' }
       }));
       setAverages({ cupo: 0, cursos: 0, acumulado: 0 });
+      if (meses.length > 0 && mesSeleccionado === '') setLoading(false); // Stop loading if month deselected
       return;
     }
+
+    setLoading(true); // Start loading for data processing
 
     const [year, month] = mesSeleccionado.split('-').map(Number);
     const diasDelMes = dayjs(mesSeleccionado + '-01').daysInMonth();
 
-    const labels = [];
-    const dataCupo = [];
-    const dataCursos = [];
-    const dataAcumulado = [];
+    const currentLabels = [];
+    const currentDataCupo = [];
+    const currentDataCursos = [];
+    const currentDataAcumulado = [];
 
     let runningAccumulated = 0;
 
@@ -154,7 +187,6 @@ const DetalleFechasChart = () => {
     if (prevMonthData && prevMonthData[prevDayKey]) {
       const posFinPrev = buscarPosicionFecha(prevDayKey, matriz.listaFechasFin || []);
       initialAccumulated = posFinPrev >= 0 ? (matriz.listaFechasFin[posFinPrev]?.acumulado || 0) : 0;
-
     } else {
       const finEntriesBefore = (matriz.listaFechasFin || [])
         .filter(entry => dayjs(entry.fecha).isBefore(firstDayOfMonth))
@@ -165,39 +197,38 @@ const DetalleFechasChart = () => {
     }
     runningAccumulated = initialAccumulated;
 
-
     for (let d = 1; d <= diasDelMes; d++) {
       const day = String(d).padStart(2, '0');
       const mesStr = String(month).padStart(2, '0');
       const claveDia = `${year}-${mesStr}-${day}`;
       const fechaLabel = dayjs(claveDia).format('DD-MM-YYYY');
-      labels.push(fechaLabel);
+      currentLabels.push(fechaLabel);
 
       const infoDia = matriz[mesSeleccionado]?.[claveDia] || {};
       const cupoVal = infoDia.cantidadCupoDiario || 0;
       const cursosVal = infoDia.cantidadCursosDiario || 0;
-
       const cursosInicianHoy = infoDia.cantidadCursosInicianHoy || 0;
       const cursosTerminanHoy = infoDia.cantidadCursosTerminanHoy || 0;
 
       runningAccumulated += cursosInicianHoy - cursosTerminanHoy;
 
-      dataCupo.push(cupoVal);
-      dataCursos.push(cursosVal);
-      dataAcumulado.push(Math.max(0, runningAccumulated));
+      currentDataCupo.push(cupoVal);
+      currentDataCursos.push(cursosVal);
+      currentDataAcumulado.push(Math.max(0, runningAccumulated));
     }
 
-    setSeries([
-      { name: 'Cupo diario', data: dataCupo },
-      { name: 'Cursos diarios', data: dataCursos },
-      { name: 'Cursos acumulados', data: dataAcumulado },
-    ]);
+    // Set individual data states
+    setDataCupo(currentDataCupo);
+    setDataCursos(currentDataCursos);
+    setDataAcumulado(currentDataAcumulado);
+    setLabels(currentLabels); // Set labels state
 
-    setOptions(prevOptions => ({
+    // Update base options (xaxis categories and main title)
+    setBaseOptions(prevOptions => ({
       ...prevOptions,
       xaxis: {
         ...prevOptions.xaxis,
-        categories: labels,
+        categories: currentLabels, // Use the calculated labels
       },
       title: {
         ...prevOptions.title,
@@ -205,87 +236,147 @@ const DetalleFechasChart = () => {
       },
     }));
 
+    // Calculate averages
     const avg = arr => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
     setAverages({
-      cupo: avg(dataCupo),
-      cursos: avg(dataCursos),
-      acumulado: avg(dataAcumulado),
+      cupo: avg(currentDataCupo),
+      cursos: avg(currentDataCursos),
+      acumulado: avg(currentDataAcumulado),
     });
 
-  }, [matriz, mesSeleccionado]);
+    setLoading(false); // Stop loading after processing
 
+  }, [matriz, mesSeleccionado, meses]); // Added meses dependency
 
   const handleMonthChange = (event) => {
     setMesSeleccionado(event.target.value);
   };
 
-  const chartHeight = options?.chart?.height || 450;
+  const handleChangeTab = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+
+  const chartHeight = baseOptions?.chart?.height || 450;
+
+  // Function to generate specific options for each chart
+  const getChartOptions = (yAxisTitle, color) => ({
+    ...baseOptions,
+    yaxis: {
+      ...baseOptions.yaxis,
+      title: {
+        text: yAxisTitle,
+      },
+    },
+    colors: [color], // Set specific color
+  });
 
   return (
     <Box sx={{ width: '100%', p: { xs: 1, sm: 2 } }}>
+      <FormControl fullWidth sx={{ mb: 3 }} disabled={meses.length === 0 || loading}>
+        <InputLabel id="select-mes-label">Mes</InputLabel>
+        <Select
+          labelId="select-mes-label"
+          value={mesSeleccionado}
+          label="Mes"
+          onChange={handleMonthChange}
+        >
+          {meses.length === 0 && <MenuItem value="" disabled>No hay meses disponibles</MenuItem>}
+          {meses.map(m => (
+            <MenuItem key={m} value={m}>
+              {dayjs(m + '-01').format('MMMM YYYY')}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: chartHeight }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: chartHeight + 50 }}>
           <CircularProgress />
         </Box>
+      ) : !mesSeleccionado || meses.length === 0 ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: chartHeight + 50, border: '1px dashed grey', borderRadius: '4px', p: 2, textAlign: 'center' }}>
+          <Typography>
+            {meses.length > 0 ? 'Seleccione un mes para ver los datos.' : 'No hay datos disponibles para mostrar.'}
+          </Typography>
+        </Box>
       ) : (
-        <>
-          <FormControl fullWidth sx={{ mb: 3 }} disabled={meses.length === 0}>
-            <InputLabel id="select-mes-label">Mes</InputLabel>
-            <Select
-              labelId="select-mes-label"
-              value={mesSeleccionado}
-              label="Mes"
-              onChange={handleMonthChange}
-            >
-              {meses.length === 0 && <MenuItem value="" disabled>No hay meses disponibles</MenuItem>}
-              {meses.map(m => (
-                <MenuItem key={m} value={m}>
-                  {dayjs(m + '-01').format('MMMM YYYY')}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+        <Paper elevation={1} sx={{ width: '100%' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={activeTab} onChange={handleChangeTab} aria-label="Gráficos de detalle diario" centered>
+              <Tab label="Cupo Diario" id="chart-tab-0" aria-controls="chart-tabpanel-0" />
+              <Tab label="Cursos Diarios" id="chart-tab-1" aria-controls="chart-tabpanel-1" />
+              <Tab label="Cursos Acumulados" id="chart-tab-2" aria-controls="chart-tabpanel-2" />
+            </Tabs>
+          </Box>
 
-          {series.length === 0 || !mesSeleccionado ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: chartHeight, border: '1px dashed grey', borderRadius: '4px', p: 2, textAlign: 'center' }}>
-              <Typography>
-                {meses.length > 0 ? 'Seleccione un mes para ver los datos.' : 'No hay datos disponibles para mostrar.'}
-              </Typography>
-            </Box>
-          ) : (
-            <Box sx={{ width: '100%', overflowX: 'auto' }}>
-              <ReactApexChart
-                options={options}
-                series={series}
-                type="bar"
-                height={chartHeight}
-                width="100%"
-              />
-            </Box>
-          )}
+          {/* Cupo Diario Panel */}
+          <TabPanel value={activeTab} index={0}>
+            {dataCupo.length > 0 ? (
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <ReactApexChart
+                  options={getChartOptions('Cupo Diario', '#36A2EB')}
+                  series={[{ name: 'Cupo diario', data: dataCupo }]}
+                  type="bar"
+                  height={chartHeight}
+                  width="100%"
+                />
+              </Box>
+            ) : <Typography align="center" sx={{ p: 2 }}>No hay datos de cupo para este mes.</Typography>}
+          </TabPanel>
 
-          {series.length > 0 && mesSeleccionado && (
-            <Paper elevation={2} sx={{ mt: 4, p: 2 }}>
-              <Typography variant="h6" gutterBottom align="center">
-                Promedios — {dayjs(mesSeleccionado + '-01').format('MMMM YYYY')}
-              </Typography>
-              <Grid container spacing={2} justifyContent="center" alignItems="center">
-                <Grid item xs={12} sm={4} sx={{ textAlign: 'center' }}>
-                  <Typography>Cupo diario prom.:</Typography>
-                  <Typography variant="h5">{averages.cupo.toFixed(2)}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={4} sx={{ textAlign: 'center' }}>
-                  <Typography>Cursos diarios prom.:</Typography>
-                  <Typography variant="h5">{averages.cursos.toFixed(2)}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={4} sx={{ textAlign: 'center' }}>
-                  <Typography>Cursos acum. prom.:</Typography>
-                  <Typography variant="h5">{averages.acumulado.toFixed(2)}</Typography>
-                </Grid>
-              </Grid>
-            </Paper>
-          )}
-        </>
+          {/* Cursos Diarios Panel */}
+          <TabPanel value={activeTab} index={1}>
+            {dataCursos.length > 0 ? (
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <ReactApexChart
+                  options={getChartOptions('Cursos Diarios', '#FF6384')}
+                  series={[{ name: 'Cursos diarios', data: dataCursos }]}
+                  type="bar"
+                  height={chartHeight}
+                  width="100%"
+                />
+              </Box>
+            ) : <Typography align="center" sx={{ p: 2 }}>No hay datos de cursos diarios para este mes.</Typography>}
+          </TabPanel>
+
+          {/* Cursos Acumulados Panel */}
+          <TabPanel value={activeTab} index={2}>
+            {dataAcumulado.length > 0 ? (
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <ReactApexChart
+                  options={getChartOptions('Cursos Acumulados', '#4BC0C0')}
+                  series={[{ name: 'Cursos acumulados', data: dataAcumulado }]}
+                  type="bar" // Could be 'line' or 'area' too for accumulated
+                  height={chartHeight}
+                  width="100%"
+                />
+              </Box>
+            ) : <Typography align="center" sx={{ p: 2 }}>No hay datos de cursos acumulados para este mes.</Typography>}
+          </TabPanel>
+        </Paper>
+      )}
+
+      {/* Promedios Section (Only show if not loading and data exists) */}
+      {!loading && mesSeleccionado && (dataCupo.length > 0 || dataCursos.length > 0 || dataAcumulado.length > 0) && (
+        <Paper elevation={2} sx={{ mt: 4, p: 2 }}>
+          <Typography variant="h6" gutterBottom align="center">
+            Promedios — {dayjs(mesSeleccionado + '-01').format('MMMM YYYY')}
+          </Typography>
+          <Grid container spacing={2} justifyContent="center" alignItems="center">
+            <Grid item xs={12} sm={4} sx={{ textAlign: 'center' }}>
+              <Typography>Cupo diario prom.:</Typography>
+              <Typography variant="h5">{averages.cupo.toFixed(2)}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={4} sx={{ textAlign: 'center' }}>
+              <Typography>Cursos diarios prom.:</Typography>
+              <Typography variant="h5">{averages.cursos.toFixed(2)}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={4} sx={{ textAlign: 'center' }}>
+              <Typography>Cursos acum. prom.:</Typography>
+              <Typography variant="h5">{averages.acumulado.toFixed(2)}</Typography>
+            </Grid>
+          </Grid>
+        </Paper>
       )}
     </Box>
   );
