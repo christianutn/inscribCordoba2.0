@@ -162,7 +162,7 @@ const ReporteCursosCC = () => {
                 const estadoCurso = (curso["Estado"] || "").toUpperCase().trim();
                 const nombreCorto = curso["Código del curso"] || "";
                 const esAutogestionado = (curso["Es Autogestionado"] || "").toUpperCase() === "SI";
-                const participantes = Number(curso["Participantes"]) || 0;
+                const participantes = Number(curso["Cantidad de inscritos"]) || 0;
 
                 const fechaInicioObj = parseDateString(fechaInicioCursoStr);
                 const fechaFinObj = parseDateString(fechaFinCursoStr);
@@ -250,7 +250,7 @@ const ReporteCursosCC = () => {
                 filteredCronogramaData.forEach(curso => {
                     const fechaInicioObj = parseDateString(curso["Fecha inicio del curso"]);
                     if (fechaInicioObj && fechaInicioObj.getUTCFullYear() === currentYear && fechaInicioObj.getUTCMonth() === monthIndex) {
-                        const participantes = Number(curso["Participantes"]) || 0;
+                        const participantes = Number(curso["Cantidad de inscritos"]) || 0;
                         const estadoCurso = (curso["Estado"] || "").toUpperCase().trim();
                         const isCancelledOrSuspended = estadoCurso === "SUSPENDIDO" || estadoCurso === "CANCELADO";
                         if (!isCancelledOrSuspended) {

@@ -40,7 +40,7 @@ const paperStyles = {
   height: '100%',
 };
 
-const Home = ({ nombre }) => {
+const Home = ({ nombre, setOpcionSeleccionada }) => {
   const [avisos, setAvisos] = useState([]);
   const [loadingAvisos, setLoadingAvisos] = useState(true);
 
@@ -114,7 +114,7 @@ const Home = ({ nombre }) => {
           <Button
             variant="contained"
             size="large"
-            href="/capacitaciones"
+            onClick={() => setOpcionSeleccionada('Calendario')}
             endIcon={<ArrowForwardIcon />}
             sx={{
               borderRadius: '50px',
