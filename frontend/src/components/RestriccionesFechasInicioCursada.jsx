@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import TextField from './UIElements/TextField';
 import { getMyUser } from "../services/usuarios.service.js";
 import Titulo from './fonts/TituloPrincipal';
-import { Divider } from "@mui/material";
+import Subtitulo from "./fonts/SubtituloPrincipal.jsx";
+import { Divider, Grid, Box } from "@mui/material";
 import Button from "./UIElements/Button.jsx";
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -11,11 +12,9 @@ import Alert from '@mui/material/Alert';
 import Autocomplete from "../components/UIElements/Autocomplete.jsx";
 import { getRestricciones, putRestriccion } from "../services/restricciones.service.js";
 import DetalleFechasPorDia from "./DetalleFechas.jsx";
-import Subtitulo from "./fonts/SubtituloPrincipal.jsx";
 import DetalleMes from "./DetalleMes.jsx";
 
 const RestriccionesFechasInicioCursada = () => {
-
     const navigate = useNavigate();
 
     const [error, setError] = useState(null);
@@ -29,156 +28,210 @@ const RestriccionesFechasInicioCursada = () => {
     const [maximoAcumulado, setMaximoAcumulado] = useState("");
     const listaMeses = ["Sin Bloqueo", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-
-
-
     useEffect(() => {
         (async () => {
             try {
                 setCargando(true);
                 const user = await getMyUser();
 
-
                 if (!user.cuil) {
                     navigate("/login");
-                    return
+                    return;
                 }
 
                 const rest = await getRestricciones();
-                console.log(rest);
-                setSelectedMes(listaMeses[rest.mesBloqueado]);
-                setMaximoCuposDiario(rest.maximoCuposXDia);
-                setMaximoCuposMensual(rest.maximoCuposXMes);
-                setMaximoCursosDiario(rest.maximoCursosXDia);
-                setMaximoCursosMensual(rest.maximoCursosXMes);
-                setMaximoAcumulado(rest.maximoAcumulado);
-
-
+                console.log("Fetched restrictions:", rest);
+                setSelectedMes(listaMeses[rest.mesBloqueado ?? 0]);
+                setMaximoCuposDiario(String(rest.maximoCuposXDia ?? ""));
+                setMaximoCuposMensual(String(rest.maximoCuposXMes ?? ""));
+                setMaximoCursosDiario(String(rest.maximoCursosXDia ?? ""));
+                setMaximoCursosMensual(String(rest.maximoCursosXMes ?? ""));
+                setMaximoAcumulado(String(rest.maximoAcumulado ?? ""));
 
             } catch (error) {
+                console.error("Error fetching data:", error);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 setSuccess(false);
-                setError(error.message);
+                setError(error.message || "Error al cargar los datos");
             } finally {
                 setCargando(false);
             }
         })();
-    }, []);
+    }, [navigate]);
 
     const limpiarFormulario = () => {
-
     }
 
     const isValidInteger = (value) => {
-        // Convertir el valor a número
-        const number = Number(value);
-
-        // Verificar si es un número entero y mayor que cero
-        return Number.isInteger(number) && number > 0;
+        const strValue = String(value).trim();
+        if (strValue === "") return true;
+        const number = Number(strValue);
+        return Number.isInteger(number) && number >= 0;
     }
 
     const validarDatos = () => {
-        //Garantizar que los valores sean numéricos y positivos. Ejmplo maximoCuposDiario: 100, maximoCuposMensual: 1000
+        if (maximoCursosDiario !== "" && !isValidInteger(maximoCursosDiario)) {
+            throw new Error("El límite de cursos diarios debe ser un número entero no negativo (o dejarse vacío).");
+        }
+        if (maximoCursosMensual !== "" && !isValidInteger(maximoCursosMensual)) {
+            throw new Error("El límite de cursos mensuales debe ser un número entero no negativo (o dejarse vacío).");
+        }
+        if (maximoCuposDiario !== "" && !isValidInteger(maximoCuposDiario)) {
+            throw new Error("El límite de cupos diarios debe ser un número entero no negativo (o dejarse vacío).");
+        }
+        if (maximoCuposMensual !== "" && !isValidInteger(maximoCuposMensual)) {
+            throw new Error("El límite de cupos mensuales debe ser un número entero no negativo (o dejarse vacío).");
+        }
+        if (maximoAcumulado !== "" && !isValidInteger(maximoAcumulado)) {
+            throw new Error("El máximo acumulado de cursos debe ser un número entero no negativo (o dejarse vacío).");
+        }
+        if (!selectedMes || !listaMeses.includes(selectedMes)) {
+            throw new Error("Debe seleccionar un mes para bloqueo (o 'Sin Bloqueo').");
+        }
 
-        if (!isValidInteger(maximoCursosDiario)) {
-            throw new Error("El maximo de cursos diarios debe ser un numero entero positivo");
+        const numCursosDiario = maximoCursosDiario === "" ? Infinity : Number(maximoCursosDiario);
+        const numCursosMensual = maximoCursosMensual === "" ? Infinity : Number(maximoCursosMensual);
+        const numCuposDiario = maximoCuposDiario === "" ? Infinity : Number(maximoCuposDiario);
+        const numCuposMensual = maximoCuposMensual === "" ? Infinity : Number(maximoCuposMensual);
+
+        if (numCursosDiario > numCursosMensual) {
+            throw new Error("El límite diario de cursos no puede ser mayor que el límite mensual.");
         }
-        if (!isValidInteger(maximoCursosMensual)) {
-            throw new Error("El maximo de cursos mensuales debe ser un numero entero positivo");
-        }
-        if (!isValidInteger(maximoCuposDiario)) {
-            throw new Error("El maximo de cupos diarios debe ser un numero entero positivo");
-        }
-        if (!isValidInteger(maximoCuposMensual)) {
-            throw new Error("El maximo de cupos mensuales debe ser un numero entero positivo");
+        if (numCuposDiario > numCuposMensual) {
+            throw new Error("El límite diario de cupos no puede ser mayor que el límite mensual.");
         }
     }
 
+
     const handleEnviar = async () => {
         try {
-
             setCargando(true);
+            setError(null);
+            setSuccess(false);
             validarDatos();
 
-            //Función para agregar
-            await putRestriccion({ mesBloqueado: listaMeses.indexOf(selectedMes), maximoCursosXDia: maximoCursosDiario, maximoCursosXMes: maximoCursosMensual, maximoCuposXDia: maximoCuposDiario, maximoCuposXMes: maximoCuposMensual, maximoAcumulado: maximoAcumulado });
+            const payload = {
+                mesBloqueado: listaMeses.indexOf(selectedMes),
+                maximoCursosXDia: maximoCursosDiario === "" ? null : Number(maximoCursosDiario),
+                maximoCursosXMes: maximoCursosMensual === "" ? null : Number(maximoCursosMensual),
+                maximoCuposXDia: maximoCuposDiario === "" ? null : Number(maximoCuposDiario),
+                maximoCuposXMes: maximoCuposMensual === "" ? null : Number(maximoCuposMensual),
+                maximoAcumulado: maximoAcumulado === "" ? null : Number(maximoAcumulado)
+            };
+            console.log("Sending payload:", payload);
 
+            await putRestriccion(payload);
 
             setSuccess(true);
-            setError(false);
             limpiarFormulario();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
 
         } catch (error) {
+            console.error("Error sending data:", error);
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setSuccess(false);
-            setError(error.message);
+            setError(error.message || "Error al guardar los cambios");
         } finally {
             setCargando(false);
         }
     }
 
-
     return (
         <>
-            {
-                error &&
-
-                <Alert variant="filled" severity="error" sx={{ width: '100%' }} >
+            {error && (
+                <Alert variant="filled" severity="error" sx={{ width: '100%', mb: 2 }} onClose={() => setError(null)}>
                     {error}
                 </Alert>
-
-            }
-            {
-                success &&
-                <Alert variant="filled" severity="success" sx={{ width: '100%' }} >
+            )}
+            {success && (
+                <Alert variant="filled" severity="success" sx={{ width: '100%', mb: 2 }} onClose={() => setSuccess(false)}>
                     Restricciones actualizadas con éxito
                 </Alert>
-            }
-            {
-                cargando && <Backdrop
+            )}
+            {cargando && (
+                <Backdrop
                     sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                     open={cargando}
                 >
                     <CircularProgress color="inherit" />
                 </Backdrop>
-            }
+            )}
 
-            <form>
-                <div className='container-restricciones'>
-                    <div className='titulo'><Titulo texto='Restricciones' /></div>
-                    <div className="divider">
-                        <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
-                    </div>
+            <Box component="form" sx={{ p: { xs: 1, sm: 2, md: 3 }, width: '100%' }} noValidate autoComplete="off">
+                <Grid container spacing={3}>
 
-                    <div className="inputs-limites">
-                        <TextField label={"Límite de cursos por mes"} type={"number"} value={maximoCursosMensual} getValue={(value) => setMaximoCursosMensual(value)}></TextField>
-                        <TextField label={"Límite de cupos por mes"} type={"number"} value={maximoCuposMensual} getValue={(value) => setMaximoCuposMensual(value)}></TextField>
-                        <TextField label={"Límite de cursos por día"} type={"number"} value={maximoCursosDiario} getValue={(value) => setMaximoCursosDiario(value)}></TextField>
-                        <TextField label={"Límite de cupos por día"} type={"number"} value={maximoCuposDiario} getValue={(value) => setMaximoCuposDiario(value)}></TextField>
-                        <TextField label={"Máximo acumulado de cursos"} type={"number"} value={maximoAcumulado} getValue={(value) => setMaximoAcumulado(value)}></TextField>
-                        <Autocomplete label={"Mes bloqueado"} options={listaMeses} value={selectedMes}
-                            getValue={(value) => setSelectedMes(value)} ></Autocomplete>
+                    <Grid item xs={12}>
+                        <Titulo texto='Restricciones de Inicio de Cursada' />
+                        <Divider sx={{ mb: 2, borderBottomWidth: 2, borderColor: 'rgba(0, 0, 0, 0.12)', mt: 1 }} />
+                    </Grid>
 
+                    <Grid item xs={12}>
+                        <Subtitulo texto="Establecer Límites y Bloqueo Mensual" />
+                        <Grid container spacing={2} sx={{ mt: 0.5 }}>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <TextField label={"Límite de cursos por mes"} type={"number"} value={maximoCursosMensual} getValue={(value) => setMaximoCursosMensual(value)} fullWidth inputProps={{ min: "0" }} />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <TextField label={"Límite de cursos por día"} type={"number"} value={maximoCursosDiario} getValue={(value) => setMaximoCursosDiario(value)} fullWidth inputProps={{ min: "0" }} />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <TextField label={"Límite de cupos por mes"} type={"number"} value={maximoCuposMensual} getValue={(value) => setMaximoCuposMensual(value)} fullWidth inputProps={{ min: "0" }} />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <TextField label={"Límite de cupos por día"} type={"number"} value={maximoCuposDiario} getValue={(value) => setMaximoCuposDiario(value)} fullWidth inputProps={{ min: "0" }} />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <TextField label={"Máximo acumulado de cursos"} type={"number"} value={maximoAcumulado} getValue={(value) => setMaximoAcumulado(value)} fullWidth inputProps={{ min: "0" }} />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <Autocomplete
+                                    label={"Mes bloqueado para nuevos inicios"}
+                                    options={listaMeses}
+                                    value={selectedMes}
+                                    getValue={(value) => setSelectedMes(value)}
+                                    fullWidth
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
 
-                    </div>
+                    <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 3 }}>
+                        <Button type="button" mensaje={"Guardar Cambios"} hanldeOnClick={handleEnviar} disabled={cargando} />
+                    </Grid>
 
-                    <div className="enviar">
-                        <Button type="button" mensaje={"Modificar"} hanldeOnClick={handleEnviar}></Button>
-                    </div>
+                    <Grid item xs={12}>
+                        <Divider sx={{ mb: 2, borderBottomWidth: 1, borderColor: 'rgba(0, 0, 0, 0.12)', mt: 1 }} />
+                    </Grid>
 
-                    <div className="detalle-container">
-                        <div className="detalle-fechas">
-                            <DetalleFechasPorDia maximoCuposDiario={maximoCuposDiario} maximoCursosDiario={maximoCursosDiario} maximoAcumulado={maximoAcumulado} />
-                        </div>
-                        <div className="detalle-mes">
-                            <DetalleMes maximoCuposMensual={maximoCuposMensual} maximoCursosMensual={maximoCursosMensual} />
-                        </div>
-                    </div>
+                    <Grid item xs={12} sx={{ mt: 3 }}>
+                        <Subtitulo texto="Visualización de Cupos Actuales" />
+                    </Grid>
 
-                </div>
-            </form>
+                    <Grid item xs={12}>
+                        <Box sx={{ border: '1px solid rgba(0,0,0,0.12)', p: 2, borderRadius: 1, height: '100%' }}>
+                            <Subtitulo texto="Detalle Diario" />
+                            <DetalleFechasPorDia
+                                maximoCuposDiario={maximoCuposDiario}
+                                maximoCursosDiario={maximoCursosDiario}
+                                maximoAcumulado={maximoAcumulado}
+                            />
+                        </Box>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <Box sx={{ border: '1px solid rgba(0,0,0,0.12)', p: 2, borderRadius: 1, height: '100%', mt: 3 }}>
+                            <Subtitulo texto="Detalle Mensual" />
+                            <DetalleMes
+                                maximoCuposMensual={maximoCuposMensual}
+                                maximoCursosMensual={maximoCursosMensual}
+                            />
+                        </Box>
+                    </Grid>
+
+                </Grid>
+            </Box>
         </>
-    )
+    );
 }
 
-export default RestriccionesFechasInicioCursada
+export default RestriccionesFechasInicioCursada;
