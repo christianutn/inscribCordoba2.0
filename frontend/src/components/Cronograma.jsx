@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useMemo } from 'react';
-// import dayjs from 'dayjs'; // Eliminado
-// import customParseFormat from 'dayjs/plugin/customParseFormat'; // Eliminado
-// import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // Eliminado
-// import isBefore from 'dayjs/plugin/isBefore'; // Eliminado
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { getCronograma } from "../services/googleSheets.service.js";
 import { descargarExcel } from "../services/excel.service.js";
 import { DataGrid } from '@mui/x-data-grid';
@@ -29,20 +29,21 @@ import MenuItem from '@mui/material/MenuItem';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
+import Tooltip from '@mui/material/Tooltip';
 import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
 import SearchIcon from '@mui/icons-material/Search';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Titulo from "../components/fonts/TituloPrincipal.jsx";
 
-// dayjs.extend(customParseFormat); // Eliminado
-// dayjs.extend(isSameOrAfter); // Eliminado
-// dayjs.extend(isBefore); // Eliminado
+dayjs.extend(customParseFormat);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 const modalStyle = {
   position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
@@ -54,69 +55,41 @@ const MONTH_NAMES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
+
 const DATE_FORMATS_TO_TRY = ['DD/MM/YYYY', 'D/M/YYYY', 'DD-MM-YYYY', 'D-M-YYYY', 'YYYY-MM-DD'];
 
-// --- FUNCIONES AUXILIARES PARA FECHAS NATIVAS ---
-function parseDateFromString(dateString) {
-  if (!dateString || typeof dateString !== 'string') return null;
-  const trimmedDate = dateString.trim();
-
-  // Formato YYYY-MM-DD (más estándar)
-  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedDate)) {
-    const [year, month, day] = trimmedDate.split('-').map(Number);
-    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      const date = new Date(Date.UTC(year, month - 1, day));
-      // Verificar si la fecha creada es válida y corresponde al input
-      if (!isNaN(date.getTime()) && date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day) {
-        return date;
-      }
+const parseDate = (dateString) => {
+  if (!dateString || typeof dateString !== 'string' || dateString.trim() === '') {
+    return null;
+  }
+  const trimmedDateStr = dateString.trim();
+  for (const format of DATE_FORMATS_TO_TRY) {
+    const d = dayjs(trimmedDateStr, format, true);
+    if (d.isValid()) {
+      return d;
     }
   }
+  return null;
+};
 
-  // Formatos DD/MM/YYYY o DD-MM-YYYY (y variantes con un dígito)
-  const parts = trimmedDate.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-  if (parts) {
-    const day = parseInt(parts[1], 10);
-    const month = parseInt(parts[2], 10);
-    const year = parseInt(parts[3], 10);
-
-    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      const date = new Date(Date.UTC(year, month - 1, day));
-      // Verificar si la fecha creada es válida y corresponde al input
-      if (!isNaN(date.getTime()) && date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day) {
-        return date;
-      }
-    }
-  }
-
-  return null; // No se pudo parsear con los formatos esperados
-}
-
-// Resetea la hora a 00:00:00.000 para comparar solo días
-function resetTime(date) {
-  if (!date) return null;
-  const newDate = new Date(date); // Clonar para no mutar original
-  newDate.setUTCHours(0, 0, 0, 0);
-  return newDate;
-}
-// --- FIN FUNCIONES AUXILIARES ---
 
 const Cronograma = () => {
   const [cursosData, setCursosData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [originalHeaders, setOriginalHeaders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [error, setError] = useState(null);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
+
   const [ministerioOptions, setMinisterioOptions] = useState([]);
   const [areaOptions, setAreaOptions] = useState(['all']);
   const [ministerioFilter, setMinisterioFilter] = useState('all');
   const [areaFilter, setAreaFilter] = useState('all');
   const [nombreFilter, setNombreFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('all');
-  const [filterActiveNow, setFilterActiveNow] = useState(false);
+  const [activosFilterActive, setActivosFilterActive] = useState(false);
 
   const COLUMNAS_VISIBLES = useMemo(() => [
     "Ministerio", "Area", "Nombre del curso",
@@ -137,146 +110,168 @@ const Cronograma = () => {
       });
   }, [originalHeaders, COLUMNAS_VISIBLES]);
 
-  const isFilterActive = useMemo(() => {
-    return nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || filterActiveNow;
-  }, [nombreFilter, ministerioFilter, areaFilter, monthFilter, filterActiveNow]);
-
   useEffect(() => {
-    setLoading(true);
-    setInitialLoadComplete(false);
-    setError(null);
     (async () => {
+      setLoading(true);
+      setError(null);
       try {
         const dataCronograma = await getCronograma();
-        if (!dataCronograma || !Array.isArray(dataCronograma) || dataCronograma.length < 1 || !Array.isArray(dataCronograma[0])) {
-          console.warn("Datos del cronograma inválidos o vacíos.");
-          setCursosData([]);
-          setOriginalHeaders([]);
-          setMinisterioOptions(['all']);
-        } else {
-          const headers = dataCronograma[0].map((h, i) => (h ? String(h).trim() : `Columna_${i}`));
-          setOriginalHeaders(headers);
-          const minSet = new Set();
-          const dataObjs = (dataCronograma.length > 1 ? dataCronograma.slice(1) : [])
-            .map((row, idx) => {
-              const obj = { id: idx };
-              if (Array.isArray(row)) {
-                headers.forEach((h, i) => {
-                  const val = row[i] != null ? String(row[i]).trim() : '';
-                  obj[h] = val;
-                  if (h === "Ministerio" && val) minSet.add(val);
-                });
-              } else { console.warn(`Fila ${idx + 1} no es un array:`, row); }
-              return obj;
-            }).filter(obj => Object.keys(obj).length > 1);
-          setCursosData(dataObjs);
-          setMinisterioOptions(['all', ...Array.from(minSet).sort()]);
+        if (!dataCronograma || dataCronograma.length < 2) {
+          throw new Error("No se recibieron datos válidos del cronograma.");
         }
+        const headers = dataCronograma[0].map(h => h.trim());
+        setOriginalHeaders(headers);
+
+        const minSet = new Set();
+        const dataObjs = dataCronograma.slice(1).map((row, idx) => {
+          const obj = { id: idx };
+          headers.forEach((h, i) => {
+            const val = row[i] != null ? String(row[i]).trim() : '';
+            obj[h] = val;
+            if (h === "Ministerio" && val) minSet.add(val);
+          });
+          return obj;
+        });
+
+        setCursosData(dataObjs);
+        setFilteredData(dataObjs);
+        setMinisterioOptions(['all', ...Array.from(minSet).sort()]);
       } catch (err) {
         console.error("Error loading data:", err);
         setError(err.message || "Error al cargar datos.");
-        setCursosData([]);
-        setOriginalHeaders([]);
-        setMinisterioOptions(['all']);
       } finally {
-        setInitialLoadComplete(true);
+        setLoading(false);
       }
     })();
   }, []);
 
   useEffect(() => {
-    if (!initialLoadComplete || !cursosData.length) {
+    if (loading || !cursosData.length) {
       setAreaOptions(['all']);
       if (areaFilter !== 'all') setAreaFilter('all');
       return;
     }
-    let relevantCourses = (ministerioFilter === 'all') ? cursosData : cursosData.filter(c => c["Ministerio"] === ministerioFilter);
+
+    let relevantCourses = [];
+    if (ministerioFilter === 'all') {
+      relevantCourses = cursosData;
+      if (areaFilter !== 'all') setAreaFilter('all');
+    } else {
+      relevantCourses = cursosData.filter(c => c["Ministerio"] === ministerioFilter);
+    }
+
     const areasSet = new Set(relevantCourses.map(c => c.Area).filter(Boolean));
     const newAreaOptions = ['all', ...Array.from(areasSet).sort()];
     setAreaOptions(newAreaOptions);
-    if (ministerioFilter === 'all' && areaFilter !== 'all') setAreaFilter('all');
-    if (ministerioFilter !== 'all' && !newAreaOptions.includes(areaFilter)) setAreaFilter('all');
-  }, [ministerioFilter, areaFilter, cursosData, initialLoadComplete]);
+
+    if (ministerioFilter !== 'all' && !newAreaOptions.includes(areaFilter)) {
+      setAreaFilter('all');
+    }
+
+  }, [ministerioFilter, cursosData, loading, areaFilter]);
+
 
   useEffect(() => {
-    if (!initialLoadComplete) return;
+    if (!cursosData.length) return;
 
     setLoading(true);
     let data = [...cursosData];
+    const today = dayjs().startOf('day');
 
-    if (ministerioFilter !== 'all') data = data.filter(c => c["Ministerio"] === ministerioFilter);
-    if (ministerioFilter !== 'all' && areaFilter !== 'all') data = data.filter(c => c["Area"] === areaFilter);
-    if (nombreFilter.trim()) data = data.filter(c => c["Nombre del curso"]?.toLowerCase().includes(nombreFilter.trim().toLowerCase()));
+    if (ministerioFilter !== 'all') {
+      data = data.filter(c => c["Ministerio"] === ministerioFilter);
+    }
+    if (ministerioFilter !== 'all' && areaFilter !== 'all') {
+      data = data.filter(c => c["Area"] === areaFilter);
+    }
+    if (nombreFilter.trim()) {
+      const term = nombreFilter.trim().toLowerCase();
+      data = data.filter(c => c["Nombre del curso"]?.toLowerCase().includes(term));
+    }
     if (monthFilter !== 'all') {
-      const targetMonth = parseInt(monthFilter, 10); // targetMonth es 0-11
+      const targetMonth = parseInt(monthFilter, 10);
       data = data.filter(c => {
-        const parsedDate = parseDateFromString(c["Fecha inicio del curso"]);
-        // getMonth() es 0-indexado
-        return parsedDate ? parsedDate.getUTCMonth() === targetMonth : false;
+        const fechaInicioStr = c["Fecha inicio del curso"];
+        const parsedDate = parseDate(fechaInicioStr);
+        return parsedDate && parsedDate.month() === targetMonth;
       });
     }
-    if (filterActiveNow) {
-      const todayDate = resetTime(new Date()); // Hoy a las 00:00:00 UTC
 
-      if (todayDate) { // Solo filtrar si obtenemos bien la fecha de hoy
-        data = data.filter(c => {
-          const parsedStartDate = parseDateFromString(c["Fecha inicio del curso"]);
-          const parsedEndDate = parseDateFromString(c["Fecha fin del curso"]);
+    if (activosFilterActive) {
+      data = data.filter(c => {
+        const startDateStr = c["Fecha inicio del curso"];
+        const endDateStr = c["Fecha fin del curso"];
 
-          const startDateReset = resetTime(parsedStartDate);
-          const endDateReset = resetTime(parsedEndDate);
+        const startDate = parseDate(startDateStr);
+        const endDate = parseDate(endDateStr);
 
-          if (!startDateReset || !endDateReset) {
-            return false; // No se pueden parsear las fechas, no cumple
-          }
-
-          // inicio < hoy Y fin >= hoy
-          return startDateReset < todayDate && endDateReset >= todayDate;
-        });
-      }
+        return startDate && endDate && startDate.isSameOrBefore(today) && endDate.isSameOrAfter(today);
+      });
     }
 
     setFilteredData(data);
     setLoading(false);
-
-  }, [cursosData, originalHeaders, ministerioFilter, areaFilter, nombreFilter, monthFilter, filterActiveNow, initialLoadComplete]);
+  }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive]);
 
   const handleRowClick = params => {
     const fullRow = cursosData.find(c => c.id === params.row.id);
-    setSelectedRowData(fullRow || params.row); setModalOpen(true);
+    setSelectedRowData(fullRow || params.row);
+    setModalOpen(true);
   };
-  const handleCloseModal = () => { setModalOpen(false); setSelectedRowData(null); };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedRowData(null);
+  };
+
   const handleDescargarExcel = async () => {
-    if (!filteredData.length) return; setLoading(true);
+    if (!filteredData.length) return;
+    setLoading(true);
     try {
       const headersVis = columnsForGrid.map(c => c.headerName);
       const dataToExport = filteredData.map(row => {
         const exportedRow = {};
-        headersVis.forEach(header => { exportedRow[header] = row[header] ?? ''; });
+        headersVis.forEach(header => {
+          exportedRow[header] = row[header] ?? '';
+        });
         return exportedRow;
       });
       await descargarExcel(dataToExport, headersVis, "Cronograma_Filtrado");
-    } catch (e) { console.error("Error generating Excel:", e); setError("Error al generar el Excel."); }
-    finally { setLoading(false); }
+    } catch (e) {
+      console.error("Error generating Excel:", e);
+      setError("Error al generar el Excel.");
+    } finally {
+      setLoading(false);
+    }
   };
-  const handleMinisterioChange = e => { setMinisterioFilter(e.target.value); };
+
+  const handleMinisterioChange = e => {
+    setMinisterioFilter(e.target.value);
+    if (e.target.value !== 'all') {
+      setAreaFilter('all');
+    }
+  };
   const handleAreaChange = e => setAreaFilter(e.target.value);
   const handleNombreChange = e => setNombreFilter(e.target.value);
   const handleMonthChange = e => setMonthFilter(e.target.value);
-  const handleToggleFilterActiveNow = () => {
-    setFilterActiveNow(prev => !prev);
-  };
+  const handleToggleActivosFilter = () => setActivosFilterActive(prev => !prev);
+
   const handleClearFilters = () => {
     setNombreFilter('');
     setMinisterioFilter('all');
     setAreaFilter('all');
     setMonthFilter('all');
-    setFilterActiveNow(false);
+    setActivosFilterActive(false);
   };
 
-  if (!initialLoadComplete && loading) {
+  const isFilterActive = useMemo(() => {
+    return nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive;
+  }, [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive]);
+
+
+  if (loading && !cursosData.length) {
     return (
-      <Backdrop open sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, color: '#fff' }}>
+      <Backdrop open sx={{ zIndex: t => t.zIndex.drawer + 1, color: '#fff' }}>
         <CircularProgress color="inherit" />
       </Backdrop>
     );
@@ -293,19 +288,19 @@ const Cronograma = () => {
     );
   }
 
-  if (!loading && !error && cursosData.length === 0 && originalHeaders.length === 0) {
+  if (!loading && !cursosData.length && !error) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h6" gutterBottom>No Hay Datos Disponibles</Typography>
-          <Typography>No se encontraron datos en el cronograma para mostrar.</Typography>
+          <Typography variant="h6" gutterBottom>No Hay Datos</Typography>
+          <Typography>No se encontraron datos en el cronograma o no se pudieron cargar.</Typography>
         </Paper>
       </Box>
     );
   }
 
   return (
-    <>
+    <div style={{ padding: 20 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
         <Titulo texto="Cronograma" />
         <BotonCircular
@@ -319,58 +314,138 @@ const Cronograma = () => {
 
       <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6} md={3} lg={2.5}>
-            <TextField fullWidth label="Buscar por Nombre" variant="outlined" size="small" value={nombreFilter} onChange={handleNombreChange} disabled={loading} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>), }} />
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              fullWidth
+              label="Buscar por Nombre"
+              variant="outlined"
+              size="small"
+              value={nombreFilter}
+              onChange={handleNombreChange}
+              disabled={loading}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
           </Grid>
-          <Grid item xs={12} sm={6} md={2} lg={2}>
+
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small" variant="outlined" disabled={loading || ministerioOptions.length <= 1}>
               <InputLabel id="ministerio-filter-label">Ministerio</InputLabel>
-              <Select labelId="ministerio-filter-label" id="select-ministerio" value={ministerioFilter} label="Ministerio" onChange={handleMinisterioChange} startAdornment={<AccountBalanceIcon sx={{ mr: 1, color: 'action.active', ml: -0.5 }} />}>
+              <Select
+                labelId="ministerio-filter-label"
+                id="select-ministerio"
+                value={ministerioFilter}
+                label="Ministerio"
+                onChange={handleMinisterioChange}
+                startAdornment={
+                  <InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}>
+                    <AccountBalanceIcon color="action" fontSize='small' />
+                  </InputAdornment>
+                }
+                sx={{ '& .MuiSelect-select': { pl: 1 } }} // Adjust padding if icon overlaps text
+              >
                 <MenuItem value="all"><em>Todos</em></MenuItem>
-                {ministerioOptions.map((opt, i) => opt !== 'all' && <MenuItem key={i} value={opt}>{opt}</MenuItem>)}
+                {ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (
+                  <MenuItem key={i} value={opt}>{opt}</MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2} lg={2}>
-            <FormControl fullWidth size="small" variant="outlined" disabled={loading || ministerioFilter === 'all' || areaOptions.length <= 1}>
+
+          <Grid item xs={12} sm={6} md={2}>
+            <FormControl
+              fullWidth
+              size="small"
+              variant="outlined"
+              disabled={loading || ministerioFilter === 'all' || areaOptions.length <= 1}
+            >
               <InputLabel id="area-filter-label">Área</InputLabel>
-              <Select labelId="area-filter-label" id="select-area" value={areaFilter} label="Área" onChange={handleAreaChange} startAdornment={<FolderSpecialIcon sx={{ mr: 1, color: 'action.active', ml: -0.5 }} />}>
+              <Select
+                labelId="area-filter-label"
+                id="select-area"
+                value={areaFilter}
+                label="Área"
+                onChange={handleAreaChange}
+                startAdornment={
+                  <InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}>
+                    <FolderSpecialIcon color="action" fontSize='small' />
+                  </InputAdornment>
+                }
+                sx={{ '& .MuiSelect-select': { pl: 1 } }}
+              >
                 <MenuItem value="all"><em>Todas</em></MenuItem>
-                {areaOptions.map((opt, i) => opt !== 'all' && <MenuItem key={i} value={opt}>{opt}</MenuItem>)}
-                {ministerioFilter !== 'all' && areaOptions.length <= 1 && !loading && <MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>}
+                {areaOptions.filter(opt => opt !== 'all').map((opt, i) => (
+                  <MenuItem key={i} value={opt}>{opt}</MenuItem>
+                ))}
+                {ministerioFilter !== 'all' && areaOptions.length <= 1 && (
+                  <MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>
+                )}
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2} lg={2}>
+
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small" variant="outlined" disabled={loading}>
               <InputLabel id="mes-filter-label">Mes Inicio Curso</InputLabel>
-              <Select labelId="mes-filter-label" id="select-month" value={monthFilter} label="Mes Inicio Curso" onChange={handleMonthChange} startAdornment={<CalendarMonthIcon sx={{ mr: 1, color: 'action.active', ml: -0.5 }} />}>
+              <Select
+                labelId="mes-filter-label"
+                id="select-month"
+                value={monthFilter}
+                label="Mes Inicio Curso"
+                onChange={handleMonthChange}
+                startAdornment={
+                  <InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}>
+                    <CalendarMonthIcon color="action" fontSize='small' />
+                  </InputAdornment>
+                }
+                sx={{ '& .MuiSelect-select': { pl: 1 } }}
+              >
                 <MenuItem value="all"><em>Todos</em></MenuItem>
-                {MONTH_NAMES.map((m, i) => <MenuItem key={i} value={i.toString()}>{m}</MenuItem>)}
+                {MONTH_NAMES.map((m, i) => (
+                  <MenuItem key={i} value={i.toString()}>{m}</MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2} lg={2}>
+
+          <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}>
+            <Tooltip title={activosFilterActive ? "Mostrar todos los cursos" : "Mostrar solo cursos activos ahora"}>
+              <Button
+                fullWidth
+                variant={activosFilterActive ? "contained" : "outlined"}
+                size="medium"
+                onClick={handleToggleActivosFilter}
+                disabled={loading}
+                startIcon={<AccessTimeIcon />}
+                sx={{ height: '40px', minWidth: 'auto' }} // Ensure button takes width and height
+              >
+                Activos
+              </Button>
+            </Tooltip>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}>
             <Button
               fullWidth
-              variant={filterActiveNow ? "contained" : "outlined"}
-              color="primary"
+              variant="outlined"
               size="medium"
-              onClick={handleToggleFilterActiveNow}
-              disabled={loading}
-              startIcon={<PlayCircleOutlineIcon />}
-              sx={{ height: '40px' }}
+              onClick={handleClearFilters}
+              disabled={!isFilterActive || loading}
+              startIcon={<ClearAllIcon />}
+              sx={{ height: '40px', minWidth: 'auto' }} // Ensure button takes width and height
             >
-              En Curso
+              Limpiar
             </Button>
-          </Grid>
-          <Grid item xs={12} sm={6} md={1} lg={1.5}>
-            <Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters} disabled={!isFilterActive || loading} startIcon={<ClearAllIcon />} sx={{ height: '40px', minWidth: 'auto', px: 1 }}>Limpiar</Button>
           </Grid>
         </Grid>
       </Paper>
 
-      {loading && initialLoadComplete && (
+      {loading && cursosData.length > 0 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}>
           <CircularProgress size={20} sx={{ mr: 1 }} />
           <Typography variant="body2" color="text.secondary">Actualizando tabla...</Typography>
@@ -384,15 +459,24 @@ const Cronograma = () => {
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
           onRowClick={handleRowClick}
           getRowId={r => r.id}
-          loading={loading && filteredData.length === 0 && initialLoadComplete}
+          loading={loading && cursosData.length > 0}
           density="compact"
           disableRowSelectionOnClick
-          initialState={{ sorting: { sortModel: originalHeaders.includes('Fecha inicio del curso') ? [{ field: 'Fecha inicio del curso', sort: 'asc' }] : [] } }}
+          initialState={{
+            sorting: { sortModel: originalHeaders.includes('Fecha inicio del curso') ? [{ field: 'Fecha inicio del curso', sort: 'asc' }] : [] }
+          }}
           sx={{
             border: 0,
-            '& .MuiDataGrid-columnHeaders': { backgroundColor: 'primary.main', color: 'black', fontWeight: 'bold' },
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: 'primary.light',
+              color: 'text.primary',
+              fontWeight: 'bold'
+            },
             '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none!important' },
             '& .MuiDataGrid-row': { cursor: 'pointer' },
+            '& .MuiDataGrid-row:hover': {
+              backgroundColor: 'action.hover',
+            },
             '& .MuiDataGrid-overlay': { backgroundColor: 'rgba(255,255,255,0.7)' }
           }}
           slots={{
@@ -400,9 +484,7 @@ const Cronograma = () => {
               <Box sx={{ mt: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', p: 2 }}>
                 <InfoIcon color="action" sx={{ mb: 1, fontSize: '3rem' }} />
                 <Typography align="center">
-                  {(cursosData.length === 0 && originalHeaders.length === 0)
-                    ? "No hay datos de cronograma disponibles."
-                    : "No hay cursos que coincidan con los filtros seleccionados."}
+                  {cursosData.length === 0 ? "No hay datos de cronograma disponibles." : "No hay cursos que coincidan con los filtros seleccionados."}
                 </Typography>
               </Box>
             )
@@ -428,25 +510,31 @@ const Cronograma = () => {
                 <List dense>
                   {originalHeaders
                     .filter(h => h !== 'id' && selectedRowData[h] != null && selectedRowData[h] !== '')
-                    .map((h, index, arr) => (
-                      <React.Fragment key={h}>
-                        <ListItem sx={{ py: 0.8, px: 0 }}>
-                          <ListItemText
-                            primary={selectedRowData[h]}
-                            secondary={h}
-                            primaryTypographyProps={{ fontWeight: 500, color: 'text.primary', wordBreak: 'break-word' }}
-                            secondaryTypographyProps={{ fontSize: '0.8rem', color: 'text.secondary' }} />
-                        </ListItem>
-                        {index < arr.length - 1 && (<Divider component="li" sx={{ my: 0.5 }} />)}
-                      </React.Fragment>
-                    ))}
+                    .map((h, index, arr) => {
+                      const val = selectedRowData[h];
+                      return (
+                        <React.Fragment key={h}>
+                          <ListItem sx={{ py: 0.8, px: 0 }}>
+                            <ListItemText
+                              primary={val}
+                              secondary={h}
+                              primaryTypographyProps={{ fontWeight: 500, color: 'text.primary', wordBreak: 'break-word' }}
+                              secondaryTypographyProps={{ fontSize: '0.8rem', color: 'text.secondary' }}
+                            />
+                          </ListItem>
+                          {index < arr.length - 1 && (
+                            <Divider component="li" sx={{ my: 0.5 }} />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
                 </List>
               </CardContent>
             </Card>
           )}
         </Box>
       </Modal>
-    </>
+    </div>
   );
 };
 
