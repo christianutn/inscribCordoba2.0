@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import ReactApexChart from 'react-apexcharts';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
@@ -16,92 +7,128 @@ import { getMatrizFechas } from '../services/googleSheets.service';
 
 dayjs.locale('es');
 
-// Registro de componentes de Chart.js
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
 const DetalleMesChart = () => {
   const [loading, setLoading] = useState(true);
-  const [chartData, setChartData] = useState({
-    labels: [],
-    datasets: []
+  const [series, setSeries] = useState([]);
+  const [options, setOptions] = useState({
+    chart: {
+      type: 'bar',
+      height: 400,
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: '55%',
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    stroke: {
+      show: true,
+      width: 2,
+      colors: ['transparent'],
+    },
+    xaxis: {
+      categories: [],
+      title: {
+        text: 'Mes',
+      },
+    },
+    yaxis: {
+      title: {
+        text: 'Cantidad',
+      },
+      min: 0,
+    },
+    fill: {
+      opacity: 1,
+    },
+    tooltip: {
+      y: {
+        formatter: function (val) {
+          return val;
+        },
+      },
+    },
+    title: {
+      text: 'Resumen Mensual de Cupo y Cursos',
+      align: 'center',
+    },
+    legend: {
+      position: 'top',
+    },
+    colors: ['#36A2EB', '#FF6384'],
   });
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       try {
         const matriz = await getMatrizFechas();
-        // extraigo solo claves tipo "YYYY-MM"
         const mesesClaves = Object.keys(matriz)
           .filter(k => /^\d{4}-\d{2}$/.test(k))
           .sort();
 
-        // etiquetas en español, p.e. "enero", "febrero", ...
         const labels = mesesClaves.map(m =>
           dayjs(m + '-01').format('MMMM YYYY')
         );
 
-        // datos de cada mes
         const datosCupo = mesesClaves.map(m => matriz[m].cantidadCupoMensual || 0);
         const datosCursos = mesesClaves.map(m => matriz[m].cantidadCursosMensual || 0);
 
-        setChartData({
-          labels,
-          datasets: [
-            {
-              label: 'Total Cupo Mensual',
-              data: datosCupo,
-              backgroundColor: 'rgba(54,162,235,0.5)'
-            },
-            {
-              label: 'Total Cursos Mensual',
-              data: datosCursos,
-              backgroundColor: 'rgba(255,99,132,0.5)'
-            }
-          ]
-        });
+        setSeries([
+          {
+            name: 'Total Cupo Mensual',
+            data: datosCupo,
+          },
+          {
+            name: 'Total Cursos Mensual',
+            data: datosCursos,
+          },
+        ]);
+
+        setOptions(prevOptions => ({
+          ...prevOptions,
+          xaxis: {
+            ...prevOptions.xaxis,
+            categories: labels,
+          },
+        }));
+
       } catch (error) {
         console.error('Error cargando matriz de fechas:', error);
+        setSeries([]);
+        setOptions(prevOptions => ({
+          ...prevOptions,
+          xaxis: {
+            ...prevOptions.xaxis,
+            categories: [],
+          },
+        }));
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: { position: 'top' },
-      title: {
-        display: true,
-        text: 'Resumen Mensual de Cupo y Cursos'
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: 'Mes' } },
-      y: {
-        beginAtZero: true,
-        title: { display: true, text: 'Cantidad' }
-      }
-    }
-  };
-
   return (
     <Box sx={{ width: '100%', p: 2 }}>
       {loading ? (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
           <CircularProgress />
         </Box>
-      ) : chartData.labels.length === 0 ? (
-        <Typography>No hay datos mensuales para mostrar.</Typography>
+      ) : series.length === 0 || series[0]?.data.length === 0 ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+          <Typography>No hay datos mensuales para mostrar.</Typography>
+        </Box>
       ) : (
-        <Bar data={chartData} options={options} />
+        <ReactApexChart
+          options={options}
+          series={series}
+          type="bar"
+          height={options.chart.height}
+        />
       )}
     </Box>
   );

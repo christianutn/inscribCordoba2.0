@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { getCronograma } from "../services/googleSheets.service";
 import {
-    Box, CircularProgress, Typography, Alert, Container, Paper, Grid,
+    Box,
+    CircularProgress, Typography, Alert, Paper, Grid,
     Card, CardContent, Divider, List, ListItem, ListItemIcon, ListItemText,
-    FormControl, InputLabel, Select, MenuItem
+    FormControl, InputLabel, Select, MenuItem,
+    Button
 } from "@mui/material";
-
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CancelIcon from '@mui/icons-material/Cancel';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -18,6 +19,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
 import PeopleIcon from '@mui/icons-material/People';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
 import {
     Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
@@ -112,6 +114,7 @@ const ReporteCursosCC = () => {
 
         if (selectedMinisterio === 'all') {
             setAvailableAreas(['all']);
+            if (selectedArea !== 'all') setSelectedArea('all');
         } else {
             const areasSet = new Set();
             rawCronogramaData.forEach(curso => {
@@ -122,9 +125,11 @@ const ReporteCursosCC = () => {
             });
             const newAvailableAreas = ['all', ...Array.from(areasSet).sort()];
             setAvailableAreas(newAvailableAreas);
+            if (!newAvailableAreas.includes(selectedArea)) {
+                setSelectedArea('all');
+            }
         }
-
-    }, [selectedMinisterio, rawCronogramaData]);
+    }, [selectedMinisterio, rawCronogramaData, selectedArea]);
 
     useEffect(() => {
         if (loading || !rawCronogramaData.length) {
@@ -137,7 +142,6 @@ const ReporteCursosCC = () => {
             return ministerioMatch && areaMatch;
         });
         setFilteredCronogramaData(filtered);
-
     }, [rawCronogramaData, selectedMinisterio, selectedArea, loading]);
 
     useEffect(() => {
@@ -281,8 +285,16 @@ const ReporteCursosCC = () => {
     }, [selectedMonth, allMonthsData, filteredCronogramaData, currentYear, loading]);
 
     const handleMonthChange = (event) => { setSelectedMonth(event.target.value); };
-    const handleMinisterioChange = (event) => { setSelectedMinisterio(event.target.value); setSelectedArea('all'); };
+    const handleMinisterioChange = (event) => {
+        setSelectedMinisterio(event.target.value);
+    };
     const handleAreaChange = (event) => { setSelectedArea(event.target.value); };
+
+    const handleClearFilters = () => {
+        setSelectedMonth('all');
+        setSelectedMinisterio('all');
+        setSelectedArea('all');
+    };
 
     const commonDataLabelConfig = useMemo(() => ({ display: true, color: '#333', font: { size: 10, weight: 'bold', }, formatter: (value, context) => { if (value === 0 || value === null || value === undefined) return null; if (context.dataset.label?.includes('%')) { return value.toFixed(1) + '%'; } return Math.round(value); }, anchor: 'end', align: 'top', offset: 4, }), []);
     const commonChartOptions = useMemo(() => ({ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }, title: { display: true, font: { size: 16 }, padding: { top: 10, bottom: 20 } }, tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(0, 0, 0, 0.8)', titleFont: { size: 14 }, bodyFont: { size: 12 }, padding: 10, cornerRadius: 4 }, datalabels: commonDataLabelConfig }, scales: { x: { display: true, title: { display: false }, grid: { display: false }, ticks: { font: { size: 11 } } }, y: { display: true, position: 'left', title: { display: true, text: 'Cantidad de Cursos' }, beginAtZero: true, grid: { color: '#eee' }, ticks: { font: { size: 11 }, stepSize: 1 } }, yPercentage: { display: false, position: 'right', title: { display: true, text: 'Porcentaje (%)' }, min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { callback: (value) => value + '%', font: { size: 11 } } } }, interaction: { mode: 'nearest', axis: 'x', intersect: false }, animation: { duration: 500 } }), [commonDataLabelConfig]);
@@ -291,18 +303,24 @@ const ReporteCursosCC = () => {
     const barMonthlyCourseDetailOptions = useMemo(() => ({ ...commonChartOptions, indexAxis: 'y', plugins: { ...commonChartOptions.plugins, legend: { display: false }, title: { ...commonChartOptions.plugins.title, text: `Detalle Cursos ${displayKpiData?.monthName ?? ''}` }, datalabels: { ...commonDataLabelConfig, anchor: 'end', align: 'right', offset: 8, } }, scales: { x: { ...commonChartOptions.scales.y, position: 'bottom', title: { display: true, text: 'Cantidad' } }, y: { ...commonChartOptions.scales.x, type: 'category', title: { display: false } }, yPercentage: { display: false } } }), [commonChartOptions, displayKpiData?.monthName, commonDataLabelConfig]);
 
     const renderSummaryText = () => { if (!displaySummaryData || displaySummaryData.length === 0) return null; const textStyleProps = { primaryTypographyProps: { sx: { color: 'text.primary', fontWeight: 500 } } }; if (displayKpiData?.isAnnual) { const mesMasNuevos = encontrarMesPico(displaySummaryData, 'cursosPorMes'); const mesMasActivos = encontrarMesPico(displaySummaryData, 'totalCursosAcumulados'); return (<List dense sx={{ '& .MuiListItemText-secondary': { fontSize: '0.8rem' } }}> <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><CheckCircleOutlineIcon color="success" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Nuevos Cursos (${currentYear}): ${displayKpiData.nuevos}`} secondary="Cantidad total de cursos que iniciaron durante el año (filtrado)." /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><HighlightOffIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Cancelados/Suspendidos: ${displayKpiData.cancelados}`} secondary="Cursos cuyo inicio estaba programado para este año pero fueron cancelados/suspendidos (filtrado)." /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><TrendingUpIcon color="action" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Promedio Cursos Activos por Mes: ${displayKpiData.activosPromedio}`} secondary="Número promedio de cursos en estado activo (nuevos + de meses anteriores) cada mes (filtrado)." /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`% Autogestionados (sobre nuevos): ${displayKpiData.porcAutogestionado}`} secondary="Porcentaje anual de los nuevos cursos iniciados que fueron de tipo autogestionado (filtrado)." /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Participantes (Cursos Nuevos ${currentYear}): ${displayKpiData.totalParticipantes}`} secondary="Suma de participantes de cursos iniciados en el año (filtrado)." /> </ListItem> <Divider component="li" sx={{ my: 2 }} /> <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Mes con Más Cursos Nuevos: ${mesMasNuevos}`} /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Mes con Mayor Total de Cursos Activos: ${mesMasActivos}`} /> </ListItem> </List>); } else { const monthData = displaySummaryData[0]; if (!monthData) return null; return (<List dense sx={{ '& .MuiListItemText-secondary': { fontSize: '0.8rem' } }}> <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><CheckCircleOutlineIcon color="primary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Nuevos Cursos en ${monthData.mesNombre}: ${monthData.cursosPorMes}`} /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><TrendingUpIcon color="success" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cursos Activos de Meses Anteriores: ${monthData.cursosActivosAnteriores}`} /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Cursos Activos en ${monthData.mesNombre}: ${monthData.totalCursosAcumulados}`} /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><CancelIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cancelados/Suspendidos (iniciaban en ${monthData.mesNombre}): ${monthData.canceladosSuspendidos}`} /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Autogestionados (nuevos en ${monthData.mesNombre}): ${monthData.autogestionados} (${monthData.porcentajeAutogestionados.toFixed(1)}%)`} /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Participantes (Nuevos Cursos ${monthData.mesNombre}): ${displayKpiData.totalParticipantes}`} secondary="Suma de participantes de cursos iniciados en el mes (filtrado)." /> </ListItem> <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><ShowChartIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cursos en Plataforma Externa (nuevos en ${monthData.mesNombre}): ${monthData.plataformaExterna}`} /> </ListItem> </List>); } };
-
     const getReportTitle = () => { let title = `Reporte Cursos ${currentYear}`; const filtersApplied = []; if (selectedMinisterio !== 'all') filtersApplied.push(selectedMinisterio); if (selectedArea !== 'all') filtersApplied.push(selectedArea); if (selectedMonth !== 'all') filtersApplied.push(mesesFull[selectedMonth]); if (filtersApplied.length > 0) { title += ` (${filtersApplied.join(' / ')})`; } else if (selectedMonth === 'all') { title += " (Anual General)"; } return title; };
 
+    const isFilterActive = useMemo(() => {
+        return selectedMonth !== 'all' || selectedMinisterio !== 'all' || selectedArea !== 'all';
+    }, [selectedMonth, selectedMinisterio, selectedArea]);
+
     return (
-        <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+        <Box sx={{
+            width: '100%',
+            py: 4,
+        }}>
             <Typography variant="h4" gutterBottom component="h1" sx={{ mb: 2, textAlign: 'center', fontWeight: 'bold' }}>
                 {getReportTitle()}
             </Typography>
 
             <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} sm={6} md={4}>
+                <Grid container spacing={2} alignItems="flex-end">
+                    <Grid item xs={12} sm={6} md={3}>
                         <FormControl fullWidth size="small" disabled={loading}>
                             <InputLabel id="select-month-label">Mes</InputLabel>
                             <Select labelId="select-month-label" id="select-month" value={selectedMonth} label="Mes" onChange={handleMonthChange} startAdornment={<CalendarMonthIcon sx={{ mr: 1, color: 'action.active' }} />}>
@@ -311,7 +329,7 @@ const ReporteCursosCC = () => {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
+                    <Grid item xs={12} sm={6} md={3}>
                         <FormControl fullWidth size="small" disabled={loading || !allMinisterios.length}>
                             <InputLabel id="select-ministerio-label">Ministerio</InputLabel>
                             <Select labelId="select-ministerio-label" id="select-ministerio" value={selectedMinisterio} label="Ministerio" onChange={handleMinisterioChange} startAdornment={<AccountBalanceIcon sx={{ mr: 1, color: 'action.active' }} />}>
@@ -319,18 +337,31 @@ const ReporteCursosCC = () => {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={12} md={4}>
-                        <FormControl fullWidth size="small" disabled={loading || selectedMinisterio === 'all'}>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <FormControl fullWidth size="small" disabled={loading || selectedMinisterio === 'all' || availableAreas.length <= 1}>
                             <InputLabel id="select-area-label">Área</InputLabel>
                             <Select labelId="select-area-label" id="select-area" value={selectedArea} label="Área" onChange={handleAreaChange} startAdornment={<FolderSpecialIcon sx={{ mr: 1, color: 'action.active' }} />}>
                                 {availableAreas.map((area, index) => (
                                     <MenuItem key={index} value={area}>{area === 'all' ? <em>Todas las Áreas</em> : area}</MenuItem>
                                 ))}
                                 {selectedMinisterio !== 'all' && availableAreas.length <= 1 && (
-                                    <MenuItem value="all" disabled><em>(No hay áreas para este ministerio)</em></MenuItem>
+                                    <MenuItem value="all" disabled><em>(No hay áreas)</em></MenuItem>
                                 )}
                             </Select>
                         </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            size="medium"
+                            onClick={handleClearFilters}
+                            disabled={!isFilterActive || loading}
+                            startIcon={<ClearAllIcon />}
+                            sx={{ height: '40px' }}
+                        >
+                            Limpiar Filtros
+                        </Button>
                     </Grid>
                 </Grid>
             </Paper>
@@ -357,7 +388,7 @@ const ReporteCursosCC = () => {
                                     <Grid item xs={12} lg={6}> <Paper elevation={2} sx={{ p: { xs: 1, sm: 2 }, height: { xs: 300, md: 400 } }}> <Line options={lineTrendsOptionsAnnual} data={{ labels: displayChartData.labels, datasets: displayChartData.tendencias?.datasets ?? [] }} /> </Paper> </Grid>
                                     <Grid item xs={12} lg={6}> <Paper elevation={2} sx={{ p: { xs: 1, sm: 2 }, height: { xs: 300, md: 400 } }}> <Bar options={stackedBarOptionsAnnual} data={{ labels: displayChartData.labels, datasets: displayChartData.composicionActivos?.datasets ?? [] }} /> </Paper> </Grid>
                                     <Grid item xs={12}>
-                                        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, mt: { xs: 3, lg: 3 }, height: '100%' }}>
+                                        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, mt: { xs: 2, lg: 0 }, height: '100%' }}>
                                             <Typography variant="h5" component="h2" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                                                 <BarChartIcon sx={{ mr: 1 }} color="primary" /> Resumen Anual ({currentYear})
                                             </Typography>
@@ -400,7 +431,7 @@ const ReporteCursosCC = () => {
                     <Typography variant="body1" color="textSecondary"> No se encontraron datos de cursos iniciales para el año {currentYear}. Verifica la fuente de datos. </Typography>
                 </Paper>
             )}
-        </Container>
+        </Box>
     );
 };
 
