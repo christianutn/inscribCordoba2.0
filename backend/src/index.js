@@ -28,7 +28,7 @@ initSequelize();
 
 app.use(cors());
 
-const PORT = 4001
+const PORT = 4001 // para producción cambiar a 4000
 
 // Middleware
 app.use(express.json());
