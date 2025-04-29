@@ -4,7 +4,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { getCronograma } from "../services/googleSheets.service.js";
-import { descargarExcel } from "../services/excel.service.js";
+import { descargarExcelCronograma } from "../services/excel.service.js";
 import { DataGrid } from '@mui/x-data-grid';
 import { esES } from '@mui/x-data-grid/locales';
 import Backdrop from '@mui/material/Backdrop';
@@ -228,15 +228,14 @@ const Cronograma = () => {
     if (!filteredData.length) return;
     setLoading(true);
     try {
-      const headersVis = columnsForGrid.map(c => c.headerName);
       const dataToExport = filteredData.map(row => {
         const exportedRow = {};
-        headersVis.forEach(header => {
+        originalHeaders.forEach(header => {
           exportedRow[header] = row[header] ?? '';
         });
         return exportedRow;
       });
-      await descargarExcel(dataToExport, headersVis, "Cronograma_Filtrado");
+      await descargarExcelCronograma(dataToExport, originalHeaders, "Cronograma_Filtrado");
     } catch (e) {
       console.error("Error generating Excel:", e);
       setError("Error al generar el Excel.");
