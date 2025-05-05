@@ -24,8 +24,8 @@ export const getUsuario = async (req, res, next) => {
             ]
         });
 
-        if(usuarios.length === 0){
-            
+        if (usuarios.length === 0) {
+
             const error = new Error("No existen usuarios");
             error.statusCode = 404;
             throw error;
@@ -41,7 +41,7 @@ export const getUsuario = async (req, res, next) => {
 export const postUsuario = async (req, res, next) => {
     try {
 
-        let {cuil, contrasenia, rol, area} = req.body;
+        let { cuil, contrasenia, rol, area } = req.body;
         const usuario = await Usuario.findOne({ where: { cuil: cuil } });
 
         //Validar que el cuil no exista
@@ -51,7 +51,7 @@ export const postUsuario = async (req, res, next) => {
             error.statusCode = 400;
             throw error;
         }
-        
+
         if (usuario) {
             const error = new Error("El usuario ya existe");
             error.statusCode = 400;
@@ -61,10 +61,10 @@ export const postUsuario = async (req, res, next) => {
         //Asegurar que contrasenia sea uan cadena si no es una cadena convertirla a string
         contrasenia = String(contrasenia)
         const contraseniaHash = createHash(contrasenia)
-        const nuevoUsuario = await Usuario.create({ cuil:cuil, contrasenia: contraseniaHash, rol:rol, area:area, necesitaCbioContrasenia: "1" });
-        
-        if(!nuevoUsuario){
-            const error = new Error("No se pudo crear el usuario");            
+        const nuevoUsuario = await Usuario.create({ cuil: cuil, contrasenia: contraseniaHash, rol: rol, area: area, necesitaCbioContrasenia: "1" });
+
+        if (!nuevoUsuario) {
+            const error = new Error("No se pudo crear el usuario");
             error.statusCode = 400;
             throw error;
         }
@@ -72,7 +72,7 @@ export const postUsuario = async (req, res, next) => {
         res.status(201).json(nuevoUsuario)
 
     } catch (error) {
-        
+
         next(error)
     }
 }
@@ -81,7 +81,7 @@ export const postUsuario = async (req, res, next) => {
 export const putUsuario = async (req, res, next) => {
     const t = await sequelize.transaction(); // Iniciamos la transacción
     try {
-       
+
 
         let { cuil, nombre, apellido, mail, celular, newCuil, area, rol, esExcepcionParaFechas } = req.body;
 
@@ -108,12 +108,12 @@ export const putUsuario = async (req, res, next) => {
             throw error;
         }
 
-        
-        if(!esExcepcionParaFechas){
+
+        if (!esExcepcionParaFechas) {
             const error = new Error("El referente es requerido");
             error.statusCode = 400;
             throw error;
-        } else if(esExcepcionParaFechas !== "Si" && esExcepcionParaFechas !== "No"){
+        } else if (esExcepcionParaFechas !== "Si" && esExcepcionParaFechas !== "No") {
             const error = new Error("El referente debe ser Si o No");
             error.statusCode = 400;
             throw error;
@@ -122,7 +122,7 @@ export const putUsuario = async (req, res, next) => {
         esExcepcionParaFechas = esExcepcionParaFechas.trim()
         esExcepcionParaFechas = esExcepcionParaFechas === "Si" ? 1 : esExcepcionParaFechas === "No" ? 0 : null;
 
-       
+
 
         // Limpieza de datos
         cuil = cuil.trim();
@@ -130,7 +130,7 @@ export const putUsuario = async (req, res, next) => {
         nombre = tratarNombres(nombre.trim());
         apellido = tratarNombres(apellido.trim());
         mail = mail.trim();
-       
+
         celular = celular ? celular.trim() : null;
 
         // Actualización de Persona
@@ -145,7 +145,7 @@ export const putUsuario = async (req, res, next) => {
             { where: { cuil: cuil }, transaction: t } // Aseguramos que se incluya la transacción
         );
 
-        if(updatePersona[0] === 0 && updateUsuario[0] === 0){
+        if (updatePersona[0] === 0 && updateUsuario[0] === 0) {
             const error = new Error("No se encontraron datos para actualizar");
             error.statusCode = 404;
             throw error;
@@ -210,7 +210,35 @@ export const updateContrasenia = async (req, res, next) => {
             throw error;
         }
 
-        
+
+        res.status(200).json({ message: "Contraseña actualizada correctamente" });
+
+    } catch (error) {
+        next(error);
+    }
+};
+export const recuperoContrasenia = async (req, res, next) => {
+    try {
+        let { cuil } = req.body;
+
+        // Asegurar que la contraseña sea una cadena, si no es, convertirla a string
+        const nuevaContrasenia = String(cuil);
+        const contraseniaHash = createHash(nuevaContrasenia);
+
+
+        // Actualizar solo la contraseña del usuario
+        const updateUsuario = await Usuario.update(
+            { contrasenia: contraseniaHash, necesitaCbioContrasenia: 0 },
+            { where: { cuil: cuil } }
+        );
+
+        if (updateUsuario[0] === 0) {
+            const error = new Error("No se encontraron datos para actualizar");
+            error.statusCode = 404;
+            throw error;
+        }
+
+
         res.status(200).json({ message: "Contraseña actualizada correctamente" });
 
     } catch (error) {

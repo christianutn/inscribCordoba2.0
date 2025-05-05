@@ -11,10 +11,10 @@ export const getUsuarios = async () => {
             }
         });
         const data = await response.json();
-        if(response.status !== 200) {
+        if (response.status !== 200) {
             throw new Error("No se encontraron usuarios");
         }
-        
+
         return data
     } catch (error) {
         throw error
@@ -30,13 +30,13 @@ export const putUsuarios = async (usuario) => {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
             },
-            body: JSON.stringify({...usuario})
+            body: JSON.stringify({ ...usuario })
         });
         const data = await response.json();
-        if(response.status !== 200) {
-            throw new Error( data.message || "No se encontraron usuarios");
+        if (response.status !== 200) {
+            throw new Error(data.message || "No se encontraron usuarios");
         }
-        
+
         return data
     } catch (error) {
         throw error
@@ -45,7 +45,7 @@ export const putUsuarios = async (usuario) => {
 
 export const deleteUsuario = async (cuil) => {
     try {
-        const response = await fetch(`${URL}/${cuil}`, {    
+        const response = await fetch(`${URL}/${cuil}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -53,7 +53,7 @@ export const deleteUsuario = async (cuil) => {
             }
         });
         const data = await response.json();
-        if(response.status !== 200) {
+        if (response.status !== 200) {
             throw new Error(data.message || "No se encontraron usuarios");
         }
         return data
@@ -72,7 +72,7 @@ export const getMyUser = async () => {
             }
         });
         const data = await response.json();
-        if(response.status !== 200) {
+        if (response.status !== 200) {
             return false
         }
         return data
@@ -84,20 +84,20 @@ export const getMyUser = async () => {
 
 export const postUser = async (user) => {
     try {
-        
+
         const response = await fetch(`${URL}/registrar`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
             },
-            body: JSON.stringify({...user})
+            body: JSON.stringify({ ...user })
         });
         const data = await response.json();
-        if(response.status !== 201) {
-            throw new Error( data.message || "No fue posible el alta del usuario");
+        if (response.status !== 201) {
+            throw new Error(data.message || "No fue posible el alta del usuario");
         }
-        
+
         return data
     } catch (error) {
         throw error
@@ -112,13 +112,33 @@ export const cambiarContrasenia = async (nuevaContrasenia) => {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
             },
-            body: JSON.stringify({nuevaContrasenia: nuevaContrasenia})
+            body: JSON.stringify({ nuevaContrasenia: nuevaContrasenia })
         });
         const data = await response.json();
-        if(response.status !== 200) {
-            throw new Error( data.message || "No fue posible el cambio de contraseña");
+        if (response.status !== 200) {
+            throw new Error(data.message || "No fue posible el cambio de contraseña");
         }
-        
+
+        return true
+    } catch (error) {
+        throw error
+    }
+}
+
+export const recuperoContrasenia = async (cuil) => {
+    try {
+        const response = await fetch(`${URL}/recuperocontrasenia`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ cuil: cuil })
+        });
+        const data = await response.json();
+        if (response.status !== 200) {
+            throw new Error(data.message || "No fue posible el cambio de contraseña");
+        }
+
         return true
     } catch (error) {
         throw error
