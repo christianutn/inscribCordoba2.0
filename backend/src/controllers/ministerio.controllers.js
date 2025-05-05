@@ -38,7 +38,7 @@ export const getMinisterios = async (req, res, next) => {
         let ministerios;
 
         // Lógica para obtener ministerios según el rol
-        if (rol === "ADM") {
+        if (rol === "ADM" || rol === "GA") {
             ministerios = await Ministerio.findAll({
                 include: [
                     {

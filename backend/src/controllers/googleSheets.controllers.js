@@ -3,8 +3,10 @@ import { getCronograma } from "../googleSheets/services/getCronograma.js";
 import AsignacionesAreasUsuario from "../models/areasAsignadasUsuario.models.js";
 
 import { getObjFechas } from "../googleSheets/services/getObjFechas.js";
-import Usuario from "../models/usuario.models.js";
+
 import Area from "../models/area.models.js";
+
+import { getNroEventos } from "../googleSheets/services/getNroEventos.js";
 
 export const getDatosCronograma = async (req, res, next) => {
     try {
@@ -72,6 +74,15 @@ export const getFechasParaValidar = async (req, res, next) => {
     }
 }
 
+
+export const getObjNroEventos = async (req, res, next) => {
+    try {
+        const eventos = await getNroEventos();
+        res.status(200).json(eventos)
+    } catch (error) {
+        next(error)
+    }
+}
 
 
 

@@ -5,7 +5,7 @@ import obtenerCursosARevisar from "../utils/obtenerCursosARevisar.js"; // Asegú
 
 
 const enviarCorreoDiarioContolDeCursos =  () => {
-    cron.schedule('0 0 8 * * * *', async () => { // Añadido async
+    cron.schedule('0 26 11 * * * *', async () => { // Añadido async
         const timestamp = new Date().toISOString();
         console.log(`[${timestamp}] CRON TAREA: Iniciando revisión de cursos para alerta de 5 o 6 días.`);
     
@@ -227,7 +227,7 @@ const enviarCorreoDiarioContolDeCursos =  () => {
                 const emailSubject = `Alerta: ${coursesFoundCount} Curso${coursesFoundCount > 1 ? 's' : ''} inicia${coursesFoundCount > 1 ? 'n' : ''} en 5 días (${fechaObjetivoStr5} )`;
     
                 //Toma la lista de correos del .env sino por defecto manda a soporte
-                const emailRecipients = process.env.EMAIL_RECIPIENTS || "soportecampuscordoba@gmail.com"; // Update default if needed
+                const emailRecipients = "soportecampuscordoba@gmail.com"; // Update default if needed
     
                 if (!emailRecipients) {
                     console.error(`[${timestamp}] CRON TAREA: No se configuraron destinatarios de correo (la variable de entorno EMAIL_RECIPIENTS está vacía). No se puede enviar el correo.`);

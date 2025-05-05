@@ -7,7 +7,7 @@ import passport from "passport";
 
 const areaTematicaRouter = Router();
 
-areaTematicaRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getAreasTematicas)
-areaTematicaRouter.get("/:cod", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getAreaTematicaByCod)
+areaTematicaRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getAreasTematicas)
+areaTematicaRouter.get("/:cod", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getAreaTematicaByCod)
 
 export default areaTematicaRouter

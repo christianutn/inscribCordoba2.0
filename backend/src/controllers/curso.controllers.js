@@ -27,7 +27,7 @@ export const getCursos = async (req, res, next) => {
         });
         let cursos;
 
-        if (rol === "ADM") {
+        if (rol === "ADM" || rol === "GA") {
             cursos = await cursoModel.findAll({
                 include: [
                     {

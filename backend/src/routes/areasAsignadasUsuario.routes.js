@@ -25,6 +25,6 @@ router.put("/", auth, autorizar(['ADM']), putAreaAsignada);
 router.delete("/:usuario/:area", auth, autorizar(['ADM']), deleteAreaAsignada);
 
 // Obtener áreas asignadas de un usuario específico
-router.get("/usuario/:usuario", auth, autorizar(['ADM', 'REF']), getAreasAsignadasPorUsuario);
+router.get("/usuario/:usuario", auth, autorizar(['ADM', 'REF', , 'GA']), getAreasAsignadasPorUsuario);
 
 export default router;

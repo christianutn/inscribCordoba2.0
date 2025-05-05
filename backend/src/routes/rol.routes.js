@@ -5,6 +5,6 @@ import passport from "passport";
 
 const rolRouter = Router();
 
-rolRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']),  getRoles)
+rolRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']),  getRoles)
 
 export default rolRouter
