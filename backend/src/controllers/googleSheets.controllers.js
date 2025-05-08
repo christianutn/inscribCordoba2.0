@@ -31,7 +31,7 @@ export const getDatosCronograma = async (req, res, next) => {
 
         // 2. Optimización de lógica condicional
         let parametroFiltro;
-        if (rol === "ADM") {
+        if (rol === "ADM" || rol === "GA") {
             parametroFiltro = "todos";
         } else {
             const nombresAreas = areasAsignadas.map(a => a.detalle_area.nombre);

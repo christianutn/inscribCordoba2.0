@@ -67,7 +67,7 @@ const Login = () => {
         const cuil = data.get('cuilRecovery');
 
         try {
-            // await recuperoContrasenia(cuil);
+            await recuperoContrasenia(cuil);
             console.log("Requesting password recovery for CUIL:", cuil);
             // Example: await solicitarRecuperacionContrasenia(cuil);
             // await new Promise(resolve => setTimeout(resolve, 1500));
@@ -227,9 +227,10 @@ const Login = () => {
                     }
                 }}
                 disabled={open}
+                
             >
                 Enviar Instrucciones
-            </Button>
+            </Button>   
             <Grid container>
                 <Grid item xs style={{ textAlign: 'center' }}>
                     <Link href="#" variant="body2" onClick={toggleFormView}>

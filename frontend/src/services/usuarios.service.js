@@ -68,7 +68,7 @@ export const getMyUser = async () => {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Authorization": `Bearer ${localStorage.getItem("jwt")} `
             }
         });
         const data = await response.json();
@@ -106,28 +106,44 @@ export const postUser = async (user) => {
 
 export const cambiarContrasenia = async (nuevaContrasenia) => {
     try {
+        // 1. Intento primero el JWT guardado
+        let token = localStorage.getItem("jwt");
+        // 2. Si no hay JWT, lo saco de la query string
+        if (!token) {
+            const params = new URLSearchParams(window.location.search);
+            token = params.get("token");
+        }
+        if (!token) {
+            throw new Error("No se encontró token para autorizar la petición");
+        }
+
         const response = await fetch(`${URL}/contrasenia`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Authorization": `Bearer ${token}`
             },
-            body: JSON.stringify({ nuevaContrasenia: nuevaContrasenia })
+            body: JSON.stringify({ nuevaContrasenia })
         });
+
         const data = await response.json();
         if (response.status !== 200) {
-            throw new Error(data.message || "No fue posible el cambio de contraseña");
+            throw new Error(data.message || "No fue posible el cambio de contraseña");
         }
 
-        return true
+        return true;
     } catch (error) {
-        throw error
+        throw error;
     }
-}
+};
+
+
 
 export const recuperoContrasenia = async (cuil) => {
     try {
-        const response = await fetch(`${URL}/recuperocontrasenia`, {
+
+
+        const response = await fetch(`${URL}/recuperoContrasenia`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
