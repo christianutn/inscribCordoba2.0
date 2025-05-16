@@ -7,21 +7,31 @@ import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
 import { getMatrizFechas, buscarPosicionFecha } from "../services/googleSheets.service";
 import { getRestricciones } from "../services/restricciones.service.js";
-
+import { getFeriadosDelAnio } from '../services/api.service.js';
 
 const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [matrizFechas, setMatrizFechas] = useState([]);
   const [maximoAcumulado, setMaximoAcumulado] = useState(0);
+  const [feriados, setFeriados] = useState([]);
 
   useEffect(() => {
     (async () => {
-      const response = await getMatrizFechas();
-      const restricciones = await getRestricciones();
+      try {
+        const response = await getMatrizFechas();
+        const restricciones = await getRestricciones();
+        const feriados = await getFeriadosDelAnio();
 
-      setMaximoAcumulado(restricciones.maximoAcumulado === undefined ? false : restricciones.maximoAcumulado);
+        console.log("Feriados: ", feriados);
 
-      setMatrizFechas(response);
+        setFeriados(feriados.map(feriado => feriado.fecha));
+
+        setMaximoAcumulado(restricciones.maximoAcumulado === undefined ? false : restricciones.maximoAcumulado);
+
+        setMatrizFechas(response);
+      } catch (error) {
+        console.error('Error al obtener la matriz de fechas:', error);
+      }
     })();
   }, []);
 
@@ -53,7 +63,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
       if (matrizFechas[claveAnioMes]) {
 
 
-        
+
         const posInicio = buscarPosicionFecha(claveDia, matrizFechas.listaFechasInicio);
         const posFin = buscarPosicionFecha(claveDia, matrizFechas.listaFechasFin);
 
@@ -68,6 +78,13 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
         if (matrizFechas[claveAnioMes]?.invalidarMesAnio || matrizFechas[claveAnioMes]?.[claveDia]?.invalidarDia) {
           return true;
         }
+        
+        if (feriados.includes(`${fechaAValidar[0]}-${fechaAValidar[1]}-${fechaAValidar[2]}`)) {
+          console.log("Feriado: ", `${fechaAValidar[0]}-${fechaAValidar[1]}-${fechaAValidar[2]}`);
+          console.log("Feriados: ", feriados);
+          return true;
+        }
+
       }
     }
 

@@ -43,14 +43,10 @@ const Login = () => {
             localStorage.setItem('jwt', token);
             navigate("/principal");
         } catch (error) {
-            if (error.response && error.response.status === 429) {
-                setMensajeDeError(error.response.data?.message || 'Demasiados intentos. Intente más tarde.');
-            } else if (error.response && error.response.status === 401) {
+            if(error.statusCode === 429){
+                setMensajeDeError(error.message);
+            } else {
                 setMensajeDeError("Usuario o contraseña incorrectos");
-            }
-            else {
-                setMensajeDeError("Ocurrió un error inesperado. Intente nuevamente.");
-                console.error("Login error:", error);
             }
         } finally {
             setOpen(false);

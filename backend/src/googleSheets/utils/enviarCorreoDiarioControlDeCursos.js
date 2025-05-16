@@ -5,7 +5,7 @@ import obtenerCursosARevisar from "../utils/obtenerCursosARevisar.js"; // Asegú
 
 
 const enviarCorreoDiarioContolDeCursos =  () => {
-    cron.schedule('0 26 11 * * * *', async () => { // Añadido async
+    cron.schedule('0 0 8 * * * *', async () => { // Añadido async
         const timestamp = new Date().toISOString();
         console.log(`[${timestamp}] CRON TAREA: Iniciando revisión de cursos para alerta de 5 o 6 días.`);
     
@@ -249,8 +249,6 @@ const enviarCorreoDiarioContolDeCursos =  () => {
     });
 }
 
-
-enviarCorreoDiarioContolDeCursos()
 
 
 export default enviarCorreoDiarioContolDeCursos;

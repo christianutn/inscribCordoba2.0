@@ -26,6 +26,7 @@ import tipoCertificacionRouter from "./tipoCertificacion.routes.js";
 import eventoRouter from "./evento.routes.js";
 import { Router } from "express";
 import AvisoRouter from "./aviso.routes.js"
+import ApiArgentinaFeriadosRouter from "./api.routes.js";
 
 const router = Router();
 
@@ -61,5 +62,6 @@ router.use("/areasTematicas", AreaTematica)
 router.use("/tiposCertificaciones", tipoCertificacionRouter)
 router.use("/eventos", eventoRouter)
 router.use("/avisos", AvisoRouter)
+router.use("/argentina/feriados", ApiArgentinaFeriadosRouter)
 
 export default router

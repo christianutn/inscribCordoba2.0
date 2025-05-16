@@ -299,7 +299,7 @@ const generarHtmlRecuperarContraseña = (urlPeticion) => {
              <a href="${urlPeticion}">${urlPeticion}</a>
         </p>
 
-        <p>Este enlace de recuperación expirará en [Tiempo de expiración, ej: 1 hora]. Por favor, úsalo antes de que expire.</p>
+        <p>Este enlace de recuperación expirará en [Tiempo de expiración en 12hr]. Por favor, úsalo antes de que expire.</p>
 
         <p>Si no solicitaste un restablecimiento de contraseña, por favor ignora este correo electrónico. Tu contraseña actual no se modificará.</p>
 
