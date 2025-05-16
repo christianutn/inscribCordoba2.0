@@ -40,3 +40,25 @@ export const getAvisos = async () => {
         throw error
     }
 }
+
+
+export const deleteAviso = async (id) => {
+    try {
+        const response = await fetch(`${URL}/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+            },
+        });
+
+        if (response.status !== 204) {
+            const errorResponse = await response.json();
+            throw new Error(errorResponse.message || 'Error al eliminar el aviso');
+        }
+
+        return true
+    } catch (error) {
+        throw error
+    }
+}
