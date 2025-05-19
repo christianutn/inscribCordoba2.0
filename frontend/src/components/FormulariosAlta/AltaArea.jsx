@@ -69,7 +69,7 @@ const AltaArea = () => {
             throw new Error("El nombre es requerido");
         }
 
-        if(!selectMinisterio){
+        if (!selectMinisterio) {
             throw new Error("El ministerio es requerido");
         }
     }
@@ -134,10 +134,10 @@ const AltaArea = () => {
                         <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
                     </div>
                     <div className="ministerio">
-                        <Autocomplete label={"Ministerio"} 
-                        options={ministerios.map(m => m.nombre)} 
-                        getValue={(value) => setSelectMinisterio(value)} 
-                        value={selectMinisterio} />
+                        <Autocomplete label={"Ministerio"}
+                            options={ministerios.map(m => m.nombre)}
+                            getValue={(value) => setSelectMinisterio(value)}
+                            value={selectMinisterio} />
                     </div>
 
                     <div className="codigo">
