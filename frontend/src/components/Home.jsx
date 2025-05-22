@@ -12,7 +12,12 @@ import {
   ListItemText,
   Divider,
   Chip,
-  Skeleton
+  Skeleton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
 } from '@mui/material';
 import {
   CheckCircleOutline as CheckCircleOutlineIcon,
@@ -23,12 +28,10 @@ import {
   ArrowForward as ArrowForwardIcon,
   NotificationsActive as NotificationsActiveIcon
 } from '@mui/icons-material';
-// Asegúrate de que getAvisos y deleteAviso se importan correctamente y están implementados en '../services/avisos.service'
 import { getAvisos, deleteAviso } from '../services/avisos.service';
-import DOMPurify from 'dompurify'; // Asegúrate de que esta librería esté instalada
+import DOMPurify from 'dompurify';
 import LinkInteres from './LinkDeInteres.jsx';
 
-// Asegúrate de que las rutas de las imágenes sean correctas
 import Capacitacion4 from './imagenes/capacitacion_4pasos.png';
 import PortalCC from './imagenes/portal_cc.png';
 import Victorius from './imagenes/victorius.png';
@@ -36,8 +39,8 @@ import CampusCba from './imagenes/campus_cordoba.png';
 import LogoFooter from './imagenes/logo_footer.png';
 
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
-// Asegúrate de que tu componente Alerta acepta props 'open' (boolean), 'onClose' (function), 'severity' (string) y 'message' (string)
 import Alerta from '@mui/material/Alert';
 
 import CircularProgress from '@mui/material/CircularProgress';
@@ -52,22 +55,17 @@ const paperStyles = {
 
 const Home = ({ nombre, setOpcionSeleccionada }) => {
   const [avisos, setAvisos] = useState([]);
-  const [loading, setLoading] = useState(true); // Loading inicial de la lista de avisos
+  const [loading, setLoading] = useState(true);
 
-  // *** Estados para feedback de la operación de eliminación (Simplificados) ***
-  const [loadingDelete, setLoadingDelete] = useState(false); // Loading de la operación de eliminar un aviso
-  const [errorMessage, setErrorMessage] = useState(null); // Mensaje de error (null o '' si no hay error)
-  const [successMessage, setSuccessMessage] = useState(null); // Mensaje de éxito (null o '' si no hay éxito)
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
-  // Eliminamos los estados booleanos redundantes 'error' y 'success' originales
-  // const [error, setError] = useState(false);
-  // const [success, setSuccess] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [avisoToDelete, setAvisoToDelete] = useState(null);
 
-
-  // Effect para la carga inicial de avisos
   useEffect(() => {
     setLoading(true);
-    // Limpiar mensajes de operaciones anteriores al cargar (ej: si vienes de otra página)
     setErrorMessage(null);
     setSuccessMessage(null);
 
@@ -76,26 +74,21 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
         const data = await getAvisos();
         setAvisos(
           data
-            .filter(a => a.visible) // Mantener solo avisos visibles
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Ordenar por fecha descendente
+            .filter(a => a.visible)
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         );
       } catch (error) {
         console.error("Error fetching avisos:", error);
-        // Aquí podrías poner un mensaje de error si falla la carga inicial de avisos
-        // setErrorMessage("Error al cargar la lista de avisos.");
+        setErrorMessage("Error al cargar la lista de avisos.");
       } finally {
         setLoading(false);
       }
     };
+    fetchAvisos();
+  }, []);
 
-    fetchAvisos(); // Ejecutar la carga inicial
-
-  }, []); // El array vacío [] asegura que este efecto se ejecute solo una vez al montar el componente
-
-
-  // Función para formatear la fecha (sin cambios, funciona bien)
   const formatearFecha = fecha => {
-    if (!fecha) return ''; // Manejar casos donde la fecha podría ser null o undefined
+    if (!fecha) return '';
     return new Date(fecha).toLocaleDateString('es-AR', {
       year: 'numeric',
       month: 'short',
@@ -103,8 +96,6 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
     });
   }
 
-
-  // Datos de los links de interés (sin cambios, funcionan bien)
   const linksInteresData = [
     { img: Capacitacion4, title: 'Capacitación 4 Pasos', url: 'https://campusvirtual.cba.gov.ar/course/view.php?id=14629' },
     { img: Victorius, title: 'Gestión Victorius', url: 'https://campuscordoba.cba.gov.ar/gestordeplataforma/public/' },
@@ -112,53 +103,92 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
     { img: CampusCba, title: 'Plataforma Campus Córdoba', url: 'https://campuscordoba.cba.gov.ar/plataforma/my/' },
   ];
 
-  // *** Función para manejar la eliminación de un aviso ***
-  const handleDeleteAviso = async (id) => {
-    // Limpiar mensajes anteriores antes de la nueva operación de eliminación
+  const handleDeleteAvisoClick = (aviso) => {
+    setAvisoToDelete(aviso);
+    setOpenConfirmDialog(true);
     setErrorMessage(null);
     setSuccessMessage(null);
-    setLoadingDelete(true); // Iniciar estado de carga para la eliminación
+  };
+
+  const handleCloseConfirmDialog = () => {
+    if (loadingDelete) return;
+    setOpenConfirmDialog(false);
+    setAvisoToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!avisoToDelete || !avisoToDelete.id) return;
+
+    setLoadingDelete(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
 
     try {
-      // Llamar al servicio para eliminar el aviso en el backend
-      await deleteAviso(id);
-
-      // Si la eliminación en el backend es exitosa (no lanzó error)
-      // Filtra el aviso eliminado del estado local para actualizar la UI
-      setAvisos(prevAvisos => prevAvisos.filter(aviso => aviso.id !== id));
-      setSuccessMessage('Aviso eliminado correctamente.'); // Establece el mensaje de éxito
-
+      await deleteAviso(avisoToDelete.id);
+      setAvisos(prevAvisos => prevAvisos.filter(aviso => aviso.id !== avisoToDelete.id));
+      setSuccessMessage('Aviso eliminado correctamente.');
+      setOpenConfirmDialog(false);
+      setAvisoToDelete(null);
     } catch (error) {
-      // Si ocurre un error durante la eliminación
       console.error("Error al eliminar aviso:", error);
-      // Limpiar mensaje de éxito en caso de error
-      setSuccessMessage(null); // Importante!
-      // Establecer el mensaje de error. Usa el mensaje del error lanzado si está disponible.
+      setSuccessMessage(null);
       setErrorMessage(error.message || 'Ocurrió un error al eliminar el aviso.');
     } finally {
-      // Siempre termina el estado de carga después de la operación (éxito o error)
       setLoadingDelete(false);
     }
-  }
+  };
 
-  // Función para cerrar los carteles de Alerta (simplificada)
   const handleCloseAlert = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
   };
 
-
   return (
     <>
-      {/* Backdrop de carga para la operación de eliminación */}
-      {
-        loading && <Backdrop
-          sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      {loading && (
+        <Backdrop
+          sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 2 }}
           open={loading}
         >
           <CircularProgress color="inherit" />
         </Backdrop>
-      }
+      )}
+
+      {openConfirmDialog && avisoToDelete && (
+        <Dialog
+          open={openConfirmDialog}
+          onClose={handleCloseConfirmDialog}
+          aria-labelledby="confirm-delete-dialog-title"
+          aria-describedby="confirm-delete-dialog-description"
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle sx={{ backgroundColor: 'error.main', color: 'white' }} id="confirm-delete-dialog-title">
+            Confirmar Eliminación
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{ pt: 2 }} id="confirm-delete-dialog-description">
+              ¿Está seguro de que desea eliminar el aviso: <strong>{avisoToDelete.titulo}</strong>?
+              <br />Esta acción no se puede deshacer.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ p: '16px 24px' }}>
+            <Button onClick={handleCloseConfirmDialog} color="secondary" disabled={loadingDelete}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmDelete}
+              variant="contained"
+              color="error"
+              startIcon={loadingDelete ? <CircularProgress size={20} color="inherit" /> : <DeleteIcon />}
+              disabled={loadingDelete}
+            >
+              {loadingDelete ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
 
       <Box
         sx={{
@@ -218,9 +248,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
       </Box>
 
       <Container sx={{ py: { xs: 4, md: 8 } }}>
-
         <Grid container spacing={5}>
-
           <Grid item xs={12} md={12} lg={12}>
             <Paper sx={{ ...paperStyles, p: 4 }}>
               <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
@@ -256,13 +284,12 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
             </Paper>
           </Grid>
 
-          {/* --- Sección de Últimos Avisos --- */}
           <Grid item xs={12} md={12} lg={12}>
             <Paper
               sx={{
                 p: 3,
                 borderRadius: 3,
-                height: '100%',
+                minHeight: 300,
                 backgroundColor: '#f0f2f5',
                 borderLeft: '5px solid',
                 borderColor: 'primary.main',
@@ -275,62 +302,42 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
             >
               <Box display="flex" alignItems="center" mb={2}>
                 <NotificationsActiveIcon sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6" component="h3" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                <Typography variant="h6" component="h3" sx={{ fontWeight: 600, color: 'primary.main', flexGrow: 1 }}>
                   Últimos Avisos
                 </Typography>
-                {
-                  successMessage && (
-                    <Alerta
-                      severity="success"
-                      sx={{
-                        ml: 2,
-                        flexGrow: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '0.8rem',
-                        fontWeight: 500,
-                        color: 'success.main',
-                        border: '1px solid',
-                        borderColor: 'success.main',
-                        borderRadius: 1,
-                        py: 0.5,
-                        px: 1,
-                      }}
-                      onClose={handleCloseAlert} // Cerrar el mensaje de éxito
-                    >
-                      {successMessage}
-                    </Alerta>
-                  )
-                }
-                {
-                  errorMessage && (
-                    <Alerta
-                      severity="error"
-                      sx={{
-                        ml: 2,
-                        flexGrow: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '0.8rem',
-                        fontWeight: 500,
-                        color: 'error.main',
-                        border: '1px solid',
-                        borderColor: 'error.main',
-                        borderRadius: 1,
-                        py: 0.5,
-                        px: 1,
-                      }}
-                    >
-                      {errorMessage}
-                    </Alerta>
-                  )
-                } 
-               
-               
-                
-              </Box>    
+                {successMessage && (
+                  <Alerta
+                    severity="success"
+                    sx={{
+                      ml: 2,
+                      flexShrink: 0,
+                      fontSize: '0.8rem',
+                      fontWeight: 500,
+                      py: 0.5, px: 1,
+                      borderRadius: 1,
+                    }}
+                    onClose={handleCloseAlert}
+                  >
+                    {successMessage}
+                  </Alerta>
+                )}
+                {errorMessage && (
+                  <Alerta
+                    severity="error"
+                    sx={{
+                      ml: successMessage ? 1 : 2,
+                      flexShrink: 0,
+                      fontSize: '0.8rem',
+                      fontWeight: 500,
+                      py: 0.5, px: 1,
+                      borderRadius: 1,
+                    }}
+                    onClose={handleCloseAlert}
+                  >
+                    {errorMessage}
+                  </Alerta>
+                )}
+              </Box>
 
               {loading ? (
                 Array.from(new Array(3)).map((_, index) => (
@@ -351,30 +358,22 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
                 avisos.map((aviso, index) => (
                   <React.Fragment key={aviso.id}>
                     <Box sx={{ p: 2, mb: 2, background: '#fff', borderRadius: 2, boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
-                      {/* Esta Box contiene la fecha, título y AHORA el botón de eliminar */}
                       <Box display="flex" alignItems="center" mb={0.5}>
-                        {/* Fecha */}
                         <Chip label={formatearFecha(aviso.created_at)} size="small" variant="outlined" sx={{ mr: 1.5 }} />
-                        {/* Título */}
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, flexGrow: 1 }}> {/* flexGrow: 1 para que el título ocupe espacio y empuje el botón a la derecha */}
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, flexGrow: 1 }}>
                           {aviso.icono || <InfoOutlinedIcon sx={{ fontSize: '1.2rem', verticalAlign: 'bottom', mr: 0.5 }} />}
                           {aviso.titulo}
                         </Typography>
-
-                        {/* !!! BOTÓN DE ELIMINAR !!! */}
                         <IconButton
                           aria-label={`eliminar aviso ${aviso.titulo}`}
-                          onClick={() => handleDeleteAviso(aviso.id)} // Llama a la función de manejo de eliminación
+                          onClick={() => handleDeleteAvisoClick(aviso)}
                           size="small"
                           sx={{ ml: 'auto', color: 'error.main' }}
-                          disabled={loadingDelete} // Deshabilitar el botón mientras hay una operación de eliminación en curso
+                          disabled={loadingDelete && avisoToDelete?.id === aviso.id}
                         >
-                          <DeleteForeverIcon />
+                          {(loadingDelete && avisoToDelete?.id === aviso.id) ? <CircularProgress size={20} color="inherit" /> : <DeleteForeverIcon />}
                         </IconButton>
-                        {/* !!! FIN BOTÓN DE ELIMINAR !!! */}
-
                       </Box>
-                      {/* Contenido del aviso */}
                       <Box
                         sx={{
                           mt: 1,
@@ -388,16 +387,12 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
                         }}
                       />
                     </Box>
-                    {/* No mostrar Divider después del último aviso */}
                     {index < avisos.length - 1 && <Divider sx={{ my: 1, borderColor: 'rgba(0,0,0,0.05)' }} />}
                   </React.Fragment>
                 ))
               )}
             </Paper>
           </Grid>
-          {/* --- Fin Sección de Últimos Avisos --- */}
-
-
         </Grid>
       </Container>
 
@@ -444,10 +439,6 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
           </Typography>
         </Container>
       </Box>
-
-
-      {/* --- Fin Componentes de Alerta --- */}
-
     </>
   );
 };
