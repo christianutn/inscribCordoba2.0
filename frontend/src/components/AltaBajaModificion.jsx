@@ -354,6 +354,7 @@ const AltaBajaModificion = () => {
                 datosParaEnviar.codPlataformaDictado = plataformasDictadoDataState.find(p => p.nombre === editedRowData.plataformaDictado)?.cod;
                 datosParaEnviar.codMedioInscripcion = mediosInscripcionDataState.find(m => m.nombre === editedRowData.medioInscripcion)?.cod;
                 datosParaEnviar.codTipoCapacitacion = tiposCapacitacionesDataState.find(t => t.nombre === editedRowData.tipoCapacitacion)?.cod;
+                datosParaEnviar.codArea = areasDataState.find(a => a.nombre === editedRowData.area)?.cod;
             } else if (propiedadConfig === 'tutores' || propiedadConfig === 'usuarios') {
                 datosParaEnviar.codArea = areasDataState.find(a => a.nombre === editedRowData.area)?.cod;
                 if (propiedadConfig === 'usuarios') {
@@ -364,6 +365,7 @@ const AltaBajaModificion = () => {
             if (datosParaEnviar.hasOwnProperty('tiene_evento_creado')) datosParaEnviar.tiene_evento_creado = editedRowData.tiene_evento_creado === "Si";
             if (datosParaEnviar.hasOwnProperty('esReferente')) datosParaEnviar.esReferente = editedRowData.esReferente === "Si";
             if (datosParaEnviar.hasOwnProperty('esExcepcionParaFechas')) datosParaEnviar.esExcepcionParaFechas = editedRowData.esExcepcionParaFechas === "Si";
+            if (datosParaEnviar.hasOwnProperty('ministerio')) datosParaEnviar.codMinisterio = ministeriosDataState.find(m => m.nombre === editedRowData.ministerio)?.cod;
             if (currentEditingRow.cod && !datosParaEnviar.cod) datosParaEnviar.cod = currentEditingRow.cod;
             if (currentEditingRow.cuil && !datosParaEnviar.cuil) datosParaEnviar.cuil = currentEditingRow.cuil;
 

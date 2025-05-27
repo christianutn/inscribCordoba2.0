@@ -162,7 +162,7 @@ export const putMinisterio = async (req, res, next) => {
 
         // Realiza la actualización en la base de datos
         const [affectedRows] = await Ministerio.update(
-            { cod: newCod || cod, nombre: nombre, esVigente: esVigente === "Si" ? 1 : 0 },
+            { cod: newCod || cod, nombre: nombre, esVigente: (esVigente === "Si" || esVigente === 1 || esVigente === true) ? 1 : 0 },
             {
                 where: { cod },
                 transaction: t,
