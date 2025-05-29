@@ -312,15 +312,31 @@ const generarHtmlRecuperarContraseña = (urlPeticion) => {
 </html>`
 
 }
+
+// Función para enmascarar el mail
+function maskEmail(email) {
+    if (!email || typeof email !== 'string') return '';
+    const [user, domain] = email.split('@');
+    if (!user || !domain) return '';
+    // Enmascarar usuario (primera y última letra visibles, resto asteriscos)
+    let maskedUser = user.length <= 2 ? user[0] + '*' : user[0] + '*'.repeat(user.length - 2) + user[user.length - 1];
+    // Enmascarar dominio (primera letra y después asteriscos hasta el punto, luego el TLD)
+    const domainParts = domain.split('.');
+    let maskedDomain = domainParts[0][0] + '*'.repeat(Math.max(domainParts[0].length - 1, 0));
+    if (domainParts.length > 1) {
+        maskedDomain += '.' + domainParts.slice(1).join('.')
+    }
+    return `${maskedUser}@${maskedDomain}`;
+}
+
 export const recuperoContrasenia = async (req, res, next) => {
     try {
         const { cuil } = req.body;
         // Quiero recuperar la URL que hace la petición
-        
         //const url = req.protocol + '://' + req.get('host') + req.originalUrl;
         const url = "http://localhost:3000"
-        console.log("URL de la petición:", url)
-        
+    
+
         if (!validarCuil(cuil)) {
             const error = new Error("El CUIL no es válido");
             error.statusCode = 400;
@@ -329,24 +345,19 @@ export const recuperoContrasenia = async (req, res, next) => {
 
         const persona = await Persona.findOne({ where: { cuil: cuil } });
         if (!persona) {
-            const error = new Error(`La persona con el cuil ${cuil} no existe.`);
-            error.statusCode = 400;
-            throw error;
+            // No revelamos si existe o no, devolvemos mensaje genérico
+            return res.status(200).json({ message: "Correo de recuperación enviado" });
         }
-        console.log("Persona encontrada:", persona.mail)
-
         
 
         const token = generarToken({ cuil: cuil, mail: persona.mail }  );
-
         //armamamos la url de la peticion para el frontend
         const urlPeticion = url + "/cambiarContrasenia?token=" + token;
-
         await enviarCorreo(generarHtmlRecuperarContraseña(urlPeticion), "Recupero de contraseña", persona.mail);
-
-        res.status(200).json({ message: "Correo de recuperación enviado" });
+        // Devolver el mail enmascarado
+        const maskedEmail = maskEmail(persona.mail);
         
-
+        res.status(200).json({ message: "Correo de recuperación enviado", cuilRecovery: maskedEmail });
     } catch (error) {
         next(error);
     }

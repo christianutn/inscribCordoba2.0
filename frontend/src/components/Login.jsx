@@ -63,16 +63,18 @@ const Login = () => {
         const cuil = data.get('cuilRecovery');
 
         try {
-            await recuperoContrasenia(cuil);
-            console.log("Requesting password recovery for CUIL:", cuil);
-            // Example: await solicitarRecuperacionContrasenia(cuil);
-            // await new Promise(resolve => setTimeout(resolve, 1500));
-
-            setMensajeDeExito("Si el CUIL está registrado, recibirás instrucciones para restablecer tu contraseña.");
-            // setShowForgotPassword(false); // Optionally switch back
-
+            const resp = await recuperoContrasenia(cuil);
+            // Si el backend devuelve cuilRecovery (mail enmascarado), lo mostramos en el mensaje
+            if (resp && resp.cuilRecovery) {
+                setMensajeDeExito(
+                    `Si el CUIL está registrado, recibirás instrucciones para restablecer tu contraseña en el correo: ${resp.cuilRecovery}`
+                );
+            } else {
+                setMensajeDeExito(
+                    "Si el CUIL está registrado, recibirás instrucciones para restablecer tu contraseña."
+                );
+            }
         } catch (error) {
-            console.error("Password recovery error:", error);
             setMensajeDeError("No se pudo procesar la solicitud de recuperación. Intente nuevamente.");
         } finally {
             setOpen(false);

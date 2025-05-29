@@ -85,6 +85,8 @@ const AltaBajaModificion = () => {
     const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
     const [rowToDelete, setRowToDelete] = useState(null);
 
+    const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+    const [pendingDelete, setPendingDelete] = useState(null);
 
     useEffect(() => {
         setCargando(true);
@@ -474,29 +476,54 @@ const AltaBajaModificion = () => {
             case "Plataformas de Dictado": navigate('/plataformasDictados/alta'); break;
             case "Usuarios": navigate("/usuarios/alta"); break;
             case "Tipos de Capacitación": navigate('/tiposCapacitaciones/alta'); break;
-            case "Asignar areas a usuarios": setError("Gestione desde la tabla."); break;
+            case "Asignar areas a usuarios": navigate('/areasAsignadasUsuario/alta'); break;
             default: break;
         }
     };
 
-    const handleDeleteAreaAsignada = async (cuil, codArea) => {
-        if (window.confirm(`¿Desasignar área al usuario ${cuil}?`)) {
-            try {
-                setCargando(true);
-                await deleteAreaAsignada(cuil, codArea);
-                setConfiguraciones(prev => {
-                    const newConfig = JSON.parse(JSON.stringify(prev));
-                    const areasCfg = newConfig.areasAsignadas;
-                    if (areasCfg) {
-                        const idx = areasCfg.rows.findIndex(r => r.cuil === cuil);
-                        if (idx > -1) areasCfg.rows[idx].areasAsignadas = areasCfg.rows[idx].areasAsignadas.filter(a => a.cod !== codArea);
+    const handleDeleteAreaAsignada = (cuil, codArea) => {
+        setPendingDelete({ cuil, codArea });
+        setOpenConfirmDialog(true);
+    };
+
+    const confirmDeleteArea = async () => {
+        if (!pendingDelete) return;
+        try {
+            setCargando(true);
+            await deleteAreaAsignada(pendingDelete.cuil, pendingDelete.codArea);
+            const areasAsignadasRes = await getAreasAsignadas();
+            setConfiguraciones(prev => {
+                const newConfig = { ...prev };
+                newConfig.areasAsignadas.rows = areasAsignadasRes.reduce((acc, asignacion) => {
+                    if (!asignacion.detalle_usuario || !asignacion.detalle_area) return acc;
+                    const existingRow = acc.find(row => row.cuil === asignacion.detalle_usuario.cuil);
+                    if (existingRow) {
+                        existingRow.areasAsignadas.push({ cod: asignacion.detalle_area.cod, nombre: asignacion.detalle_area.nombre });
+                    } else {
+                        acc.push({
+                            id: asignacion.detalle_usuario.cuil,
+                            cuil: asignacion.detalle_usuario.cuil,
+                            areasAsignadas: [{ cod: asignacion.detalle_area.cod, nombre: asignacion.detalle_area.nombre }],
+                            asignarNueva: ''
+                        });
                     }
-                    return newConfig;
-                });
-                setSuccess("Área desasignada."); setError(null);
-            } catch (err) { setError(err.message || 'Error al desasignar.'); setSuccess(false); }
-            finally { setCargando(false); }
+                    return acc;
+                }, []);
+                return newConfig;
+            });
+            setSuccess("Área desasignada."); setError(null);
+        } catch (err) {
+            setError(err.message || 'Error al desasignar.'); setSuccess(false);
+        } finally {
+            setCargando(false);
+            setOpenConfirmDialog(false);
+            setPendingDelete(null);
         }
+    };
+
+    const cancelDeleteArea = () => {
+        setOpenConfirmDialog(false);
+        setPendingDelete(null);
     };
 
     const handleAsignarNuevaArea = async (cuil) => {
@@ -507,7 +534,8 @@ const AltaBajaModificion = () => {
             setAreasDataState(areasRes);
             setAreasDisponibles(areasRes.filter(a => a.esVigente));
             setAreaFilterDialog(''); setOpenDialog(true);
-        } catch (err) { setError(err.message || "Error al cargar áreas."); }
+        } catch (err) {
+            setError(err.message || "Error al cargar áreas."); }
         finally { setCargando(false); }
     };
 
@@ -516,28 +544,32 @@ const AltaBajaModificion = () => {
         try {
             setCargando(true);
             await postAreaAsignada({ cuil_usuario: selectedUserCuil, cod_area: codArea });
-            const areaSel = areasDataState.find(a => a.cod === codArea);
-            if (!areaSel) throw new Error("Área no encontrada.");
+            const areasAsignadasRes = await getAreasAsignadas();
             setConfiguraciones(prev => {
-                const newConfig = JSON.parse(JSON.stringify(prev));
-                const areasCfg = newConfig.areasAsignadas;
-                if (areasCfg) {
-                    let userRow = areasCfg.rows.find(r => r.cuil === selectedUserCuil);
-                    if (userRow) {
-                        if (!userRow.areasAsignadas.find(a => a.cod === areaSel.cod)) {
-                            userRow.areasAsignadas.push({ cod: areaSel.cod, nombre: areaSel.nombre });
-                            userRow.areasAsignadas.sort((a, b) => a.nombre.localeCompare(b.nombre));
-                        }
+                const newConfig = { ...prev };
+                newConfig.areasAsignadas.rows = areasAsignadasRes.reduce((acc, asignacion) => {
+                    if (!asignacion.detalle_usuario || !asignacion.detalle_area) return acc;
+                    const existingRow = acc.find(row => row.cuil === asignacion.detalle_usuario.cuil);
+                    if (existingRow) {
+                        existingRow.areasAsignadas.push({ cod: asignacion.detalle_area.cod, nombre: asignacion.detalle_area.nombre });
                     } else {
-                        areasCfg.rows.push({ id: selectedUserCuil, cuil: selectedUserCuil, areasAsignadas: [{ cod: areaSel.cod, nombre: areaSel.nombre }], asignarNueva: '' });
-                        areasCfg.rows.sort((a, b) => a.cuil.localeCompare(b.cuil));
+                        acc.push({
+                            id: asignacion.detalle_usuario.cuil,
+                            cuil: asignacion.detalle_usuario.cuil,
+                            areasAsignadas: [{ cod: asignacion.detalle_area.cod, nombre: asignacion.detalle_area.nombre }],
+                            asignarNueva: ''
+                        });
                     }
-                }
+                    return acc;
+                }, []);
                 return newConfig;
             });
             setSuccess("Área asignada."); setError(null);
-        } catch (err) { setError(err.message || "Error al asignar."); setSuccess(false); }
-        finally { setCargando(false); }
+        } catch (err) {
+            setError(err.message || "Error al asignar."); setSuccess(false);
+        } finally {
+            setCargando(false);
+        }
     };
 
     const handleCloseDialog = () => { setOpenDialog(false); setSelectedUserCuil(null); setAreaFilterDialog(''); };
@@ -583,13 +615,11 @@ const AltaBajaModificion = () => {
                                     <BotonCircular icon="descargar" height={40} width={40} isIconButton />
                                 </IconButton>
                             </Tooltip>
-                            {selectOption !== "Asignar areas a usuarios" && (
-                                <Tooltip title="Agregar Nuevo" placement="top">
-                                    <IconButton onClick={handleAgregar} color="primary" size="large">
-                                        <BotonCircular icon="agregar" height={40} width={40} isIconButton />
-                                    </IconButton>
-                                </Tooltip>
-                            )}
+                            <Tooltip title="Agregar Nuevo" placement="top">
+                                <IconButton onClick={handleAgregar} color="primary" size="large">
+                                    <BotonCircular icon="agregar" height={40} width={40} isIconButton />
+                                </IconButton>
+                            </Tooltip>
                         </Box>
                     )}
                 </Box>
@@ -731,6 +761,16 @@ const AltaBajaModificion = () => {
                     )}
                 </DialogContent>
                 <DialogActions><MuiButton onClick={handleCloseDialog}>Cerrar</MuiButton></DialogActions>
+            </Dialog>
+
+            <Dialog open={openConfirmDialog} onClose={cancelDeleteArea}>
+                <Alert severity="warning" sx={{ m: 2 }}>
+                    ¿Está seguro que desea desasignar el área?
+                </Alert>
+                <DialogActions>
+                    <MuiButton onClick={cancelDeleteArea} color="secondary">Cancelar</MuiButton>
+                    <MuiButton onClick={confirmDeleteArea} color="error" variant="contained">Desasignar</MuiButton>
+                </DialogActions>
             </Dialog>
         </>
     );

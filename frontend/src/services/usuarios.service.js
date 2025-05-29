@@ -1,4 +1,3 @@
-
 const URL = process.env.REACT_APP_API_URL + "/usuarios";
 
 export const getUsuarios = async () => {
@@ -106,16 +105,20 @@ export const postUser = async (user) => {
 
 export const cambiarContrasenia = async (nuevaContrasenia) => {
     try {
-        // 1. Intento primero el JWT guardado
-        let token = localStorage.getItem("jwt");
-        // 2. Si no hay JWT, lo saco de la query string
+        // 1. Intento primero el token de la URL
+        const params = new URLSearchParams(window.location.search);
+        let token = params.get("token");
+        
+        // 2. Si no hay token en la URL, lo saco del localStorage
         if (!token) {
-            const params = new URLSearchParams(window.location.search);
-            token = params.get("token");
+            token = localStorage.getItem("jwt");
         }
+
         if (!token) {
             throw new Error("No se encontró token para autorizar la petición");
         }
+
+        console.log("Token:", token);
 
         const response = await fetch(`${URL}/contrasenia`, {
             method: "PUT",
@@ -155,7 +158,7 @@ export const recuperoContrasenia = async (cuil) => {
             throw new Error(data.message || "No fue posible el cambio de contraseña");
         }
 
-        return true
+        return data
     } catch (error) {
         throw error
     }
