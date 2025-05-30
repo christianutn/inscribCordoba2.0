@@ -10,6 +10,7 @@ import Usuario from "../models/usuario.models.js";
 import { createHash } from "../utils/bcrypt.js"
 import generarToken from "../utils/jwt.js";
 import enviarCorreo from "../utils/enviarCorreo.js";
+import parseEsExcepcionParaFechas from "../utils/parseEsExcepcionParaFechas.js"
 
 
 export const getUsuario = async (req, res, next) => {
@@ -113,18 +114,7 @@ export const putUsuario = async (req, res, next) => {
         }
 
 
-        if (!esExcepcionParaFechas) {
-            const error = new Error("El referente es requerido");
-            error.statusCode = 400;
-            throw error;
-        } else if (esExcepcionParaFechas !== "Si" && esExcepcionParaFechas !== "No") {
-            const error = new Error("El referente debe ser Si o No");
-            error.statusCode = 400;
-            throw error;
-        }
 
-        esExcepcionParaFechas = esExcepcionParaFechas.trim()
-        esExcepcionParaFechas = esExcepcionParaFechas === "Si" ? 1 : esExcepcionParaFechas === "No" ? 0 : null;
 
 
 
@@ -145,7 +135,7 @@ export const putUsuario = async (req, res, next) => {
 
         // Actualización de Tutor
         const updateUsuario = await Usuario.update(
-            { cuil: newCuil || cuil, area: area, rol: rol, esExcepcionParaFechas: esExcepcionParaFechas },
+            { cuil: newCuil || cuil, area: area, rol: rol, esExcepcionParaFechas: parseEsExcepcionParaFechas(esExcepcionParaFechas) },
             { where: { cuil: cuil }, transaction: t } // Aseguramos que se incluya la transacción
         );
 
@@ -335,7 +325,7 @@ export const recuperoContrasenia = async (req, res, next) => {
         // Quiero recuperar la URL que hace la petición
         //const url = req.protocol + '://' + req.get('host') + req.originalUrl;
         const url = "http://localhost:3000"
-    
+
 
         if (!validarCuil(cuil)) {
             const error = new Error("El CUIL no es válido");
@@ -348,15 +338,15 @@ export const recuperoContrasenia = async (req, res, next) => {
             // No revelamos si existe o no, devolvemos mensaje genérico
             return res.status(200).json({ message: "Correo de recuperación enviado" });
         }
-        
 
-        const token = generarToken({ cuil: cuil, mail: persona.mail }  );
+
+        const token = generarToken({ cuil: cuil, mail: persona.mail });
         //armamamos la url de la peticion para el frontend
         const urlPeticion = url + "/cambiarContrasenia?token=" + token;
         await enviarCorreo(generarHtmlRecuperarContraseña(urlPeticion), "Recupero de contraseña", persona.mail);
         // Devolver el mail enmascarado
         const maskedEmail = maskEmail(persona.mail);
-        
+
         res.status(200).json({ message: "Correo de recuperación enviado", cuilRecovery: maskedEmail });
     } catch (error) {
         next(error);

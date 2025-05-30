@@ -8,6 +8,7 @@ import { Op } from "sequelize";
 import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
 import sequelize from "../config/database.js";
 import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
+import parseEsVigente from "../utils/parseEsVigente.js"
 
 export const getCursos = async (req, res, next) => {
     try {
@@ -23,7 +24,7 @@ export const getCursos = async (req, res, next) => {
         // Obtener áreas asignadas al usuario
         const areasAsignadas = await AreasAsignadasUsuario.findAll({
             where: { usuario: cuil }
-           
+
         });
         let cursos;
 
@@ -62,7 +63,7 @@ export const getCursos = async (req, res, next) => {
                     codigosArea.push(areaAsignada.area);
                 });
             }
-            
+
             cursos = await cursoModel.findAll({
                 where: {
                     area: {
@@ -154,11 +155,13 @@ export const updateCurso = async (req, res, next) => {
         const parsedCupo = Number(cupo);
         const parsedCantidadHoras = Number(cantidad_horas);
 
+
+
         if (parsedCupo < 1 || isNaN(parsedCupo) || !Number.isInteger(parsedCupo)) {
-             throw new Error("El cupo debe ser un entero mayor a 0");
+            throw new Error("El cupo debe ser un entero mayor a 0");
         }
         if (parsedCantidadHoras < 1 || isNaN(parsedCantidadHoras) || !Number.isInteger(parsedCantidadHoras)) {
-             throw new Error("La cantidad de horas debe ser un entero mayor a 0");
+            throw new Error("La cantidad de horas debe ser un entero mayor a 0");
         }
         // --- Fin Validaciones de entrada ---
 
@@ -192,7 +195,7 @@ export const updateCurso = async (req, res, next) => {
                 plataforma_dictado,
                 tipo_capacitacion,
                 area,
-                esVigente: esVigente === "Si" ? 1 : 0,
+                esVigente: parseEsVigente(esVigente),
                 tiene_evento_creado: tiene_evento_creado === "Si" ? 1 : 0
             },
             {
@@ -206,7 +209,7 @@ export const updateCurso = async (req, res, next) => {
         // Verificamos si la actualización afectó alguna fila (Sin cambios en lógica)
         if (result[0] === 0) {
             // Lanzamos el error. El catch lo capturará y hará rollback.
-             // Mantenemos tu lógica original de considerar 0 filas afectadas como error.
+            // Mantenemos tu lógica original de considerar 0 filas afectadas como error.
             throw new Error("No hubo actualización de datos");
         }
 

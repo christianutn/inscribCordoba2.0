@@ -1,12 +1,13 @@
 import Ministerio from "../models/ministerio.models.js";
 import Area from "../models/area.models.js";
 import Curso from "../models/curso.models.js";
-import {actualizarDatosColumna} from "../googleSheets/services/actualizarDatosColumna.js";
+import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
 import sequelize from "../config/database.js";
 
 import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
 import Usuario from "../models/usuario.models.js";
 import { Op } from 'sequelize'; // Importar el operador de Sequelize
+import parseEsVigente from "../utils/parseEsVigente.js"
 
 export const getMinisterios = async (req, res, next) => {
     try {
@@ -67,7 +68,7 @@ export const getMinisterios = async (req, res, next) => {
                 areasAsignadas.forEach(areaAsignada => {
                     codigosArea.push(areaAsignada.detalle_area.cod);
                 });
-            } 
+            }
 
             // Obtener ministerios filtrados por áreas asignadas
             ministerios = await Ministerio.findAll({
@@ -162,7 +163,7 @@ export const putMinisterio = async (req, res, next) => {
 
         // Realiza la actualización en la base de datos
         const [affectedRows] = await Ministerio.update(
-            { cod: newCod || cod, nombre: nombre, esVigente: (esVigente === "Si" || esVigente === 1 || esVigente === true) ? 1 : 0 },
+            { cod: newCod || cod, nombre: nombre, esVigente: parseEsVigente(esVigente) },
             {
                 where: { cod },
                 transaction: t,
@@ -194,7 +195,7 @@ export const putMinisterio = async (req, res, next) => {
 
 export const deleteMinisterio = async (req, res, next) => {
     try {
-        const {cod} = req.params
+        const { cod } = req.params
 
         if (cod == "" || cod == null || cod == undefined) {
             const error = new Error("El código no es valido");
@@ -207,7 +208,7 @@ export const deleteMinisterio = async (req, res, next) => {
             }
         });
 
-        if(ministerio == 0){
+        if (ministerio == 0) {
             const error = new Error("No existen datos para eliminar");
             error.statusCode = 400;
             throw error;
@@ -221,8 +222,8 @@ export const deleteMinisterio = async (req, res, next) => {
 
 export const postMinisterio = async (req, res, next) => {
     try {
-        
-        let {cod, nombre} = req.body
+
+        let { cod, nombre } = req.body
 
         if (cod == "" || cod == null || cod == undefined) {
             const error = new Error("El código no es valido");
@@ -237,12 +238,12 @@ export const postMinisterio = async (req, res, next) => {
 
         nombre = nombre.trim()
         cod = cod.trim()
-        
 
 
-        const area = await Ministerio.create({cod: cod, nombre: nombre});
 
-        if(!area){
+        const area = await Ministerio.create({ cod: cod, nombre: nombre });
+
+        if (!area) {
             const error = new Error("No se pudo crear el Ministerio");
             error.statusCode = 400;
             throw error;
