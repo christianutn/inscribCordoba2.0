@@ -12,7 +12,12 @@ import {
   ListItemText,
   Divider,
   Chip,
-  Skeleton
+  Skeleton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
 } from '@mui/material';
 import {
   CheckCircleOutline as CheckCircleOutlineIcon,
@@ -23,7 +28,7 @@ import {
   ArrowForward as ArrowForwardIcon,
   NotificationsActive as NotificationsActiveIcon
 } from '@mui/icons-material';
-import { getAvisos } from '../services/avisos.service';
+import { getAvisos, deleteAviso } from '../services/avisos.service';
 import DOMPurify from 'dompurify';
 import LinkInteres from './LinkDeInteres.jsx';
 
@@ -32,6 +37,14 @@ import PortalCC from './imagenes/portal_cc.png';
 import Victorius from './imagenes/victorius.png';
 import CampusCba from './imagenes/campus_cordoba.png';
 import LogoFooter from './imagenes/logo_footer.png';
+
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
+import Alerta from '@mui/material/Alert';
+
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
 const paperStyles = {
   p: 3,
@@ -42,11 +55,21 @@ const paperStyles = {
 
 const Home = ({ nombre, setOpcionSeleccionada }) => {
   const [avisos, setAvisos] = useState([]);
-  const [loadingAvisos, setLoadingAvisos] = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [avisoToDelete, setAvisoToDelete] = useState(null);
 
   useEffect(() => {
-    setLoadingAvisos(true);
-    (async () => {
+    setLoading(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const fetchAvisos = async () => {
       try {
         const data = await getAvisos();
         setAvisos(
@@ -56,18 +79,22 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
         );
       } catch (error) {
         console.error("Error fetching avisos:", error);
+        setErrorMessage("Error al cargar la lista de avisos.");
       } finally {
-        setLoadingAvisos(false);
+        setLoading(false);
       }
-    })();
+    };
+    fetchAvisos();
   }, []);
 
-  const formatearFecha = fecha =>
-    new Date(fecha).toLocaleDateString('es-AR', {
+  const formatearFecha = fecha => {
+    if (!fecha) return '';
+    return new Date(fecha).toLocaleDateString('es-AR', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
+  }
 
   const linksInteresData = [
     { img: Capacitacion4, title: 'Capacitación 4 Pasos', url: 'https://campusvirtual.cba.gov.ar/course/view.php?id=14629' },
@@ -76,8 +103,93 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
     { img: CampusCba, title: 'Plataforma Campus Córdoba', url: 'https://campuscordoba.cba.gov.ar/plataforma/my/' },
   ];
 
+  const handleDeleteAvisoClick = (aviso) => {
+    setAvisoToDelete(aviso);
+    setOpenConfirmDialog(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+  };
+
+  const handleCloseConfirmDialog = () => {
+    if (loadingDelete) return;
+    setOpenConfirmDialog(false);
+    setAvisoToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!avisoToDelete || !avisoToDelete.id) return;
+
+    setLoadingDelete(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      await deleteAviso(avisoToDelete.id);
+      setAvisos(prevAvisos => prevAvisos.filter(aviso => aviso.id !== avisoToDelete.id));
+      setSuccessMessage('Aviso eliminado correctamente.');
+      setOpenConfirmDialog(false);
+      setAvisoToDelete(null);
+    } catch (error) {
+      console.error("Error al eliminar aviso:", error);
+      setSuccessMessage(null);
+      setErrorMessage(error.message || 'Ocurrió un error al eliminar el aviso.');
+    } finally {
+      setLoadingDelete(false);
+    }
+  };
+
+  const handleCloseAlert = () => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
+  };
+
   return (
     <>
+      {loading && (
+        <Backdrop
+          sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 2 }}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      )}
+
+      {openConfirmDialog && avisoToDelete && (
+        <Dialog
+          open={openConfirmDialog}
+          onClose={handleCloseConfirmDialog}
+          aria-labelledby="confirm-delete-dialog-title"
+          aria-describedby="confirm-delete-dialog-description"
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle sx={{ backgroundColor: 'error.main', color: 'white' }} id="confirm-delete-dialog-title">
+            Confirmar Eliminación
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{ pt: 2 }} id="confirm-delete-dialog-description">
+              ¿Está seguro de que desea eliminar el aviso: <strong>{avisoToDelete.titulo}</strong>?
+              <br />Esta acción no se puede deshacer.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ p: '16px 24px' }}>
+            <Button onClick={handleCloseConfirmDialog} color="secondary" disabled={loadingDelete}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmDelete}
+              variant="contained"
+              color="error"
+              startIcon={loadingDelete ? <CircularProgress size={20} color="inherit" /> : <DeleteIcon />}
+              disabled={loadingDelete}
+            >
+              {loadingDelete ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+
       <Box
         sx={{
           background: '#f8f9fa',
@@ -137,7 +249,6 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
 
       <Container sx={{ py: { xs: 4, md: 8 } }}>
         <Grid container spacing={5}>
-
           <Grid item xs={12} md={12} lg={12}>
             <Paper sx={{ ...paperStyles, p: 4 }}>
               <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
@@ -178,7 +289,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
               sx={{
                 p: 3,
                 borderRadius: 3,
-                height: '100%',
+                minHeight: 300,
                 backgroundColor: '#f0f2f5',
                 borderLeft: '5px solid',
                 borderColor: 'primary.main',
@@ -191,12 +302,44 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
             >
               <Box display="flex" alignItems="center" mb={2}>
                 <NotificationsActiveIcon sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6" component="h3" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                <Typography variant="h6" component="h3" sx={{ fontWeight: 600, color: 'primary.main', flexGrow: 1 }}>
                   Últimos Avisos
                 </Typography>
+                {successMessage && (
+                  <Alerta
+                    severity="success"
+                    sx={{
+                      ml: 2,
+                      flexShrink: 0,
+                      fontSize: '0.8rem',
+                      fontWeight: 500,
+                      py: 0.5, px: 1,
+                      borderRadius: 1,
+                    }}
+                    onClose={handleCloseAlert}
+                  >
+                    {successMessage}
+                  </Alerta>
+                )}
+                {errorMessage && (
+                  <Alerta
+                    severity="error"
+                    sx={{
+                      ml: successMessage ? 1 : 2,
+                      flexShrink: 0,
+                      fontSize: '0.8rem',
+                      fontWeight: 500,
+                      py: 0.5, px: 1,
+                      borderRadius: 1,
+                    }}
+                    onClose={handleCloseAlert}
+                  >
+                    {errorMessage}
+                  </Alerta>
+                )}
               </Box>
 
-              {loadingAvisos ? (
+              {loading ? (
                 Array.from(new Array(3)).map((_, index) => (
                   <Box key={index} sx={{ mb: 2 }}>
                     <Skeleton variant="text" width="80%" sx={{ mb: 0.5 }} />
@@ -217,10 +360,19 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
                     <Box sx={{ p: 2, mb: 2, background: '#fff', borderRadius: 2, boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
                       <Box display="flex" alignItems="center" mb={0.5}>
                         <Chip label={formatearFecha(aviso.created_at)} size="small" variant="outlined" sx={{ mr: 1.5 }} />
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, flexGrow: 1 }}>
                           {aviso.icono || <InfoOutlinedIcon sx={{ fontSize: '1.2rem', verticalAlign: 'bottom', mr: 0.5 }} />}
                           {aviso.titulo}
                         </Typography>
+                        <IconButton
+                          aria-label={`eliminar aviso ${aviso.titulo}`}
+                          onClick={() => handleDeleteAvisoClick(aviso)}
+                          size="small"
+                          sx={{ ml: 'auto', color: 'error.main' }}
+                          disabled={loadingDelete && avisoToDelete?.id === aviso.id}
+                        >
+                          {(loadingDelete && avisoToDelete?.id === aviso.id) ? <CircularProgress size={20} color="inherit" /> : <DeleteForeverIcon />}
+                        </IconButton>
                       </Box>
                       <Box
                         sx={{

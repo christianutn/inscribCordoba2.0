@@ -6,7 +6,7 @@ import passport from "passport";
 
 const tipoCertificacionRouter = Router();
 
-tipoCertificacionRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getTiposCertificacion)
-tipoCertificacionRouter.get("/:cod", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getTipoCertificacionByCod)
+tipoCertificacionRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getTiposCertificacion)
+tipoCertificacionRouter.get("/:cod", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getTipoCertificacionByCod)
 
 export default tipoCertificacionRouter

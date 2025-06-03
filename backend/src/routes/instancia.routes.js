@@ -8,7 +8,7 @@ const instanciaRouter = Router();
 
 instanciaRouter.get("/",passport.authenticate('jwt', {session: false}), autorizar(['ADM']), getInstancias)
 
-instanciaRouter.post("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), postInstancia)
+instanciaRouter.post("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), postInstancia)
 
 instanciaRouter.delete("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), deleteInstancia)
 

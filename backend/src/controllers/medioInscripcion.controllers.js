@@ -1,14 +1,15 @@
 import medioInscripcionModel from "../models/medioInscripcion.models.js";
 import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
 import sequelize from "../config/database.js";
+import parseEsVigente from "../utils/parseEsVigente.js"
 
 
 export const getMediosInscripcion = async (req, res, next) => {
     try {
         const mediosInscripcion = await medioInscripcionModel.findAll();
-        
-        if(mediosInscripcion.length === 0){
-            
+
+        if (mediosInscripcion.length === 0) {
+
             const error = new Error("No existen medios de inscripción");
             error.statusCode = 404;
             throw error;
@@ -24,8 +25,8 @@ export const getMediosInscripcion = async (req, res, next) => {
 export const putMedioInscripcion = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
-        
-        let {cod, nombre, newCod, esVigente} =  req.body
+
+        let { cod, nombre, newCod, esVigente } = req.body
 
         if (cod == "" || cod == null || cod == undefined) {
 
@@ -41,7 +42,7 @@ export const putMedioInscripcion = async (req, res, next) => {
             throw error;
         }
 
-        
+
 
         nombre = nombre.trim()
         cod = cod.trim()
@@ -58,24 +59,24 @@ export const putMedioInscripcion = async (req, res, next) => {
         const areaActualJSON = medioInscAnterior.toJSON();
 
         //Actualizamos medio de inscripción con transacción
-        
-        const medioInscripcion = await medioInscripcionModel.update({cod: newCod || cod, nombre: nombre, esVigente: esVigente === "Si" ? 1 : 0}, {
+
+        const medioInscripcion = await medioInscripcionModel.update({ cod: newCod || cod, nombre: nombre, esVigente: parseEsVigente(esVigente) }, {
             where: {
                 cod: cod
             },
             transaction: t
         });
 
-        if(medioInscripcion[0] === 0){
+        if (medioInscripcion[0] === 0) {
             const error = new Error("No se pudo actualizar el medio de inscripción");
             error.statusCode = 404;
             throw error;
         }
 
-         // Llama a actualizarDatosColumna
-         const resultadoGoogleSheets = await actualizarDatosColumna('Medio de inscripción', medioInscAnterior.nombre, nombre);
+        // Llama a actualizarDatosColumna
+        const resultadoGoogleSheets = await actualizarDatosColumna('Medio de inscripción', medioInscAnterior.nombre, nombre);
 
-         if (!resultadoGoogleSheets.success) {
+        if (!resultadoGoogleSheets.success) {
             throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
         }
 
@@ -90,14 +91,14 @@ export const putMedioInscripcion = async (req, res, next) => {
 
 export const postMedioInscripcion = async (req, res, next) => {
     try {
-        let {cod, nombre} = req.body;
-        if(!cod){
+        let { cod, nombre } = req.body;
+        if (!cod) {
             const error = new Error("El código no es válido");
             error.statusCode = 400;
             throw error;
         }
 
-        if(!nombre){
+        if (!nombre) {
             const error = new Error("El nombre no es válido");
             error.statusCode = 400;
             throw error;
@@ -105,22 +106,22 @@ export const postMedioInscripcion = async (req, res, next) => {
 
         cod = cod.trim();
         nombre = nombre.trim();
-        
-        const existeMedioInscripcion = await medioInscripcionModel.findOne({where: {cod}});
-        if(existeMedioInscripcion){
+
+        const existeMedioInscripcion = await medioInscripcionModel.findOne({ where: { cod } });
+        if (existeMedioInscripcion) {
             const error = new Error("El medio de inscripción ya existe");
             error.statusCode = 409;
             throw error;
         }
 
-        const existeNombre = await medioInscripcionModel.findOne({where: {nombre}});
-        if(existeNombre){
+        const existeNombre = await medioInscripcionModel.findOne({ where: { nombre } });
+        if (existeNombre) {
             const error = new Error("El nombre ya existe");
             error.statusCode = 409;
             throw error;
         }
-        const newMedioInscripcion = await medioInscripcionModel.create({cod, nombre});
-        
+        const newMedioInscripcion = await medioInscripcionModel.create({ cod, nombre });
+
         res.status(201).json(newMedioInscripcion);
 
     } catch (error) {
@@ -131,16 +132,16 @@ export const postMedioInscripcion = async (req, res, next) => {
 
 export const deleteMedioInscripcion = async (req, res, next) => {
     try {
-        const {cod} = req.params
-        if(!cod){
+        const { cod } = req.params
+        if (!cod) {
             const error = new Error("El código no es válido");
             error.statusCode = 400;
             throw error;
         }
 
-        const medioInscripcion = await medioInscripcionModel.destroy({where: {cod}});
-        
-        if(medioInscripcion === 0){
+        const medioInscripcion = await medioInscripcionModel.destroy({ where: { cod } });
+
+        if (medioInscripcion === 0) {
             const error = new Error("No se encontraron coincidencias para borrar");
             error.statusCode = 404;
             throw error;

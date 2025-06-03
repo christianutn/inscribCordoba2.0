@@ -28,7 +28,11 @@ initSequelize();
 
 app.use(cors());
 
+<<<<<<< HEAD
 const PORT = 4000 // para producción cambiar a 4000
+=======
+const PORT = 4000// para producción cambiar a 4000
+>>>>>>> christian
 
 // Middleware
 app.use(express.json());

@@ -81,3 +81,26 @@ export const buscarPosicionFecha = (fecha, ListaFechas) => {
 
     return resultado === -1 ? 0: resultado // Si no hay coincidencias, retornamos 0. Si no, retornamos la última que fue menor (o la primera)
 };            
+
+
+export const getObjNroEventos = async () => {
+    try {
+        const response = await fetch(URL + "/nroEventos", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json", 
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+        });
+
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error("No se encontraron los datos");
+        }
+        
+        return data
+
+    } catch (error) {
+        throw error
+    }
+}

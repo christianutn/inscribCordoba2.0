@@ -26,7 +26,7 @@ const inicializarPassport = () => {
             token = token.slice(7, token.length);
         }
 
-        return token;   
+        return token;
 
     }
 
@@ -67,13 +67,45 @@ const inicializarPassport = () => {
                 done(null, false);
             }
 
-            const datosUsuario = {...usuario.dataValues, nombre: persona.nombre, apellido: persona.apellido } //Unifico los datos del usuario y de la persona para que se guarde en la sesión
+            const datosUsuario = { ...usuario.dataValues, nombre: persona.nombre, apellido: persona.apellido } //Unifico los datos del usuario y de la persona para que se guarde en la sesión
 
             done(null, datosUsuario); //Devuelvo el usuario y la persona para que se guarde en la sesión;
         } catch (error) {
             done(error)
         }
     }));
+
+
+    passport.use('jwt-url-param', new JWTStrategy({
+        jwtFromRequest: ExtractJWT.fromUrlQueryParameter('token'),
+        secretOrKey: process.env.JWT_SECRET,
+        passReqToCallback: true
+    }, async (req, jwt_payload, done) => {
+        try {
+            // Buscamos al usuario según el campo que pusimos en el payload
+            console.log('Payload:', jwt_payload);
+            const user = await Usuario.findOne({ where: { cuil: jwt_payload.user.cuil } });
+
+            if (!user) {
+                console.log('Usuario no encontrado para token URL:', jwt_payload.user.cuil);
+                // Terminamos acá si no existe
+                return done(null, false, { message: 'Usuario asociado al token no encontrado.' });
+            }
+
+            // Podés guardar el payload en req si lo vas a usar después
+            req.resetTokenPayload = jwt_payload;
+            // Y el user para tenerlo en los controllers
+            req.user = user;
+
+            console.log('Usuario encontrado:', user.cuil);
+            // Autenticación exitosa
+            return done(null, user);
+        } catch (error) {
+            console.error("Error en estrategia 'jwt-url-param':", error);
+            return done(error, false);
+        }
+    }));
+
 
 }
 

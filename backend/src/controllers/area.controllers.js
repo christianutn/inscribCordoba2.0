@@ -3,6 +3,7 @@ import Ministerio from "../models/ministerio.models.js"; // Importa el modelo de
 import Curso from "../models/curso.models.js";
 import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
 import sequelize from "../config/database.js";
+import parseEsVigente from "../utils/parseEsVigente.js"
 
 export const getAreas = async (req, res, next) => {
     try {
@@ -35,12 +36,16 @@ export const getAreas = async (req, res, next) => {
     }
 }
 
+
+
 export const putArea = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
         const { cod, nombre, ministerio, newCod, esVigente } = req.body;
 
-        if (!cod || !nombre || !ministerio || !esVigente) {
+        const esVigenteNormalizado = parseEsVigente(esVigente);
+
+        if (!cod || !nombre || !ministerio) {
             throw new Error("Datos inválidos: se requiere código, nombre, ministerio y si es vigente.");
         }
 
@@ -52,7 +57,7 @@ export const putArea = async (req, res, next) => {
         const areaActualJSON = areaActual.toJSON();
 
         const area = await areaModel.update(
-            { cod: newCod || cod, nombre, ministerio: ministerio, esVigente: esVigente === "Si" ? 1 : 0   },
+            { cod: newCod || cod, nombre, ministerio: ministerio, esVigente: esVigenteNormalizado },
             { where: { cod }, transaction: t }
         );
 

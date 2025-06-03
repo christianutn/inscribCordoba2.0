@@ -31,6 +31,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
 
 import Formulario from './Formulario';
 import Cronograma from "./Cronograma.jsx";
@@ -40,6 +41,8 @@ import Home from "./Home.jsx";
 import NuevoEvento from './NuevoEvento.jsx';
 import ReporteCursos from "./ReporteCursosCC.jsx";
 import CrearAviso from './CrearAviso.jsx';
+import VersionReducidaGa from './VersionReducidaGA.jsx';
+import VersionReducidaAdministradores from './VersionReducidaAdministradores.jsx';
 
 
 import { getMyUser } from "../services/usuarios.service.js";
@@ -47,14 +50,16 @@ import { getMyUser } from "../services/usuarios.service.js";
 const drawerWidth = 260;
 
 const menuItemsConfig = [
-  { label: "Inicio", identifier: "Home", icon: <HouseIcon />, roles: ["ADM", "REF"] },
-  { label: "Nueva Cohorte", identifier: "Formulario", icon: <EditCalendarIcon />, roles: ["ADM", "REF"] },
-  { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon />, roles: ["ADM", "REF"] },
-  { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon />, roles: ["ADM", "REF"] },
-  { label: "Reporte de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon />, roles: ["ADM", "REF"] },
+  { label: "Inicio", identifier: "Home", icon: <HouseIcon />, roles: ["ADM", "REF", 'GA'] },
+  { label: "Nueva Cohorte", identifier: "Formulario", icon: <EditCalendarIcon />, roles: ["ADM", "REF", 'GA'] },
+  { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon />, roles: ["ADM", "REF", 'GA'] },
+  { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon />, roles: ["ADM", "REF", 'GA'] },
+  { label: "Reporte de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon />, roles: ["ADM", "REF", 'GA'] },
   { label: "Administrar Usuarios/Cursos", identifier: "AltaBajaModificion", icon: <SettingsSuggestIcon />, roles: ["ADM"] },
   { label: "Restricciones Fechas", identifier: "RestriccionesFechasInicioCursada", icon: <GavelIcon />, roles: ["ADM"] },
   { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon />, roles: ["ADM"] },
+  { label: "Version reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon />, roles: ['GA'] },
+  { label: "Version reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
 ];
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -200,6 +205,8 @@ export default function Principal() {
       case "Eventos": return <NuevoEvento />;
       case "ReporteCursosIdentifier": return <ReporteCursos />;
       case "CrearAviso": return <CrearAviso />;
+      case "VersionReducidaGa": return <VersionReducidaGa />;
+      case "VersionReducidaAdministradores": return <VersionReducidaAdministradores />;
       case "Home":
       default: return <Home nombre={user?.nombre} setOpcionSeleccionada={setOpcionSeleccionada} />;
     }

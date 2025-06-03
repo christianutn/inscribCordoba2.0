@@ -6,7 +6,7 @@ import passport from "passport";
 const tutorXInstanciaRouter = Router();
 
 
-tutorXInstanciaRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getTutoresXInstancia)
+tutorXInstanciaRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getTutoresXInstancia)
 
 
 

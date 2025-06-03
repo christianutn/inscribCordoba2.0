@@ -19,7 +19,7 @@ export const agregarFilasGoogleSheets = async (newInstancias) => {
 
 
         for (let i = 0; i < cohortes.length; i++) {
-
+            console.log(cohortes[i].fechaInscripcionDesde, cohortes[i].fechaInscripcionHasta, cohortes[i].fechaCursadaDesde, cohortes[i].fechaCursadaHasta);
             let rowNew = [
                 ministerio, 
                 area, 

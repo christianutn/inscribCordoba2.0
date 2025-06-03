@@ -3,6 +3,7 @@ import { getAvisos } from '../services/avisos.service';
 import { Card, CardContent, Typography, Box } from '@mui/material';
 import DOMPurify from 'dompurify'; // para sanitizar el HTML
 
+
 const MostrarAvisos = () => {
   const [avisos, setAvisos] = useState([]);
 

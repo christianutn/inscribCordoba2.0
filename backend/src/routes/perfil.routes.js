@@ -7,6 +7,6 @@ import {getPerfiles, getPerfilByCod} from "../controllers/perfil.controllers.js"
 
 const perfilRouter = Router();
 
-perfilRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getPerfiles)
-perfilRouter.get("/:cod", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getPerfilByCod)
+perfilRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getPerfiles)
+perfilRouter.get("/:cod", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getPerfilByCod)
 export default perfilRouter
