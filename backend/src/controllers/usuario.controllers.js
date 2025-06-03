@@ -324,7 +324,7 @@ export const recuperoContrasenia = async (req, res, next) => {
         const { cuil } = req.body;
         // Quiero recuperar la URL que hace la petición
         //const url = req.protocol + '://' + req.get('host') + req.originalUrl;
-        const url = "http://localhost:3000"
+        const url = "https://inscribcordoba.cunix.net"
 
 
         if (!validarCuil(cuil)) {
