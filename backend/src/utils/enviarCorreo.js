@@ -25,7 +25,7 @@ async function enviarCorreo(htmlMensaje, asunto, correoDestino) {
 
     // 3. Enviar el Correo
     try {
-        console.log("Intentando enviar correo...");
+        
         let info = await transporter.sendMail(mailOptions);
         console.log("Correo enviado con éxito!");
         console.log("Message ID:", info.messageId);

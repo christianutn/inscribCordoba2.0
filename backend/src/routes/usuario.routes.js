@@ -22,7 +22,6 @@ usuarioRouter.put("/contrasenia", passport.authenticate('jwt', { session: false 
 
 usuarioRouter.put("/recuperoContrasenia", recuperoContrasenia) //Envia correo para con el enlace para recuperar la contraseña
 
-usuarioRouter.put("/renovarContrasenia", passport.authenticate('jwt-url-param', { session: false }), updateContrasenia) //Validamos el token de la url para el cambio de contraseña
 
 
 

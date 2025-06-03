@@ -118,7 +118,6 @@ export const cambiarContrasenia = async (nuevaContrasenia) => {
             throw new Error("No se encontró token para autorizar la petición");
         }
 
-        console.log("Token:", token);
 
         const response = await fetch(`${URL}/contrasenia`, {
             method: "PUT",
