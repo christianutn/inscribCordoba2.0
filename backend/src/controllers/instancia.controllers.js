@@ -1,17 +1,15 @@
 import instanciaModel from "../models/instancia.models.js";
 import Curso from "../models/curso.models.js";
-import Estado from "../models/estado.models.js";
+import Estado_Instancia from "../models/estado_instancia.models.js";
 import Area from "../models/area.models.js";
 import Ministerio from "../models/ministerio.models.js";
 import validarFormatoFecha from "../utils/validarFormatoFecha.js";
 import Persona from "../models/persona.models.js";
 import sequelize from "../config/database.js";
 import TutoresXInstancia from "../models/tutorXInstancia.models.js";
-import { agregarFilasGoogleSheets } from "../googleSheets/services/agregarFilasGoogleSheets.js";
-import { esInstanciaExistente } from "../googleSheets/services/esInstanciaExistente.js";
+import { DateTime } from 'luxon';
 
-import { getObjFechas } from "../googleSheets/services/getObjFechas.js";
-import {superaAcumulado} from "../googleSheets/services/superaAcumulado.js";
+
 
 export const getInstancias = async (req, res, next) => {
     try {
@@ -33,7 +31,7 @@ export const getInstancias = async (req, res, next) => {
 
                 },
                 {
-                    model: Estado, as: 'detalle_estado'
+                    model: Estado_Instancia, as: 'detalle_estado_instancia'
 
                 }
             ]
@@ -56,76 +54,78 @@ export const postInstancia = async (req, res, next) => {
     const t = await sequelize.transaction();
 
     try {
-        const { ministerio, area, medio_inscripcion, plataforma_dictado, tipo_capacitacion, cupo, horas, curso, cohortes, tutores, opciones, comentario } = req.body;
-        const aplicaRestricciones = req.user.user.esExcepcionParaFechas == 0;
+        const {
+            curso,
+            medio_inscripcion,
+            plataforma_dictado,
+            tipo_capacitacion,
+            cupo,
+            horas,
+            cohortes,
+            tutores,
+            opciones,
+            comentario
+        } = req.body;
 
-        // variable que guarda fecha y hora exacta en horas y minutos nada mas en que se ejecuta
-        const fechaActual = new Date();
-        //const fechaActualString = `${fechaActual.getFullYear()}-${fechaActual.getMonth() + 1}-${fechaActual.getDate()} ${fechaActual.getHours()}:${fechaActual.getMinutes()}`;
 
         // cuil del usaurio que hizo la solicitud
-        const cuilUsuario = req.user.user.cuil;
-
-        // cadena de fechaActualString y cuilUsuario
-        const cadenaSolicitud = `${fechaActual.toString()}-${cuilUsuario}`;
-        
-        // Obtener objeto de fechas para verificar las reglas de negocio
-        const objFechas = await getObjFechas(aplicaRestricciones);
-
-        const dataCurso = await Curso.findOne({ where: { nombre: curso } });
-        if (!dataCurso) {
-            throw crearError(404, "No existe el curso");
+        const cuilUsuario = req.user.user.cuil
+        if (!cuilUsuario) {
+            throw new Error("No se pudo obtener el cuil del usuario")
         }
 
-        if(!dataCurso.tiene_evento_creado){
-            throw crearError(400, "El curso no tiene evento creado");
+        const nombreUsuario = req.user.user.nombre
+        if (!nombreUsuario) {
+            throw new Error("No se pudo obtener el nombre del usuario")
         }
+
+        const apellidoUsuario = req.user.user.apellido
+        if (!apellidoUsuario) {
+            throw new Error("No se pudo obtener el apellido del usuario")
+        }
+        // variable que guarda fecha y hora exacta en horas y minutos nada mas en que se ejecuta
+        const fechaActual = DateTime.now().setZone('America/Argentina/Buenos_Aires');
+        const fechaFormateada = fechaActual.toFormat('dd/MM/yyyy HH:mm');
+
+        const datos_solicitud =
+            `Usuario: ${nombreUsuario} ${apellidoUsuario} | ` +
+            `Cuil: ${cuilUsuario} | ` +
+            `Fecha y Hora: ${fechaFormateada}`;
+
 
         for (const cohorte of cohortes) {
-            const { fechaInscripcionDesde, fechaInscripcionHasta, fechaCursadaDesde, fechaCursadaHasta, estado = "PEND" } = cohorte;
-
-            if (![fechaInscripcionDesde, fechaInscripcionHasta, fechaCursadaDesde, fechaCursadaHasta].every(validarFormatoFecha)) {
-                throw crearError(400, "Formato de fecha inválido");
-            }
-
-            const instanciaExistenteBD = await instanciaModel.findOne({
-                where: {
-                    curso: dataCurso.cod,
-                    fecha_inicio_curso: fechaCursadaDesde,
-                }
-            });
-
-            if (instanciaExistenteBD) {
-                throw crearError(400, `La instancia para el curso ${curso} con fecha de inicio ${fechaCursadaDesde} ya existe en nuestra base de datos`);
-            }
-
-            // Verificar restricciones de fecha usando el nuevo formato
-            const claveMesAnio = `${fechaCursadaDesde.split('-')[0]}-${fechaCursadaDesde.split('-')[1]}`;
-            const fechaClave = fechaCursadaDesde;
-
-            // Verificar si el mes está invalidado
-            if (objFechas[claveMesAnio]?.invalidarMesAnio) {
-                throw crearError(400, "Se ha superado el límite mensual de cursos o cupos");
-            }
-
-            // Verificar si el día específico está invalidado
-            if (objFechas[claveMesAnio]?.[fechaClave]?.invalidarDia) {
-                throw crearError(400, "Se ha superado el límite diario de cursos o cupos");
-            }
-
-            // Verificar si el acumulado está invalidado
-            if(aplicaRestricciones && await superaAcumulado(objFechas, fechaClave)){
-                throw crearError(400, "Se ha superado el límite acumulado de cursos o cupos");
-            }
+            const {
+                fechaInscripcionDesde,
+                fechaInscripcionHasta,
+                fechaCursadaDesde,
+                fechaCursadaHasta,
+            } = cohorte;
 
             // Crear la instancia
-            const instancia = await instanciaModel.create({
-                curso: dataCurso.cod,
+            await instanciaModel.create({
+                curso: curso,
                 fecha_inicio_inscripcion: fechaInscripcionDesde,
                 fecha_fin_inscripcion: fechaInscripcionHasta,
                 fecha_inicio_curso: fechaCursadaDesde,
                 fecha_fin_curso: fechaCursadaHasta,
-                estado: estado
+                estado_instancia: "PEND",
+                medio_inscripcion: medio_inscripcion,
+                plataforma_dictado: plataforma_dictado,
+                tipo_capacitacion: tipo_capacitacion,
+                cupo: cupo,
+                cantidad_horas: horas,
+                comentario: comentario,
+                cuil_creador: cuilUsuario,
+                es_autogestionado: opciones.autogestionado,
+                tiene_correlatividad: opciones.correlatividad,
+                tiene_restriccion_edad: opciones.edad,
+                tiene_restriccion_departamento: opciones.departamento,
+                es_publicada_portal_cc: opciones.publicaCC,
+                cantidad_horas: horas,
+                comentario: comentario,
+                datos_solictud: datos_solicitud
+
+
             }, { transaction: t });
 
             // Procesar tutores
@@ -137,15 +137,12 @@ export const postInstancia = async (req, res, next) => {
 
                 await TutoresXInstancia.create({
                     cuil: tutor.cuil,
-                    curso: dataCurso.cod,
+                    curso: req.body.curso,
                     fecha_inicio_curso: fechaCursadaDesde
                 }, { transaction: t });
             }
         }
 
-        
-
-        agregarFilasGoogleSheets({ ...req.body, codCurso: dataCurso.cod, cadenaSolicitud: cadenaSolicitud });
 
         await t.commit();
         res.status(201).json({ message: "Instancias y tutores creados exitosamente" });

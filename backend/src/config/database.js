@@ -2,17 +2,17 @@ import { Sequelize } from "sequelize";
 import 'dotenv/config';
 
 const {
-  DB_NAME,
-  DB_USER,
-  DB_PASSWORD,
-  DB_HOST,
-  DB_PORT
+  DB_NAME_DESARROLLO,
+  DB_USER_DESARROLLO,
+  DB_PASSWORD_DESARROLLO,
+  DB_HOST_DESARROLLO,
+  DB_PORT_DESARROLLO
 } = process.env;
 
-const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
-  host: DB_HOST,
+const sequelize = new Sequelize(DB_NAME_DESARROLLO, DB_USER_DESARROLLO, DB_PASSWORD_DESARROLLO, {
+  host: DB_HOST_DESARROLLO,
   dialect: 'mysql',
-  port: DB_PORT,
+  port: DB_PORT_DESARROLLO,
   dialectOptions: {
     ssl: {
       require: true, // Requiere SSL para la conexión

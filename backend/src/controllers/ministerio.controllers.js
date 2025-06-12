@@ -1,7 +1,7 @@
 import Ministerio from "../models/ministerio.models.js";
 import Area from "../models/area.models.js";
 import Curso from "../models/curso.models.js";
-import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
+
 import sequelize from "../config/database.js";
 
 import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";

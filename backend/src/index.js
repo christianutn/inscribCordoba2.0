@@ -8,6 +8,8 @@ import sequelize from "./config/database.js";
 import associateModels from "./models/asociateModelos.js";
 import 'dotenv/config';
 import enviarCorreoDiarioContolDeCursos from "./googleSheets/utils/enviarCorreoDiarioControlDeCursos.js";
+import syncModels from "./config/sync.database.js";
+
 
 const app = express();
 
@@ -16,8 +18,14 @@ const initSequelize = async () => {
     try {
         await sequelize.authenticate();
         console.log('Connection to the database has been established successfully.');
+       
         associateModels();
         console.log('All models were synchronized successfully.');
+
+        if(process.env.NODE_ENV === 'desarrollo') {
+            await syncModels();
+            console.log('All models were synchronized successfully.');
+        }
     } catch (error) {
         console.error('Unable to connect to the database:', error);
     }
@@ -33,6 +41,7 @@ const PORT = 4000 // para producción cambiar a 4000
 // Middleware
 app.use(express.json());
 inicializarPassport();
+
 
 app.use("/api", indexRoutes);
 

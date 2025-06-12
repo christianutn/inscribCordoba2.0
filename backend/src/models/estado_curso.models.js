@@ -1,16 +1,16 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
-const estado = sequelize.define("estados", {
+const Estado_curso = sequelize.define("estados_cursos", {
     cod: {
-        type: DataTypes.STRING(15),
+        type: DataTypes.STRING(10),
         primaryKey: true
     },
-    nombre: DataTypes.STRING(100)
+    descripcion: DataTypes.STRING(45)
 }, {
     timestamps: false
 });
 
 
 
-export default estado
+export default Estado_curso

@@ -1,3 +1,5 @@
+
+/*
 import { getDataRange } from "../utils/getDataRange.js"; // Importa una función para obtener datos de un rango de Google Sheets.
 import authorize from "../utils/getAuth.js"; // Importa una función para autenticar con Google Sheets.
 import { google } from 'googleapis'; // Importa la biblioteca de Google APIs para interactuar con Google Sheets.
@@ -288,3 +290,4 @@ const insertarFecha = (listaFechasFin, fechaFin) => {
     listaFechasFin.splice(inicio, 0, { fecha: fechaClaveFinCurso, cantidad: 1 });
     return listaFechasFin;
 };
+*/

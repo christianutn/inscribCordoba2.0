@@ -1,5 +1,5 @@
 import medioInscripcionModel from "../models/medioInscripcion.models.js";
-import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
+
 import sequelize from "../config/database.js";
 import parseEsVigente from "../utils/parseEsVigente.js"
 

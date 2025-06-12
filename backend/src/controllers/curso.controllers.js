@@ -5,7 +5,7 @@ import plataformaDictadoModel from "../models/plataformaDictado.models.js";
 import areaModel from "../models/area.models.js";
 import ministerio from "../models/ministerio.models.js";
 import { Op } from "sequelize";
-import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
+
 import sequelize from "../config/database.js";
 import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
 import parseEsVigente from "../utils/parseEsVigente.js"

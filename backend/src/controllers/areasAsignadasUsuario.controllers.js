@@ -2,6 +2,7 @@ import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
 import Usuario from "../models/usuario.models.js";
 import Area from "../models/area.models.js";
 import sequelize from "../config/database.js";
+import AppError from "../utils/appError.js";
 
 // Obtener todas las asignaciones
 export const getAreasAsignadas = async (req, res, next) => {
@@ -33,59 +34,19 @@ export const getAreasAsignadas = async (req, res, next) => {
 
 // Crear una nueva asignación
 export const postAreaAsignada = async (req, res, next) => {
-    const t = await sequelize.transaction();
+    
     try {
         const { cuil_usuario, cod_area, comentario } = req.body; 
-
-        // Validaciones iniciales
-        if (!cuil_usuario || !cod_area) {
-            const error = new Error("El usuario y el area son obligatorios");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        // Verificar si el usuario existe (esto se hace una vez fuera del loop)
-        const existeUsuario = await Usuario.findOne({ where: { cuil: cuil_usuario } });
-        if (!existeUsuario) {
-            const error = new Error("El usuario no existe");
-            error.statusCode = 404;
-            throw error;
-        }
-
-        // Verificar si el area existe (esto se hace una vez fuera del loop)
-        const existeArea = await Area.findOne({ where: { cod: cod_area } });
-        if (!existeArea) {
-            const error = new Error("El area no existe");
-            error.statusCode = 404;
-            throw error;
-        }
-
-        // Verificar si el usuario y el area ya estan asignados
-        const asignacionesExistentes = await AreasAsignadasUsuario.findAll({
-            where: { usuario: cuil_usuario, area: cod_area },
-            transaction: t
-        });
-
-        if (asignacionesExistentes.length > 0) {
-            const error = new Error("El usuario y el area ya estan asignados");
-            error.statusCode = 400;
-            throw error;
-        }
-
         // crear nueva asignacion de area
         const nuevaAsignacion = await AreasAsignadasUsuario.create(
             { usuario: cuil_usuario.trim(), area: cod_area.trim(), comentario: comentario || "Sin comentarios" },
-            { transaction: t }
+            
         )
 
         if (!nuevaAsignacion) {
-            const error = new Error("No se pudo crear la nueva asignación");
-            error.statusCode = 400;
-            throw error;
+            throw new AppError("No se pudo crear la nueva asignación", 400);
         }
 
-
-        await t.commit();
         res.status(201).json(nuevaAsignacion); // Devolver la lista de asignaciones creadas
     } catch (error) {
         await t.rollback();

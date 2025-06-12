@@ -50,6 +50,50 @@ const Curso = sequelize.define("cursos", {
         type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
         allowNull: true
     },
+    es_autogestionado: {
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
+    },
+    tiene_restriccion_edad: {
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
+    },
+    tiene_restriccion_departamento: {
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
+    },
+    publica_pcc: {
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
+    },
+    tiene_correlatividad: {
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
+    },
+    numero_evento: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    esta_maquetado:{
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
+    },
+    esta_configurado: {
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
+    },
+    esta_configurado:{
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
+    },
+    aplica_sincronizacion_certificados:{
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
+    },
+    url_curso:{
+        type: DataTypes.STRING(500),
+        allowNull: true
+    }
 }, {
     timestamps: false,
     tableName: 'cursos'

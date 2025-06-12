@@ -1,6 +1,8 @@
 import cron from "node-cron";
 import envioCorreo from "../../utils/enviarCorreo.js"; // Asegúrate que esta ruta es correcta
-import obtenerCursosARevisar from "../utils/obtenerCursosARevisar.js"; // Asegúrate que esta ruta es correcta
+import Instancia from "../../models/instancia.models.js";
+import Curso from "../../models/curso.models.js";
+
 
 
 
@@ -11,7 +13,8 @@ const enviarCorreoDiarioContolDeCursos =  () => {
     
         try {
             // 1. Obtener los cursos
-            const cursosARevisar = await obtenerCursosARevisar();
+            const cursosARevisar = await Instancia.findAll();
+            
             console.log(`[${timestamp}] CRON TAREA: Se obtuvieron ${cursosARevisar ? cursosARevisar.length : 0} cursos.`);
     
     

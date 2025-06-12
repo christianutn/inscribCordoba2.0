@@ -1,5 +1,5 @@
 import tipoCapacitacionModel from "../models/tipoCapacitacion.models.js";
-import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
+
 import sequelize from "../config/database.js";
 import parseEsVigente from "../utils/parseEsVigente.js"
 

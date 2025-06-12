@@ -2,8 +2,7 @@ import Evento from '../models/evento.models.js';
 import Perfil from '../models/perfil.models.js';
 import AreaTematica from '../models/areaTematica.models.js';
 import TipoCertificacion from '../models/tipoCertificacion.models.js';
-import {agregarFilasNuevoEvento} from '../googleSheets/services/agregarFilaAEvento.js';
-import sequelize from "../config/database.js";
+
 import Curso from '../models/curso.models.js';
 import enviarCorreo from '../utils/enviarCorreo.js';
 
@@ -48,7 +47,7 @@ export const getEventoByCod = async (req, res, next) => {
 
 
 export const postEvento = async (req, res, next) => {
-    const t = await sequelize.transaction();
+    
 
     // Datos del usuario
     const { cuil } = req.user.user;
@@ -134,18 +133,13 @@ export const postEvento = async (req, res, next) => {
             ejes_tematicos,
             certifica_en_cc,
             disenio_a_cargo_cc
-        }, { transaction: t });
+        });
 
         //  Modificar el atributo tiene_evento_Creado de cursoEvento a 1
         cursoEvento.tiene_evento_creado = 1;
         await cursoEvento.save({ transaction: t });
 
-        
-
-        // Cambiar el nombre de la variable para evitar conflictos
-        const resultado = await agregarFilasNuevoEvento(evento, cuil);
-
-        await t.commit();
+       
 
         const htmlBodyCorreo = `<!DOCTYPE html>
 <html lang="es">

@@ -1,3 +1,4 @@
+/*
 import { getDataRange } from "../utils/getDataRange.js";
 import authorize from "../utils/getAuth.js";
 import { google } from 'googleapis';
@@ -38,3 +39,4 @@ export const esInstanciaExistente = async (codCursoAValidar, fechaInicioCursadaA
         throw error;
     }
 }
+*/

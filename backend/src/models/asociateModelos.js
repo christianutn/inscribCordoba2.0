@@ -7,14 +7,12 @@ import Curso from "./curso.models.js";
 import MedioInscripcion from "./medioInscripcion.models.js";
 import TipoCapacitacion from "./tipoCapacitacion.models.js";
 import PlataformaDictado from "./plataformaDictado.models.js";
-import Estado from "./estado.models.js";
+import EstadoInstancia from "./estado_instancia.models.js";
 import Autorizador from "./autorizador.models.js";
 import Rol from "./rol.models.js";
 import Usuario from "./usuario.models.js";
 import Tutor from "./tutor.models.js";
 import TipoRolTutor from "./tipoRolTutor.models.js";
-import CategoriaChatbot from "./categoriaChatbot.models.js";
-import DiccionarioChatbot from "./diccionarioChatbot.models.js";
 import AreasAsignadasUsuario from "./areasAsignadasUsuario.models.js";
 import TipoCertificacion from "./tipoCertificacion.models.js";
 import AreaTematica from "./areaTematica.models.js";
@@ -33,7 +31,7 @@ const associateModels = () => {
 
     //Intancia
     Instancia.belongsTo(Curso, { foreignKey: 'curso', as: 'detalle_curso' });
-    Instancia.belongsTo(Estado, { foreignKey: 'estado', as: 'detalle_estado' });
+    Instancia.belongsTo(EstadoInstancia, { foreignKey: 'estado_instancia', as: 'detalle_estado_instancia' });
    
 
 
@@ -70,8 +68,7 @@ const associateModels = () => {
 
 
 
-    // Cuando llame a DiccionarioChatbot debo poder acceder a todos los atributos de CategoriaChatbot
-    DiccionarioChatbot.belongsTo(CategoriaChatbot, { foreignKey: 'idCategoria', as: 'detalle_categoria' });
+    
 
     // Asociar al modelo Evento los modelos de AreaTematica, TipoCertificacion y Perfil
     Evento.belongsTo(AreaTematica, { foreignKey: 'area_tematica', as: 'detalle_areaTematica' });
