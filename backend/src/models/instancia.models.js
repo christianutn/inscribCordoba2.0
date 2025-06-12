@@ -81,18 +81,28 @@ Object.assign(Instancia, {
      * @returns {Promise<number>} La cantidad total de cursos acumulados.
      */
     async getTotalCursosAcumulados(cohorteFechaCursadaDesde) {
-        // Convertimos el Date nativo a Luxon DateTime
-        const cohorteDateTime = DateTime.fromJSDate(cohorteFechaCursadaDesde);
+        let cohorteDateTime;
+        if (cohorteFechaCursadaDesde instanceof Date) {
+            cohorteDateTime = DateTime.fromJSDate(cohorteFechaCursadaDesde);
+        } else if (typeof cohorteFechaCursadaDesde === 'string') {
+            cohorteDateTime = DateTime.fromISO(cohorteFechaCursadaDesde);
+        } else {
+            throw new Error('Tipo de dato de fecha no soportado');
+        }
 
-        return await Instancia.count({ // <--- Mantiene .count() según tu último código
+        if (!cohorteDateTime.isValid) {
+            throw new Error('Fecha inválida');
+        }
+
+        const fechaISO = cohorteDateTime.toISODate(); // 'YYYY-MM-DD'
+
+        return await Instancia.count({
             where: {
-                // `fecha_inicio_curso` sea MENOR O IGUAL que `cohorteFechaCursadaDesde`
                 fecha_inicio_curso: {
-                    [Op.lte]: cohorteDateTime.toJSDate() // <-- Convertimos a JS Date para Sequelize
+                    [Op.lte]: fechaISO
                 },
-                // `fecha_fin_curso` sea MAYOR que `cohorteFechaCursadaDesde` (tu lógica original)
                 fecha_fin_curso: {
-                    [Op.gt]: cohorteDateTime.toJSDate() // <-- Convertimos a JS Date para Sequelize
+                    [Op.gt]: fechaISO
                 },
                 estado_instancia: {
                     [Op.notIn]: ['CANC', 'REPR']
@@ -107,10 +117,21 @@ Object.assign(Instancia, {
      * @returns {Promise<number>} La cantidad total de cursos.
      */
     async getTotalCursosMes(dateObj) {
-        const dateTime = DateTime.fromJSDate(dateObj); // Convertimos a Luxon DateTime
+        let dateTime;
+        if (dateObj instanceof Date) {
+            dateTime = DateTime.fromJSDate(dateObj);
+        } else if (typeof dateObj === 'string') {
+            dateTime = DateTime.fromISO(dateObj);
+        } else {
+            throw new Error('Tipo de dato de fecha no soportado');
+        }
 
-        const startDate = dateTime.startOf('month').toJSDate(); // Inicio del mes con Luxon, convertido a JS Date
-        const endDate = dateTime.startOf('month').plus({ months: 1 }).toJSDate(); // Inicio del mes siguiente con Luxon, convertido a JS Date
+        if (!dateTime.isValid) {
+            throw new Error('Fecha inválida');
+        }
+
+        const startDate = dateTime.startOf('month').toJSDate(); // Inicio del mes
+        const endDate = dateTime.startOf('month').plus({ months: 1 }).toJSDate(); // Inicio del mes siguiente
 
         return await Instancia.count({
             where: {
@@ -124,17 +145,27 @@ Object.assign(Instancia, {
             }
         });
     },
-
     /**
      * Calcula la suma de cupos para cursos con fecha de inicio en un mes y año dados.
      * @param {Date} dateObj - Un objeto Date del cual extraer el mes y el año.
      * @returns {Promise<number>} La suma total de cupos.
      */
     async getCantidadCupoMes(dateObj) {
-        const dateTime = DateTime.fromJSDate(dateObj); // Convertimos a Luxon DateTime
+        let dateTime;
+        if (dateObj instanceof Date) {
+            dateTime = DateTime.fromJSDate(dateObj);
+        } else if (typeof dateObj === 'string') {
+            dateTime = DateTime.fromISO(dateObj);
+        } else {
+            throw new Error('Tipo de dato de fecha no soportado');
+        }
 
-        const startDate = dateTime.startOf('month').toJSDate(); // Inicio del mes con Luxon, convertido a JS Date
-        const endDate = dateTime.startOf('month').plus({ months: 1 }).toJSDate(); // Inicio del mes siguiente con Luxon, convertido a JS Date
+        if (!dateTime.isValid) {
+            throw new Error('Fecha inválida');
+        }
+
+        const startDate = dateTime.startOf('month').toJSDate(); // Inicio del mes
+        const endDate = dateTime.startOf('month').plus({ months: 1 }).toJSDate(); // Inicio del mes siguiente
 
         return await Instancia.sum('cupo', {
             where: {
@@ -155,10 +186,21 @@ Object.assign(Instancia, {
      * @returns {Promise<number>} La cantidad total de cursos.
      */
     async getCantidadCursosDia(dateObj) {
-        const dateTime = DateTime.fromJSDate(dateObj); // Convertimos a Luxon DateTime
+        let dateTime;
+        if (dateObj instanceof Date) {
+            dateTime = DateTime.fromJSDate(dateObj);
+        } else if (typeof dateObj === 'string') {
+            dateTime = DateTime.fromISO(dateObj);
+        } else {
+            throw new Error('Tipo de dato de fecha no soportado');
+        }
 
-        const startOfDay = dateTime.startOf('day').toJSDate(); // Inicio del día con Luxon, convertido a JS Date
-        const endOfDay = dateTime.startOf('day').plus({ days: 1 }).toJSDate(); // Inicio del día siguiente con Luxon, convertido a JS Date
+        if (!dateTime.isValid) {
+            throw new Error('Fecha inválida');
+        }
+
+        const startOfDay = dateTime.startOf('day').toJSDate(); // Inicio del día
+        const endOfDay = dateTime.startOf('day').plus({ days: 1 }).toJSDate(); // Inicio del día siguiente
 
         return await Instancia.count({
             where: {
@@ -179,10 +221,21 @@ Object.assign(Instancia, {
      * @returns {Promise<number>} La suma total de cupos.
      */
     async getCantidadCupoDia(dateObj) {
-        const dateTime = DateTime.fromJSDate(dateObj); // Convertimos a Luxon DateTime
+        let dateTime;
+        if (dateObj instanceof Date) {
+            dateTime = DateTime.fromJSDate(dateObj);
+        } else if (typeof dateObj === 'string') {
+            dateTime = DateTime.fromISO(dateObj);
+        } else {
+            throw new Error('Tipo de dato de fecha no soportado');
+        }
 
-        const startOfDay = dateTime.startOf('day').toJSDate(); // Inicio del día con Luxon, convertido a JS Date
-        const endOfDay = dateTime.startOf('day').plus({ days: 1 }).toJSDate(); // Inicio del día siguiente con Luxon, convertido a JS Date
+        if (!dateTime.isValid) {
+            throw new Error('Fecha inválida');
+        }
+
+        const startOfDay = dateTime.startOf('day').toJSDate(); // Inicio del día
+        const endOfDay = dateTime.startOf('day').plus({ days: 1 }).toJSDate(); // Inicio del día siguiente
 
         return await Instancia.sum('cupo', {
             where: {
@@ -207,6 +260,9 @@ Object.assign(Instancia, {
         }
         // dateObj se pasa directamente, ya que getCantidadCupoMes lo convertirá a Luxon.
         const total_cupos_mes = await this.getCantidadCupoMes(dateObj);
+        console.log("Fecha a validar: ", dateObj);
+        console.log("Total cupo mes: ", total_cupos_mes);
+        console.log("Limite de cupo mes: ", limiteData.maximoCuposXMes);
         return total_cupos_mes >= limiteData.maximoCuposXMes;
     },
 
@@ -217,6 +273,9 @@ Object.assign(Instancia, {
         }
         // dateObj se pasa directamente.
         const total_cupos_dia = await this.getCantidadCupoDia(dateObj);
+        console.log("Fecha a validar: ", dateObj);
+        console.log("Total cupo dia: ", total_cupos_dia);
+        console.log("Limite de cupos acumulados acumulados: ", limiteData.maximoCuposXDia);
         return total_cupos_dia >= limiteData.maximoCuposXDia;
     },
 
@@ -229,6 +288,9 @@ Object.assign(Instancia, {
         // Recordatorio: getTotalCursosAcumulados cuenta cursos, no suma cupos,
         // pero el nombre de la variable 'maximoAcumulado' podría sugerir cupos.
         const total_cursos_acumulados = await this.getTotalCursosAcumulados(dateObj);
+        console.log("Fecha a validar: ", dateObj);
+        console.log("Total cursos acumulados: ", total_cursos_acumulados);
+        console.log("Limite de cursos acumulados: ", limiteData.maximoAcumulado);
         return total_cursos_acumulados >= limiteData.maximoAcumulado;
     },
 
@@ -239,6 +301,9 @@ Object.assign(Instancia, {
         }
         // dateObj se pasa directamente.
         const total_cursos_mes = await this.getTotalCursosMes(dateObj);
+        console.log("Fecha a validar: ", dateObj);
+        console.log("Total cursos acumulados: ", total_cursos_mes);
+        console.log("Limite de cursos acumulados: ", limiteData.maximoAcumulado);
         return total_cursos_mes >= limiteData.maximoCursosXMes;
     },
 
@@ -249,6 +314,9 @@ Object.assign(Instancia, {
         }
         // dateObj se pasa directamente.
         const total_cursos_dia = await this.getCantidadCursosDia(dateObj);
+        console.log("Fecha a validar: ", dateObj);
+        console.log("Total cursos acumulados: ", total_cursos_dia);
+        console.log("Limite de cursos acumulados: ", limiteData.maximoAcumulado);
         return total_cursos_dia >= limiteData.maximoCursosXDia;
     }
 });

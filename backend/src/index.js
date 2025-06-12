@@ -23,7 +23,7 @@ const initSequelize = async () => {
         console.log('All models were synchronized successfully.');
 
         if(process.env.NODE_ENV === 'desarrollo') {
-            await syncModels();
+            //await syncModels();
             console.log('All models were synchronized successfully.');
         }
     } catch (error) {

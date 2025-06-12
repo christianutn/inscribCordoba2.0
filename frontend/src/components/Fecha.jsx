@@ -5,9 +5,9 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
-import { getMatrizFechas, buscarPosicionFecha } from "../services/googleSheets.service";
 import { getRestricciones } from "../services/restricciones.service.js";
 import { getFeriadosDelAnio } from '../services/api.service.js';
+import { supera_cupo_mes, supera_cupo_dia, supera_cantidad_cursos_acumulado, supera_cantidad_cursos_mes, supera_cantidad_cursos_dia } from "../services/instancias.service.js"
 
 const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -18,7 +18,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await getMatrizFechas();
+        
         const restricciones = await getRestricciones();
         const feriados = await getFeriadosDelAnio();
 
@@ -28,7 +28,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
         setMaximoAcumulado(restricciones.maximoAcumulado === undefined ? false : restricciones.maximoAcumulado);
 
-        setMatrizFechas(response);
+        
       } catch (error) {
         console.error('Error al obtener la matriz de fechas:', error);
       }
@@ -41,7 +41,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
     getFecha(formattedDate, id, fieldFecha);
   };
 
-  const shouldDisableDate = (date) => {
+  const shouldDisableDate = async (date) => {
     const today = dayjs();
     const isWeekend = date.day() === 0 || date.day() === 6;
     const isBeforeToday = date.isBefore(today, 'day');
@@ -50,42 +50,36 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
       return true;
     }
 
-    if (!matrizFechas.listaFechasFin || !matrizFechas.listaFechasInicio ||
-      matrizFechas.listaFechasFin.length === 0 || matrizFechas.listaFechasInicio.length === 0) {
-      return false;
-    }
+    const fechaAValidar = date.format('YYYY-MM-DD').split('-');
+    const fechaString = `${fechaAValidar[0]}-${fechaAValidar[1]}-${fechaAValidar[2]}`;
+    console.log("Fecha a validar: ", fechaString);
+    // Validamos si supera limites
+    const supera_cantidad_cursos_acumulado_res = await supera_cantidad_cursos_acumulado(fechaString);
+    //if(supera_cantidad_cursos_acumulado_res) return true;
+    console.log("Supera cantidad cursos acumulado: ", supera_cantidad_cursos_acumulado_res);
 
-    if (fieldFecha === "fechaCursadaDesde" && matrizFechas) {
-      const fechaAValidar = dayjs(date).format('YYYY-MM-DD').split("-");
-      const claveAnioMes = `${fechaAValidar[0]}-${fechaAValidar[1]}`;
-      const claveDia = `${claveAnioMes}-${fechaAValidar[2]}`;
+    const supera_cantidad_cursos_mes_res = await supera_cantidad_cursos_mes(fechaString);
+    //if(supera_cantidad_cursos_mes_res) return true;
+    console.log("Supera cantidad cursos mes: ", supera_cantidad_cursos_mes_res);
 
-      if (matrizFechas[claveAnioMes]) {
+    const supera_cantidad_cursos_dia_res = await supera_cantidad_cursos_dia(fechaString);
+    //if(supera_cantidad_cursos_dia_res) return true;
+    console.log("Supera cantidad cursos dia: ", supera_cantidad_cursos_dia_res);
 
+    const supera_cupo_mes_res = await supera_cupo_mes(fechaString);
+    //if(supera_cupo_mes_res) return true;
+    console.log("Supera cupo mes: ", supera_cupo_mes_res);
 
+    const supera_cupo_dia_res = await supera_cupo_dia(fechaString);
+    //if(supera_cupo_dia_res) return true;
+    console.log("Supera cupo dia: ", supera_cupo_dia_res);
 
-        const posInicio = buscarPosicionFecha(claveDia, matrizFechas.listaFechasInicio);
-        const posFin = buscarPosicionFecha(claveDia, matrizFechas.listaFechasFin);
-
-        if (posInicio === -1 || posFin === -1) return false;
-
-        const acumulado = matrizFechas.listaFechasInicio[posInicio]?.acumulado - matrizFechas.listaFechasFin[posFin]?.acumulado;
-
-        if (acumulado >= maximoAcumulado) {
-          return true;
-        }
-
-        if (matrizFechas[claveAnioMes]?.invalidarMesAnio || matrizFechas[claveAnioMes]?.[claveDia]?.invalidarDia) {
-          return true;
-        }
-        
-        if (feriados.includes(`${fechaAValidar[0]}-${fechaAValidar[1]}-${fechaAValidar[2]}`)) {
-          console.log("Feriado: ", `${fechaAValidar[0]}-${fechaAValidar[1]}-${fechaAValidar[2]}`);
-          console.log("Feriados: ", feriados);
-          return true;
-        }
-
-      }
+    
+    
+    if (feriados.includes(`${fechaAValidar[0]}-${fechaAValidar[1]}-${fechaAValidar[2]}`)) {
+      console.log("Feriado: ", `${fechaAValidar[0]}-${fechaAValidar[1]}-${fechaAValidar[2]}`);
+      console.log("Feriados: ", feriados);
+      return true;
     }
 
 

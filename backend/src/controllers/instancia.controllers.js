@@ -8,6 +8,7 @@ import Persona from "../models/persona.models.js";
 import sequelize from "../config/database.js";
 import TutoresXInstancia from "../models/tutorXInstancia.models.js";
 import { DateTime } from 'luxon';
+import AppError from "../utils/appError.js";
 
 
 
@@ -187,4 +188,55 @@ export const deleteInstancia = async (req, res, next) => {
 }
 
 
+export const supera_cupo_mes = async (req, res, next) => {
+    try {
+        const {fechaCursadaDesde} = req.params;
+        const superaCupoMes = await instanciaModel.supera_cupo_mes(fechaCursadaDesde);
+        res.status(200).json(superaCupoMes);
 
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const supera_cupo_dia = async (req, res, next) => {
+    try {
+        const {fechaCursadaDesde} = req.params;
+        const superaCupoDia = await instanciaModel.supera_cupo_dia(fechaCursadaDesde);
+        res.status(200).json(superaCupoDia);
+
+    } catch (error) {
+        next(error);
+    } 
+}
+
+export const supera_cantidad_cursos_acumulado = async (req, res, next) => {
+    try {
+        const { fechaCursadaDesde } = req.params;
+        const superaCupoDia = await instanciaModel.supera_cantidad_cursos_acumulado(fechaCursadaDesde);
+        res.status(200).json(superaCupoDia);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const supera_cantidad_cursos_mes = async (req, res, next) => {
+    try {
+        const {fechaCursadaDesde} = req.params;
+        const superaCupoDia = await instanciaModel.supera_cantidad_cursos_mes(fechaCursadaDesde);
+        res.status(200).json(superaCupoDia);
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const supera_cantidad_cursos_dia = async (req, res, next) => {
+    try {
+        const {fechaCursadaDesde} = req.params;
+        const superaCupoDia = await instanciaModel.supera_cantidad_cursos_dia(fechaCursadaDesde);
+        res.status(200).json(superaCupoDia);
+    } catch (error) {
+        next(error);
+    }
+}

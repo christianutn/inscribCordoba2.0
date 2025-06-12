@@ -12,9 +12,7 @@ import AltaPersona from "./components/FormulariosAlta/AltaPersonas";
 import AltaTutores from "./components/FormulariosAlta/AltaTutores";
 import RegistrosTutores from "./components/RegistrosTutores";
 import CambioContrasenia from './components/CambioContrasenia';
-import PingTest from "./components/PingTest"; // Sólo a  modo de desarrollo, luego podrá eliminarse no influye con ninguna funcionalidad
-import ChatBoot from './components/ChatBot';
-import DiccionarioChat from './components/Diccionario';
+import PingTest from "./components/PingTest"; 
 import AltaAsignacionesAreasUsuario from './components/FormulariosAlta/AltaAsignacionesAreasUsuario';
 import DetalleFechas from './components/DetalleFechas';
 import NuevoEvento from "./components/NuevoEvento"
@@ -44,8 +42,6 @@ function App() {
         <Route path="/usuarios/alta" element={<RegistrosTutores />} />
         <Route path="/cambiarContrasenia" element={<CambioContrasenia />} />
         <Route path='/PingTest' element={<PingTest />} />
-        <Route path='/chatbot' element={<ChatBoot />} />
-        <Route path='/diccionario' element={<DiccionarioChat />} />
         <Route path='/areasAsignadasUsuario/alta' element={<AltaAsignacionesAreasUsuario />} />
         <Route path='/detalleFechas' element={<DetalleFechas />} />
         <Route path='/nuevoEvento' element={<NuevoEvento />} />
