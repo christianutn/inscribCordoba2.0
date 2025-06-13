@@ -18,6 +18,7 @@ export const getFeriados =  async (req, res) => {
 
       const data = await response.json();
       console.log("Feriados obtenidos:", data);
+
       res.status(200).json(data);
     } catch (error) {
       console.error("Error al obtener feriados:", error.message);

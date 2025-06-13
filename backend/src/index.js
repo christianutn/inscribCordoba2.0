@@ -9,7 +9,7 @@ import associateModels from "./models/asociateModelos.js";
 import 'dotenv/config';
 import enviarCorreoDiarioContolDeCursos from "./googleSheets/utils/enviarCorreoDiarioControlDeCursos.js";
 import syncModels from "./config/sync.database.js";
-
+import manejarErrorGlobales from "./middlewares/manejoGlobalErrores.js"
 
 const app = express();
 
@@ -65,15 +65,7 @@ app.use((req, res, next) => {
 });
 
 // Middleware para manejar errores generales
-app.use((err, req, res, next) => {
-    console.log("INFO ERROR: ", {
-        message: err.message || err,
-        url: req.originalUrl,
-        method: req.method,
-        status: err.statusCode || 500
-    });
-    res.status(err.statusCode || 500).json({ message: err.message || "Error Interno" });
-});
+app.use(manejarErrorGlobales);
 
 enviarCorreoDiarioContolDeCursos(); // Llamada a la función para enviar el correo diario de control de cursos
 
