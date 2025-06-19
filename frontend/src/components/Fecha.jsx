@@ -8,64 +8,67 @@ import { Typography } from '@mui/material';
 import { getMatrizFechas, buscarPosicionFecha } from "../services/googleSheets.service";
 import { getRestricciones } from "../services/restricciones.service.js";
 import { getFeriadosDelAnio } from '../services/api.service.js';
-import { supera_cupo_mes, supera_cupo_dia, supera_cantidad_cursos_acumulado, supera_cantidad_cursos_mes, supera_cantidad_cursos_dia, get_supera_cantidad_cursos_acumulado_mes } from '../services/instancias.service.js';
+// Remove supera_cantidad_cursos_acumulado (per-day) and get_supera_cantidad_cursos_acumulado_mes (old name)
+// Add getFechasInvalidasPorMes
+import { supera_cupo_mes, supera_cupo_dia, supera_cantidad_cursos_mes, supera_cantidad_cursos_dia, getFechasInvalidasPorMes } from '../services/instancias.service.js';
 
 const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [matrizFechas, setMatrizFechas] = useState([]);
   const [maximoAcumulado, setMaximoAcumulado] = useState(0);
   const [feriados, setFeriados] = useState([]);
-  const [disabledAccumulatedDates, setDisabledAccumulatedDates] = useState(new Set());
-  const [isLoadingMonthData, setIsLoadingMonthData] = useState(false);
+  // Rename disabledAccumulatedDates to invalidDatesInMonth
+  const [invalidDatesInMonth, setInvalidDatesInMonth] = useState(new Set());
+  const [isLoadingMonthData, setIsLoadingMonthData] = useState(false); // Should already exist
 
-  const fetchDisabledDatesForMonth = useCallback(async (dateInView) => {
-    if (!dateInView || !dateInView.isValid()) {
-      // console.warn("fetchDisabledDatesForMonth called with invalid date:", dateInView);
+  // Rename fetchDisabledDatesForMonth to fetchInvalidDatesForMonthView
+  const fetchInvalidDatesForMonthView = useCallback(async (dateInView) => {
+    if (fieldFecha !== "fechaCursadaDesde") {
+      setInvalidDatesInMonth(new Set()); // Use new setter
       return;
     }
-    if (fieldFecha !== "fechaCursadaDesde") {
-      setDisabledAccumulatedDates(new Set());
+    if (!dateInView || !dateInView.isValid()) {
+      // console.warn("fetchInvalidDatesForMonthView called with invalid date:", dateInView);
       return;
     }
 
     setIsLoadingMonthData(true);
     const year = dateInView.year();
-    const month = dateInView.month() + 1; // dayjs month is 0-indexed, API expects 1-indexed
+    const month = dateInView.month() + 1; // For 1-indexed API
 
     try {
-      const datesArray = await get_supera_cantidad_cursos_acumulado_mes(year, month);
-      setDisabledAccumulatedDates(new Set(datesArray));
+      // Use the new service function
+      const datesArray = await getFechasInvalidasPorMes(year, month);
+      setInvalidDatesInMonth(new Set(datesArray)); // Use new setter
     } catch (error) {
-      console.error(`Error fetching accumulated dates for ${year}-${month}:`, error);
-      setDisabledAccumulatedDates(new Set());
+      console.error(`Error fetching invalid dates for ${year}-${month}:`, error);
+      setInvalidDatesInMonth(new Set()); // Use new setter
     } finally {
       setIsLoadingMonthData(false);
     }
-  }, [fieldFecha, setDisabledAccumulatedDates, setIsLoadingMonthData]);
+  }, [fieldFecha, setIsLoadingMonthData, setInvalidDatesInMonth]); // Update dependencies for useCallback
 
   useEffect(() => {
     (async () => {
       try {
-        const GSheetResponse = await getMatrizFechas(); // Renamed to avoid conflict if any
-        const restriccionesData = await getRestricciones(); // Renamed
+        const GSheetResponse = await getMatrizFechas();
+        const restriccionesData = await getRestricciones();
         const feriadosData = await getFeriadosDelAnio();
 
         setFeriados(feriadosData.map(f => f.fecha));
         setMaximoAcumulado(restriccionesData.maximoAcumulado === undefined ? false : restriccionesData.maximoAcumulado);
         setMatrizFechas(GSheetResponse);
 
-        if (fieldFecha === "fechaCursadaDesde") {
-          const dateForInitialFetch = value && dayjs(value).isValid() ? dayjs(value) : dayjs();
-          await fetchDisabledDatesForMonth(dateForInitialFetch);
-        } else {
-          setDisabledAccumulatedDates(new Set());
-        }
+        // Call the renamed fetch function
+        const dateForInitialFetch = value && dayjs(value).isValid() ? dayjs(value) : dayjs();
+        // No need to check fieldFecha here, fetchInvalidDatesForMonthView does it internally
+        await fetchInvalidDatesForMonthView(dateForInitialFetch);
 
       } catch (error) {
         console.error('Error during initial data fetch:', error);
       }
     })();
-  }, [value, fieldFecha, fetchDisabledDatesForMonth]);
+  }, [value, fieldFecha, fetchInvalidDatesForMonthView]); // Update dependency to new function name
 
   const handleDateChange = (newDate) => {
     const formattedDate = newDate ? dayjs(newDate).format('YYYY-MM-DD') : null;
@@ -89,14 +92,11 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
     if (fieldFecha === "fechaCursadaDesde") {
       const stringFecha = date.format('YYYY-MM-DD');
-      if (disabledAccumulatedDates.has(stringFecha)) {
+      // Check against the new state variable invalidDatesInMonth
+      if (invalidDatesInMonth.has(stringFecha)) {
         return true;
       }
     }
-    //isLoadingMonthData can be used here to disable all dates while loading new month data
-    // if (isLoadingMonthData) return true;
-    // However, this might be too aggressive. The DatePicker shows a loading indicator.
-
     return false;
   };
 
@@ -114,8 +114,9 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
           inputFormat="DD/MM/YYYY"
           format="DD/MM/YYYY" // Set the format here
           shouldDisableDate={shouldDisableDate}
-          onMonthChange={(newMonthDate) => fetchDisabledDatesForMonth(newMonthDate)}
-          loading={isLoadingMonthData} // Show loading indicator on DatePicker
+          // Call the new renamed function
+          onMonthChange={(newMonthDate) => fetchInvalidDatesForMonthView(newMonthDate)}
+          loading={isLoadingMonthData} // This should be correct
           className='fecha-picker'
           PopperProps={{
             placement: "bottom-start",

@@ -41,9 +41,9 @@ export const postInstancias = async (newInstancia) => {
 }
 
 
-export const get_supera_cantidad_cursos_acumulado_mes = async (anio, mes) => {
+export const getFechasInvalidasPorMes = async (anio, mes) => { // Renamed
     try {
-        const response = await fetch(`${URL}/supera-cantidad-cursos-acumulado-por-mes?anio=${anio}&mes=${mes}`, {
+        const response = await fetch(`${URL}/obtenerFechasInvalidasPorMes?anio=${anio}&mes=${mes}`, { // Updated URL
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -52,11 +52,10 @@ export const get_supera_cantidad_cursos_acumulado_mes = async (anio, mes) => {
         });
         const data = await response.json();
         if (response.status !== 200) {
-            throw new Error(data.message || "Error al obtener los datos de acumulación mensual");
+            throw new Error(data.message || "Error al obtener las fechas inválidas por mes."); // Updated error message
         }
-        return data; // Expected to be an array of date strings e.g., ["2023-12-15"]
+        return data; // Expected to be an array of date strings
     } catch (error) {
-        // console.error("Error in get_supera_cantidad_cursos_acumulado_mes:", error); // Optional: for debugging
         throw error;
     }
 };

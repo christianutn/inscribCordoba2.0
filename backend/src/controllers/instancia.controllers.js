@@ -187,6 +187,90 @@ export const deleteInstancia = async (req, res, next) => {
     }
 }
 
+const calcularFechasInvalidasDelMes = async (anio, mes) => {
+  const invalidDatesSet = new Set();
+
+  // Luxon months are 1-indexed, matching our 'mes' parameter.
+  const startDate = DateTime.local(anio, mes, 1);
+  const daysInMonth = startDate.daysInMonth;
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const currentDate = DateTime.local(anio, mes, day);
+    const currentDateString = currentDate.toISODate(); // Format: YYYY-MM-DD
+
+    try {
+      // Call the model's static methods.
+      // These methods are expected to return true if the limit is exceeded, false otherwise.
+      const checks = [
+        instanciaModel.supera_cupo_dia(currentDateString),
+        instanciaModel.supera_cantidad_cursos_acumulado(currentDateString),
+        instanciaModel.supera_cantidad_cursos_dia(currentDateString),
+        instanciaModel.supera_cupo_mes(currentDateString), // Assumes model method is designed for this daily iteration context
+        instanciaModel.supera_cantidad_cursos_mes(currentDateString) // Same assumption
+      ];
+
+      const results = await Promise.all(checks);
+
+      if (results.some(result => result === true)) {
+        invalidDatesSet.add(currentDateString);
+      }
+
+    } catch (error) {
+      // Log the error and potentially re-throw or handle it if a single day's check failure
+      // shouldn't stop the whole process. For now, log and continue to check other days.
+      console.error(`Error checking limits for date ${currentDateString}:`, error);
+      // Decide if this date should be considered invalid due to check error, or skip.
+      // For robustness, if a check fails, we might want to either mark the day as "uncertain" (not straightforward)
+      // or let it pass and rely on logs. Let's assume for now we log and it doesn't become invalid due to check error.
+    }
+  }
+
+  return Array.from(invalidDatesSet);
+};
+
+export const obtenerFechasInvalidasPorMes = async (req, res, next) => {
+  try {
+    const { anio: anioStr, mes: mesStr } = req.query;
+
+    if (!anioStr || !mesStr) {
+      const error = new Error("Año y mes son requeridos en los parámetros query.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const anio = parseInt(anioStr, 10);
+    const mes = parseInt(mesStr, 10);
+
+    if (isNaN(anio) || isNaN(mes)) {
+      const error = new Error("Año y mes deben ser valores numéricos.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (mes < 1 || mes > 12) {
+      const error = new Error("Mes debe estar entre 1 y 12.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Example: Validate year range (e.g., between 2000 and 2030)
+    // Adjust range as necessary for the application context.
+    if (anio < 2000 || anio > 2030) {
+      const error = new Error("Año fuera del rango permitido (2000-2030).");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Call the (currently placeholder) logic function
+    const fechasInvalidas = await calcularFechasInvalidasDelMes(anio, mes);
+
+    res.status(200).json(fechasInvalidas);
+
+  } catch (error) {
+    next(error); // Pass error to the global error handler
+  }
+};
+
 
 export const supera_cupo_mes = async (req, res, next) => {
     try {

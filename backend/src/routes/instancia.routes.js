@@ -1,4 +1,4 @@
-import { getInstancias, postInstancia, deleteInstancia,  supera_cupo_mes, supera_cupo_dia, supera_cantidad_cursos_acumulado, supera_cantidad_cursos_mes, supera_cantidad_cursos_dia} from "../controllers/instancia.controllers.js";
+import { getInstancias, postInstancia, deleteInstancia,  supera_cupo_mes, supera_cupo_dia, supera_cantidad_cursos_acumulado, supera_cantidad_cursos_mes, supera_cantidad_cursos_dia, obtenerFechasInvalidasPorMes } from "../controllers/instancia.controllers.js";
 import { Router } from "express";
 import autorizar from "../utils/autorizar.js"
 import manejerValidacionErrores from "../utils/manejarValidacionErrores.js";
@@ -64,5 +64,15 @@ instanciaRouter.get("/supera-cantidad-cursos-dia/:fechaCursadaDesde",
     manejerValidacionErrores,
     supera_cantidad_cursos_dia
 )
+
+
+// Nueva ruta para obtener fechas inválidas por mes (acumulado)
+instanciaRouter.get("/obtenerFechasInvalidasPorMes",
+    passport.authenticate('jwt', { session: false }),
+    autorizar(['ADM', 'REF', 'GA']), // Asumiendo misma autorización que otras rutas de validación GET
+    // No hay middleware de validación específico aquí por ahora; el controlador validará los parámetros de consulta.
+    manejerValidacionErrores, // Manejador de errores de validación estándar
+    obtenerFechasInvalidasPorMes // Nueva función del controlador
+);
 
 export default instanciaRouter
