@@ -60,6 +60,8 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
       // funcion autollamada
       (async() => {
+
+        let superaCupoXMes = await supera_cupo_mes(stringFecha);
         if(await supera_cupo_mes(stringFecha)){
           return true;
         }
