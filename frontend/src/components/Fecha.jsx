@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -8,35 +8,64 @@ import { Typography } from '@mui/material';
 import { getMatrizFechas, buscarPosicionFecha } from "../services/googleSheets.service";
 import { getRestricciones } from "../services/restricciones.service.js";
 import { getFeriadosDelAnio } from '../services/api.service.js';
-import { supera_cupo_mes, supera_cupo_dia, supera_cantidad_cursos_acumulado, supera_cantidad_cursos_mes, supera_cantidad_cursos_dia} from '../services/instancias.service.js';
+import { supera_cupo_mes, supera_cupo_dia, supera_cantidad_cursos_acumulado, supera_cantidad_cursos_mes, supera_cantidad_cursos_dia, get_supera_cantidad_cursos_acumulado_mes } from '../services/instancias.service.js';
 
 const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [matrizFechas, setMatrizFechas] = useState([]);
   const [maximoAcumulado, setMaximoAcumulado] = useState(0);
   const [feriados, setFeriados] = useState([]);
-  const [disabledAccumulatedDates, setDisabledAccumulatedDates] = useState(new Set()); // New state
-  const [checkedAccumulatedDates, setCheckedAccumulatedDates] = useState(new Set());
+  const [disabledAccumulatedDates, setDisabledAccumulatedDates] = useState(new Set());
+  const [isLoadingMonthData, setIsLoadingMonthData] = useState(false);
+
+  const fetchDisabledDatesForMonth = useCallback(async (dateInView) => {
+    if (!dateInView || !dateInView.isValid()) {
+      // console.warn("fetchDisabledDatesForMonth called with invalid date:", dateInView);
+      return;
+    }
+    if (fieldFecha !== "fechaCursadaDesde") {
+      setDisabledAccumulatedDates(new Set());
+      return;
+    }
+
+    setIsLoadingMonthData(true);
+    const year = dateInView.year();
+    const month = dateInView.month() + 1; // dayjs month is 0-indexed, API expects 1-indexed
+
+    try {
+      const datesArray = await get_supera_cantidad_cursos_acumulado_mes(year, month);
+      setDisabledAccumulatedDates(new Set(datesArray));
+    } catch (error) {
+      console.error(`Error fetching accumulated dates for ${year}-${month}:`, error);
+      setDisabledAccumulatedDates(new Set());
+    } finally {
+      setIsLoadingMonthData(false);
+    }
+  }, [fieldFecha, setDisabledAccumulatedDates, setIsLoadingMonthData]);
 
   useEffect(() => {
     (async () => {
       try {
-        const response = await getMatrizFechas();
-        const restricciones = await getRestricciones();
-        const feriados = await getFeriadosDelAnio();
+        const GSheetResponse = await getMatrizFechas(); // Renamed to avoid conflict if any
+        const restriccionesData = await getRestricciones(); // Renamed
+        const feriadosData = await getFeriadosDelAnio();
 
-        console.log("Feriados: ", feriados);
+        setFeriados(feriadosData.map(f => f.fecha));
+        setMaximoAcumulado(restriccionesData.maximoAcumulado === undefined ? false : restriccionesData.maximoAcumulado);
+        setMatrizFechas(GSheetResponse);
 
-        setFeriados(feriados.map(feriado => feriado.fecha));
+        if (fieldFecha === "fechaCursadaDesde") {
+          const dateForInitialFetch = value && dayjs(value).isValid() ? dayjs(value) : dayjs();
+          await fetchDisabledDatesForMonth(dateForInitialFetch);
+        } else {
+          setDisabledAccumulatedDates(new Set());
+        }
 
-        setMaximoAcumulado(restricciones.maximoAcumulado === undefined ? false : restricciones.maximoAcumulado);
-
-        setMatrizFechas(response);
       } catch (error) {
-        console.error('Error al obtener la matriz de fechas:', error);
+        console.error('Error during initial data fetch:', error);
       }
     })();
-  }, []);
+  }, [value, fieldFecha, fetchDisabledDatesForMonth]);
 
   const handleDateChange = (newDate) => {
     const formattedDate = newDate ? dayjs(newDate).format('YYYY-MM-DD') : null;
@@ -45,55 +74,30 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   };
 
   const shouldDisableDate = (date) => {
-    const today = dayjs(); // dayjs object
+    const today = dayjs();
     const isWeekend = date.day() === 0 || date.day() === 6;
-    // 'date' is already a dayjs object as passed by DatePicker
     const isBeforeToday = date.isBefore(today, 'day');
 
     if (isWeekend || isBeforeToday) {
       return true;
     }
 
-    // Add check for feriados if it's not already implicitly handled
-    // Assuming 'feriados' state contains date strings in 'YYYY-MM-DD' format
     const formattedDateForFeriados = date.format('YYYY-MM-DD');
-    if (feriados.includes(formattedDateForFeriados)) { // Ensure 'feriados' is accessible here
-        // console.log("Deshabilitando por feriado: ", formattedDateForFeriados); // Optional: for debugging
-        return true;
+    if (feriados.includes(formattedDateForFeriados)) {
+      return true;
     }
 
     if (fieldFecha === "fechaCursadaDesde") {
-      const stringFecha = date.format('YYYY-MM-DD'); // 'date' is a dayjs object
-
-      // Synchronous check against the new state variable
+      const stringFecha = date.format('YYYY-MM-DD');
       if (disabledAccumulatedDates.has(stringFecha)) {
-        return true; // Already confirmed to be disabled
+        return true;
       }
-
-      // If not yet disabled, and not yet checked
-      if (!checkedAccumulatedDates.has(stringFecha)) {
-            // Add to checked set immediately via state update
-            setCheckedAccumulatedDates(prev => new Set(prev).add(stringFecha));
-
-            supera_cantidad_cursos_acumulado(stringFecha)
-              .then(superaAcumulado => {
-                if (superaAcumulado) {
-                  // If it exceeds, add to the disabled dates Set
-                  setDisabledAccumulatedDates(prevDisabled => new Set(prevDisabled).add(stringFecha));
-                }
-              })
-              .catch(error => {
-                console.error(`Error checking accumulated courses for ${stringFecha}:`, error);
-                // Optionally, remove from checkedAccumulatedDates if we want to allow a retry on next render?
-                // For now, leave it as checked to prevent repeated errors for the same date.
-              });
-      }
-      // On the first pass for a date, it will return false here if not already disabled or checked.
-      // If supera_cantidad_cursos_acumulado returns true, the state update will trigger a re-render,
-      // and then disabledAccumulatedDates.has(stringFecha) will be true.
     }
+    //isLoadingMonthData can be used here to disable all dates while loading new month data
+    // if (isLoadingMonthData) return true;
+    // However, this might be too aggressive. The DatePicker shows a loading indicator.
 
-    return false; // Default to enable
+    return false;
   };
 
   return (
@@ -110,6 +114,8 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
           inputFormat="DD/MM/YYYY"
           format="DD/MM/YYYY" // Set the format here
           shouldDisableDate={shouldDisableDate}
+          onMonthChange={(newMonthDate) => fetchDisabledDatesForMonth(newMonthDate)}
+          loading={isLoadingMonthData} // Show loading indicator on DatePicker
           className='fecha-picker'
           PopperProps={{
             placement: "bottom-start",

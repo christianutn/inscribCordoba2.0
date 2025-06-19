@@ -40,6 +40,27 @@ export const postInstancias = async (newInstancia) => {
     }
 }
 
+
+export const get_supera_cantidad_cursos_acumulado_mes = async (anio, mes) => {
+    try {
+        const response = await fetch(`${URL}/supera-cantidad-cursos-acumulado-por-mes?anio=${anio}&mes=${mes}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        });
+        const data = await response.json();
+        if (response.status !== 200) {
+            throw new Error(data.message || "Error al obtener los datos de acumulación mensual");
+        }
+        return data; // Expected to be an array of date strings e.g., ["2023-12-15"]
+    } catch (error) {
+        // console.error("Error in get_supera_cantidad_cursos_acumulado_mes:", error); // Optional: for debugging
+        throw error;
+    }
+};
+
 export const supera_cupo_mes = async (fecha) => {
     try {
         const response = await fetch(`${URL}/supera-cantidad-cupo-mes/${fecha}`, {
