@@ -15,6 +15,8 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   const [matrizFechas, setMatrizFechas] = useState([]);
   const [maximoAcumulado, setMaximoAcumulado] = useState(0);
   const [feriados, setFeriados] = useState([]);
+  const [disabledAccumulatedDates, setDisabledAccumulatedDates] = useState(new Set()); // New state
+  const [checkedAccumulatedDates, setCheckedAccumulatedDates] = useState(new Set());
 
   useEffect(() => {
     (async () => {
@@ -43,39 +45,55 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   };
 
   const shouldDisableDate = (date) => {
-    const today = dayjs();
+    const today = dayjs(); // dayjs object
     const isWeekend = date.day() === 0 || date.day() === 6;
+    // 'date' is already a dayjs object as passed by DatePicker
     const isBeforeToday = date.isBefore(today, 'day');
 
     if (isWeekend || isBeforeToday) {
       return true;
     }
 
-    if (fieldFecha === "fechaCursadaDesde") {
-      const fechaAValidar = dayjs(date).format('YYYY-MM-DD').split("-");
-      const claveAnioMes = `${fechaAValidar[0]}-${fechaAValidar[1]}`;
-      const claveDia = `${claveAnioMes}-${fechaAValidar[2]}`;
-
-      const stringFecha = `${fechaAValidar[0]}-${fechaAValidar[1]}-${fechaAValidar[2]}`;
-
-      // funcion autollamada
-      (async() => {
-
-        let superaAcumulado = await supera_cantidad_cursos_acumulado(stringFecha);
-        if (superaAcumulado) {
-          return true;
-        }
-       
-      })();
-
-  
-
-      
+    // Add check for feriados if it's not already implicitly handled
+    // Assuming 'feriados' state contains date strings in 'YYYY-MM-DD' format
+    const formattedDateForFeriados = date.format('YYYY-MM-DD');
+    if (feriados.includes(formattedDateForFeriados)) { // Ensure 'feriados' is accessible here
+        // console.log("Deshabilitando por feriado: ", formattedDateForFeriados); // Optional: for debugging
+        return true;
     }
 
+    if (fieldFecha === "fechaCursadaDesde") {
+      const stringFecha = date.format('YYYY-MM-DD'); // 'date' is a dayjs object
 
+      // Synchronous check against the new state variable
+      if (disabledAccumulatedDates.has(stringFecha)) {
+        return true; // Already confirmed to be disabled
+      }
 
-    return false;
+      // If not yet disabled, and not yet checked
+      if (!checkedAccumulatedDates.has(stringFecha)) {
+            // Add to checked set immediately via state update
+            setCheckedAccumulatedDates(prev => new Set(prev).add(stringFecha));
+
+            supera_cantidad_cursos_acumulado(stringFecha)
+              .then(superaAcumulado => {
+                if (superaAcumulado) {
+                  // If it exceeds, add to the disabled dates Set
+                  setDisabledAccumulatedDates(prevDisabled => new Set(prevDisabled).add(stringFecha));
+                }
+              })
+              .catch(error => {
+                console.error(`Error checking accumulated courses for ${stringFecha}:`, error);
+                // Optionally, remove from checkedAccumulatedDates if we want to allow a retry on next render?
+                // For now, leave it as checked to prevent repeated errors for the same date.
+              });
+      }
+      // On the first pass for a date, it will return false here if not already disabled or checked.
+      // If supera_cantidad_cursos_acumulado returns true, the state update will trigger a re-render,
+      // and then disabledAccumulatedDates.has(stringFecha) will be true.
+    }
+
+    return false; // Default to enable
   };
 
   return (
