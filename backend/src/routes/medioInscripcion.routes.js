@@ -5,7 +5,7 @@ import passport from "passport";
 
 const medioInscripcionRouter = Router();
 
-medioInscripcionRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getMediosInscripcion)
+medioInscripcionRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getMediosInscripcion)
 
 medioInscripcionRouter.put("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']),putMedioInscripcion)
 

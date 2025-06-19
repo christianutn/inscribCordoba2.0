@@ -7,7 +7,7 @@ import passport from "passport";
 
 const personaRouter = Router();
 
-personaRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getPersonas)
+personaRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getPersonas)
 personaRouter.post("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), postPersona)
 personaRouter.put("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), putPersona)
 personaRouter.delete("/:cuil", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), deletePersona)

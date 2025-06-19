@@ -26,7 +26,8 @@ export const updateRow = async (row, option) => {
                     plataforma_dictado: row.codPlataformaDictado,
                     tipo_capacitacion: row.codTipoCapacitacion,
                     area: row.codArea,
-                    esVigente: row.esVigente
+                    esVigente: row.esVigente,
+                    tiene_evento_creado: row.tiene_evento_creado
 
                 })
                 break;

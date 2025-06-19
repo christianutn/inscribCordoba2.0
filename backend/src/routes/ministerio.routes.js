@@ -6,7 +6,7 @@ import autorizar from "../utils/autorizar.js"
 const ministerioRouter = Router();
 
 
-ministerioRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getMinisterios)
+ministerioRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getMinisterios)
 ministerioRouter.put("/",  passport.authenticate('jwt', {session: false}), autorizar(['ADM']), putMinisterio)
 ministerioRouter.delete("/:cod",  passport.authenticate('jwt', {session: false}), autorizar(['ADM']), deleteMinisterio)
 ministerioRouter.post("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), postMinisterio)

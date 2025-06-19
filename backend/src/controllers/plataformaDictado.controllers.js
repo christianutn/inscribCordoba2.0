@@ -1,6 +1,9 @@
 import plataformaDictadoModel from "../models/plataformaDictado.models.js";
-import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
+
 import sequelize from "../config/database.js";
+import parseEsVigente from "../utils/parseEsVigente.js"
+
+
 export const getPlataformasDictado = async (req, res, next) => {
     try {
         const plataformasDictado = await plataformaDictadoModel.findAll();
@@ -26,7 +29,7 @@ export const putPlataformaDictado = async (req, res, next) => {
 
         let { cod, nombre, newCod, esVigente } = req.body
 
-        if (!cod || !nombre || !esVigente) {
+        if (!cod || !nombre) {
             const error = new Error("El código, el nombre y la vigencia son obligatorios");
             error.statusCode = 400;
             throw error;
@@ -49,7 +52,7 @@ export const putPlataformaDictado = async (req, res, next) => {
 
         //Actualizar la plataforma de dictado
 
-        const plataforma_dictado = await plataformaDictadoModel.update({ cod: newCod || cod, nombre: nombre, esVigente: esVigente === "Si" ? 1 : 0 }, {
+        const plataforma_dictado = await plataformaDictadoModel.update({ cod: newCod || cod, nombre: nombre, esVigente: parseEsVigente(esVigente) }, {
             where: {
                 cod: cod
             },
@@ -62,7 +65,7 @@ export const putPlataformaDictado = async (req, res, next) => {
             throw error;
         }
 
-        
+
 
         // Llama a actualizarDatosColumna
         const resultadoGoogleSheets = await actualizarDatosColumna('Plataforma de dictado', plataformaDictadoAnteriorJSON.nombre, nombre);

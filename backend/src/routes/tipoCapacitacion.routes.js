@@ -5,7 +5,7 @@ import passport from "passport";
 
 const tipoCapacitacionRouter = Router();
 
-tipoCapacitacionRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getTiposCapacitacion)
+tipoCapacitacionRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getTiposCapacitacion)
 tipoCapacitacionRouter.post("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), postTiposCapacitacion)
 tipoCapacitacionRouter.put("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), putTiposCapacitacion)
 tipoCapacitacionRouter.delete("/:cod", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), deleteTiposCapacitacion)

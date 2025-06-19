@@ -5,7 +5,7 @@ import autorizar from "../utils/autorizar.js"
 
 const tutorRouter = Router();
 
-tutorRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']),  getTutores)
+tutorRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']),  getTutores)
 
 tutorRouter.put("/",  passport.authenticate('jwt', {session: false}), autorizar(['ADM']), putTutores)
 

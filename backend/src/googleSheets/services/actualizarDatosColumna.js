@@ -1,3 +1,4 @@
+/*
 import { google } from 'googleapis';
 import authorize from '../utils/getAuth.js';
 export const actualizarDatosColumna = async (nombreColumna, valorActual, valorNuevo) => {
@@ -49,3 +50,4 @@ export const actualizarDatosColumna = async (nombreColumna, valorActual, valorNu
         throw error;
     }
 };
+*/

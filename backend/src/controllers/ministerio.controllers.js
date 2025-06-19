@@ -1,17 +1,45 @@
 import Ministerio from "../models/ministerio.models.js";
 import Area from "../models/area.models.js";
 import Curso from "../models/curso.models.js";
-import {actualizarDatosColumna} from "../googleSheets/services/actualizarDatosColumna.js";
+
 import sequelize from "../config/database.js";
+
+import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
+import Usuario from "../models/usuario.models.js";
+import { Op } from 'sequelize'; // Importar el operador de Sequelize
+import parseEsVigente from "../utils/parseEsVigente.js"
 
 export const getMinisterios = async (req, res, next) => {
     try {
         // Obtener los valores del token
-        const { rol, area } = req.user.user;
+        const { rol, area, cuil } = req.user.user;
+
+        // Validar datos del usuario
+        if (!cuil || !rol) {
+            const error = new Error("No se encontraron los datos del usuario (rol o cuil)");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Obtener áreas asignadas al usuario
+        const areasAsignadas = await AreasAsignadasUsuario.findAll({
+            where: { usuario: cuil },
+            include: [
+                {
+                    model: Usuario,
+                    as: 'detalle_usuario'
+                },
+                {
+                    model: Area,
+                    as: 'detalle_area'
+                }
+            ]
+        });
 
         let ministerios;
 
-        if (rol === "ADM") {
+        // Lógica para obtener ministerios según el rol
+        if (rol === "ADM" || rol === "GA") {
             ministerios = await Ministerio.findAll({
                 include: [
                     {
@@ -27,12 +55,32 @@ export const getMinisterios = async (req, res, next) => {
                 ]
             });
         } else {
+            // Validar área para roles no administradores
+            if (!area) {
+                const error = new Error("No se encontraron los datos del usuario (area)");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            // Crear lista de códigos de área
+            const codigosArea = [area];
+            if (areasAsignadas.length > 0) {
+                areasAsignadas.forEach(areaAsignada => {
+                    codigosArea.push(areaAsignada.detalle_area.cod);
+                });
+            }
+
+            // Obtener ministerios filtrados por áreas asignadas
             ministerios = await Ministerio.findAll({
                 include: [
                     {
                         model: Area,
                         as: 'detalle_areas',
-                        where: { cod: area }, // Filtrar por área específica del usuario
+                        where: {
+                            cod: {
+                                [Op.in]: codigosArea // Filtrar áreas que coincidan con alguno de los códigos en la lista
+                            }
+                        },
                         include: [
                             {
                                 model: Curso,
@@ -44,12 +92,14 @@ export const getMinisterios = async (req, res, next) => {
             });
         }
 
+        // Validar si se encontraron ministerios
         if (ministerios.length === 0) {
             const error = new Error("No existen ministerios");
             error.statusCode = 404;
             throw error;
         }
 
+        // Enviar respuesta exitosa
         res.status(200).json(ministerios);
     } catch (error) {
         next(error);
@@ -113,7 +163,7 @@ export const putMinisterio = async (req, res, next) => {
 
         // Realiza la actualización en la base de datos
         const [affectedRows] = await Ministerio.update(
-            { cod: newCod || cod, nombre: nombre, esVigente: esVigente === "Si" ? 1 : 0 },
+            { cod: newCod || cod, nombre: nombre, esVigente: parseEsVigente(esVigente) },
             {
                 where: { cod },
                 transaction: t,
@@ -145,7 +195,7 @@ export const putMinisterio = async (req, res, next) => {
 
 export const deleteMinisterio = async (req, res, next) => {
     try {
-        const {cod} = req.params
+        const { cod } = req.params
 
         if (cod == "" || cod == null || cod == undefined) {
             const error = new Error("El código no es valido");
@@ -158,7 +208,7 @@ export const deleteMinisterio = async (req, res, next) => {
             }
         });
 
-        if(ministerio == 0){
+        if (ministerio == 0) {
             const error = new Error("No existen datos para eliminar");
             error.statusCode = 400;
             throw error;
@@ -172,8 +222,8 @@ export const deleteMinisterio = async (req, res, next) => {
 
 export const postMinisterio = async (req, res, next) => {
     try {
-        
-        let {cod, nombre} = req.body
+
+        let { cod, nombre } = req.body
 
         if (cod == "" || cod == null || cod == undefined) {
             const error = new Error("El código no es valido");
@@ -188,12 +238,12 @@ export const postMinisterio = async (req, res, next) => {
 
         nombre = nombre.trim()
         cod = cod.trim()
-        
 
 
-        const area = await Ministerio.create({cod: cod, nombre: nombre});
 
-        if(!area){
+        const area = await Ministerio.create({ cod: cod, nombre: nombre });
+
+        if (!area) {
             const error = new Error("No se pudo crear el Ministerio");
             error.statusCode = 400;
             throw error;

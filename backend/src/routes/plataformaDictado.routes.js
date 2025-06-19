@@ -7,7 +7,7 @@ import passport from "passport";
 const plataformaDictadoRouter = Router();
 
 
-plataformaDictadoRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF']), getPlataformasDictado)
+plataformaDictadoRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getPlataformasDictado)
 
 plataformaDictadoRouter.put("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM']), putPlataformaDictado)
 

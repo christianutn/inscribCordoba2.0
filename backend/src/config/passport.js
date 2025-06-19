@@ -4,6 +4,7 @@ import Usuario from "../models/usuario.models.js"
 import { createHash, validatePassword } from "../utils/bcrypt.js"
 import jwt from 'passport-jwt'
 import 'dotenv/config';
+import Persona from '../models/persona.models.js';
 
 const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = jwt.Strategy
@@ -25,7 +26,7 @@ const inicializarPassport = () => {
             token = token.slice(7, token.length);
         }
 
-        return token;   
+        return token;
 
     }
 
@@ -53,20 +54,27 @@ const inicializarPassport = () => {
             const usuario = await Usuario.findOne({ where: { cuil: cuil } });
             if (!usuario) {
 
-                done(null, false);
+                return done(null, false);
             }
 
             if (!validatePassword(String(contrasenia), usuario.contrasenia)) {
 
-                done(null, false);
+                return done(null, false);
             }
 
+            const persona = await Persona.findOne({ where: { cuil: cuil } });
+            if (!persona) {
+                return done(null, false);
+            }
 
-            done(null, usuario);
+            const datosUsuario = { ...usuario.dataValues, nombre: persona.nombre, apellido: persona.apellido } //Unifico los datos del usuario y de la persona para que se guarde en la sesión
+
+            return done(null, datosUsuario); //Devuelvo el usuario y la persona para que se guarde en la sesión;
         } catch (error) {
-            done(error)
+           return done(error)
         }
     }));
+
 
 }
 

@@ -9,6 +9,7 @@
         "select-medio-inscripcion select-plataforma-dictado  select-tipo-capacitacion"
         "input . ."
         "opciones-evento opciones-evento opciones-evento"
+        "comentario comentario comentario"
         "tutores tutores tutores"
         "cohortes cohortes cohortes"
         "submit submit submit";
@@ -34,6 +35,7 @@
     .select-plataforma-dictado { grid-area: select-plataforma-dictado; }
     .titulo { grid-area: titulo; }
     .divider { grid-area: divider; }
+    .comentario { grid-area: comentario; }
 
     // Media query para pantallas pequeñas
     @media (max-width: 768px) {
@@ -49,6 +51,7 @@
             "tutores"
             "input"
             "opciones-evento"
+            "comentario"
             "cohortes"
             "submit";
         margin-left: 20px;
@@ -70,5 +73,6 @@
         .select-plataforma-dictado { grid-area: select-plataforma-dictado; }
         .titulo { grid-area: titulo; }
         .divider { grid-area: divider; }
+        .comentario { grid-area: comentario; }
     }
 }

@@ -24,7 +24,7 @@ const CambioContrasenia = () => {
     useEffect(() => {
         (async () => {
             try {
-                setCargando(true);
+                setCargando(true);/*
                 const user = await getMyUser();
 
 
@@ -32,7 +32,7 @@ const CambioContrasenia = () => {
                     navigate("/login");
                     return
                 }
-
+*/
 
             } catch (error) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });

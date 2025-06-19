@@ -1,13 +1,14 @@
 import tipoCapacitacionModel from "../models/tipoCapacitacion.models.js";
-import { actualizarDatosColumna } from "../googleSheets/services/actualizarDatosColumna.js";
+
 import sequelize from "../config/database.js";
+import parseEsVigente from "../utils/parseEsVigente.js"
 
 export const getTiposCapacitacion = async (req, res, next) => {
     try {
         const tiposCapacitacion = await tipoCapacitacionModel.findAll();
 
-        if(tiposCapacitacion.length === 0){
-            
+        if (tiposCapacitacion.length === 0) {
+
             const error = new Error("No existen tipos de capacitacion");
             error.statusCode = 404;
             throw error;
@@ -23,8 +24,8 @@ export const getTiposCapacitacion = async (req, res, next) => {
 export const putTiposCapacitacion = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
-        
-        let {cod, nombre, newCod, esVigente} =  req.body
+
+        let { cod, nombre, newCod, esVigente } = req.body
 
         if (!cod) {
 
@@ -40,13 +41,7 @@ export const putTiposCapacitacion = async (req, res, next) => {
             throw error;
         }
 
-        if (!esVigente){
-            const error = new Error("Debe ingresarse la vigencia");
-            error.statusCode = 400;
-            throw error;
-        }
 
-        
 
         nombre = nombre.trim()
         cod = cod.trim()
@@ -65,15 +60,15 @@ export const putTiposCapacitacion = async (req, res, next) => {
         const tipoCapacitacionAnteriorJSON = JSON.parse(JSON.stringify(tipoCapacitacionAnterior));
 
 
-        
-        const tipo_capacitacion = await tipoCapacitacionModel.update({cod: newCod || cod, nombre: nombre, esVigente: esVigente === "Si" ? 1 : 0}, {
+
+        const tipo_capacitacion = await tipoCapacitacionModel.update({ cod: newCod || cod, nombre: nombre, esVigente: parseEsVigente(esVigente) }, {
             where: {
                 cod: cod
             },
             transaction: t
         });
 
-        if(tipo_capacitacion[0] === 0){
+        if (tipo_capacitacion[0] === 0) {
             const error = new Error("No se pudo actualizar el tipo de capacitación");
             error.statusCode = 404;
             throw error;
@@ -95,9 +90,9 @@ export const putTiposCapacitacion = async (req, res, next) => {
 
 
 export const postTiposCapacitacion = async (req, res, next) => {
-    
+
     try {
-        let {cod, nombre} = req.body;
+        let { cod, nombre } = req.body;
         if (!cod) {
             const error = new Error("El código no es valido");
             error.statusCode = 400;
@@ -116,9 +111,9 @@ export const postTiposCapacitacion = async (req, res, next) => {
             throw error;
         }
         nombre = nombre.trim()
-        cod = cod.trim()    
-     
-        const tipo_capacitacion = await tipoCapacitacionModel.create({cod: cod, nombre: nombre});
+        cod = cod.trim()
+
+        const tipo_capacitacion = await tipoCapacitacionModel.create({ cod: cod, nombre: nombre });
         res.status(201).json(tipo_capacitacion);
     } catch (error) {
         next(error);
@@ -128,7 +123,7 @@ export const postTiposCapacitacion = async (req, res, next) => {
 
 export const deleteTiposCapacitacion = async (req, res, next) => {
     try {
-        const {cod} = req.params;
+        const { cod } = req.params;
 
         const tipo_capacitacion = await tipoCapacitacionModel.destroy({
             where: {
@@ -136,7 +131,7 @@ export const deleteTiposCapacitacion = async (req, res, next) => {
             }
         });
 
-        if(tipo_capacitacion === 0){
+        if (tipo_capacitacion === 0) {
             const error = new Error("No se pudo borrar el tipo de capacitación");
             error.statusCode = 404;
             throw error;
