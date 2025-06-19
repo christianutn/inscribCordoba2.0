@@ -21,9 +21,7 @@ export const getAreasAsignadas = async (req, res, next) => {
         });
 
         if (areasAsignadas.length === 0) {
-            const error = new Error("No existen áreas asignadas");
-            error.statusCode = 404;
-            throw error;
+            throw new AppError("No se encontraron areas asignadas", 404)
         }
 
         res.status(200).json(areasAsignadas);
