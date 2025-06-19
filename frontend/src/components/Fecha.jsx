@@ -61,25 +61,11 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
       // funcion autollamada
       (async() => {
 
-        let superaCupoXMes = await supera_cupo_mes(stringFecha);
-        if(await supera_cupo_mes(stringFecha)){
+        let superaAcumulado = await supera_cantidad_cursos_acumulado(stringFecha);
+        if (superaAcumulado) {
           return true;
         }
-        if(await supera_cupo_dia(stringFecha)){
-          return true;
-        }
-        const supera_acum = await supera_cantidad_cursos_acumulado(stringFecha);
-        
-        if(supera_acum){
-          console.log("supera_acum: ", supera_acum);
-          return true;
-        }
-        if(await supera_cantidad_cursos_mes(stringFecha)){
-          return true;
-        }
-        if(await supera_cantidad_cursos_dia(stringFecha)){
-          return true;
-        }
+       
       })();
 
   
