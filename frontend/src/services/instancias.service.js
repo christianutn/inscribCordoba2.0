@@ -145,3 +145,23 @@ export const supera_cantidad_cursos_dia = async (fecha) => {
 }
 
 
+export const getFechasInvalidas = async (targetYear) => {
+    try {
+        const response = await fetch(`${URL}/get-fechas-invalidas/${targetYear}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        })
+
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error(data.message || "Error al registrar instancia")
+        }
+        return data
+
+    } catch (error) {
+        throw error
+    }
+} 
