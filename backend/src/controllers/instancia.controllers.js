@@ -4,7 +4,7 @@ import Estado_Instancia from "../models/estado_instancia.models.js";
 import Area from "../models/area.models.js";
 import Ministerio from "../models/ministerio.models.js";
 import MedioInscripcion from "../models/medioInscripcion.models.js";
-import TipoCapacitacion from "../models/tipoCapacitacion.models.js";        
+import TipoCapacitacion from "../models/tipoCapacitacion.models.js";
 import PlataformaDictado from "../models/plataformaDictado.models.js";
 import Persona from "../models/persona.models.js";
 import sequelize from "../config/database.js";
@@ -12,7 +12,8 @@ import { QueryTypes, Model, DataTypes } from 'sequelize'; // Necesitas DataTypes
 import TutoresXInstancia from "../models/tutorXInstancia.models.js";
 import { DateTime } from 'luxon';
 import AppError from "../utils/appError.js";
-
+import Usuario from "../models/usuario.models.js";
+import Rol from "../models/rol.models.js";
 
 
 export const getInstancias = async (req, res, next) => {
@@ -21,16 +22,7 @@ export const getInstancias = async (req, res, next) => {
             include: [
                 {
                     model: Curso, as: 'detalle_curso',
-
                     include: [
-                        {
-                            model: Area, as: 'detalle_area',
-                            include: [
-                                {
-                                    model: Ministerio, as: 'detalle_ministerio'
-                                }
-                            ]
-                        },
                         {
                             model: MedioInscripcion, as: 'detalle_medioInscripcion'
                         },
@@ -39,14 +31,34 @@ export const getInstancias = async (req, res, next) => {
                         },
                         {
                             model: PlataformaDictado, as: 'detalle_plataformaDictado'
-                        }
+                        },
+                        {
+                            model: Area,
+                            as: 'detalle_area',
+                            include: [
+                                { model: Ministerio, as: 'detalle_ministerio' }
+                            ]
+                        },
+
                     ]
 
                 },
-                {
-                    model: Estado_Instancia, as: 'detalle_estado_instancia'
 
+                {
+                    model: Usuario, as: 'detalle_asignado',
+                    include: [
+                        {
+                            model: Persona, as: 'detalle_persona'
+                        },
+                        {
+                            model: Rol, as: 'detalle_rol'
+                        },
+                        {
+                            model: Area, as: 'detalle_area'
+                        }
+                    ]
                 }
+
             ]
         });
 
@@ -81,7 +93,7 @@ export const postInstancia = async (req, res, next) => {
         } = req.body;
 
 
-        
+
         // variable que guarda fecha y hora exacta en horas y minutos nada mas en que se ejecuta
         const fechaActual = DateTime.now().setZone('America/Argentina/Buenos_Aires');
         const fechaFormateada = fechaActual.toFormat('dd/MM/yyyy HH:mm');
@@ -204,7 +216,7 @@ export const get_fechas_invalidas = async (req, res, next) => {
             return res.status(200).send([]);
         }
 
-        
+
         console.log(`Año objetivo determinado dinámicamente: ${targetYear}`);
 
         // 2. Usar el año determinado en la consulta principal
@@ -320,5 +332,48 @@ export const get_fechas_invalidas = async (req, res, next) => {
     } catch (error) {
         console.error("Error al obtener detalles de fechas inválidas:", error);
         next(error);
+    }
+}
+
+
+export const putInstancia = async (req, res, next) => {
+    try {
+
+        const { curso_params, fecha_inicio_curso_params } = req.params;
+
+        const where = {}
+
+        if(req.body.hasOwnProperty('fecha_inicio_curso')) where.fecha_inicio_curso = req.body.fecha_inicio_curso;
+        if(req.body.hasOwnProperty('fecha_fin_curso')) where.fecha_fin_curso = req.body.fecha_fin_curso;
+        if(req.body.hasOwnProperty('fecha_inicio_inscripcion')) where.fecha_inicio_inscripcion = req.body.fecha_inicio_inscripcion;
+        if(req.body.hasOwnProperty('fecha_fin_inscripcion')) where.fecha_fin_inscripcion = req.body.fecha_fin_inscripcion;
+        if(req.body.hasOwnProperty('es_publicada_portal_cc')) where.es_publicada_portal_cc = req.body.es_publicada_portal_cc;
+        if(req.body.hasOwnProperty('estado_instancia')) where.estado_instancia = req.body.estado_instancia;
+        if(req.body.hasOwnProperty('medio_inscripcion')) where.medio_inscripcion = req.body.medio_inscripcion;
+        if(req.body.hasOwnProperty('plataforma_dictado')) where.plataforma_dictado = req.body.plataforma_dictado;
+        if(req.body.hasOwnProperty('tipo_capacitacion')) where.tipo_capacitacion = req.body.tipo_capacitacion;
+        if(req.body.hasOwnProperty('cupo')) where.cupo = req.body.cupo;
+        if(req.body.hasOwnProperty('cantidad_horas')) where.cantidad_horas = req.body.cantidad_horas;
+        if(req.body.hasOwnProperty('cohortes')) where.cohortes = req.body.cohortes;
+        if(req.body.hasOwnProperty('tutores')) where.tutores = req.body.tutores;
+        if(req.body.hasOwnProperty('opciones')) where.opciones = req.body.opciones;
+        if(req.body.hasOwnProperty('comentario')) where.comentario = req.body.comentario;
+        if(req.body.hasOwnProperty('es_autogestionado')) where.es_autogestionado = req.body.es_autogestionado;
+        if(req.body.hasOwnProperty('tiene_correlatividad')) where.tiene_correlatividad = req.body.tiene_correlatividad;
+        if(req.body.hasOwnProperty('tiene_restriccion_edad')) where.tiene_restriccion_edad = req.body.tiene_restriccion_edad;
+        if(req.body.hasOwnProperty('tiene_restriccion_departamento')) where.tiene_restriccion_departamento = req.body.tiene_restriccion_departamento;
+        if(req.body.hasOwnProperty('asignado')) where.asignado = req.body.asignado;
+
+
+        // actualizar con where 
+        const instancia = await instanciaModel.update(where, {
+            where: {
+                curso: curso_params,
+                fecha_inicio_curso: fecha_inicio_curso_params
+            }
+        });
+        res.status(200).send(instancia);
+    } catch (error) {
+        next(new AppError("Error al actualizar la instancia", 500));
     }
 }

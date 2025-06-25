@@ -72,3 +72,24 @@ export const getFechasInvalidas = async (targetYear) => {
         throw error
     }
 } 
+
+
+export const putInstancia = async (curso_params, fecha_inicio_curso_params, newInstancia) => {
+    try {
+        const response = await fetch(`${URL}/${curso_params}/${fecha_inicio_curso_params}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify(newInstancia)
+        })
+        const data = await response.json();
+        if(response.status !== 200) {
+            throw new Error(data.message || "Error al actualizar instancia")
+        }
+        return data
+    } catch (error) {
+        throw error
+    }
+}

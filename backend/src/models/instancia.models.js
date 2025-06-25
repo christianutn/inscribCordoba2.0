@@ -75,6 +75,10 @@ const Instancia = sequelize.define("instancias", {
     comentario: {
         type: DataTypes.STRING(350)
     },
+    asignado: {
+        type: DataTypes.STRING(11),
+        allowNull: true
+    }
     
 
     // ... Otras columnas si las tienes, asegúrate de añadir 'field' si son snake_case

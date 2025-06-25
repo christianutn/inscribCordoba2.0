@@ -69,6 +69,7 @@ const parseDate = (dateString) => {
       return d;
     }
   }
+  // console.warn(`Could not parse date: "${dateString}" with formats: ${DATE_FORMATS_TO_TRY.join(', ')}`);
   return null;
 };
 
@@ -91,62 +92,107 @@ const Cronograma = () => {
   const [monthFilter, setMonthFilter] = useState('all');
   const [activosFilterActive, setActivosFilterActive] = useState(false);
 
+  // Defines which columns are visible in the DataGrid.
+  // These names must match the keys in the processed data objects.
   const COLUMNAS_VISIBLES = useMemo(() => [
     "Ministerio", "Area", "Nombre del curso",
     "Fecha inicio de inscripción", "Fecha fin de inscripción",
-    "Fecha inicio del curso", "Fecha fin del curso"
+    "Fecha inicio del curso", "Fecha fin del curso", "Estado de Instancia"
   ], []);
 
+  // Generates column definitions for DataGrid based on visible columns
   const columnsForGrid = useMemo(() => {
-    if (!originalHeaders.length) return [];
+    if (!originalHeaders.length) return []; // originalHeaders now stores the keys of processed data
     return originalHeaders
-      .filter(h => COLUMNAS_VISIBLES.includes(h))
-      .map(header => {
+      .filter(h_key => COLUMNAS_VISIBLES.includes(h_key))
+      .map(headerKey => {
         let flex = 1;
-        if (header === "Nombre del curso") flex = 2.5;
-        if (header === "Ministerio" || header === "Area") flex = 1.5;
-        if (header.toLowerCase().includes("fecha")) flex = 1.2;
-        return { field: header, headerName: header, flex, minWidth: 130 };
+        if (headerKey === "Nombre del curso") flex = 2.5;
+        if (headerKey === "Ministerio" || headerKey === "Area") flex = 1.5;
+        if (headerKey.toLowerCase().includes("fecha")) flex = 1.2;
+        return { field: headerKey, headerName: headerKey, flex, minWidth: 130 };
       });
   }, [originalHeaders, COLUMNAS_VISIBLES]);
+
+
+  const formatValue = useCallback((value) => {
+    if (value == null) return ''; // Handles null and undefined
+    return String(value).trim();
+  }, []);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       setError(null);
       try {
-        const dataCronograma = await getInstancias();
+        const rawDataCronograma = await getInstancias(); // New data format
+        console.log("Nuevos Datos del cronograma:", rawDataCronograma);
         
-        const headers = [
-          "Curso", "Fecha inicio del curso", "Fecha fin del curso",
+        // Define all possible headers/keys we want to extract and use.
+        // This list will be used for the modal and Excel export.
+        const allDesiredHeaders = [
+          "Código del curso", "Nombre del curso", "Ministerio", "Area",
+          "Fecha inicio del curso", "Fecha fin del curso",
           "Fecha inicio de inscripción", "Fecha fin de inscripción",
-          "Cupo", "Cantidad de horas", "Publica PCC", "Es Autogestionado", "Restricción porcorrelatividad", "Restricción por edad", "Restricción por departamento",
-          "Estado de Instancia", "Medio de inscripción", "Plataforma de dictado", "Tipo de capacitación", "Comentario", "Datos de solicitud"
-        ]
-        setOriginalHeaders(headers);
+          "Cupo", "Cantidad de horas", "Publica PCC", "Es Autogestionado", 
+          "Restricción por correlatividad", "Restricción por edad", "Restricción por departamento",
+          "Estado de Instancia", "Medio de inscripción", "Plataforma de dictado", 
+          "Tipo de capacitación", "Comentario", "Datos de solicitud"
+          // Add more here if needed from the source for modal/excel
+        ];
+        setOriginalHeaders(allDesiredHeaders);
 
         const minSet = new Set();
-        const dataObjs = dataCronograma.slice(1).map((row, idx) => {
-          const obj = { id: idx };
-          headers.forEach((h, i) => {
-            const val = row[i] != null ? String(row[i]).trim() : '';
-            obj[h] = val;
-            if (h === "Ministerio" && val) minSet.add(val);
-          });
+        const dataObjs = rawDataCronograma.map((instance, idx) => {
+          const detalle = instance.detalle_curso || {};
+          const areaDetalle = detalle.detalle_area || {};
+          const ministerioDetalle = areaDetalle.detalle_ministerio || {};
+          const medioInscripcionDetalle = detalle.detalle_medioInscripcion || {};
+          const plataformaDictadoDetalle = detalle.detalle_plataformaDictado || {};
+          const tipoCapacitacionDetalle = detalle.detalle_tipoCapacitacion || {};
+
+          const obj = {
+            id: idx, // Consider a more robust unique ID if available from 'instance'
+            "Código del curso": formatValue(instance.curso || detalle.cod),
+            "Nombre del curso": formatValue(detalle.nombre),
+            "Ministerio": formatValue(ministerioDetalle.nombre),
+            "Area": formatValue(areaDetalle.nombre),
+            "Fecha inicio del curso": formatValue(instance.fecha_inicio_curso),
+            "Fecha fin del curso": formatValue(instance.fecha_fin_curso),
+            "Fecha inicio de inscripción": formatValue(instance.fecha_inicio_inscripcion),
+            "Fecha fin de inscripción": formatValue(instance.fecha_fin_inscripcion),
+            "Cupo": formatValue(instance.cupo), // Instance-specific cupo
+            "Cantidad de horas": formatValue(detalle.cantidad_horas),
+            "Publica PCC": formatValue(instance.es_publicada_portal_cc ?? detalle.publica_pcc),
+            "Es Autogestionado": formatValue(instance.es_autogestionado ?? detalle.es_autogestionado),
+            "Restricción por correlatividad": formatValue(instance.tiene_correlatividad ?? detalle.tiene_correlatividad),
+            "Restricción por edad": formatValue(instance.tiene_restriccion_edad ?? detalle.tiene_restriccion_edad),
+            "Restricción por departamento": formatValue(instance.tiene_restriccion_departamento ?? detalle.tiene_restriccion_departamento),
+            "Estado de Instancia": formatValue(instance.estado_instancia),
+            "Medio de inscripción": formatValue(medioInscripcionDetalle.nombre || instance.medio_inscripcion),
+            "Plataforma de dictado": formatValue(plataformaDictadoDetalle.nombre || instance.plataforma_dictado),
+            "Tipo de capacitación": formatValue(tipoCapacitacionDetalle.nombre || instance.tipo_capacitacion),
+            "Comentario": formatValue(instance.comentario),
+            "Datos de solicitud": formatValue(instance.datos_solictud),
+          };
+          
+          if (obj["Ministerio"]) {
+            minSet.add(obj["Ministerio"]);
+          }
           return obj;
         });
 
         setCursosData(dataObjs);
         setFilteredData(dataObjs);
-        setMinisterioOptions(['all', ...Array.from(minSet).sort()]);
+        setMinisterioOptions(['all', ...Array.from(minSet).sort((a,b) => a.localeCompare(b))]);
       } catch (err) {
-        console.error("Error loading data:", err);
+        
         setError(err.message || "Error al cargar datos.");
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [formatValue]); // formatValue is stable due to useCallback
 
   useEffect(() => {
     if (loading || !cursosData.length) {
@@ -158,15 +204,16 @@ const Cronograma = () => {
     let relevantCourses = [];
     if (ministerioFilter === 'all') {
       relevantCourses = cursosData;
-      if (areaFilter !== 'all') setAreaFilter('all');
+      // if (areaFilter !== 'all') setAreaFilter('all'); // Removed to allow independent area filter if ministerio is 'all'
     } else {
       relevantCourses = cursosData.filter(c => c["Ministerio"] === ministerioFilter);
     }
-
-    const areasSet = new Set(relevantCourses.map(c => c.Area).filter(Boolean));
-    const newAreaOptions = ['all', ...Array.from(areasSet).sort()];
+    
+    const areasSet = new Set(relevantCourses.map(c => c["Area"]).filter(Boolean));
+    const newAreaOptions = ['all', ...Array.from(areasSet).sort((a,b) => a.localeCompare(b))];
     setAreaOptions(newAreaOptions);
 
+    // If selected area is no longer valid for the current ministerio, reset area
     if (ministerioFilter !== 'all' && !newAreaOptions.includes(areaFilter)) {
       setAreaFilter('all');
     }
@@ -175,18 +222,21 @@ const Cronograma = () => {
 
 
   useEffect(() => {
-    if (!cursosData.length) return;
+    if (!cursosData.length && !loading) return; // Don't filter if no data or initial load is not finished
 
-    setLoading(true);
+    // setLoading(true); // Setting loading here can cause flicker if filtering is fast
     let data = [...cursosData];
     const today = dayjs().startOf('day');
 
     if (ministerioFilter !== 'all') {
       data = data.filter(c => c["Ministerio"] === ministerioFilter);
     }
-    if (ministerioFilter !== 'all' && areaFilter !== 'all') {
-      data = data.filter(c => c["Area"] === areaFilter);
+    // Area filter should apply regardless of ministerio, or only if a ministerio is selected.
+    // Current logic: if a ministerio is selected, area is filtered within that. If ministerio is 'all', area filter still applies to all.
+    if (areaFilter !== 'all') {
+        data = data.filter(c => c["Area"] === areaFilter);
     }
+
     if (nombreFilter.trim()) {
       const term = nombreFilter.trim().toLowerCase();
       data = data.filter(c => c["Nombre del curso"]?.toLowerCase().includes(term));
@@ -207,18 +257,22 @@ const Cronograma = () => {
 
         const startDate = parseDate(startDateStr);
         const endDate = parseDate(endDateStr);
-
+        
+        // Ensure both dates are valid before comparison
         return startDate && endDate && startDate.isSameOrBefore(today) && endDate.isSameOrAfter(today);
       });
     }
 
     setFilteredData(data);
-    setLoading(false);
-  }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive]);
+    // setLoading(false);
+  }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, loading]);
 
   const handleRowClick = params => {
-    const fullRow = cursosData.find(c => c.id === params.row.id);
-    setSelectedRowData(fullRow || params.row);
+    // params.row contains the data for the clicked row, matching structure in filteredData
+    // If originalHeaders contained more fields than COLUMNAS_VISIBLES,
+    // and those extra fields were in cursosData, this would get them.
+    // Since our cursosData objects already have all desired fields, params.row is sufficient.
+    setSelectedRowData(params.row);
     setModalOpen(true);
   };
 
@@ -229,19 +283,21 @@ const Cronograma = () => {
 
   const handleDescargarExcel = async () => {
     if (!filteredData.length) return;
-    setLoading(true);
+    setLoading(true); // Indicate activity
     try {
+      // originalHeaders contains the list of all field keys we defined
       const dataToExport = filteredData.map(row => {
         const exportedRow = {};
-        originalHeaders.forEach(header => {
-          exportedRow[header] = row[header] ?? '';
+        originalHeaders.forEach(headerKey => {
+          exportedRow[headerKey] = row[headerKey] ?? ''; // Use headerKey to access property
         });
         return exportedRow;
       });
+      // Pass originalHeaders as the actual headers for the Excel file
       await descargarExcelCronograma(dataToExport, originalHeaders, "Cronograma_Filtrado");
     } catch (e) {
       console.error("Error generating Excel:", e);
-      setError("Error al generar el Excel.");
+      setError("Error al generar el Excel."); // Show error to user
     } finally {
       setLoading(false);
     }
@@ -249,8 +305,13 @@ const Cronograma = () => {
 
   const handleMinisterioChange = e => {
     setMinisterioFilter(e.target.value);
+    // If ministerio changes, area filter might need to be reset or re-evaluated
+    // The useEffect for areaOptions handles resetting area if it becomes invalid.
+    // If we want to always reset area when ministerio changes (unless ministerio is 'all'):
     if (e.target.value !== 'all') {
-      setAreaFilter('all');
+       // setAreaFilter('all'); // This line was in original code, re-evaluate if needed.
+                              // Current useEffect for areaOptions handles invalid area.
+                              // Keeping it commented to allow more flexible area filtering.
     }
   };
   const handleAreaChange = e => setAreaFilter(e.target.value);
@@ -261,7 +322,7 @@ const Cronograma = () => {
   const handleClearFilters = () => {
     setNombreFilter('');
     setMinisterioFilter('all');
-    setAreaFilter('all');
+    setAreaFilter('all'); // This will also be reset
     setMonthFilter('all');
     setActivosFilterActive(false);
   };
@@ -270,8 +331,8 @@ const Cronograma = () => {
     return nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive;
   }, [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive]);
 
-
-  if (loading && !cursosData.length) {
+  // Initial loading screen (only when cursosData is empty)
+  if (loading && !cursosData.length && !error) {
     return (
       <Backdrop open sx={{ zIndex: t => t.zIndex.drawer + 1, color: '#fff' }}>
         <CircularProgress color="inherit" />
@@ -285,17 +346,20 @@ const Cronograma = () => {
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" color="error" gutterBottom>Error</Typography>
           <Typography>{error}</Typography>
+          <Button onClick={() => window.location.reload()} sx={{ mt: 2 }}>Recargar</Button>
         </Paper>
       </Box>
     );
   }
-
+  
+  // No data available after loading (and no error)
   if (!loading && !cursosData.length && !error) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" gutterBottom>No Hay Datos</Typography>
           <Typography>No se encontraron datos en el cronograma o no se pudieron cargar.</Typography>
+           <Button onClick={() => window.location.reload()} sx={{ mt: 2 }}>Intentar de Nuevo</Button>
         </Paper>
       </Box>
     );
@@ -309,7 +373,7 @@ const Cronograma = () => {
           icon="descargar"
           onClick={handleDescargarExcel}
           tooltip="Descargar Vista Actual"
-          disabled={loading || !filteredData.length}
+          disabled={loading || !filteredData.length} // Disable if loading or no data to download
         />
       </Box>
       <Divider sx={{ mb: 3, borderBottomWidth: 2 }} />
@@ -324,7 +388,7 @@ const Cronograma = () => {
               size="small"
               value={nombreFilter}
               onChange={handleNombreChange}
-              disabled={loading}
+              disabled={loading && cursosData.length > 0} // Disable only if filtering/reloading data
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -336,7 +400,7 @@ const Cronograma = () => {
           </Grid>
 
           <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth size="small" variant="outlined" disabled={loading || ministerioOptions.length <= 1}>
+            <FormControl fullWidth size="small" variant="outlined" disabled={(loading && cursosData.length > 0) || ministerioOptions.length <= 1}>
               <InputLabel id="ministerio-filter-label">Ministerio</InputLabel>
               <Select
                 labelId="ministerio-filter-label"
@@ -349,7 +413,7 @@ const Cronograma = () => {
                     <AccountBalanceIcon color="action" fontSize='small' />
                   </InputAdornment>
                 }
-                sx={{ '& .MuiSelect-select': { pl: 1 } }} // Adjust padding if icon overlaps text
+                sx={{ '& .MuiSelect-select': { pl: 1 } }}
               >
                 <MenuItem value="all"><em>Todos</em></MenuItem>
                 {ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (
@@ -364,7 +428,7 @@ const Cronograma = () => {
               fullWidth
               size="small"
               variant="outlined"
-              disabled={loading || ministerioFilter === 'all' || areaOptions.length <= 1}
+              disabled={(loading && cursosData.length > 0) || areaOptions.length <= 1} // Disable if no areas or loading
             >
               <InputLabel id="area-filter-label">Área</InputLabel>
               <Select
@@ -384,15 +448,16 @@ const Cronograma = () => {
                 {areaOptions.filter(opt => opt !== 'all').map((opt, i) => (
                   <MenuItem key={i} value={opt}>{opt}</MenuItem>
                 ))}
-                {ministerioFilter !== 'all' && areaOptions.length <= 1 && (
-                  <MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>
+                {/* Show (Sin áreas) only if a ministerio is selected and it has no areas */}
+                {ministerioFilter !== 'all' && areaOptions.length <= 1 && ( 
+                  <MenuItem value="all" disabled><em>(Sin áreas específicas)</em></MenuItem>
                 )}
               </Select>
             </FormControl>
           </Grid>
 
           <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth size="small" variant="outlined" disabled={loading}>
+            <FormControl fullWidth size="small" variant="outlined" disabled={(loading && cursosData.length > 0)}>
               <InputLabel id="mes-filter-label">Mes Inicio Curso</InputLabel>
               <Select
                 labelId="mes-filter-label"
@@ -420,11 +485,11 @@ const Cronograma = () => {
               <Button
                 fullWidth
                 variant={activosFilterActive ? "contained" : "outlined"}
-                size="medium"
+                size="medium" // Was large, medium is consistent with TextField height
                 onClick={handleToggleActivosFilter}
-                disabled={loading}
+                disabled={(loading && cursosData.length > 0)}
                 startIcon={<AccessTimeIcon />}
-                sx={{ height: '40px', minWidth: 'auto' }} // Ensure button takes width and height
+                sx={{ height: '40px', minWidth: 'auto' }} 
               >
                 Activos
               </Button>
@@ -437,9 +502,9 @@ const Cronograma = () => {
               variant="outlined"
               size="medium"
               onClick={handleClearFilters}
-              disabled={!isFilterActive || loading}
+              disabled={!isFilterActive || (loading && cursosData.length > 0)}
               startIcon={<ClearAllIcon />}
-              sx={{ height: '40px', minWidth: 'auto' }} // Ensure button takes width and height
+              sx={{ height: '40px', minWidth: 'auto' }}
             >
               Limpiar
             </Button>
@@ -447,7 +512,7 @@ const Cronograma = () => {
         </Grid>
       </Paper>
 
-      {loading && cursosData.length > 0 && (
+      {(loading && cursosData.length > 0) && ( // Show this only when filtering, not initial load
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}>
           <CircularProgress size={20} sx={{ mr: 1 }} />
           <Typography variant="body2" color="text.secondary">Actualizando tabla...</Typography>
@@ -460,24 +525,27 @@ const Cronograma = () => {
           columns={columnsForGrid}
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
           onRowClick={handleRowClick}
-          getRowId={r => r.id}
-          loading={loading && cursosData.length > 0}
+          getRowId={r => r.id} // Make sure 'id' is unique in your dataObjs
+          loading={loading && cursosData.length > 0} // Show loading overlay on DataGrid when filtering
           density="compact"
           disableRowSelectionOnClick
           initialState={{
-            sorting: { sortModel: originalHeaders.includes('Fecha inicio del curso') ? [{ field: 'Fecha inicio del curso', sort: 'asc' }] : [] }
+            sorting: { 
+              sortModel: originalHeaders.includes('Fecha inicio del curso') ? 
+                         [{ field: 'Fecha inicio del curso', sort: 'asc' }] : [] 
+            }
           }}
           sx={{
             border: 0,
             '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: 'primary.light',
+              backgroundColor: 'primary.light', // theme.palette.grey[200] or similar for lighter
               color: 'text.primary',
               fontWeight: 'bold'
             },
             '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none!important' },
             '& .MuiDataGrid-row': { cursor: 'pointer' },
             '& .MuiDataGrid-row:hover': {
-              backgroundColor: 'action.hover',
+              backgroundColor: 'action.hover', // theme.palette.action.hover
             },
             '& .MuiDataGrid-overlay': { backgroundColor: 'rgba(255,255,255,0.7)' }
           }}
@@ -486,7 +554,8 @@ const Cronograma = () => {
               <Box sx={{ mt: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', p: 2 }}>
                 <InfoIcon color="action" sx={{ mb: 1, fontSize: '3rem' }} />
                 <Typography align="center">
-                  {cursosData.length === 0 ? "No hay datos de cronograma disponibles." : "No hay cursos que coincidan con los filtros seleccionados."}
+                  {/* Differentiate between no data at all vs. no results from filter */}
+                  {cursosData.length === 0 && !loading ? "No hay datos de cronograma disponibles." : "No hay cursos que coincidan con los filtros seleccionados."}
                 </Typography>
               </Box>
             )
@@ -510,16 +579,20 @@ const Cronograma = () => {
               />
               <CardContent sx={{ overflowY: 'auto', flexGrow: 1, p: 2 }}>
                 <List dense>
-                  {originalHeaders
-                    .filter(h => h !== 'id' && selectedRowData[h] != null && selectedRowData[h] !== '')
-                    .map((h, index, arr) => {
-                      const val = selectedRowData[h];
+                  {originalHeaders // This list contains all defined keys for our data objects
+                    .filter(headerKey => 
+                        selectedRowData[headerKey] != null && 
+                        String(selectedRowData[headerKey]).trim() !== '' &&
+                        headerKey !== 'id' // Don't show the internal 'id'
+                    )
+                    .map((headerKey, index, arr) => {
+                      const val = selectedRowData[headerKey];
                       return (
-                        <React.Fragment key={h}>
+                        <React.Fragment key={headerKey}>
                           <ListItem sx={{ py: 0.8, px: 0 }}>
                             <ListItemText
                               primary={val}
-                              secondary={h}
+                              secondary={headerKey} // This is the user-friendly header name
                               primaryTypographyProps={{ fontWeight: 500, color: 'text.primary', wordBreak: 'break-word' }}
                               secondaryTypographyProps={{ fontSize: '0.8rem', color: 'text.secondary' }}
                             />

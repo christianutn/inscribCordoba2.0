@@ -1,10 +1,9 @@
-import { getInstancias, postInstancia, deleteInstancia, get_fechas_invalidas} from "../controllers/instancia.controllers.js";
+import { getInstancias, postInstancia, deleteInstancia, get_fechas_invalidas, putInstancia} from "../controllers/instancia.controllers.js";
 import { Router } from "express";
 import autorizar from "../utils/autorizar.js"
 import manejerValidacionErrores from "../utils/manejarValidacionErrores.js";
 import validarInstancia from "../middlewares/validations/instancia.validations.js";
 import passport from "passport";
-import validarFechaPorParametro from "../middlewares/validations/fechaPorParametro.validations.js";
 
 const instanciaRouter = Router();
 
@@ -26,6 +25,13 @@ instanciaRouter.get("/get-fechas-invalidas/:targetYear",
     autorizar(['ADM', 'REF', 'GA']),
     manejerValidacionErrores,
     get_fechas_invalidas
+)
+
+instanciaRouter.put("/:curso_params/:fecha_inicio_curso_params",
+    passport.authenticate('jwt', { session: false }),
+    autorizar(['ADM']),
+
+    putInstancia
 )
 
 export default instanciaRouter

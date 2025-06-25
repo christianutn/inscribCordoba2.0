@@ -35,6 +35,7 @@ const associateModels = () => {
     Instancia.belongsTo(MedioInscripcion, { foreignKey: 'medio_inscripcion', as: 'detalle_medioInscripcion' });
     Instancia.belongsTo(TipoCapacitacion, { foreignKey: 'tipo_capacitacion', as: 'detalle_tipoCapacitacion' });
     Instancia.belongsTo(PlataformaDictado, { foreignKey: 'plataforma_dictado', as: 'detalle_plataformaDictado' });
+    Instancia.belongsTo(Usuario, { foreignKey: 'asignado', as: 'detalle_asignado' });
 
 
     // TutoresXInstancia
