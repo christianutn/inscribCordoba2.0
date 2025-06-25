@@ -3,7 +3,9 @@ import Curso from "../models/curso.models.js";
 import Estado_Instancia from "../models/estado_instancia.models.js";
 import Area from "../models/area.models.js";
 import Ministerio from "../models/ministerio.models.js";
-import validarFormatoFecha from "../utils/validarFormatoFecha.js";
+import MedioInscripcion from "../models/medioInscripcion.models.js";
+import TipoCapacitacion from "../models/tipoCapacitacion.models.js";        
+import PlataformaDictado from "../models/plataformaDictado.models.js";
 import Persona from "../models/persona.models.js";
 import sequelize from "../config/database.js";
 import { QueryTypes, Model, DataTypes } from 'sequelize'; // Necesitas DataTypes si defines el modelo aquí
@@ -28,6 +30,15 @@ export const getInstancias = async (req, res, next) => {
                                     model: Ministerio, as: 'detalle_ministerio'
                                 }
                             ]
+                        },
+                        {
+                            model: MedioInscripcion, as: 'detalle_medioInscripcion'
+                        },
+                        {
+                            model: TipoCapacitacion, as: 'detalle_tipoCapacitacion'
+                        },
+                        {
+                            model: PlataformaDictado, as: 'detalle_plataformaDictado'
                         }
                     ]
 
@@ -40,10 +51,7 @@ export const getInstancias = async (req, res, next) => {
         });
 
         if (instancias.length === 0) {
-
-            const error = new Error("No existen instancias");
-            error.statusCode = 404;
-            throw error;
+            throw new AppError("No existen instancias", 404);
         }
 
         res.status(200).json(instancias)
@@ -55,6 +63,9 @@ export const getInstancias = async (req, res, next) => {
 export const postInstancia = async (req, res, next) => {
     const t = await sequelize.transaction();
 
+    const nombreUsuario = req.user.user.nombre;
+    const apellidoUsuario = req.user.user.apellido;
+    const cuilUsuario = req.user.user.cuil;
     try {
         const {
             curso,
@@ -62,7 +73,7 @@ export const postInstancia = async (req, res, next) => {
             plataforma_dictado,
             tipo_capacitacion,
             cupo,
-            horas,
+            cantidad_horas,
             cohortes,
             tutores,
             opciones,
@@ -70,21 +81,7 @@ export const postInstancia = async (req, res, next) => {
         } = req.body;
 
 
-        // cuil del usaurio que hizo la solicitud
-        const cuilUsuario = req.user.user.cuil
-        if (!cuilUsuario) {
-            throw new Error("No se pudo obtener el cuil del usuario")
-        }
-
-        const nombreUsuario = req.user.user.nombre
-        if (!nombreUsuario) {
-            throw new Error("No se pudo obtener el nombre del usuario")
-        }
-
-        const apellidoUsuario = req.user.user.apellido
-        if (!apellidoUsuario) {
-            throw new Error("No se pudo obtener el apellido del usuario")
-        }
+        
         // variable que guarda fecha y hora exacta en horas y minutos nada mas en que se ejecuta
         const fechaActual = DateTime.now().setZone('America/Argentina/Buenos_Aires');
         const fechaFormateada = fechaActual.toFormat('dd/MM/yyyy HH:mm');
@@ -110,22 +107,20 @@ export const postInstancia = async (req, res, next) => {
                 fecha_fin_inscripcion: fechaInscripcionHasta,
                 fecha_inicio_curso: fechaCursadaDesde,
                 fecha_fin_curso: fechaCursadaHasta,
-                estado_instancia: "PEND",
-                medio_inscripcion: medio_inscripcion,
-                plataforma_dictado: plataforma_dictado,
-                tipo_capacitacion: tipo_capacitacion,
+                es_publicada_portal_cc: opciones.publicaCC,
                 cupo: cupo,
-                cantidad_horas: horas,
-                comentario: comentario,
-                cuil_creador: cuilUsuario,
+                cantidad_horas: cantidad_horas,
                 es_autogestionado: opciones.autogestionado,
                 tiene_correlatividad: opciones.correlatividad,
                 tiene_restriccion_edad: opciones.edad,
                 tiene_restriccion_departamento: opciones.departamento,
-                es_publicada_portal_cc: opciones.publicaCC,
-                cantidad_horas: horas,
+                datos_solictud: datos_solicitud,
+                estado_instancia: "PEND",
+
+                medio_inscripcion: medio_inscripcion,
+                plataforma_dictado: plataforma_dictado,
+                tipo_capacitacion: tipo_capacitacion,
                 comentario: comentario,
-                datos_solictud: datos_solicitud
 
 
             }, { transaction: t });
@@ -134,12 +129,12 @@ export const postInstancia = async (req, res, next) => {
             for (const tutor of tutores) {
                 const existeTutor = await Persona.findOne({ where: { cuil: tutor.cuil } });
                 if (!existeTutor) {
-                    throw crearError(404, "El tutor no existe");
+                    throw new AppError(`El tutor con CUIL ${tutor.cuil} no existe`, 404);
                 }
 
                 await TutoresXInstancia.create({
                     cuil: tutor.cuil,
-                    curso: req.body.curso,
+                    curso: curso,
                     fecha_inicio_curso: fechaCursadaDesde
                 }, { transaction: t });
             }
@@ -189,58 +184,8 @@ export const deleteInstancia = async (req, res, next) => {
 }
 
 
-export const supera_cupo_mes = async (req, res, next) => {
-    try {
-        const { fechaCursadaDesde } = req.params;
-        const superaCupoMes = await instanciaModel.supera_cupo_mes(fechaCursadaDesde);
-        res.status(200).json(superaCupoMes);
-
-    } catch (error) {
-        next(error);
-    }
-}
-
-export const supera_cupo_dia = async (req, res, next) => {
-    try {
-        const { fechaCursadaDesde } = req.params;
-        const superaCupoDia = await instanciaModel.supera_cupo_dia(fechaCursadaDesde);
-        res.status(200).json(superaCupoDia);
-
-    } catch (error) {
-        next(error);
-    }
-}
-
-export const supera_cantidad_cursos_acumulado = async (req, res, next) => {
-    try {
-        const { fechaCursadaDesde } = req.params;
-        const superaCupoDia = await instanciaModel.supera_cantidad_cursos_acumulado(fechaCursadaDesde);
-        res.status(200).json(superaCupoDia);
-    } catch (error) {
-        next(error);
-    }
-}
-
-export const supera_cantidad_cursos_mes = async (req, res, next) => {
-    try {
-        const { fechaCursadaDesde } = req.params;
-        const superaCupoDia = await instanciaModel.supera_cantidad_cursos_mes(fechaCursadaDesde);
-        res.status(200).json(superaCupoDia);
-    } catch (error) {
-        next(error);
-    }
-}
 
 
-export const supera_cantidad_cursos_dia = async (req, res, next) => {
-    try {
-        const { fechaCursadaDesde } = req.params;
-        const superaCupoDia = await instanciaModel.supera_cantidad_cursos_dia(fechaCursadaDesde);
-        res.status(200).json(superaCupoDia);
-    } catch (error) {
-        next(error);
-    }
-}
 
 export const get_fechas_invalidas = async (req, res, next) => {
     const targetYear = req.params.targetYear

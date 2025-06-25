@@ -63,7 +63,7 @@ const validarDatosCursoConCohortes = [
         .exists().withMessage("El cupo es requerido.")
         .isInt({ min: 1 }).withMessage("El cupo debe ser un número entero mayor a cero."), // Cambiado de min: 0 a min: 1
 
-    check('horas') // Si el campo en el body se llama 'horas', cámbialo a 'horas'
+    check('cantidad_horas') // Si el campo en el body se llama 'horas', cámbialo a 'horas'
         .exists().withMessage("La cantidad de horas es requerida.")
         .isInt({ min: 1 }).withMessage("La cantidad de horas debe ser un número entero mayor a cero."), // Cambiado de min: 0 a min: 1
 
@@ -90,7 +90,7 @@ const validarDatosCursoConCohortes = [
     check('opciones')
         .exists().withMessage("Las opciones son requeridas.")
         .custom((value) => {
-            const requiredProps = ['autogestionado', 'correlatividad', 'departamento', 'edad', 'publicaCC'];
+            const requiredProps = ['autogestionado', 'correlatividad', 'departamento', 'edad', 'publicaPCC'];
             for (const prop of requiredProps) {
                 if (!Object.prototype.hasOwnProperty.call(value, prop)) {
                     throw new AppError(`El campo '${prop}' en opciones es requerido.`, 400);
@@ -214,21 +214,22 @@ const validarDatosCursoConCohortes = [
             // Reglas de validación
 
             //Total cursos acumulados
-            if (!esExcepcionParaFechas && Instancia.supera_cantidad_cursos_acumulados(fcDesde)) {
-                throw new AppError(`La cantidad de cursos acumulados supera el límite establecido.`, 400);
+            const fechaCursadaDesdeString = fcDesde.toFormat('yyyy-MM-dd');
+            if (esExcepcionParaFechas == "0" && await Instancia.supera_cupo_mes(fechaCursadaDesdeString)) {
+                throw new AppError(`La cantidad de cupos mensual superan el límite establecido.`, 400);
             }
 
             //Total cursos mes
-            if (!esExcepcionParaFechas && Instancia.supera_cantidad_cursos_mes(fcDesde)) throw new AppError(`La cantidad de cursos en el mes supera el límite establecido.`, 400);
+            if (esExcepcionParaFechas == "0" && Instancia.supera_cupo_dia(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cupos en el dia supera el límite establecido.`, 400);
 
             // Calcular cupo del mes
-            if (!esExcepcionParaFechas && Instancia.supera_cupo_mes(fcDesde)) throw new AppError(`La cantidad de cupos en el mes supera el límite establecido.`, 400);
+            if (esExcepcionParaFechas == "0" && Instancia.supera_cantidad_cursos_acumulado(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cursos acumulado supera el límite establecido`, 400);
 
             // Calcular cantidad de cursos que comienzan en el día
-            if (!esExcepcionParaFechas && Instancia.supera_cupo_dia(fcDesde)) throw new AppError(`La cantidad de cupos en el dia supera el límite establecido.`, 400);
+            if (esExcepcionParaFechas == "0" && Instancia.supera_cantidad_cursos_mes(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cursos en el mes supera el límite establecido`, 400);
 
             // Calcular la cantidad de cupo por dia
-            if (!esExcepcionParaFechas && Instancia.supera_cupo_dia(fcDesde)) throw new AppError(`La cantidad de cupos en el dia supera el límite establecido.`, 400);
+            if (esExcepcionParaFechas == "0" && Instancia.supera_cantidad_cursos_dia(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cursos en el dia supera el límite establecido`, 400);
 
 
         }

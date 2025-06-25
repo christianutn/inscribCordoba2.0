@@ -3,7 +3,6 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-import { getCronograma } from "../services/googleSheets.service.js";
 import { descargarExcelCronograma } from "../services/excel.service.js";
 import { DataGrid } from '@mui/x-data-grid';
 import { esES } from '@mui/x-data-grid/locales';
@@ -40,6 +39,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Titulo from "../components/fonts/TituloPrincipal.jsx";
+import { getInstancias } from "../services/instancias.service.js"
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
@@ -115,11 +115,14 @@ const Cronograma = () => {
       setLoading(true);
       setError(null);
       try {
-        const dataCronograma = await getCronograma();
-        if (!dataCronograma || dataCronograma.length < 2) {
-          throw new Error("No se recibieron datos válidos del cronograma.");
-        }
-        const headers = dataCronograma[0].map(h => h.trim());
+        const dataCronograma = await getInstancias();
+        
+        const headers = [
+          "Curso", "Fecha inicio del curso", "Fecha fin del curso",
+          "Fecha inicio de inscripción", "Fecha fin de inscripción",
+          "Cupo", "Cantidad de horas", "Publica PCC", "Es Autogestionado", "Restricción porcorrelatividad", "Restricción por edad", "Restricción por departamento",
+          "Estado de Instancia", "Medio de inscripción", "Plataforma de dictado", "Tipo de capacitación", "Comentario", "Datos de solicitud"
+        ]
         setOriginalHeaders(headers);
 
         const minSet = new Set();

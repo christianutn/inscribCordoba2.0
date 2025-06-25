@@ -33,6 +33,9 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
         const anioSiguiente = ahoraArgentina.add(1, 'year').year().toString();
         const fechasInvalidas2025 = await getFechasInvalidas(anioActual)
         const fechasInvalidas2026 = await getFechasInvalidas(anioSiguiente)
+        const feriados = await getFeriadosDelAnio();
+        setFeriados(feriados);
+        
 
         setFechasInvalidas([...fechasInvalidas2025, ...fechasInvalidas2026])
 
@@ -61,18 +64,12 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
     if (fieldFecha === "fechaCursadaDesde") {
       const fechaAValidar = dayjs(date).format('YYYY-MM-DD').split("-");
-      const claveAnioMes = `${fechaAValidar[0]}-${fechaAValidar[1]}`;
-      const claveDia = `${claveAnioMes}-${fechaAValidar[2]}`;
-
+  
       const stringFecha = `${fechaAValidar[0]}-${fechaAValidar[1]}-${fechaAValidar[2]}`;
 
-      const soloFechasInvalidas = fechasInvalidas.map((element) => {
-        return element.calendario_fecha
-      })
-
-      if (soloFechasInvalidas.includes(stringFecha)) {
-        return true
-      }
+      if (fechasInvalidas.map(element => element.calendario_fecha).includes(stringFecha)) return true;
+      
+      if (feriados.map(element => element.fecha).includes(stringFecha)) return true;
 
     }
 

@@ -5,6 +5,7 @@ import { Op } from 'sequelize'; // Importa el objeto Op de Sequelize
 import sequelize from "../config/database.js"; // Asegúrate de que la ruta a tu instancia de Sequelize sea correcta
 import ControlDataFechaInicioCursado from './controlDataFechaInicioCursada.models.js'; // Asegúrate de la ruta correcta
 import { DateTime } from 'luxon'; // <-- Importa DateTime de Luxon
+import medioInscripcion from "./medioInscripcion.models.js";
 
 // Definición del modelo Instancia
 const Instancia = sequelize.define("instancias", {
@@ -28,10 +29,6 @@ const Instancia = sequelize.define("instancias", {
         type: DataTypes.DATEONLY,
         allowNull: false,
     },
-    estado_instancia: { // Esta es la propiedad del modelo JS
-        type: DataTypes.STRING(15),
-        allowNull: false
-    },
     es_publicada_portal_cc: {
         type: DataTypes.BOOLEAN
     },
@@ -45,6 +42,10 @@ const Instancia = sequelize.define("instancias", {
         type: DataTypes.TINYINT(1),
         allowNull: true
     },
+    tiene_correlatividad: {
+        type: DataTypes.TINYINT(1),
+        allowNull: true
+    },
     tiene_restriccion_edad: {
         type: DataTypes.TINYINT(1)
     },
@@ -52,13 +53,30 @@ const Instancia = sequelize.define("instancias", {
         type: DataTypes.TINYINT(1),
         allowNull: true
     },
-    tiene_correlatividad: {
-        type: DataTypes.TINYINT(1),
-        allowNull: true
-    },
     datos_solictud: { // Verifica si el nombre de la columna en DB es 'datos_solictud' o 'datos_solicitud'
         type: DataTypes.STRING(150)
-    }
+    },
+    estado_instancia: { // Esta es la propiedad del modelo JS
+        type: DataTypes.STRING(15),
+        allowNull: false
+    },
+    medio_inscripcion: {
+        type: DataTypes.STRING(15),
+        allowNull: false
+    },
+    plataforma_dictado: {
+        type: DataTypes.STRING(15),
+        allowNull: false
+    },
+    tipo_capacitacion: {
+        type: DataTypes.STRING(15),
+        allowNull: false
+    },
+    comentario: {
+        type: DataTypes.STRING(350)
+    },
+    
+
     // ... Otras columnas si las tienes, asegúrate de añadir 'field' si son snake_case
 }, {
     tableName: 'instancias', // Asegura que el nombre de la tabla en la DB es 'instancias'
@@ -260,9 +278,6 @@ Object.assign(Instancia, {
         }
         // dateObj se pasa directamente, ya que getCantidadCupoMes lo convertirá a Luxon.
         const total_cupos_mes = await this.getCantidadCupoMes(dateObj);
-        console.log("Fecha a validar: ", dateObj);
-        console.log("Total cupo mes: ", total_cupos_mes);
-        console.log("Limite de cupo mes: ", limiteData.maximoCuposXMes);
         return total_cupos_mes >= limiteData.maximoCuposXMes;
     },
 
@@ -273,9 +288,6 @@ Object.assign(Instancia, {
         }
         // dateObj se pasa directamente.
         const total_cupos_dia = await this.getCantidadCupoDia(dateObj);
-        console.log("Fecha a validar: ", dateObj);
-        console.log("Total cupo dia: ", total_cupos_dia);
-        console.log("Limite de cupos acumulados acumulados: ", limiteData.maximoCuposXDia);
         return total_cupos_dia >= limiteData.maximoCuposXDia;
     },
 
@@ -288,9 +300,6 @@ Object.assign(Instancia, {
         // Recordatorio: getTotalCursosAcumulados cuenta cursos, no suma cupos,
         // pero el nombre de la variable 'maximoAcumulado' podría sugerir cupos.
         const total_cursos_acumulados = await this.getTotalCursosAcumulados(dateObj);
-        console.log("Fecha a validar: ", dateObj);
-        console.log("Total cursos acumulados: ", total_cursos_acumulados);
-        console.log("Limite de cursos acumulados: ", limiteData.maximoAcumulado);
         return total_cursos_acumulados >= limiteData.maximoAcumulado;
     },
 
@@ -301,9 +310,6 @@ Object.assign(Instancia, {
         }
         // dateObj se pasa directamente.
         const total_cursos_mes = await this.getTotalCursosMes(dateObj);
-        console.log("Fecha a validar: ", dateObj);
-        console.log("Total cursos acumulados: ", total_cursos_mes);
-        console.log("Limite de cursos acumulados: ", limiteData.maximoAcumulado);
         return total_cursos_mes >= limiteData.maximoCursosXMes;
     },
 
@@ -314,9 +320,6 @@ Object.assign(Instancia, {
         }
         // dateObj se pasa directamente.
         const total_cursos_dia = await this.getCantidadCursosDia(dateObj);
-        console.log("Fecha a validar: ", dateObj);
-        console.log("Total cursos acumulados: ", total_cursos_dia);
-        console.log("Limite de cursos acumulados: ", limiteData.maximoAcumulado);
         return total_cursos_dia >= limiteData.maximoCursosXDia;
     }
 });

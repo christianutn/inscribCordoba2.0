@@ -307,7 +307,20 @@ export default function Formulario() {
         }
       }
 
-      const newInstancia = await postInstancias({ selectMinisterio, selectArea, selectCurso, selectTipoCapacitacion, selectPlataformaDictado, selectMedioInscripcion, cupo, horas, tutoresSeleccionados, cohortes, opciones, comentario });
+      const newInstancia = await postInstancias({ 
+        curso: cursos.find(curso => curso.nombre === selectCurso)?.cod, 
+        cohortes: cohortes, 
+        opciones: opciones, 
+        cupo, 
+        cantidad_horas: horas, 
+        medio_inscripcion: mediosInscripcion.find(medio => medio.nombre === selectMedioInscripcion)?.cod, 
+        plataforma_dictado: plataformasDictado.find(plataforma => plataforma.nombre === selectPlataformaDictado)?.cod, 
+        tipo_capacitacion: tiposCapacitaciones.find(tipo => tipo.nombre === selectTipoCapacitacion)?.cod, 
+        tutores: tutoresSeleccionados, 
+        ministerio: ministerios.find(ministerio => ministerio.nombre === selectMinisterio)?.cod,
+        area: areas.find(area => area.nombre === selectArea)?.cod, 
+        comentario:comentario
+      });
 
       limpiarFormulario();
       window.scrollTo({ top: 0, behavior: 'smooth' });
