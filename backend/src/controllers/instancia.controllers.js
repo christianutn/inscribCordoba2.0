@@ -61,7 +61,8 @@ export const getInstancias = async (req, res, next) => {
 
             ]
         });
-
+        // No necesitas llamar a .json() sobre instancias, simplemente devuélvelo como JSON
+        // res.status(200).json(instancias) ya lo hace correctamente
         if (instancias.length === 0) {
             throw new AppError("No existen instancias", 404);
         }
@@ -343,26 +344,26 @@ export const putInstancia = async (req, res, next) => {
 
         const where = {}
 
-        if(req.body.hasOwnProperty('fecha_inicio_curso')) where.fecha_inicio_curso = req.body.fecha_inicio_curso;
-        if(req.body.hasOwnProperty('fecha_fin_curso')) where.fecha_fin_curso = req.body.fecha_fin_curso;
-        if(req.body.hasOwnProperty('fecha_inicio_inscripcion')) where.fecha_inicio_inscripcion = req.body.fecha_inicio_inscripcion;
-        if(req.body.hasOwnProperty('fecha_fin_inscripcion')) where.fecha_fin_inscripcion = req.body.fecha_fin_inscripcion;
-        if(req.body.hasOwnProperty('es_publicada_portal_cc')) where.es_publicada_portal_cc = req.body.es_publicada_portal_cc;
-        if(req.body.hasOwnProperty('estado_instancia')) where.estado_instancia = req.body.estado_instancia;
-        if(req.body.hasOwnProperty('medio_inscripcion')) where.medio_inscripcion = req.body.medio_inscripcion;
-        if(req.body.hasOwnProperty('plataforma_dictado')) where.plataforma_dictado = req.body.plataforma_dictado;
-        if(req.body.hasOwnProperty('tipo_capacitacion')) where.tipo_capacitacion = req.body.tipo_capacitacion;
-        if(req.body.hasOwnProperty('cupo')) where.cupo = req.body.cupo;
-        if(req.body.hasOwnProperty('cantidad_horas')) where.cantidad_horas = req.body.cantidad_horas;
-        if(req.body.hasOwnProperty('cohortes')) where.cohortes = req.body.cohortes;
-        if(req.body.hasOwnProperty('tutores')) where.tutores = req.body.tutores;
-        if(req.body.hasOwnProperty('opciones')) where.opciones = req.body.opciones;
-        if(req.body.hasOwnProperty('comentario')) where.comentario = req.body.comentario;
-        if(req.body.hasOwnProperty('es_autogestionado')) where.es_autogestionado = req.body.es_autogestionado;
-        if(req.body.hasOwnProperty('tiene_correlatividad')) where.tiene_correlatividad = req.body.tiene_correlatividad;
-        if(req.body.hasOwnProperty('tiene_restriccion_edad')) where.tiene_restriccion_edad = req.body.tiene_restriccion_edad;
-        if(req.body.hasOwnProperty('tiene_restriccion_departamento')) where.tiene_restriccion_departamento = req.body.tiene_restriccion_departamento;
-        if(req.body.hasOwnProperty('asignado')) where.asignado = req.body.asignado;
+        if (req.body.hasOwnProperty('fecha_inicio_curso')) where.fecha_inicio_curso = req.body.fecha_inicio_curso;
+        if (req.body.hasOwnProperty('fecha_fin_curso')) where.fecha_fin_curso = req.body.fecha_fin_curso;
+        if (req.body.hasOwnProperty('fecha_inicio_inscripcion')) where.fecha_inicio_inscripcion = req.body.fecha_inicio_inscripcion;
+        if (req.body.hasOwnProperty('fecha_fin_inscripcion')) where.fecha_fin_inscripcion = req.body.fecha_fin_inscripcion;
+        if (req.body.hasOwnProperty('es_publicada_portal_cc')) where.es_publicada_portal_cc = req.body.es_publicada_portal_cc;
+        if (req.body.hasOwnProperty('estado_instancia')) where.estado_instancia = req.body.estado_instancia;
+        if (req.body.hasOwnProperty('medio_inscripcion')) where.medio_inscripcion = req.body.medio_inscripcion;
+        if (req.body.hasOwnProperty('plataforma_dictado')) where.plataforma_dictado = req.body.plataforma_dictado;
+        if (req.body.hasOwnProperty('tipo_capacitacion')) where.tipo_capacitacion = req.body.tipo_capacitacion;
+        if (req.body.hasOwnProperty('cupo')) where.cupo = req.body.cupo;
+        if (req.body.hasOwnProperty('cantidad_horas')) where.cantidad_horas = req.body.cantidad_horas;
+        if (req.body.hasOwnProperty('cohortes')) where.cohortes = req.body.cohortes;
+        if (req.body.hasOwnProperty('tutores')) where.tutores = req.body.tutores;
+        if (req.body.hasOwnProperty('opciones')) where.opciones = req.body.opciones;
+        if (req.body.hasOwnProperty('comentario')) where.comentario = req.body.comentario;
+        if (req.body.hasOwnProperty('es_autogestionado')) where.es_autogestionado = req.body.es_autogestionado;
+        if (req.body.hasOwnProperty('tiene_correlatividad')) where.tiene_correlatividad = req.body.tiene_correlatividad;
+        if (req.body.hasOwnProperty('tiene_restriccion_edad')) where.tiene_restriccion_edad = req.body.tiene_restriccion_edad;
+        if (req.body.hasOwnProperty('tiene_restriccion_departamento')) where.tiene_restriccion_departamento = req.body.tiene_restriccion_departamento;
+        if (req.body.hasOwnProperty('asignado')) where.asignado = req.body.asignado;
 
 
         // actualizar con where 

@@ -114,6 +114,7 @@ const ReporteCursosCC = () => {
     const [filteredCronogramaData, setFilteredCronogramaData] = useState([]);
     const [allMonthsData, setAllMonthsData] = useState([]);
     const [allMinisterios, setAllMinisterios] = useState([]);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedMonth, setSelectedMonth] = useState('all');
     const [selectedMinisterio, setSelectedMinisterio] = useState('all');
     const [selectedArea, setSelectedArea] = useState('all');
@@ -123,8 +124,8 @@ const ReporteCursosCC = () => {
     const [displaySummaryData, setDisplaySummaryData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const currentYear = new Date().getFullYear();
-
+    // const currentYear = new Date().getFullYear();
+    const currentYear = selectedYear;
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -143,7 +144,7 @@ const ReporteCursosCC = () => {
 
             try {
                 const instanciasData = await getInstancias();
-                if (!Array.isArray(instanciasData) ) {
+                if (!Array.isArray(instanciasData)) {
                     throw new Error("La respuesta de getInstancias no es un array.");
                 }
                 setRawCronogramaData(instanciasData);
@@ -199,7 +200,7 @@ const ReporteCursosCC = () => {
     }, [selectedMinisterio, rawCronogramaData, selectedArea]);
 
     useEffect(() => {
-        if (loading || !rawCronogramaData || rawCronogramaData.length === 0 ) {
+        if (loading || !rawCronogramaData || rawCronogramaData.length === 0) {
             setFilteredCronogramaData([]);
             return;
         }
@@ -231,7 +232,7 @@ const ReporteCursosCC = () => {
                 const fechaInicioCursoStr = instancia.fecha_inicio_curso;
                 const fechaFinCursoStr = instancia.fecha_fin_curso;
                 const estadoCurso = (instancia.estado_instancia || "").toUpperCase().trim();
-                
+
                 const esAutogestionadoInstancia = instancia.es_autogestionado;
                 const esAutogestionadoDetalle = instancia.detalle_curso?.es_autogestionado;
                 let esAutogestionado = false;
@@ -240,32 +241,32 @@ const ReporteCursosCC = () => {
                 } else if (esAutogestionadoInstancia === null && (esAutogestionadoDetalle === true || String(esAutogestionadoDetalle).toUpperCase() === "SI" || String(esAutogestionadoDetalle) === "1")) {
                     esAutogestionado = true;
                 }
-                
+
                 const participantes = parseInt(instancia.cupo, 10) || 0;
 
                 const fechaInicioObj = getValidDayjsObject(fechaInicioCursoStr); // Usa el helper
                 const fechaFinObj = getValidDayjsObject(fechaFinCursoStr);     // Usa el helper
 
-                if (!fechaInicioObj) return; 
+                if (!fechaInicioObj) return;
                 const anioInicioCurso = fechaInicioObj.year(); // Dayjs usa .year()
 
-                if (anioInicioCurso !== currentYear) return; 
+                if (anioInicioCurso !== currentYear) return;
 
                 const mesInicioCurso = fechaInicioObj.month(); // Dayjs usa .month() (0-11)
-                
+
                 const esFechaFinValida = fechaFinObj !== null; // Simplificado gracias al helper
 
                 const mesFinCurso = esFechaFinValida ? fechaFinObj.month() : -1;
                 const anioFinCurso = esFechaFinValida ? fechaFinObj.year() : -1;
-                
+
                 const isCancelledOrSuspended = estadoCurso === "SUSP" || estadoCurso === "CANC";
 
-                if (mesInicioCurso === mesIndex) { 
+                if (mesInicioCurso === mesIndex) {
                     if (!isCancelledOrSuspended) {
                         cursosPorMes++;
                         const plataforma = instancia.plataforma_dictado || instancia.detalle_curso?.plataforma_dictado;
                         if (String(plataforma).toUpperCase().includes("EXT")) {
-                             plataformaExterna++;
+                            plataformaExterna++;
                         }
                         if (esAutogestionado) autogestionados++;
                         participantesPorMes += participantes;
@@ -273,17 +274,17 @@ const ReporteCursosCC = () => {
                         canceladosSuspendidos++;
                     }
                 } else if (!isCancelledOrSuspended && esFechaFinValida &&
-                    (fechaInicioObj.isBefore(dayjs().year(currentYear).month(mesIndex).startOf('month'))) && 
-                    (fechaFinObj.isSameOrAfter(dayjs().year(currentYear).month(mesIndex).startOf('month'))) 
+                    (fechaInicioObj.isBefore(dayjs().year(currentYear).month(mesIndex).startOf('month'))) &&
+                    (fechaFinObj.isSameOrAfter(dayjs().year(currentYear).month(mesIndex).startOf('month')))
                 ) {
-                     // Lógica más precisa para cursos activos de meses anteriores:
+                    // Lógica más precisa para cursos activos de meses anteriores:
                     // Inició antes del mes actual Y termina en o después del mes actual
                     // (Considerando que el curso pudo haber iniciado en un año anterior)
                     // (O que inicia en un mes anterior del mismo año)
                     // Y que termina en este mes, o en un mes posterior, o en un año posterior.
-                    if ( (anioInicioCurso < currentYear || (anioInicioCurso === currentYear && mesInicioCurso < mesIndex)) &&
-                         (anioFinCurso > currentYear || (anioFinCurso === currentYear && mesFinCurso >= mesIndex))
-                       ) {
+                    if ((anioInicioCurso < currentYear || (anioInicioCurso === currentYear && mesInicioCurso < mesIndex)) &&
+                        (anioFinCurso > currentYear || (anioFinCurso === currentYear && mesFinCurso >= mesIndex))
+                    ) {
                         cursosActivosAnteriores++;
                     }
                 }
@@ -313,14 +314,14 @@ const ReporteCursosCC = () => {
 
         const totalParticipantesAnual = allMonthsData.reduce((sum, m) => sum + m.participantesPorMes, 0);
 
-        if (selectedMonth === 'all') { 
+        if (selectedMonth === 'all') {
             const totalNuevosAnual = allMonthsData.reduce((sum, m) => sum + m.cursosPorMes, 0);
             const totalCanceladosAnual = allMonthsData.reduce((sum, m) => sum + m.canceladosSuspendidos, 0);
-            
+
             const mesesConActividad = allMonthsData.filter(m => m.totalCursosAcumulados > 0 || m.cursosPorMes > 0 || m.canceladosSuspendidos > 0);
             const totalActivosSum = mesesConActividad.reduce((sum, m) => sum + m.totalCursosAcumulados, 0);
             const promedioActivosMes = mesesConActividad.length > 0 ? (totalActivosSum / mesesConActividad.length) : 0;
-            
+
             const totalAutogestionadosAnual = allMonthsData.reduce((sum, m) => sum + m.autogestionados, 0);
             const porcentajeAutogestionadoAnual = totalNuevosAnual > 0 ? (totalAutogestionadosAnual / totalNuevosAnual) * 100 : 0;
 
@@ -339,7 +340,7 @@ const ReporteCursosCC = () => {
             });
             setDisplaySummaryData(allMonthsData);
 
-        } else { 
+        } else {
             const monthIndex = parseInt(selectedMonth, 10);
             const monthData = allMonthsData.find(m => m.id === monthIndex);
 
@@ -372,6 +373,16 @@ const ReporteCursosCC = () => {
         }
     }, [selectedMonth, allMonthsData, currentYear, loading]);
 
+    const yearsOptions = useMemo(() => {
+        const start = 2022;
+        const currentYear = new Date().getFullYear();
+        const endYear = Math.max(currentYear + 1, start + 1); // al menos 2 años en total
+        const years = [];
+        for (let y = start; y <= endYear; y++) {
+            years.push(y);
+        }
+        return years;
+    }, []);
 
     const handleMonthChange = (event) => { setSelectedMonth(event.target.value); };
     const handleMinisterioChange = (event) => {
@@ -380,13 +391,14 @@ const ReporteCursosCC = () => {
     const handleAreaChange = (event) => { setSelectedArea(event.target.value); };
 
     const handleClearFilters = () => {
+        setSelectedYear(new Date().getFullYear());
         setSelectedMonth('all');
         setSelectedMinisterio('all');
         setSelectedArea('all');
     };
 
     const commonDataLabelConfig = useMemo(() => ({ display: true, color: '#333', font: { size: 10, weight: 'bold', }, formatter: (value) => { if (value === 0 || value === null || value === undefined) return ''; return Math.round(value); }, anchor: 'end', align: 'top', offset: 4, }), []); // Removido context de formatter si no se usa
-    const commonChartOptions = useMemo(() => ({ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }, title: { display: true, font: { size: 16 }, padding: { top: 10, bottom: 20 } }, tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(0, 0, 0, 0.8)', titleFont: { size: 14 }, bodyFont: { size: 12 }, padding: 10, cornerRadius: 4 }, datalabels: commonDataLabelConfig }, scales: { x: { display: true, title: { display: false }, grid: { display: false }, ticks: { font: { size: 11 } } }, y: { display: true, position: 'left', title: { display: true, text: 'Cantidad de Cursos' }, beginAtZero: true, grid: { color: '#eee' }, ticks: { font: { size: 11 }, callback: function(value) {if (Number.isInteger(value)) {return value;}} } }, yPercentage: { display: false, position: 'right', title: { display: true, text: 'Porcentaje (%)' }, min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { callback: (value) => value + '%', font: { size: 11 } } } }, interaction: { mode: 'nearest', axis: 'x', intersect: false }, animation: { duration: 500 } }), [commonDataLabelConfig]);
+    const commonChartOptions = useMemo(() => ({ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }, title: { display: true, font: { size: 16 }, padding: { top: 10, bottom: 20 } }, tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(0, 0, 0, 0.8)', titleFont: { size: 14 }, bodyFont: { size: 12 }, padding: 10, cornerRadius: 4 }, datalabels: commonDataLabelConfig }, scales: { x: { display: true, title: { display: false }, grid: { display: false }, ticks: { font: { size: 11 } } }, y: { display: true, position: 'left', title: { display: true, text: 'Cantidad de Cursos' }, beginAtZero: true, grid: { color: '#eee' }, ticks: { font: { size: 11 }, callback: function (value) { if (Number.isInteger(value)) { return value; } } } }, yPercentage: { display: false, position: 'right', title: { display: true, text: 'Porcentaje (%)' }, min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { callback: (value) => value + '%', font: { size: 11 } } } }, interaction: { mode: 'nearest', axis: 'x', intersect: false }, animation: { duration: 500 } }), [commonDataLabelConfig]);
     const lineTrendsOptionsAnnual = useMemo(() => ({ ...commonChartOptions, plugins: { ...commonChartOptions.plugins, title: { ...commonChartOptions.plugins.title, text: 'Tendencia Mensual Cursos' }, datalabels: { ...commonDataLabelConfig, align: 'top', offset: 6, } }, scales: { ...commonChartOptions.scales, yPercentage: { display: false } } }), [commonChartOptions, commonDataLabelConfig]);
     const stackedBarOptionsAnnual = useMemo(() => ({ ...commonChartOptions, plugins: { ...commonChartOptions.plugins, title: { ...commonChartOptions.plugins.title, text: 'Composición Cursos Activos/Mes' }, datalabels: { ...commonDataLabelConfig, align: 'center', anchor: 'center', font: { size: 9 }, } }, scales: { x: { ...commonChartOptions.scales.x, stacked: true }, y: { ...commonChartOptions.scales.y, stacked: true, title: { display: true, text: 'Total Cursos Activos' } }, yPercentage: { display: false } } }), [commonChartOptions, commonDataLabelConfig]);
     const barMonthlyCourseDetailOptions = useMemo(() => ({ ...commonChartOptions, indexAxis: 'y', plugins: { ...commonChartOptions.plugins, legend: { display: false }, title: { ...commonChartOptions.plugins.title, text: `Detalle Cursos ${displayKpiData?.monthName ?? ''}` }, datalabels: { ...commonDataLabelConfig, anchor: 'end', align: 'right', offset: 8, } }, scales: { x: { ...commonChartOptions.scales.y, position: 'bottom', title: { display: true, text: 'Cantidad' } }, y: { ...commonChartOptions.scales.x, type: 'category', title: { display: false } }, yPercentage: { display: false } } }), [commonChartOptions, displayKpiData?.monthName, commonDataLabelConfig]);
@@ -433,7 +445,7 @@ const ReporteCursosCC = () => {
         if (selectedMinisterio !== 'all') filtersApplied.push(selectedMinisterio);
         if (selectedArea !== 'all') filtersApplied.push(selectedArea);
         if (selectedMonth !== 'all' && typeof selectedMonth === 'number' && mesesFull[selectedMonth]) {
-             filtersApplied.push(mesesFull[selectedMonth]);
+            filtersApplied.push(mesesFull[selectedMonth]);
         }
         if (filtersApplied.length > 0) {
             title += ` (${filtersApplied.join(' / ')})`;
@@ -443,10 +455,15 @@ const ReporteCursosCC = () => {
         return title;
     };
 
+    const defaultYear = new Date().getFullYear();
 
-    const isFilterActive = useMemo(() => {
-        return selectedMonth !== 'all' || selectedMinisterio !== 'all' || selectedArea !== 'all';
-    }, [selectedMonth, selectedMinisterio, selectedArea]);
+
+    const isFilterActive = useMemo(() =>
+        selectedYear !== defaultYear ||
+        selectedMonth !== 'all' ||
+        selectedMinisterio !== 'all' ||
+        selectedArea !== 'all',
+        [defaultYear, selectedYear, selectedMonth, selectedMinisterio, selectedArea]);
 
     return (
         <Box sx={{
@@ -459,6 +476,33 @@ const ReporteCursosCC = () => {
 
             <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
                 <Grid container spacing={2} alignItems="flex-end">
+                    <Grid item xs={12} sm={6} md={3}>
+                        <FormControl fullWidth size="small" disabled={loading}>
+                            <InputLabel id="select-year-label">Año</InputLabel>
+                            <Select
+                                labelId="select-year-label"
+                                id="select-year"
+                                value={selectedYear}
+                                label="Año"
+                                onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
+                                startAdornment={<CalendarMonthIcon sx={{ mr: 1, color: 'action.active' }} />}
+                            >
+                                {yearsOptions.map((year) => (
+                                    <MenuItem
+                                        key={year}
+                                        value={year}
+                                        sx={year === new Date().getFullYear() ? {
+                                            fontWeight: 600,
+                                            color: 'primary.main',
+                                            '& .MuiTypography-root': { fontWeight: 700 }
+                                        } : {}}
+                                    >
+                                        {year === new Date().getFullYear() ? `${year} (Año Actual)` : year}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
                     <Grid item xs={12} sm={6} md={3}>
                         <FormControl fullWidth size="small" disabled={loading}>
                             <InputLabel id="select-month-label">Mes</InputLabel>
@@ -541,14 +585,14 @@ const ReporteCursosCC = () => {
                                 <>
                                     <Grid item xs={12} md={6}>
                                         <Paper elevation={2} sx={{ p: { xs: 1, sm: 2 }, height: { xs: 300, md: 400 } }}>
-                                            {displayChartData.monthlyCourseDetail ? (<Bar options={barMonthlyCourseDetailOptions} data={displayChartData.monthlyCourseDetail} />) 
-                                            : <Typography sx={{textAlign: 'center', pt: 'calc(50% - 1em)'}}>No hay datos para el mes seleccionado.</Typography>} {/* Centrado vertical aproximado */}
+                                            {displayChartData.monthlyCourseDetail ? (<Bar options={barMonthlyCourseDetailOptions} data={displayChartData.monthlyCourseDetail} />)
+                                                : <Typography sx={{ textAlign: 'center', pt: 'calc(50% - 1em)' }}>No hay datos para el mes seleccionado.</Typography>} {/* Centrado vertical aproximado */}
                                         </Paper>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                         <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, height: '100%' }}>
                                             <Typography variant="h6" component="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                                <BarChartIcon sx={{ mr: 1 }} color="primary" /> {`Resumen ${ (typeof selectedMonth === 'number' && mesesFull[selectedMonth]) ? mesesFull[selectedMonth] : ''} ${currentYear}`}
+                                                <BarChartIcon sx={{ mr: 1 }} color="primary" /> {`Resumen ${(typeof selectedMonth === 'number' && mesesFull[selectedMonth]) ? mesesFull[selectedMonth] : ''} ${currentYear}`}
                                             </Typography>
                                             {renderSummaryText()}
                                         </Paper>
@@ -564,7 +608,7 @@ const ReporteCursosCC = () => {
                     )}
                 </>
             )}
-            
+
             {!loading && !error && (!rawCronogramaData || rawCronogramaData.length === 0) && (
                 <Paper elevation={3} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
                     <Typography variant="h6" gutterBottom>No hay datos disponibles</Typography>

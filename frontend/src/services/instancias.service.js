@@ -6,7 +6,7 @@ export const postInstancias = async (newInstancia) => {
     try {
 
 
-        
+
         const response = await fetch(URL, {
             method: "POST",
             headers: {
@@ -16,10 +16,10 @@ export const postInstancias = async (newInstancia) => {
             body: JSON.stringify(newInstancia)
         })
         const data = await response.json();
-        if(response.status !== 201) {
+        if (response.status !== 201) {
             throw new Error(data.message || "Error al registrar instancia")
         }
-        
+
         return data
     } catch (error) {
         throw error
@@ -36,11 +36,12 @@ export const getInstancias = async () => {
             }
         })
         const data = await response.json();
-        if(response.status !== 200) {
+        console.log(data);
+        if (response.status !== 200) {
             throw new Error(data.message || "Error al buscar instancia")
         }
 
-        if(!data || data.length === 0) {
+        if (!data || data.length === 0) {
             throw new Error("No se encontraron instancias")
         }
         return data
@@ -63,7 +64,7 @@ export const getFechasInvalidas = async (targetYear) => {
         })
 
         const data = await response.json();
-        if(response.status !== 200) {
+        if (response.status !== 200) {
             throw new Error(data.message || "Error al registrar instancia")
         }
         return data
@@ -71,7 +72,7 @@ export const getFechasInvalidas = async (targetYear) => {
     } catch (error) {
         throw error
     }
-} 
+}
 
 
 export const putInstancia = async (curso_params, fecha_inicio_curso_params, newInstancia) => {
@@ -85,7 +86,7 @@ export const putInstancia = async (curso_params, fecha_inicio_curso_params, newI
             body: JSON.stringify(newInstancia)
         })
         const data = await response.json();
-        if(response.status !== 200) {
+        if (response.status !== 200) {
             throw new Error(data.message || "Error al actualizar instancia")
         }
         return data
