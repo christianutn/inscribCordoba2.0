@@ -33,8 +33,8 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
         const anioSiguiente = ahoraArgentina.add(1, 'year').year().toString();
         const fechasInvalidas2025 = await getFechasInvalidas(anioActual)
         const fechasInvalidas2026 = await getFechasInvalidas(anioSiguiente)
-        const feriados = await getFeriadosDelAnio();
-        setFeriados(feriados);
+       // const feriados = await getFeriadosDelAnio();
+        //setFeriados(feriados);
         
 
         setFechasInvalidas([...fechasInvalidas2025, ...fechasInvalidas2026])
