@@ -36,6 +36,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
         const feriados = await getFeriadosDelAnio();
         setFeriados(feriados);
         
+        console.log([fechasInvalidas2025, ...fechasInvalidas2026])
 
         setFechasInvalidas([...fechasInvalidas2025, ...fechasInvalidas2026])
 

@@ -23,17 +23,17 @@ areaRouter.put("/",
             .custom(async (value) => {
                 const area = await AreaModel.findOne({ where: { cod: value } });
                 if (!area) {
-                    throw new AppError(`El area no existe`, 404);
+                    throw new AppError(`El area no existe`, 400);
                 }
             }),
-        body("nombre").optional().isString({ max: 250 }).withMessage("El nombre es requerido"),
-        body("ministerio").optional().isString({ max: 15 }).withMessage("El ministerio es requerido")
+        body("nombre").optional().isString().isLength({ min: 1, max: 250 }).withMessage("El nombre es requerido"),
+        body("ministerio").optional().isString().isLength({ max: 15, min: 1 }).withMessage("El ministerio es requerido")
             .custom(async (value) => {
                 const minist = await MinisterioModel.findByPk(value)
                 if (!minist) throw new AppError("El ministerio no existe")
             }),
         body("esVigente").optional().isBoolean().withMessage("El estado es requerido"),
-        body("newCod").optional().isString({ max: 15 }).withMessage("El nuevo codigo es requerido"),
+        body("newCod").optional().isString().isLength({ min: 1, max: 15 }).withMessage("El nuevo codigo es requerido"),
 
     ],
     manejarValidacionErrores,
@@ -51,7 +51,7 @@ areaRouter.post("/",
                 throw new AppError(`Ya existe un área con el código ${value}`, 400);
             }
         }),
-        check("nombre").exists().isString().isLength({max: 250}).withMessage("El nombre de área debe contenener un máximo de 250 caracteres"),
+        check("nombre").exists().isString().isLength({min: 1, max: 250}).withMessage("El nombre de área debe contenener un máximo de 250 caracteres"),
         check("ministerio").exists().isString().isLength({ max: 15, min: 1 }).withMessage("El ministerio es requerido").custom(async (value) => {
             const ministerio = await MinisterioModel.findOne({ where: { cod: value } });
             if (!ministerio) {

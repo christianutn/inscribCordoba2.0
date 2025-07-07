@@ -282,7 +282,8 @@ Object.assign(Instancia, {
         }
         // dateObj se pasa directamente, ya que getCantidadCupoMes lo convertirá a Luxon.
         const total_cupos_mes = await this.getCantidadCupoMes(dateObj);
-        return total_cupos_mes >= limiteData.maximoCuposXMes;
+        const supera = total_cupos_mes >= limiteData.maximoCuposXMes;
+        return supera;
     },
 
     async supera_cupo_dia(dateObj) {

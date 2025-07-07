@@ -174,12 +174,6 @@ export const putMinisterio = async (req, res, next) => {
             throw new Error("No existen datos para actualizar");
         }
 
-        // Si se actualizó correctamente en la base de datos, actualiza Google Sheets
-        const resultadoGoogleSheets = await actualizarDatosColumna("Ministerio", ministerioAntesJSON.nombre, nombre);
-
-        if (!resultadoGoogleSheets.success) {
-            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
-        }
 
         // Confirma la transacción
         await t.commit();

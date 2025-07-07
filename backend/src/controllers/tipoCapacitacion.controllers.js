@@ -74,12 +74,6 @@ export const putTiposCapacitacion = async (req, res, next) => {
             throw error;
         }
 
-        // Llama a actualizarDatosColumna
-        const resultadoGoogleSheets = await actualizarDatosColumna('Tipo de capacitación', tipoCapacitacionAnteriorJSON.nombre, nombre);
-
-        if (!resultadoGoogleSheets.success) {
-            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
-        }
         await t.commit();
         res.status(200).json(tipo_capacitacion);
     } catch (error) {

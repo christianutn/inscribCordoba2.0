@@ -73,8 +73,6 @@ export const putMedioInscripcion = async (req, res, next) => {
             throw error;
         }
 
-        // Llama a actualizarDatosColumna
-        const resultadoGoogleSheets = await actualizarDatosColumna('Medio de inscripción', medioInscAnterior.nombre, nombre);
 
         if (!resultadoGoogleSheets.success) {
             throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);

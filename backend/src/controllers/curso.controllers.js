@@ -132,12 +132,6 @@ export const postCurso = async (req, res, next) => {
 }
 
 
-// Asegúrate de importar sequelize (tu instancia de Sequelize) y tu modelo cursoModel
-// import sequelize from '../config/database'; // Ajusta la ruta a tu instancia de Sequelize
-// import cursoModel from '../models/curso.models'; // Ajusta la ruta a tu modelo Curso
-// Asegúrate de importar actualizarDatosColumna desde tu servicio de Google Sheets
-// import { actualizarDatosColumna } from '../services/googleSheets.service'; // Ajusta la ruta
-
 export const updateCurso = async (req, res, next) => {
     // Declaramos la variable de transacción para usarla en el catch si es necesario
     let t;
@@ -217,13 +211,6 @@ export const updateCurso = async (req, res, next) => {
         // --- Actualización en Google Sheets (Sin cambios en lógica) ---
         // Esta operación NO es parte de la transacción de DB. Si falla,
         // el catch hará rollback de la DB, pero el cambio en Sheets no se deshace aquí.
-        const resultadoGoogleSheets = await actualizarDatosColumna('Nombre del curso', cursoAntesJSON.nombre, nombre);
-
-        // Verificamos el resultado de Google Sheets (Sin cambios en lógica)
-        if (!resultadoGoogleSheets || !resultadoGoogleSheets.success) {
-            // Lanzamos el error. El catch lo capturará y hará rollback de la DB.
-            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets ? resultadoGoogleSheets.error : 'Resultado inválido'}`);
-        }
 
 
         // --- Commit de la transacción y respuesta al cliente ---

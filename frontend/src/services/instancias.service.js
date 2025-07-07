@@ -22,6 +22,7 @@ export const postInstancias = async (newInstancia) => {
 
         return data
     } catch (error) {
+        console.log(error)
         throw error
     }
 }
