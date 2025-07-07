@@ -23,6 +23,7 @@ const sendErrorProd = (err, res) => {
             // Incluye los errores de validación si existen
             errors: err.isValidationError ? err.validationErrors : undefined,
         });
+        
     } else {
         // Errores de programación o desconocidos: no se filtraron por AppError, son bugs
         // 1) Log el error
@@ -46,7 +47,7 @@ const globalErrorHandler = (err, req, res, next) => {
     err.status = err.status || 'error';
 
     // Determina si estamos en desarrollo o producción
-    if (process.env.NODE_ENV === 'desarrollo') {
+    if (process.env.NODE_ENV === 'desarrollo' || process.env.NODE_ENV === "test") {
         sendErrorDev(err, res);
     } else if (process.env.NODE_ENV === 'produccion') {
         // Aquí puedes copiar propiedades del error original si quieres,

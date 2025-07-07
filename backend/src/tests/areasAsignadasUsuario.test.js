@@ -4,7 +4,7 @@ import sequelize from '../config/database.js';
 
 describe('Rutas de Areas', () => {
     let token_adm;
-    let areaId_creado = 0;
+    let objectCreacion = 0;
 
     beforeAll(async () => {
         process.env.NODE_ENV = 'test';
@@ -24,83 +24,64 @@ describe('Rutas de Areas', () => {
         await sequelize.close();
     });
 
-    describe('GET /api/areas', () => {
+    describe('GET /api/areasAsignadasUsuario', () => {
         it('debe devolver 200 y un array de areas', async () => {
             const res = await request(app)
-                .get('/api/areas')
+                .get('/api/areasAsignadasUsuario')
                 .set('Authorization', `Bearer ${token_adm}`);
             expect(res.statusCode).toBe(200);
             expect()
 
         });
 
-
-
     });
 
-    // Validamos ruta /api/areas/:id
-
-    //Validamos ruta POST /api/areas
-    describe('POST /api/areas', () => {
+     //Validamos ruta POST /api/areasAsignadasUsuario
+    describe('POST /api/areasAsignadasUsuario', () => {
 
         it('debe devolver 201 y un area', async () => {
             const res = await request(app)
-                .post('/api/areas')
+                .post('/api/areasAsignadasUsuario')
                 .set('Authorization', `Bearer ${token_adm}`)
-                .send({ nombre: "Area de test", cod: "TEST9912", ministerio: "MTEST" });
+                .send({ cuil_usuario: "20378513376", cod_area: "TEST", comentario: "test" });
             expect(res.statusCode).toBe(201);
-            expect(res.body).toHaveProperty('nombre');
-            expect(res.body).toHaveProperty('cod');
-            expect(res.body).toHaveProperty('ministerio');
-            areaId_creado = res.body.cod;
+            expect(res.body).toHaveProperty('usuario');
+            expect(res.body).toHaveProperty('area');
+            expect(res.body).toHaveProperty('comentario');
+            objectCreacion = res.body;
+            console.log("USUARIO: ", objectCreacion)
         });
 
-        // // Error por que el abono ya existe
+        // Error por atributos inválidos
         it('debe devolver 400 cuando un atributo es inválido', async () => {
             const res = await request(app)
-                .post(`/api/areas`)
+                .post(`/api/areasAsignadasUsuario`)
                 .set('Authorization', `Bearer ${token_adm}`)
-                .send({ nombre: "", cod: ""});
+                .send({ nombre: "", cod: "" });
             expect(res.statusCode).toBe(400);
         });
 
     })
 
-    describe('PUT /api/areas', () => {
-        it('debe devovler 200', async () => {
+
+    describe('DELETE /api/areasAsignadasUsuario/:usuario/:area', () => {
+        it('debe devolver 200', async () => {
             const res = await request(app)
-                .put(`/api/areas`)
-                .set('Authorization', `Bearer ${token_adm}`)
-                .send({ nombre: "Cambiando", cod: "TEST9912", ministerio: "MTEST", newCod : "TEST9912", esVigente: 1 })
-            expect(res.statusCode).toBe(200);
-        });
-
-        it('debe devovler 400', async () => {
-            const res = await request(app)
-                .put(`/api/areas`)
-                .set('Authorization', `Bearer ${token_adm}`)
-                .send({ nombre: "Cambiando", ministerio: "MTEST", newCod : "TEST9912", esVigente: 1 })
-            expect(res.statusCode).toBe(400);
-        });
-
-
-    })
-
-    describe('DELETE /api/areas/:cod', () => {
-        it('debe devolver 201', async () => {
-            const res = await request(app)
-                .delete(`/api/areas/${areaId_creado}`)
+                .delete(`/api/areasAsignadasUsuario/${objectCreacion.usuario}/${objectCreacion.area}`)
                 .set('Authorization', `Bearer ${token_adm}`)
             expect(res.statusCode).toBe(200);
         });
 
-         it('debe devolver 404', async () => {
+        it('debe devolver 404', async () => {
             const res = await request(app)
-                .delete(`/api/areas/unCodigoqueNoExiste`)
+                .delete(`/api/areasAsignadasUsuario/${objectCreacion.usuario}/unCodQueNoExiste`)
                 .set('Authorization', `Bearer ${token_adm}`)
             expect(res.statusCode).toBe(404);
         });
 
     })
+
+
+   
 
 });

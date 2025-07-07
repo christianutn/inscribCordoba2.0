@@ -13,9 +13,7 @@ export const getAvisos = async (req, res) => {
 export const postAviso = async (req, res) => {
     try {
         const { titulo, contenido, icono, visible } = req.body;
-        console.log("Contenido:", req.body);
         const avisoNuevo = await Aviso.create({ titulo, contenido, icono, visible });
-        console.log("Aviso creado:", avisoNuevo);
         res.status(201).json(avisoNuevo);
     } catch (error) {
         res.status(500).json({ error: 'Error al crear el aviso' });

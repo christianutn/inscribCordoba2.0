@@ -2,10 +2,10 @@ import Evento from '../models/evento.models.js';
 import Perfil from '../models/perfil.models.js';
 import AreaTematica from '../models/areaTematica.models.js';
 import TipoCertificacion from '../models/tipoCertificacion.models.js';
-
+import AppError from "../utils/appError.js"
 import Curso from '../models/curso.models.js';
 import enviarCorreo from '../utils/enviarCorreo.js';
-
+import sequelize from '../config/database.js';
 export const getEventos = async (req, res, next) => {
     try {
         const eventos = await Evento.findAll({
@@ -28,7 +28,7 @@ export const getEventos = async (req, res, next) => {
             ]
         });
 
-        
+
         res.status(200).json(eventos);
     } catch (error) {
         next(error);
@@ -47,80 +47,30 @@ export const getEventoByCod = async (req, res, next) => {
 
 
 export const postEvento = async (req, res, next) => {
-    
+
 
     // Datos del usuario
-    const { cuil } = req.user.user;
     try {
         const { curso, perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc } = req.body;
 
-        // validar datos del body
-        if (!curso) {
-            const error = new Error("El curso es obligatorio");
-            error.statusCode = 400;
-            throw error;
-        }
-        if (!perfil) {
-            const error = new Error("El perfil es obligatorio");
-            error.statusCode = 400;
-            throw error;
-        }
-        if (!area_tematica) {
-            const error = new Error("El area tematica es obligatorio");
-            error.statusCode = 400;
-            throw error;
-        }
-        if (!tipo_certificacion) {
-            const error = new Error("El tipo de certificacion es obligatorio");
-            error.statusCode = 400;
-            throw error;
-        }
-        if (!presentacion) {
-            const error = new Error("La presentacion es obligatoria");
-            error.statusCode = 400;
-            throw error;
-        }
-        if (!objetivos) {
-            const error = new Error("Los objetivos son obligatorios");
-            error.statusCode = 400;
-            throw error;
-        }
-        if (!requisitos_aprobacion) {
-            const error = new Error("Los requisitos de aprobacion son obligatorios");
-            error.statusCode = 400;
-            throw error;
-        }
-        if (!ejes_tematicos) {
-            const error = new Error("Los ejes tematicos son obligatorios");
-            error.statusCode = 400;
-            throw error;
-        }
-        
-        
 
         // obtener curso
         const cursoEvento = await Curso.findOne({ where: { cod: curso } });
         if (!cursoEvento) {
-            const error = new Error("El curso no existe");
-            error.statusCode = 400;
-            throw error;
+            throw new AppError("Curso no existe", 400);;
         }
 
         // si cursiEvento.tiene_evento_Creado es 1, entonces no se puede crear el evento
         if (cursoEvento.tiene_evento_creado === 1) {
-            const error = new Error("El curso ya tiene un evento creado");
-            error.statusCode = 400;
-            throw error;
+            throw new AppError("El curso ya tiene un evento creado", 400);;
         }
 
-        
-        
-        
+
+
+
         const existeEvento = await Evento.findOne({ where: { curso } });
         if (existeEvento) {
-            const error = new Error("El evento ya existe");
-            error.statusCode = 400;
-            throw error;
+            throw new AppError("Ya eviste el evento", 400);;
         }
         const evento = await Evento.create({
             curso,
@@ -137,9 +87,9 @@ export const postEvento = async (req, res, next) => {
 
         //  Modificar el atributo tiene_evento_Creado de cursoEvento a 1
         cursoEvento.tiene_evento_creado = 1;
-        await cursoEvento.save({ transaction: t });
+        await cursoEvento.save();
 
-       
+
 
         const htmlBodyCorreo = `<!DOCTYPE html>
 <html lang="es">
@@ -196,7 +146,59 @@ export const postEvento = async (req, res, next) => {
         enviarCorreo(htmlBodyCorreo, "Nuevo Formulario - Creación de Evento", "soportecampuscordoba@gmail.com");
         res.status(201).json(evento);
     } catch (error) {
-        await t.rollback();
         next(error);
+    }
+};
+
+
+
+export const deleteEvento = async (req, res, next) => {
+    let transaction; // Declara la variable para la transacción aquí
+
+    try {
+        // Inicia la transacción
+        transaction = await sequelize.transaction();
+
+        const { curso } = req.params;
+
+        // 1. Buscar la instancia del evento, dentro de la transacción
+        const evento = await Evento.findOne({
+            where: {
+                curso: curso,
+            }
+        }, { transaction }); // ¡Importante pasar la transacción aquí!
+
+        if (!evento) {
+            // Si el evento no existe, revierte la transacción antes de lanzar el error
+            await transaction.rollback();
+            throw new AppError("Evento no existe", 400);
+        }
+
+        // 2. Actualizar el campo 'tiene_evento_creado' en el modelo Curso, dentro de la transacción
+        await Curso.update(
+            {
+                tiene_evento_creado: 0 // Solo pasamos el campo que queremos actualizar
+            },
+            {
+                where: {
+                    cod: curso, // Asumo que 'curso' de los params es el 'cod' del Curso
+                },
+                transaction: transaction // ¡Importante pasar la transacción aquí como parte del segundo objeto!
+            }
+        );
+
+        // 3. Eliminar la instancia del evento, dentro de la transacción
+        await evento.destroy({ transaction }); // ¡Importante pasar la transacción aquí!
+
+        // 4. Si todo fue exitoso, commitea la transacción
+        await transaction.commit();
+        res.status(200).json({ message: "Evento eliminado y curso actualizado." }); // Mensaje más descriptivo
+
+    } catch (error) {
+        // Si hubo algún error, revierte la transacción si existe
+        if (transaction) {
+            await transaction.rollback();
+        }
+        next(error); // Pasa el error al siguiente middleware de manejo de errores
     }
 };
