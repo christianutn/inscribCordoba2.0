@@ -1,7 +1,6 @@
 import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
 import Usuario from "../models/usuario.models.js";
 import Area from "../models/area.models.js";
-import sequelize from "../config/database.js";
 import AppError from "../utils/appError.js";
 
 // Obtener todas las asignaciones
@@ -47,13 +46,11 @@ export const postAreaAsignada = async (req, res, next) => {
 
         res.status(201).json(nuevaAsignacion); // Devolver la lista de asignaciones creadas
     } catch (error) {
-        await t.rollback();
         next(error);
     }
 };
 // Actualizar una asignación existente
 export const putAreaAsignada = async (req, res, next) => {
-    const t = await sequelize.transaction();
     try {
         const { cuil_usuario, cod_area, comentario } = req.body;
 
@@ -76,8 +73,7 @@ export const putAreaAsignada = async (req, res, next) => {
         const asignacionActualizada = await AreasAsignadasUsuario.update(
             { comentario },
             {
-                where: { usuario: cuil_usuario, area: cod_area },
-                transaction: t
+                where: { usuario: cuil_usuario, area: cod_area }
             }
         );
 
@@ -87,17 +83,14 @@ export const putAreaAsignada = async (req, res, next) => {
             throw error;
         }
 
-        await t.commit();
         res.status(200).json({ message: "Asignación actualizada correctamente" });
     } catch (error) {
-        await t.rollback();
         next(error);
     }
 };
 
 // Eliminar una asignación
 export const deleteAreaAsignada = async (req, res, next) => {
-    const t = await sequelize.transaction();
     try {
         const { usuario, area } = req.params;
 
@@ -108,8 +101,7 @@ export const deleteAreaAsignada = async (req, res, next) => {
         }
 
         const resultado = await AreasAsignadasUsuario.destroy({
-            where: { usuario: usuario, area: area },
-            transaction: t
+            where: { usuario: usuario, area: area }
         });
 
         if (resultado === 0) {
@@ -118,10 +110,8 @@ export const deleteAreaAsignada = async (req, res, next) => {
             throw error;
         }
 
-        await t.commit();
         res.status(200).json({ message: "Asignación eliminada correctamente" });
     } catch (error) {
-        await t.rollback();
         next(error);
     }
 };

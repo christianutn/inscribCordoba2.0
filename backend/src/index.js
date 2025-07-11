@@ -78,8 +78,9 @@ export {app}
 
 const startServer = async () => {
     try {
-        await initDb();
+        
         if (process.env.NODE_ENV !== 'test') {
+            await initDb();
             app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
         }
     } catch (error) {

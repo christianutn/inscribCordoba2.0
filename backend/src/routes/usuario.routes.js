@@ -3,7 +3,6 @@ import { getUsuario, postUsuario, putUsuario, deleteUsuario, getMyUser, updateCo
 import { Router } from "express";
 import passport from "passport";
 import autorizar from "../utils/autorizar.js"
-import { validatePassword } from "../utils/bcrypt.js";
 
 const usuarioRouter = Router();
 

@@ -23,7 +23,6 @@ export const getMediosInscripcion = async (req, res, next) => {
 
 
 export const putMedioInscripcion = async (req, res, next) => {
-    const t = await sequelize.transaction();
     try {
 
         let { cod, nombre, newCod, esVigente } = req.body
@@ -52,19 +51,17 @@ export const putMedioInscripcion = async (req, res, next) => {
         //para luego actualar en el excel del cronograma
 
         const medioInscAnterior = await medioInscripcionModel.findOne({ where: { cod } });
+
         if (!medioInscAnterior) {
             throw new Error(`No se encontró un área con el código ${cod}`);
         }
-
-        const areaActualJSON = medioInscAnterior.toJSON();
 
         //Actualizamos medio de inscripción con transacción
 
         const medioInscripcion = await medioInscripcionModel.update({ cod: newCod || cod, nombre: nombre, esVigente: parseEsVigente(esVigente) }, {
             where: {
                 cod: cod
-            },
-            transaction: t
+            }
         });
 
         if (medioInscripcion[0] === 0) {
@@ -73,15 +70,8 @@ export const putMedioInscripcion = async (req, res, next) => {
             throw error;
         }
 
-
-        if (!resultadoGoogleSheets.success) {
-            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
-        }
-
-        await t.commit();
         res.status(200).json(medioInscripcion);
     } catch (error) {
-        await t.rollback();
         next(error);
     }
 }

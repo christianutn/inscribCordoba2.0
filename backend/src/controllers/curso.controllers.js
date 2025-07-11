@@ -172,9 +172,6 @@ export const updateCurso = async (req, res, next) => {
             throw new AppError(`No se encontró un curso con el código ${cod}`, 400);
         }
 
-        const cursoAntesJSON = cursoAntes.toJSON();
-
-
         // --- Actualización en base de datos (Sin cambios en lógica, AÑADIDA transacción) ---
         const result = await cursoModel.update(
             {

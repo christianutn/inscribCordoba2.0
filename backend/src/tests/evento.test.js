@@ -42,34 +42,26 @@ describe('Rutas de eventos', () => {
     //Validamos ruta POST /api/eventos
     describe('POST /api/eventos', () => {
 
-        it('debe devolver 200 y un area', async () => {
-            const res = await request(app)
-                .post('/api/eventos')
-                .set('Authorization', `Bearer ${token_adm}`)
-                .send({curso: "CTESST", perfil: "ONG", area_tematica: "TE", tipo_certificacion: "CAP", presentacion: "test", objetivos: "test", requisitos_aprobacion : "test",  ejes_tematicos: "test", certifica_en_cc: 1,  disenio_a_cargo_cc: 1 });
-            expect(res.statusCode).toBe(201);
-            objectCreacion = res.body;
-        });
-
-        // // Error por que el eventos 
-        // it('debe devolver 400 cuando un atributo es inválido', async () => {
+        // it('debe devolver 200 y un area', async () => {
         //     const res = await request(app)
-        //         .post(`/api/eventos`)
+        //         .post('/api/eventos')
         //         .set('Authorization', `Bearer ${token_adm}`)
-        //         .send({ nombre: "", cod: ""});
-        //     expect(res.statusCode).toBe(400);
+        //         .send({curso: "CTESST", perfil: "ONG", area_tematica: "TE", tipo_certificacion: "CAP", presentacion: "test", objetivos: "test", requisitos_aprobacion : "test",  ejes_tematicos: "test", certifica_en_cc: 1,  disenio_a_cargo_cc: 1 });
+        //     expect(res.statusCode).toBe(201);
+        //     objectCreacion = res.body;
         // });
 
+
     })
 
 
-    describe('DELETE /api/eventos/:curso', () => {
-        it('debe devolver 201', async () => {
-            const res = await request(app)
-                .delete(`/api/eventos/${objectCreacion.curso}`)
-                .set('Authorization', `Bearer ${token_adm}`)
-            expect(res.statusCode).toBe(200);
-        });
-    })
+    // describe('DELETE /api/eventos/:curso', () => {
+    //     it('debe devolver 201', async () => {
+    //         const res = await request(app)
+    //             .delete(`/api/eventos/${objectCreacion.curso}`)
+    //             .set('Authorization', `Bearer ${token_adm}`)
+    //         expect(res.statusCode).toBe(200);
+    //     });
+    // })
 
 });

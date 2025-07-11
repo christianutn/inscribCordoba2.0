@@ -147,7 +147,6 @@ export const postInstancia = async (req, res, next) => {
                 plataforma_dictado: plataforma_dictado,
                 tipo_capacitacion: tipo_capacitacion,
                 comentario: comentario,
-                asignado: "20378513376"
 
 
             }, { transaction: t });
@@ -189,6 +188,8 @@ function crearError(statusCode, message) {
 export const deleteInstancia = async (req, res, next) => {
     try {
         const { curso, fecha_inicio_curso } = req.body;
+
+        //Buscamos tutores por instancia
 
         const instancia = await instanciaModel.findOne({
             where: {
