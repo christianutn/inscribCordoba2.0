@@ -137,7 +137,8 @@ const Cronograma = () => {
           "Cupo", "Cantidad de horas", "Publica PCC", "Es Autogestionado", 
           "Restricción por correlatividad", "Restricción por edad", "Restricción por departamento",
           "Estado de Instancia", "Medio de inscripción", "Plataforma de dictado", 
-          "Tipo de capacitación", "Comentario", "Datos de solicitud"
+          "Tipo de capacitación", "Comentario", "Datos de solicitud",
+          "Cantidad de inscriptos"
           // Add more here if needed from the source for modal/excel
         ];
         setOriginalHeaders(allDesiredHeaders);
@@ -174,6 +175,7 @@ const Cronograma = () => {
             "Tipo de capacitación": formatValue(tipoCapacitacionDetalle.nombre || instance.tipo_capacitacion),
             "Comentario": formatValue(instance.comentario),
             "Datos de solicitud": formatValue(instance.datos_solictud),
+            "Cantidad de inscriptos": instance.cantidad_inscriptos || 0
           };
           
           if (obj["Ministerio"]) {
@@ -272,6 +274,7 @@ const Cronograma = () => {
     // If originalHeaders contained more fields than COLUMNAS_VISIBLES,
     // and those extra fields were in cursosData, this would get them.
     // Since our cursosData objects already have all desired fields, params.row is sufficient.
+    
     setSelectedRowData(params.row);
     setModalOpen(true);
   };

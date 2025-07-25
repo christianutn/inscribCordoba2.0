@@ -78,6 +78,10 @@ const Instancia = sequelize.define("instancias", {
     asignado: {
         type: DataTypes.STRING(11),
         allowNull: true
+    },
+    cantidad_inscriptos: {
+        type: DataTypes.STRING(11),
+        allowNull: true
     }
     
 
