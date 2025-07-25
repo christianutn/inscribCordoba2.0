@@ -3,6 +3,7 @@ import { app, initDb } from '../index.js'; // Ajusta la ruta a tu app si es nece
 import sequelize from '../config/database.js';
 import Area from '../models/area.models.js';
 import Ministerio from '../models/ministerio.models.js';
+import passport from "passport";
 // Mockeamos passport para saltarnos la autenticación real en todos los tests
 jest.mock('passport', () => ({
     authenticate: jest.fn((strategy, options) => (req, res, next) => {

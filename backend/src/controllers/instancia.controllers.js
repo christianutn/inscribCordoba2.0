@@ -379,7 +379,7 @@ export const putInstancia = async (req, res, next) => {
         if (req.body.hasOwnProperty('tiene_restriccion_edad')) where.tiene_restriccion_edad = req.body.tiene_restriccion_edad;
         if (req.body.hasOwnProperty('tiene_restriccion_departamento')) where.tiene_restriccion_departamento = req.body.tiene_restriccion_departamento;
         if (req.body.hasOwnProperty('asignado')) where.asignado = req.body.asignado;
-
+        if (req.body.hasOwnProperty('cantidad_inscriptos')) where.cantidad_inscriptos = req.body.cantidad_inscriptos
 
         // actualizar con where 
         const instancia = await instanciaModel.update(where, {

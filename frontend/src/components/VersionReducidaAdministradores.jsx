@@ -11,7 +11,8 @@ import {
     Backdrop, CircularProgress, Box, Typography, Modal, Card, CardContent, CardHeader,
     IconButton, Divider, List, ListItem, ListItemText, Paper, TextField, FormControl,
     InputLabel, Select, MenuItem, Grid, Button, InputAdornment, Tooltip, Dialog,
-    DialogTitle, DialogContent, DialogActions, Chip, Alert, Stack
+    DialogTitle, DialogContent, DialogActions, Chip, Alert, Stack,
+    Input
 } from '@mui/material';
 // Imports para DatePicker
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -110,6 +111,16 @@ const CronogramaAdminReducido = () => {
         fecha_inicio_inscripcion: null,
         fecha_fin_inscripcion: null,
     });
+
+
+    const [otrosModalOpen, setOtrosModalOpen] = useState(false)
+    const [loadingOtros, setLoadingOtros] = useState(false)
+    const [otrosEditable, setOtrosEditable] = useState({
+        cantidad_inscriptos: null,
+        es_autogestionado: null,
+        
+
+    })
 
     const COLUMNAS_VISIBLES = useMemo(() => [
         "Asignado", "Fecha inicio del curso", "Fecha fin del curso",
@@ -275,10 +286,12 @@ const CronogramaAdminReducido = () => {
         }
         setFechasModalOpen(true);
     }, [originalInstanciaData]);
+
     const handleCloseFechasModal = useCallback(() => {
         setFechasModalOpen(false);
         setFechasEditables({ fecha_inicio_curso: null, fecha_fin_curso: null, fecha_inicio_inscripcion: null, fecha_fin_inscripcion: null });
     }, []);
+
     
     const handleApiUpdate = useCallback(async (payload) => {
         if (!originalInstanciaData) {
@@ -438,6 +451,7 @@ const CronogramaAdminReducido = () => {
                                         {renderDetailItem("Publicada en Portal", originalInstanciaData.es_publicada_portal_cc, true)}
                                         {renderDetailItem("Tiene Correlatividad", originalInstanciaData.tiene_correlatividad, true)}
                                         {renderDetailItem("Comentario", originalInstanciaData.comentario)}
+                                        {renderDetailItem("Cantidad de Inscriptos", originalInstanciaData.cantidad_inscriptos || 0)}
                                         {originalInstanciaData.detalle_curso && (<>
                                             <Divider sx={{ my: 1 }}><Chip label="Detalles del Curso" size="small" /></Divider>
                                             {renderDetailItem("Nombre General", originalInstanciaData.detalle_curso.nombre)}
@@ -445,6 +459,7 @@ const CronogramaAdminReducido = () => {
                                             {renderDetailItem("Ministerio", originalInstanciaData.detalle_curso.detalle_area?.detalle_ministerio?.nombre)}
                                         </>)}
                                         <ListItem sx={{ justifyContent: 'flex-end', pt: 2, gap: 1, flexWrap: 'wrap' }}>
+                                            <Button variant="outlined" color="secondary" onClick={() => setOtrosModalOpen(true)} startIcon={<EventIcon />}>Cambiar Otros</Button>
                                             <Button variant="outlined" color="secondary" onClick={handleOpenFechasModal} startIcon={<EventIcon />}>Cambiar Fechas</Button>
                                             <Button variant="outlined" color="secondary" onClick={handleOpenEstadoModal} startIcon={<EditIcon />}>Cambiar Estado</Button>
                                             <Button variant="contained" onClick={handleOpenReasignModal} startIcon={<AssignmentIndIcon />}>Reasignar</Button>
@@ -511,6 +526,37 @@ const CronogramaAdminReducido = () => {
                     <DialogActions>
                         <Button onClick={handleCloseFechasModal}>Cancelar</Button>
                         <Button onClick={handleUpdateFechas} variant="contained" disabled={loadingFechas}>{loadingFechas ? <CircularProgress size={24} color="inherit" /> : "Guardar Fechas"}</Button>
+                    </DialogActions>
+                </Dialog>
+
+                <Dialog open={otrosModalOpen} onClose={() => setOtrosModalOpen(false)} fullWidth maxWidth="xs">
+                    <DialogTitle>Otros</DialogTitle>
+                    <DialogContent dividers>
+                        <Typography gutterBottom>Curso: <strong>{selectedRowData?.["Nombre del curso"]}</strong></Typography>
+                        <Typography gutterBottom>Cantidad Inscriptos:</Typography>
+                        <FormControl fullWidth sx={{ mt: 2 }}>
+                            <Input value = {otrosEditable.cantidad_inscriptos} onChange={(e) => {
+                                setOtrosEditable({...otrosEditable, cantidad_inscriptos: e.target.value})
+                            }}>Cantidad de Inscriptos</Input>
+                        </FormControl>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOtrosModalOpen(false)}>Cancelar</Button>
+                        <Button onClick={async() => {
+                            try {
+                                console.log("Sii")
+                                await putInstancia(originalInstanciaData.curso, originalInstanciaData.fecha_inicio_curso, otrosEditable)
+                                setSuccessMessage('Modificado con éxito');
+                                
+                            } catch {
+                                console.log("CAmbiar")
+                            } finally {
+                                setOtrosModalOpen(false)
+                                setModalOpen(false)
+                            }
+                        }} 
+                        variant="contained" 
+                        >{loadingEstado ? <CircularProgress size={24} color="inherit" /> : "Confirmar"}</Button>
                     </DialogActions>
                 </Dialog>
             </div>
