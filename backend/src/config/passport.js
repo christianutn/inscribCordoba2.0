@@ -5,6 +5,7 @@ import { createHash, validatePassword } from "../utils/bcrypt.js"
 import jwt from 'passport-jwt'
 import 'dotenv/config';
 import Persona from '../models/persona.models.js';
+import logger from '../utils/logger.js';
 
 const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = jwt.Strategy
@@ -53,12 +54,12 @@ const inicializarPassport = () => {
 
             const usuario = await Usuario.findOne({ where: { cuil: cuil } });
             if (!usuario) {
-
+                logger.info(`Error en postLogin: Usuario: No existe`); 
                 return done(null, false);
             }
 
             if (!validatePassword(String(contrasenia), usuario.contrasenia)) {
-
+                logger.info(`Error en postLogin: Usuario: ${usuario.nombre} (Contraseña/Usuario incorrectos)`);
                 return done(null, false);
             }
 
@@ -71,6 +72,7 @@ const inicializarPassport = () => {
 
             return done(null, datosUsuario); //Devuelvo el usuario y la persona para que se guarde en la sesión;
         } catch (error) {
+
            return done(error)
         }
     }));

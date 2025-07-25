@@ -1,4 +1,12 @@
 
+import morgan from 'morgan';
+import logger from './utils/logger.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 import express from "express";
 import indexRoutes from "./routes/index.routes.js";
@@ -35,6 +43,9 @@ const initSequelize = async () => {
 initSequelize();
 
 app.use(cors());
+// Middleware de accesos HTTP
+const accessLogStream = fs.createWriteStream(path.join(__dirname, '../logs/access.log'), { flags: 'a' });
+app.use(morgan('combined', { stream: accessLogStream }));
 
 const PORT = 4000 // para producción cambiar a 4000
 

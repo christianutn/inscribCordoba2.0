@@ -138,7 +138,6 @@ export default function Principal() {
           return;
         }
         setUser(res);
-
         if (res.necesitaCbioContrasenia == "1") {
           navigate('/cambiarContrasenia');
           return;

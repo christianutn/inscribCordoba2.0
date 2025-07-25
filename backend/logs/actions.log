@@ -1,0 +1,12 @@
+2025-07-21T13:15:38.434Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
+2025-07-21T13:15:44.336Z [INFO]: getAreas ejecutado por Roque Nicolás Carballo
+2025-07-21T13:15:45.780Z [INFO]: getAreas ejecutado por Roque Nicolás Carballo
+2025-07-21T13:15:55.285Z [INFO]: Área actualizada por N/A N/A: 
+      Código: ATD → ATD, 
+      Nombre: ATD TEST → ATD TEST 2, 
+      Vigente: 1 → true
+2025-07-21T13:16:26.880Z [INFO]: Área actualizada por Roque Nicolás Carballo: 
+      Código: ATD → ATD, 
+      Nombre: ATD TEST 2 → ATD TEST, 
+      Vigente: 1 → true
+2025-07-25T13:32:35.429Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
