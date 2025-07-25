@@ -24,6 +24,7 @@ import { Router } from "express";
 import AvisoRouter from "./aviso.routes.js"
 import ApiArgentinaFeriadosRouter from "./api.routes.js";
 import AreasAsignadasUsuario from "./areasAsignadasUsuario.routes.js";
+import EstadosInstanciaRouter from "./estadosInstancia.routes.js";
 import logsRouter from './logs.js';
 
 
@@ -53,5 +54,4 @@ router.use("/eventos", eventoRouter)
 router.use("/avisos", AvisoRouter)
 router.use("/argentina/feriados", ApiArgentinaFeriadosRouter)
 router.use("/areasAsignadasUsuario", AreasAsignadasUsuario)
-router.use("/logs", logsRouter)
 export default router

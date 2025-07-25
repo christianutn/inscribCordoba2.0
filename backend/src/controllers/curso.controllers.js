@@ -9,6 +9,7 @@ import { Op } from "sequelize";
 import sequelize from "../config/database.js";
 import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
 import parseEsVigente from "../utils/parseEsVigente.js"
+import AppError from "../utils/appError.js"
 
 export const getCursos = async (req, res, next) => {
     try {
@@ -18,7 +19,7 @@ export const getCursos = async (req, res, next) => {
         if (!cuil || !rol) {
             const error = new Error("No se encontraron los datos del usuario (rol o cuil)");
             error.statusCode = 404;
-            throw error;
+            throw new AppError("Error en get Cursos ", 400);
         }
 
         // Obtener áreas asignadas al usuario
@@ -52,9 +53,7 @@ export const getCursos = async (req, res, next) => {
         } else {
             // Validar área para roles no administradores
             if (!area) {
-                const error = new Error("No se encontraron los datos del usuario (area)");
-                error.statusCode = 404;
-                throw error;
+                throw new AppError("No se encontraron los datos del usuario (area) ", 404);
             }
             // Crear lista de códigos de área
             const codigosArea = [area];
@@ -92,9 +91,7 @@ export const getCursos = async (req, res, next) => {
         }
 
         if (cursos.length === 0) {
-            const error = new Error("No existen cursos");
-            error.statusCode = 404;
-            throw error;
+            throw new AppError("No existen cursosr", 404);
         }
 
         res.status(200).json(cursos)
@@ -110,16 +107,16 @@ export const postCurso = async (req, res, next) => {
 
 
         const existe = await cursoModel.findOne({ where: { cod: cod } });
-        if (existe) throw new Error("El Código ya existe");
-        if (cod.length > 15) throw new Error("El Código no es valido debe ser menor a 15 caracteres");
-        if (cupo < 1 || isNaN(cupo)) throw new Error("El cupo debe ser mayor a 0");
-        if (cantidad_horas < 1 || isNaN(cantidad_horas)) throw new Error("La cantidad de horas debe ser mayor a 0");
-        if (medio_inscripcion.length > 15) throw new Error("El medio de inscripción no es valido debe ser menor a 15 caracteres");
-        if (plataforma_dictado.length > 15) throw new Error("La plataforma de dictado no es valido debe ser menor a 15 caracteres");
-        if (tipo_capacitacion.length > 15) throw new Error("El tipo de capacitación no es valido debe ser menor a 15 caracteres");
-        if (area.length > 15) throw new Error("El area no es valido debe ser menor a 15 caracteres");
-        if (nombre.length > 250) throw new Error("El nombre no es valido debe ser menor a 250 caracteres");
-        if (nombre.length === 0) throw new Error("El nombre no puede ser vacío");
+        if (existe) throw new AppError("El Código ya existe", 400);
+        if (cod.length > 15) throw new AppError("El Código no es valido debe ser menor a 15 caracteres", 400);
+        if (cupo < 1 || isNaN(cupo)) throw new AppError("El cupo debe ser mayor a 0", 400);
+        if (cantidad_horas < 1 || isNaN(cantidad_horas)) throw new AppError("La cantidad de horas debe ser mayor a 0", 400);
+        if (medio_inscripcion.length > 15) throw new AppError("El medio de inscripción no es valido debe ser menor a 15 caracteres", 400);
+        if (plataforma_dictado.length > 15) throw new AppError("La plataforma de dictado no es valido debe ser menor a 15 caracteres", 400);
+        if (tipo_capacitacion.length > 15) throw new AppError("El tipo de capacitación no es valido debe ser menor a 15 caracteres", 400);
+        if (area.length > 15) throw new AppError("El area no es valido debe ser menor a 15 caracteres", 400);
+        if (nombre.length > 250) throw new AppError("El nombre no es valido debe ser menor a 250 caracteres", 400);
+        if (nombre.length === 0) throw new AppError("El nombre no puede ser vacío", 400);
 
 
         const response = await cursoModel.create(req.body);
@@ -132,12 +129,6 @@ export const postCurso = async (req, res, next) => {
 }
 
 
-// Asegúrate de importar sequelize (tu instancia de Sequelize) y tu modelo cursoModel
-// import sequelize from '../config/database'; // Ajusta la ruta a tu instancia de Sequelize
-// import cursoModel from '../models/curso.models'; // Ajusta la ruta a tu modelo Curso
-// Asegúrate de importar actualizarDatosColumna desde tu servicio de Google Sheets
-// import { actualizarDatosColumna } from '../services/googleSheets.service'; // Ajusta la ruta
-
 export const updateCurso = async (req, res, next) => {
     // Declaramos la variable de transacción para usarla en el catch si es necesario
     let t;
@@ -148,7 +139,7 @@ export const updateCurso = async (req, res, next) => {
         // --- Validaciones de entrada (Sin cambios en lógica, solo se eliminan logs) ---
         // Lanzamos el error directamente, confiando en que el catch lo capture y pase a next(error)
         if (!cod || !nombre || !cupo || !cantidad_horas || !medio_inscripcion || !plataforma_dictado || !tipo_capacitacion || !area) {
-            throw new Error("Hay campos vacios");
+            throw new AppError("Hay campos vacios", 400);
         }
 
         // Convertimos a número y validamos que sean enteros positivos
@@ -158,10 +149,10 @@ export const updateCurso = async (req, res, next) => {
 
 
         if (parsedCupo < 1 || isNaN(parsedCupo) || !Number.isInteger(parsedCupo)) {
-            throw new Error("El cupo debe ser un entero mayor a 0");
+            throw new AppError("El cupo debe ser un entero mayor a 0", 400);
         }
         if (parsedCantidadHoras < 1 || isNaN(parsedCantidadHoras) || !Number.isInteger(parsedCantidadHoras)) {
-            throw new Error("La cantidad de horas debe ser un entero mayor a 0");
+            throw new AppError("La cantidad de horas debe ser un entero mayor a 0", 400);
         }
         // --- Fin Validaciones de entrada ---
 
@@ -178,11 +169,8 @@ export const updateCurso = async (req, res, next) => {
 
         if (!cursoAntes) {
             // Lanzamos el error. El catch lo capturará y hará rollback.
-            throw new Error(`No se encontró un curso con el código ${cod}`);
+            throw new AppError(`No se encontró un curso con el código ${cod}`, 400);
         }
-
-        const cursoAntesJSON = cursoAntes.toJSON();
-
 
         // --- Actualización en base de datos (Sin cambios en lógica, AÑADIDA transacción) ---
         const result = await cursoModel.update(
@@ -210,20 +198,13 @@ export const updateCurso = async (req, res, next) => {
         if (result[0] === 0) {
             // Lanzamos el error. El catch lo capturará y hará rollback.
             // Mantenemos tu lógica original de considerar 0 filas afectadas como error.
-            throw new Error("No hubo actualización de datos");
+            throw new AppError("No hubo actualización de datos", 400);
         }
 
 
         // --- Actualización en Google Sheets (Sin cambios en lógica) ---
         // Esta operación NO es parte de la transacción de DB. Si falla,
         // el catch hará rollback de la DB, pero el cambio en Sheets no se deshace aquí.
-        const resultadoGoogleSheets = await actualizarDatosColumna('Nombre del curso', cursoAntesJSON.nombre, nombre);
-
-        // Verificamos el resultado de Google Sheets (Sin cambios en lógica)
-        if (!resultadoGoogleSheets || !resultadoGoogleSheets.success) {
-            // Lanzamos el error. El catch lo capturará y hará rollback de la DB.
-            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets ? resultadoGoogleSheets.error : 'Resultado inválido'}`);
-        }
 
 
         // --- Commit de la transacción y respuesta al cliente ---
@@ -264,7 +245,7 @@ export const deleteCurso = async (req, res, next) => {
 
 
         if (!cod) {
-            throw new Error("El ID del curso es requerido");
+            throw new AppError("El ID del curso es requerido", 400);
         }
         const response = await cursoModel.destroy({
             where: {
@@ -272,7 +253,7 @@ export const deleteCurso = async (req, res, next) => {
             }
         });
         if (response === 0) {
-            throw new Error("No se pudo borrar el curso");
+            throw new AppError("No se pudo borrar el curso", 400);
         }
         res.status(200).json({ message: "Se borro correctamente el curso" })
     } catch (error) {

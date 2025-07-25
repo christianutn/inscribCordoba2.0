@@ -113,6 +113,19 @@ export const postInstancia = async (req, res, next) => {
                 fechaCursadaHasta,
             } = cohorte;
 
+            //COntrolar si existe fecha cursada para esta fecha
+            const existeInstancia = await instanciaModel.findOne({
+                where: {
+                    curso: curso,
+                    fecha_inicio_curso: fechaCursadaDesde
+                }
+                    
+            })
+
+            if (existeInstancia) {
+                throw new AppError(`Ya existe una instancia con el mismo curso y fecha de cursada.`, 400);
+            }
+
             // Crear la instancia
             await instanciaModel.create({
                 curso: curso,
@@ -120,13 +133,13 @@ export const postInstancia = async (req, res, next) => {
                 fecha_fin_inscripcion: fechaInscripcionHasta,
                 fecha_inicio_curso: fechaCursadaDesde,
                 fecha_fin_curso: fechaCursadaHasta,
-                es_publicada_portal_cc: opciones.publicaCC,
+                es_publicada_portal_cc: opciones.publicaPCC ? 1 : 0,
                 cupo: cupo,
                 cantidad_horas: cantidad_horas,
-                es_autogestionado: opciones.autogestionado,
-                tiene_correlatividad: opciones.correlatividad,
-                tiene_restriccion_edad: opciones.edad,
-                tiene_restriccion_departamento: opciones.departamento,
+                es_autogestionado: opciones.autogestionado ? 1 : 0,
+                tiene_correlatividad: opciones.correlatividad ? 1 : 0,
+                tiene_restriccion_edad: opciones.edad ? 1 : 0,
+                tiene_restriccion_departamento: opciones.departamento ? 1 : 0,
                 datos_solictud: datos_solicitud,
                 estado_instancia: "PEND",
 
@@ -175,6 +188,8 @@ function crearError(statusCode, message) {
 export const deleteInstancia = async (req, res, next) => {
     try {
         const { curso, fecha_inicio_curso } = req.body;
+
+        //Buscamos tutores por instancia
 
         const instancia = await instanciaModel.findOne({
             where: {

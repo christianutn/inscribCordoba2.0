@@ -1,4 +1,5 @@
 import tipoCapacitacionModel from "../models/tipoCapacitacion.models.js";
+import AppError from "../utils/appError.js";
 
 import sequelize from "../config/database.js";
 import parseEsVigente from "../utils/parseEsVigente.js"
@@ -9,9 +10,7 @@ export const getTiposCapacitacion = async (req, res, next) => {
 
         if (tiposCapacitacion.length === 0) {
 
-            const error = new Error("No existen tipos de capacitacion");
-            error.statusCode = 404;
-            throw error;
+            throw new AppError("No se encontraron tipos de capacitación", 404);
         }
 
         res.status(200).json(tiposCapacitacion)
@@ -22,7 +21,6 @@ export const getTiposCapacitacion = async (req, res, next) => {
 
 
 export const putTiposCapacitacion = async (req, res, next) => {
-    const t = await sequelize.transaction();
     try {
 
         let { cod, nombre, newCod, esVigente } = req.body
@@ -57,15 +55,11 @@ export const putTiposCapacitacion = async (req, res, next) => {
             throw error;
         }
 
-        const tipoCapacitacionAnteriorJSON = JSON.parse(JSON.stringify(tipoCapacitacionAnterior));
-
-
 
         const tipo_capacitacion = await tipoCapacitacionModel.update({ cod: newCod || cod, nombre: nombre, esVigente: parseEsVigente(esVigente) }, {
             where: {
                 cod: cod
-            },
-            transaction: t
+            }
         });
 
         if (tipo_capacitacion[0] === 0) {
@@ -74,16 +68,8 @@ export const putTiposCapacitacion = async (req, res, next) => {
             throw error;
         }
 
-        // Llama a actualizarDatosColumna
-        const resultadoGoogleSheets = await actualizarDatosColumna('Tipo de capacitación', tipoCapacitacionAnteriorJSON.nombre, nombre);
-
-        if (!resultadoGoogleSheets.success) {
-            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
-        }
-        await t.commit();
         res.status(200).json(tipo_capacitacion);
     } catch (error) {
-        await t.rollback();
         next(error);
     }
 }

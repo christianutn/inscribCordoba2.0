@@ -27,7 +27,7 @@ export const getAreas = async (req, res, next) => {
             throw error;
         }
 
-        logger.info(`getAreas ejecutado por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}`);
+        // logger.info(`getAreas ejecutado por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}`);
         res.status(200).json(areas);
     } catch (error) {
         logger.error(`Error en getAreas por ${req.user?.user.nombre || 'N/A'} ${req.user?.user.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });

@@ -185,7 +185,6 @@ export const getMyUser = async (req, res, next) => {
 export const updateContrasenia = async (req, res, next) => {
     try {
         let { nuevaContrasenia } = req.body;
-        console.log("loque busco:", req)
         const cuil = req.user.user?.cuil || req.user.dataValues?.cuil; // Tomamos el cuil del token o del body
 
         // Asegurar que la contraseña sea una cadena, si no es, convertirla a string

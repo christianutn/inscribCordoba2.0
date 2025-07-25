@@ -1,8 +1,8 @@
 import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
 import Usuario from "../models/usuario.models.js";
 import Area from "../models/area.models.js";
-import sequelize from "../config/database.js";
 import AppError from "../utils/appError.js";
+import logger from '../utils/logger.js';
 
 // Obtener todas las asignaciones
 export const getAreasAsignadas = async (req, res, next) => {
@@ -44,16 +44,15 @@ export const postAreaAsignada = async (req, res, next) => {
         if (!nuevaAsignacion) {
             throw new AppError("No se pudo crear la nueva asignación", 400);
         }
-
+        const usuario = req.user.user;
+        logger.info(`Área asignada por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Usuario=${cuil_usuario}, Área=${cod_area}, Comentario="${comentario || 'Sin comentarios'}"`);
         res.status(201).json(nuevaAsignacion); // Devolver la lista de asignaciones creadas
     } catch (error) {
-        await t.rollback();
         next(error);
     }
 };
 // Actualizar una asignación existente
 export const putAreaAsignada = async (req, res, next) => {
-    const t = await sequelize.transaction();
     try {
         const { cuil_usuario, cod_area, comentario } = req.body;
 
@@ -76,8 +75,7 @@ export const putAreaAsignada = async (req, res, next) => {
         const asignacionActualizada = await AreasAsignadasUsuario.update(
             { comentario },
             {
-                where: { usuario: cuil_usuario, area: cod_area },
-                transaction: t
+                where: { usuario: cuil_usuario, area: cod_area }
             }
         );
 
@@ -86,18 +84,16 @@ export const putAreaAsignada = async (req, res, next) => {
             error.statusCode = 400;
             throw error;
         }
-
-        await t.commit();
+        const usuario = req.user.user;
+        logger.info(`Área asignada actualizada por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Usuario=${cuil_usuario}, Área=${cod_area}, Nuevo Comentario="${comentario}"`);
         res.status(200).json({ message: "Asignación actualizada correctamente" });
     } catch (error) {
-        await t.rollback();
         next(error);
     }
 };
 
 // Eliminar una asignación
 export const deleteAreaAsignada = async (req, res, next) => {
-    const t = await sequelize.transaction();
     try {
         const { usuario, area } = req.params;
 
@@ -108,8 +104,7 @@ export const deleteAreaAsignada = async (req, res, next) => {
         }
 
         const resultado = await AreasAsignadasUsuario.destroy({
-            where: { usuario: usuario, area: area },
-            transaction: t
+            where: { usuario: usuario, area: area }
         });
 
         if (resultado === 0) {
@@ -117,11 +112,11 @@ export const deleteAreaAsignada = async (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
+        const usuar = req.user.user;
 
-        await t.commit();
+        logger.warn(`Asignación eliminada por ${usuar?.nombre || 'N/A'} ${usuar?.apellido || 'N/A'}: Usuario=${usuario}, Área=${area}`);
         res.status(200).json({ message: "Asignación eliminada correctamente" });
     } catch (error) {
-        await t.rollback();
         next(error);
     }
 };

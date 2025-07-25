@@ -66,14 +66,6 @@ export const putPlataformaDictado = async (req, res, next) => {
         }
 
 
-
-        // Llama a actualizarDatosColumna
-        const resultadoGoogleSheets = await actualizarDatosColumna('Plataforma de dictado', plataformaDictadoAnteriorJSON.nombre, nombre);
-        if (!resultadoGoogleSheets.success) {
-            throw new Error(`Error al actualizar en Google Sheets: ${resultadoGoogleSheets.error}`);
-        }
-
-
         await t.commit();
         res.status(200).json(plataforma_dictado);
     } catch (error) {

@@ -140,7 +140,6 @@ const validarDatosCursoConCohortes = [
             const fecha = DateTime.fromISO(value, { zone: 'America/Argentina/Buenos_Aires' });
             return fecha.isValid ? fecha.toISODate() : value;
         }),
-
     body('cohortes.*.fechaCursadaHasta')
         .exists().withMessage("El campo 'fechaCursadaHasta' es requerido para cada cohorte.")
         .isISO8601().withMessage("El formato de 'fechaCursadaHasta' es incorrecto (debe ser YYYY-MM-DDTHH:mm:ssZ).")
@@ -220,16 +219,16 @@ const validarDatosCursoConCohortes = [
             }
 
             //Total cursos mes
-            if (esExcepcionParaFechas == "0" && Instancia.supera_cupo_dia(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cupos en el dia supera el límite establecido.`, 400);
+            if (esExcepcionParaFechas == "0" && await Instancia.supera_cupo_dia(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cupos en el dia supera el límite establecido.`, 400);
 
             // Calcular cupo del mes
-            if (esExcepcionParaFechas == "0" && Instancia.supera_cantidad_cursos_acumulado(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cursos acumulado supera el límite establecido`, 400);
+            if (esExcepcionParaFechas == "0" && await Instancia.supera_cantidad_cursos_acumulado(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cursos acumulado supera el límite establecido`, 400);
 
             // Calcular cantidad de cursos que comienzan en el día
-            if (esExcepcionParaFechas == "0" && Instancia.supera_cantidad_cursos_mes(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cursos en el mes supera el límite establecido`, 400);
+            if (esExcepcionParaFechas == "0" && await Instancia.supera_cantidad_cursos_mes(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cursos en el mes supera el límite establecido`, 400);
 
             // Calcular la cantidad de cupo por dia
-            if (esExcepcionParaFechas == "0" && Instancia.supera_cantidad_cursos_dia(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cursos en el dia supera el límite establecido`, 400);
+            if (esExcepcionParaFechas == "0" && await Instancia.supera_cantidad_cursos_dia(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cursos en el dia supera el límite establecido`, 400);
 
 
         }

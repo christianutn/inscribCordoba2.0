@@ -13,7 +13,7 @@ import indexRoutes from "./routes/index.routes.js";
 import inicializarPassport from "../src/config/passport.js"; // Asegúrate que esta ruta es correcta
 import cors from "cors";
 import sequelize from "./config/database.js";
-import associateModels from "./models/asociateModelos.js";
+import   "./models/asociateModelos.js";
 import 'dotenv/config';
 import enviarCorreoDiarioContolDeCursos from "./googleSheets/utils/enviarCorreoDiarioControlDeCursos.js";
 import syncModels from "./config/sync.database.js";
@@ -22,25 +22,21 @@ import manejarErrorGlobales from "./middlewares/manejoGlobalErrores.js"
 const app = express();
 
 // Inicialización de Sequelize
-const initSequelize = async () => {
+export const initDb = async () => {
     try {
         await sequelize.authenticate();
         console.log('Connection to the database has been established successfully.');
-       
-        associateModels();
-        console.log('All models were synchronized successfully.');
-
         if(process.env.NODE_ENV === 'desarrollo') {
             //await syncModels();
             console.log('All models were synchronized successfully.');
         }
     } catch (error) {
         console.error('Unable to connect to the database:', error);
+        throw error;
     }
 };
 
-// Llamada a la función para inicializar Sequelize
-initSequelize();
+
 
 app.use(cors());
 // Middleware de accesos HTTP
@@ -89,4 +85,22 @@ enviarCorreoDiarioContolDeCursos(); // Llamada a la función para enviar el corr
 
 // --- Fin Programación de la Tarea Cron ---
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+export {app}
+
+const startServer = async () => {
+    try {
+        
+        if (process.env.NODE_ENV !== 'test') {
+            await initDb();
+            app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+        }
+    } catch (error) {
+        console.error("Failed to initialize database or start server:", error);
+        if (process.env.NODE_ENV !== 'test') {
+            process.exit(1);
+        }
+        // Si estamos en test y falla initDb, el error se propagará y el test fallará, lo cual es bueno.
+    }
+};
+
+startServer();
