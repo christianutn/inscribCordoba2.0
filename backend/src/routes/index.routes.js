@@ -54,4 +54,9 @@ router.use("/eventos", eventoRouter)
 router.use("/avisos", AvisoRouter)
 router.use("/argentina/feriados", ApiArgentinaFeriadosRouter)
 router.use("/areasAsignadasUsuario", AreasAsignadasUsuario)
+router.use("/estadosInstancia", EstadosInstanciaRouter)
+
+
+
+
 export default router
