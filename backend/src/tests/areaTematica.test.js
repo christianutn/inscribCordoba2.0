@@ -34,7 +34,8 @@ describe('Rutas de areasTematicas', () => {
 
     afterEach(() => {
         // Limpiamos los mocks después de cada test para asegurar que son independientes.
-        jest.clearAllMocks();
+        jest.clearAllMocks()
+
     });
 
     afterAll(async () => {
