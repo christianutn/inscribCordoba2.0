@@ -1,75 +1,136 @@
 import instanciaModel from "../models/instancia.models.js";
-import Curso from "../models/curso.models.js";
-import Estado_Instancia from "../models/estado_instancia.models.js";
-import Area from "../models/area.models.js";
-import Ministerio from "../models/ministerio.models.js";
-import MedioInscripcion from "../models/medioInscripcion.models.js";
-import TipoCapacitacion from "../models/tipoCapacitacion.models.js";
-import PlataformaDictado from "../models/plataformaDictado.models.js";
 import Persona from "../models/persona.models.js";
 import sequelize from "../config/database.js";
-import { QueryTypes, Model, DataTypes } from 'sequelize'; // Necesitas DataTypes si defines el modelo aquí
+import { QueryTypes } from 'sequelize'; // Necesitas DataTypes si defines el modelo aquí
 import TutoresXInstancia from "../models/tutorXInstancia.models.js";
 import { DateTime } from 'luxon';
 import AppError from "../utils/appError.js";
 import Usuario from "../models/usuario.models.js";
 import Rol from "../models/rol.models.js";
 import logger from '../utils/logger.js';
+import RestriccionesPorCorrelatividad from "../models/restricciones_por_correlatividad.models.js";
+import RestriccionesPorDepartamento from "../models/restricciones_por_departamento.models.js";
+
+
 
 export const getInstancias = async (req, res, next) => {
     try {
-        const instancias = await instanciaModel.findAll({
-            include: [
-                {
-                    model: Curso, as: 'detalle_curso',
-                    include: [
-                        {
-                            model: MedioInscripcion, as: 'detalle_medioInscripcion'
-                        },
-                        {
-                            model: TipoCapacitacion, as: 'detalle_tipoCapacitacion'
-                        },
-                        {
-                            model: PlataformaDictado, as: 'detalle_plataformaDictado'
-                        },
-                        {
-                            model: Area,
-                            as: 'detalle_area',
-                            include: [
-                                { model: Ministerio, as: 'detalle_ministerio' }
-                            ]
-                        },
+        // Nota: Esta consulta asume que la tabla para el modelo TipoCapacitacion se llama 'tipos_capacitacion'.
+        // Si tiene un nombre diferente, deberás ajustarlo en la subconsulta para 'detalle_tipoCapacitacion'.
+        const query = `
+            SELECT
+                i.curso,
+                i.fecha_inicio_curso,
+                i.fecha_fin_curso,
+                i.fecha_inicio_inscripcion,
+                i.fecha_fin_inscripcion,
+                i.es_publicada_portal_cc,
+                i.cupo,
+                i.cantidad_horas,
+                i.es_autogestionado,
+                i.tiene_correlatividad,
+                i.tiene_restriccion_edad,
+                i.tiene_restriccion_departamento,
+                i.datos_solictud,
+                i.estado_instancia,
+                i.medio_inscripcion,
+                i.plataforma_dictado,
+                i.tipo_capacitacion,
+                i.comentario,
+                i.asignado,
+                i.cantidad_inscriptos,
+                i.cantidad_certificados,
+                i.fecha_suba_certificados,
+                i.restriccion_edad_desde,
+                i.restriccion_edad_hasta,
+                (
+                    SELECT JSON_OBJECT(
+                        'cod', c.cod, 'nombre', c.nombre, 'cupo', c.cupo, 'cantidad_horas', c.cantidad_horas,
+                        'medio_inscripcion', c.medio_inscripcion, 'plataforma_dictado', c.plataforma_dictado,
+                        'tipo_capacitacion', c.tipo_capacitacion, 'area', c.area, 'esVigente', c.esVigente,
+                        'tiene_evento_creado', c.tiene_evento_creado, 'es_autogestionado', c.es_autogestionado,
+                        'tiene_restriccion_edad', c.tiene_restriccion_edad,
+                        'tiene_restriccion_departamento', c.tiene_restriccion_departamento, 'publica_pcc', c.publica_pcc,
+                        'tiene_correlatividad', c.tiene_correlatividad, 'numero_evento', c.numero_evento,
+                        'esta_maquetado', c.esta_maquetado, 'esta_configurado', c.esta_configurado,
+                        'aplica_sincronizacion_certificados', c.aplica_sincronizacion_certificados, 'url_curso', c.url_curso,
+                        'detalle_medioInscripcion', (SELECT JSON_OBJECT('cod', mi.cod, 'nombre', mi.nombre, 'esVigente', mi.esVigente) FROM medios_inscripcion mi WHERE mi.cod = c.medio_inscripcion),
+                        'detalle_tipoCapacitacion', (SELECT JSON_OBJECT('cod', tc.cod, 'nombre', tc.nombre, 'esVigente', tc.esVigente) FROM tipos_capacitacion tc WHERE tc.cod = c.tipo_capacitacion),
+                        'detalle_plataformaDictado', (SELECT JSON_OBJECT('cod', pd.cod, 'nombre', pd.nombre, 'esVigente', pd.esVigente) FROM plataformas_dictado pd WHERE pd.cod = c.plataforma_dictado),
+                        'detalle_area', (
+                            SELECT JSON_OBJECT(
+                                'cod', a.cod, 'nombre', a.nombre, 'ministerio', a.ministerio, 'esVigente', a.esVigente,
+                                'detalle_ministerio', (SELECT JSON_OBJECT('cod', m.cod, 'nombre', m.nombre, 'esVigente', m.esVigente) FROM ministerios m WHERE m.cod = a.ministerio)
+                            ) FROM areas a WHERE a.cod = c.area
+                        )
+                    )
+                    FROM cursos c WHERE c.cod = i.curso
+                ) AS detalle_curso,
+                (
+                    SELECT JSON_OBJECT(
+                        'cuil', u.cuil, 'contrasenia', u.contrasenia, 'rol', u.rol, 'area', u.area,
+                        'necesitaCbioContrasenia', u.necesitaCbioContrasenia, 'esExcepcionParaFechas', u.esExcepcionParaFechas,
+                        'detalle_persona', (SELECT JSON_OBJECT('cuil', p.cuil, 'nombre', p.nombre, 'apellido', p.apellido, 'mail', p.mail, 'celular', p.celular) FROM personas p WHERE p.cuil = u.cuil),
+                        'detalle_rol', (SELECT JSON_OBJECT('cod', r.cod, 'nombre', r.nombre) FROM roles r WHERE r.cod = u.rol),
+                        'detalle_area', (SELECT JSON_OBJECT('cod', a.cod, 'nombre', a.nombre) FROM areas a WHERE a.cod = u.area)
+                    )
+                    FROM usuarios u WHERE u.cuil = i.asignado
+                ) AS detalle_asignado,
+                (
+                    SELECT COALESCE(JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'curso', rpd.curso, 'fecha_inicio_curso', rpd.fecha_inicio_curso, 'departamento_id', rpd.departamento_id,
+                            'detalle_departamento', (SELECT JSON_OBJECT('id', d.id, 'nombre', d.nombre) FROM departamentos d WHERE d.id = rpd.departamento_id)
+                        )
+                    ), JSON_ARRAY())
+                    FROM restricciones_por_departamento rpd
+                    WHERE rpd.curso = i.curso AND rpd.fecha_inicio_curso = i.fecha_inicio_curso
+                ) AS detalle_restricciones_por_departamento,
+                (
+                    SELECT COALESCE(JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'curso', rpc.curso, 'fecha_inicio_curso', rpc.fecha_inicio_curso, 'curso_correlativo', rpc.curso_correlativo,
+                            'detalle_curso', (SELECT JSON_OBJECT('cod', dc.cod, 'nombre', dc.nombre) FROM cursos dc WHERE dc.cod = rpc.curso),
+                            'detalle_curso_correlativo', (SELECT JSON_OBJECT('cod', dcc.cod, 'nombre', dcc.nombre) FROM cursos dcc WHERE dcc.cod = rpc.curso_correlativo)
+                        )
+                    ), JSON_ARRAY())
+                    FROM restricciones_por_correlatividad rpc
+                    WHERE rpc.curso = i.curso AND rpc.fecha_inicio_curso = i.fecha_inicio_curso
+                ) AS detalle_restricciones_por_correlatividad
+            FROM instancias i;
+        `;
 
-                    ]
-
-                },
-
-                {
-                    model: Usuario, as: 'detalle_asignado',
-                    include: [
-                        {
-                            model: Persona, as: 'detalle_persona'
-                        },
-                        {
-                            model: Rol, as: 'detalle_rol'
-                        },
-                        {
-                            model: Area, as: 'detalle_area'
-                        }
-                    ]
-                }
-
-            ]
+        const [results] = await sequelize.query(query, {
+            // Sequelize v5 y anteriores devuelven [results, metadata]. En v6, solo results por defecto para SELECT.
+            // Es buena práctica usar destructuring [results] para compatibilidad.
         });
-        // No necesitas llamar a .json() sobre instancias, simplemente devuélvelo como JSON
-        // res.status(200).json(instancias) ya lo hace correctamente
-        if (instancias.length === 0) {
-            throw new AppError("No existen instancias", 404);
-        }
 
-        res.status(200).json(instancias)
+        // La consulta devuelve objetos con campos de texto JSON. Sequelize no los parsea automáticamente.
+        const parsedResults = results.map(item => {
+            const safelyParseJSON = (jsonString) => {
+                if (typeof jsonString === 'string') {
+                    try {
+                        return JSON.parse(jsonString);
+                    } catch (e) {
+                        return null; // O manejar el error como prefieras
+                    }
+                } 
+                return jsonString; // Si ya es un objeto, devuélvelo tal cual
+            };
+
+            return {
+                ...item,
+                detalle_curso: safelyParseJSON(item.detalle_curso),
+                detalle_asignado: safelyParseJSON(item.detalle_asignado),
+                detalle_restricciones_por_departamento: safelyParseJSON(item.detalle_restricciones_por_departamento),
+                detalle_restricciones_por_correlatividad: safelyParseJSON(item.detalle_restricciones_por_correlatividad)
+            };
+        });
+
+        res.status(200).json(parsedResults);
+
     } catch (error) {
-        next(error)
+        next(error);
     }
 }
 
@@ -87,11 +148,17 @@ export const postInstancia = async (req, res, next) => {
             tipo_capacitacion,
             cupo,
             cantidad_horas,
-            cohortes,
             tutores,
-            opciones,
-            comentario
+            cohortes,
+            es_autogestionado,
+            es_publicada_portal_cc,
+            restriccion_edad_desde,
+            restriccion_edad_hasta,
+            departamentos,
+            cursos_correlativos
         } = req.body;
+
+
 
 
 
@@ -106,6 +173,17 @@ export const postInstancia = async (req, res, next) => {
 
 
         for (const cohorte of cohortes) {
+
+            // banderas para tiene_correlatividad, tiene_restriccion_departamento
+            let tiene_correlatividad = 0;
+            let tiene_restriccion_departamento = 0;
+
+            // Verificamos si tiene restriccion de edad esto depende si restriccion_edad_desde es igual a 16 y restriccion_edad_desde el un falsy values
+
+            let tiene_restriccion_edad = 0;
+            if (restriccion_edad_desde && restriccion_edad_hasta) tiene_restriccion_edad = 1;
+
+
             const {
                 fechaInscripcionDesde,
                 fechaInscripcionHasta,
@@ -119,12 +197,14 @@ export const postInstancia = async (req, res, next) => {
                     curso: curso,
                     fecha_inicio_curso: fechaCursadaDesde
                 }
-                    
+
             })
 
             if (existeInstancia) {
                 throw new AppError(`Ya existe una instancia con el mismo curso y fecha de cursada.`, 400);
             }
+
+
 
             // Crear la instancia
             await instanciaModel.create({
@@ -133,27 +213,51 @@ export const postInstancia = async (req, res, next) => {
                 fecha_fin_inscripcion: fechaInscripcionHasta,
                 fecha_inicio_curso: fechaCursadaDesde,
                 fecha_fin_curso: fechaCursadaHasta,
-                es_publicada_portal_cc: opciones.publicaPCC ? 1 : 0,
+                es_publicada_portal_cc: es_publicada_portal_cc,
                 cupo: cupo,
                 cantidad_horas: cantidad_horas,
-                es_autogestionado: opciones.autogestionado ? 1 : 0,
-                tiene_correlatividad: opciones.correlatividad ? 1 : 0,
-                tiene_restriccion_edad: opciones.edad ? 1 : 0,
-                tiene_restriccion_departamento: opciones.departamento ? 1 : 0,
+                es_autogestionado: es_autogestionado,
+                tiene_correlatividad: tiene_correlatividad,
+                tiene_restriccion_edad: tiene_restriccion_edad,
+                tiene_restriccion_departamento: tiene_restriccion_departamento,
                 datos_solictud: datos_solicitud,
                 estado_instancia: "PEND",
-
                 medio_inscripcion: medio_inscripcion,
                 plataforma_dictado: plataforma_dictado,
                 tipo_capacitacion: tipo_capacitacion,
-                comentario: comentario,
-
-
+                restriccion_edad_desde: restriccion_edad_desde,
+                restriccion_edad_hasta: restriccion_edad_hasta | null,
             }, { transaction: t });
+
+            // Creamos restricciones_por_correlatividad en caso de existir
+            if (cursos_correlativos && cursos_correlativos.length > 0) {
+                for (const correlativo of cursos_correlativos) {
+                    if (!tiene_correlatividad) tiene_correlatividad = 1;
+                    await RestriccionesPorCorrelatividad.create({
+                        curso: curso,
+                        fecha_inicio_curso: fechaCursadaDesde,
+                        curso_correlativo: correlativo
+                    }, { transaction: t });
+                }
+            }
+
+            // Creamos restricciones_por_departamento en caso de existir
+            if (departamentos && departamentos.length > 0) {
+                for (const departamento of departamentos) {
+                    if (!tiene_restriccion_departamento) tiene_restriccion_departamento = 1;
+                    await RestriccionesPorDepartamento.create({
+                        curso: curso,
+                        fecha_inicio_curso: fechaCursadaDesde,
+                        departamento_id: departamento
+                    }, { transaction: t });
+                }
+            }
+
+
 
             // Procesar tutores
             for (const tutor of tutores) {
-                const existeTutor = await Persona.findOne({ where: { cuil: tutor.cuil } });
+                const existeTutor = await Persona.findByPk(tutor.cuil);
                 if (!existeTutor) {
                     throw new AppError(`El tutor con CUIL ${tutor.cuil} no existe`, 404);
                 }

@@ -25,7 +25,7 @@ import AvisoRouter from "./aviso.routes.js"
 import ApiArgentinaFeriadosRouter from "./api.routes.js";
 import AreasAsignadasUsuario from "./areasAsignadasUsuario.routes.js";
 import EstadosInstanciaRouter from "./estadosInstancia.routes.js";
-import logsRouter from './logs.js';
+import DepartamentoRouter from "./departamento.routes.js"
 
 
 const router = Router();
@@ -55,6 +55,8 @@ router.use("/avisos", AvisoRouter)
 router.use("/argentina/feriados", ApiArgentinaFeriadosRouter)
 router.use("/areasAsignadasUsuario", AreasAsignadasUsuario)
 router.use("/estadosInstancia", EstadosInstanciaRouter)
+router.use("/departamentos", DepartamentoRouter)
+
 
 
 
