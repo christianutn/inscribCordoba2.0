@@ -143,7 +143,7 @@ export const postEvento = async (req, res, next) => {
     </div>
   </body>
 </html>`
-        enviarCorreo(htmlBodyCorreo, "Nuevo Formulario - Creación de Evento", "soportecampuscordoba@gmail.com");
+        enviarCorreo(htmlBodyCorreo, "Nuevo Formulario - Creación de Evento", "rnicolascarballo@gmail.com");
         res.status(201).json(evento);
     } catch (error) {
         next(error);

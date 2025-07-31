@@ -23,7 +23,8 @@
                 "PORT": "4000",
                 "EMAIL_USER" : "christian.bergero.cba@gmail.com",
 "EMAIL_PASS" : "sahrlwiskbxnohyy",
-"EMAIL_RECIPIENTS" : "soportecampuscordoba@gmail.com",
+// "EMAIL_RECIPIENTS" : "soportecampuscordoba@gmail.com",
+"EMAIL_RECIPIENTS" : "rnicolascarballo@gmail.com",
 "ES_RED_GOBIERNO":"no",
 "NODE_ENV":"desarrollo"
               }

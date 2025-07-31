@@ -14,7 +14,7 @@ import { DateTime } from 'luxon';
 import AppError from "../utils/appError.js";
 import Usuario from "../models/usuario.models.js";
 import Rol from "../models/rol.models.js";
-
+import logger from '../utils/logger.js';
 
 export const getInstancias = async (req, res, next) => {
     try {
@@ -168,6 +168,7 @@ export const postInstancia = async (req, res, next) => {
 
 
         await t.commit();
+        logger.info(`Instancias y tutores creados exitosamente por ${nombreUsuario || 'N/A'} ${apellidoUsuario || 'N/A'}: (Curso: ${curso}, Fecha Inicio/Fin: ${fecha_inicio_curso}/${fecha_fin_curso}`);
         res.status(201).json({ message: "Instancias y tutores creados exitosamente" });
 
     } catch (error) {
@@ -182,8 +183,6 @@ function crearError(statusCode, message) {
     error.statusCode = statusCode;
     return error;
 }
-
-
 
 export const deleteInstancia = async (req, res, next) => {
     try {
@@ -210,10 +209,6 @@ export const deleteInstancia = async (req, res, next) => {
         next(error);
     }
 }
-
-
-
-
 
 export const get_fechas_invalidas = async (req, res, next) => {
     const targetYear = req.params.targetYear
@@ -350,7 +345,6 @@ export const get_fechas_invalidas = async (req, res, next) => {
         next(error);
     }
 }
-
 
 export const putInstancia = async (req, res, next) => {
     try {
