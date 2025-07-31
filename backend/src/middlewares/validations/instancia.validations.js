@@ -10,6 +10,8 @@ import Curso from '../../models/curso.models.js';
 import Instancia from '../../models/instancia.models.js';
 import Tutor from '../../models/tutor.models.js';
 import { DateTime } from 'luxon';
+import Departamento from '../../models/departamentos.models.js';
+
 
 // Middleware de validación para una ruta de creación/actualización de Curso/Evento
 const validarDatosCursoConCohortes = [
@@ -87,26 +89,13 @@ const validarDatosCursoConCohortes = [
             }
         }),
 
-    check('opciones')
-        .exists().withMessage("Las opciones son requeridas.")
-        .custom((value) => {
-            const requiredProps = ['autogestionado', 'correlatividad', 'departamento', 'edad', 'publicaPCC'];
-            for (const prop of requiredProps) {
-                if (!Object.prototype.hasOwnProperty.call(value, prop)) {
-                    throw new AppError(`El campo '${prop}' en opciones es requerido.`, 400);
-                }
-                // Permite booleanos o 0/1 como válidos
-                if (
-                    typeof value[prop] !== 'boolean' &&
-                    value[prop] !== 0 &&
-                    value[prop] !== 1
-                ) {
-                    throw new AppError(`El campo '${prop}' en opciones debe ser booleano o 0/1.`, 400);
-                }
-            }
-            return true;
-        }),
-
+    body('es_autogestionado')
+        .exists().withMessage("El campo 'es_autogestionado' es requerido.")
+        .isIn([0, 1]).withMessage("El campo 'es_autogestionado' debe ser 0 o 1."),
+    
+    body('es_publicada_portal_cc')
+        .exists().withMessage("El campo 'es_publicada_portal_cc' es requerido.")
+        .isIn([0, 1]).withMessage("El campo 'es_publicada_portal_cc' debe ser 0 o 1."),
 
 
     // 4. Validaciones para el array de 'cohortes' y sus elementos
@@ -198,7 +187,7 @@ const validarDatosCursoConCohortes = [
             }
 
             // Regla 1: fechaInscripcionDesde debe ser estrictamente anterior a fechaInscripcionHasta
-            if (fiDesde>= fiHasta) {
+            if (fiDesde >= fiHasta) {
                 throw new AppError(`La 'fechaInscripcionDesde' debe ser estrictamente anterior a 'fechaInscripcionHasta' para la cohorte ${i + 1}.`, 400);
             }
 
@@ -247,6 +236,33 @@ const validarDatosCursoConCohortes = [
                 const existeTutor = await Tutor.findOne({ where: { cuil } });
                 if (!existeTutor) {
                     throw new AppError(`El tutor con cuil ${cuil} no existe.`, 400);
+                }
+            }
+            return true;
+        }),
+
+    // Validamos restricciones_por_departamento
+
+    body('departamentos')
+        .exists().isArray().withMessage("El campo 'departamentos' es requerido.")
+        .custom(async (departamentos) => {
+            for (const departamento of departamentos) {
+                const existeDepartamento = await Departamento.findByPk(departamento);
+                if (!existeDepartamento) {
+                    throw new AppError(`El departamento con código ${departamento} no existe.`, 400);
+                }
+            }
+            return true;
+        }),
+    
+    // Validamos restricciones_por_correlatividades
+    body('cursos_correlativos')
+        .exists().isArray().withMessage("El campo 'cursos_correlativos' es requerido.")
+        .custom(async (cursos_correlativos) => {
+            for (const correlativo of cursos_correlativos) {
+                const existeCorrelativo = await Curso.findByPk(correlativo);
+                if (!existeCorrelativo) {
+                    throw new AppError(`El curso con código ${correlativo} no existe.`, 400);
                 }
             }
             return true;

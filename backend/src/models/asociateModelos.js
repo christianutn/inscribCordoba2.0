@@ -18,6 +18,10 @@ import TipoCertificacion from "./tipoCertificacion.models.js";
 import AreaTematica from "./areaTematica.models.js";
 import Evento from "./evento.models.js";
 import Perfil from "./perfil.models.js";
+import RestriccionesPorCorrelatividad from "./restricciones_por_correlatividad.models.js";
+import RestriccionesPorDepartamento from "./restricciones_por_departamento.models.js";
+import Departamento from "./departamentos.models.js"
+
 Ministerio.hasMany(Area, { foreignKey: 'ministerio', as: 'detalle_areas' });
 Area.belongsTo(Ministerio, { foreignKey: 'ministerio', as: 'detalle_ministerio' });
 Area.hasMany(Curso, { foreignKey: 'area', as: 'detalle_cursos' });
@@ -35,6 +39,8 @@ Instancia.belongsTo(MedioInscripcion, { foreignKey: 'medio_inscripcion', as: 'de
 Instancia.belongsTo(TipoCapacitacion, { foreignKey: 'tipo_capacitacion', as: 'detalle_tipoCapacitacion' });
 Instancia.belongsTo(PlataformaDictado, { foreignKey: 'plataforma_dictado', as: 'detalle_plataformaDictado' });
 Instancia.belongsTo(Usuario, { foreignKey: 'asignado', as: 'detalle_asignado' });
+
+
 
 
 // TutoresXInstancia
@@ -77,6 +83,12 @@ Evento.belongsTo(AreaTematica, { foreignKey: 'area_tematica', as: 'detalle_areaT
 Evento.belongsTo(TipoCertificacion, { foreignKey: 'tipo_certificacion', as: 'detalle_tipoCertificacion' });
 Evento.belongsTo(Perfil, { foreignKey: 'perfil', as: 'detalle_perfil' });
 
+RestriccionesPorCorrelatividad.belongsTo(Curso, { foreignKey: 'curso', as: 'detalle_curso' });
+RestriccionesPorCorrelatividad.belongsTo(Curso, { foreignKey: 'curso_correlativo', as: 'detalle_curso_correlativo' });
+
+RestriccionesPorDepartamento.belongsTo(Departamento, { foreignKey: "departamento_id", as: 'detalle_departamento'})
+
+
 
 export default {
     Area,
@@ -99,6 +111,4 @@ export default {
     AreaTematica,
     Evento,
     Perfil,
-
-
 }

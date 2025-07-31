@@ -27,6 +27,7 @@ import CustomInput from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import NuevoEvento from './NuevoEvento.jsx';
 import Alerta from "./UIElements/Dialog.jsx";
+import { getDepartamentos } from "../services/departamentos.service.js";
 
 
 
@@ -57,6 +58,7 @@ export default function Formulario() {
   const [horas, setHoras] = useState("");
   const [cohortes, setCohortes] = useState([]);
   const [comentario, setComentario] = useState("");
+  
 
 
   // OPciones de evento

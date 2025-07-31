@@ -80,7 +80,23 @@ const Instancia = sequelize.define("instancias", {
         allowNull: true
     },
     cantidad_inscriptos: {
-        type: DataTypes.STRING(11),
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    cantidad_certificados:{
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    fecha_suba_certificados: {
+        type: DataTypes.DATEONLY,
+        allowNull: true
+    },
+    restriccion_edad_desde: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    restriccion_edad_hasta: {
+        type: DataTypes.INTEGER,
         allowNull: true
     }
     
