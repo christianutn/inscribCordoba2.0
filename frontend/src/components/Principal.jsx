@@ -44,7 +44,6 @@ import CrearAviso from './CrearAviso.jsx';
 import VersionReducidaGa from './VersionReducidaGA.jsx';
 import VersionReducidaAdministradores from './VersionReducidaAdministradores.jsx';
 
-
 import { getMyUser } from "../services/usuarios.service.js";
 
 const drawerWidth = 260;
@@ -80,6 +79,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
       duration: theme.transitions.duration.enteringScreen,
     }),
     marginLeft: `-${drawerWidth}px`,
+    minWidth: 0, // <-- ¡¡¡LA SOLUCIÓN DEFINITIVA ESTÁ AQUÍ!!!
     ...(open && {
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.sharp,

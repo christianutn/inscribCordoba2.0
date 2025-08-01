@@ -1,6 +1,6 @@
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react"; // Importar useRef
 import Titulo from "./fonts/TituloPrincipal";
 import Autocomplete from "./UIElements/Autocomplete";
-import { useState, useEffect, useCallback } from "react";
 import { getCursos } from "../services/cursos.service.js";
 import { getMinisterios } from "../services/ministerios.service.js";
 import { getAreas } from "../services/areas.service.js";
@@ -87,6 +87,29 @@ const AltaBajaModificion = () => {
 
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
     const [pendingDelete, setPendingDelete] = useState(null);
+    
+    // --- Lógica para forzar re-renderizado de la tabla ---
+    const containerRef = useRef(null); // <-- CORRECCIÓN AQUÍ: SE VUELVE A AÑADIR LA DECLARACIÓN
+    const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+    useEffect(() => {
+        const resizeObserver = new ResizeObserver(entries => {
+            if (entries && entries.length > 0) {
+                const { width, height } = entries[0].contentRect;
+                setContainerSize({ width, height });
+            }
+        });
+
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
+
+        return () => {
+            if (containerRef.current) {
+                resizeObserver.unobserve(containerRef.current);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         setCargando(true);
@@ -602,57 +625,81 @@ const AltaBajaModificion = () => {
             {success && <Alert variant="filled" severity="success" sx={{ width: '100%', mb: 2, position: 'sticky', top: 0, zIndex: 1200 }} onClose={() => setSuccess(false)}>{typeof success === 'string' ? success : "Operación exitosa"}</Alert>}
             {cargando && <Backdrop sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 10 }} open={cargando}><CircularProgress color="inherit" /></Backdrop>}
 
-            <div className="container-abm" style={{ padding: '20px' }}>
-                <Titulo className="titulo-principal" texto="Alta, Baja y Modificación" />
-                <Divider className="divider" sx={{ mb: 2, borderBottomWidth: 2, borderColor: 'black', mt: 2 }} />
+            <Box
+                ref={containerRef}
+                sx={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '20px',
+                    display: 'grid',
+                    gap: '20px',
+                    gridTemplateColumns: '1fr',
+                    gridTemplateAreas: `
+                        "titulo"
+                        "divider"
+                        "controles"
+                        "tabla"
+                    `
+                }}>
+                <div style={{ gridArea: 'titulo' }}>
+                    <Titulo texto="Alta, Baja y Modificación" />
+                </div>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-                    <Autocomplete options={options} label="Seleccione una Opción" value={selectOption} getValue={handleSelectOption} sx={{ minWidth: 300, flexGrow: 1 }} />
+                <div style={{ gridArea: 'divider' }}>
+                    <Divider sx={{ mb: 2, borderBottomWidth: 2, borderColor: 'black', mt: 2 }} />
+                </div>
+
+                <div style={{ gridArea: 'controles' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+                        <Autocomplete options={options} label="Seleccione una Opción" value={selectOption} getValue={handleSelectOption} sx={{ minWidth: 300, flexGrow: 1 }} />
+                        {selectOption && (
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                <Tooltip title="Descargar Excel" placement="top">
+                                    <IconButton onClick={handleDescargarExcel} color="primary" size="large" disabled={filasFiltradas.length === 0}>
+                                        <BotonCircular icon="descargar" height={40} width={40} isIconButton />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Agregar Nuevo" placement="top">
+                                    <IconButton onClick={handleAgregar} color="primary" size="large">
+                                        <BotonCircular icon="agregar" height={40} width={40} isIconButton />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                        )}
+                    </Box>
+
+                    {!selectOption && !cargando && <Alert severity="info" sx={{ mt: 2, mb: 2 }}>Seleccione una opción para cargar los datos.</Alert>}
+
                     {selectOption && (
-                        <Box className="btn" sx={{ display: 'flex', gap: 1 }}>
-                            <Tooltip title="Descargar Excel" placement="top">
-                                <IconButton onClick={handleDescargarExcel} color="primary" size="large" disabled={filasFiltradas.length === 0}>
-                                    <BotonCircular icon="descargar" height={40} width={40} isIconButton />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Agregar Nuevo" placement="top">
-                                <IconButton onClick={handleAgregar} color="primary" size="large">
-                                    <BotonCircular icon="agregar" height={40} width={40} isIconButton />
-                                </IconButton>
-                            </Tooltip>
+                        <MuiTextField fullWidth variant="outlined" label={`Filtrar en ${selectOption}...`} value={filtroGeneralInput} onChange={(e) => setFiltroGeneralInput(e.target.value)}
+                            sx={{ mb: 2, mt: 1 }} InputProps={{
+                                endAdornment: filtroGeneralInput && (<IconButton onClick={() => setFiltroGeneralInput('')} edge="end" size="small"><CloseIcon /></IconButton>)
+                            }} />
+                    )}
+                </div>
+
+                <div style={{ gridArea: 'tabla', overflow: 'hidden' }}> {/* <-- CAMBIO CLAVE: overflow: hidden */}
+                    {selectOption && configuracionActual && !cargando && (
+                        <Box sx={{ height: 600, width: '100%' }}>
+                            <DataGrid
+                                columns={selectOption !== "Asignar areas a usuarios" ? [...columnasActuales, actionColumn] : columnasActuales}
+                                rows={filasFiltradas}
+                                pageSizeOptions={[10, 25, 50, 100]}
+                                initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+                                density="compact"
+                                getRowId={(row) => row.id || row.cod || row.cuil}
+                                sx={{ '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 'bold' } }}
+                                localeText={{ noRowsLabel: 'No hay filas para mostrar', MuiTablePagination: { labelRowsPerPage: 'Filas por página:', labelDisplayedRows: ({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}` }, toolbarDensity: 'Densidad', toolbarFilters: 'Filtros', toolbarColumns: 'Columnas' }}
+                            />
                         </Box>
                     )}
-                </Box>
+                    {selectOption && !configuracionActual && !cargando && <Alert severity="warning" sx={{ mt: 2 }}>No hay configuración para "{selectOption}".</Alert>}
+                    {selectOption && configuracionActual && filasFiltradas.length === 0 && filtroGeneralInput && !cargando && <Alert severity="info" sx={{ mt: 2 }}>No se encontraron resultados para "{filtroGeneralInput}" en {selectOption}.</Alert>}
+                    {selectOption && configuracionActual && filasOriginales.length === 0 && !filtroGeneralInput && !cargando && <Alert severity="info" sx={{ mt: 2 }}>No hay datos disponibles para {selectOption}.</Alert>}
+                </div>
+            </Box>
 
-                {!selectOption && !cargando && <Alert severity="info" sx={{ mt: 2, mb: 2 }}>Seleccione una opción para cargar los datos.</Alert>}
-
-                {selectOption && (
-                    <MuiTextField fullWidth variant="outlined" label={`Filtrar en ${selectOption}...`} value={filtroGeneralInput} onChange={(e) => setFiltroGeneralInput(e.target.value)}
-                        sx={{ mb: 2, mt: 1 }} InputProps={{
-                            endAdornment: filtroGeneralInput && (<IconButton onClick={() => setFiltroGeneralInput('')} edge="end" size="small"><CloseIcon /></IconButton>)
-                        }} />
-                )}
-
-                {selectOption && configuracionActual && !cargando && (
-                    <Box sx={{ height: 'calc(100vh - 350px)', minHeight: 400, width: '100%' }}>
-                        <DataGrid
-                            columns={selectOption !== "Asignar areas a usuarios" ? [...columnasActuales, actionColumn] : columnasActuales}
-                            rows={filasFiltradas}
-                            pageSizeOptions={[10, 25, 50, 100]}
-                            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-                            density="compact"
-                            getRowId={(row) => row.id || row.cod || row.cuil}
-                            sx={{ '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 'bold' } }}
-                            localeText={{ noRowsLabel: 'No hay filas para mostrar', MuiTablePagination: { labelRowsPerPage: 'Filas por página:', labelDisplayedRows: ({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}` }, toolbarDensity: 'Densidad', toolbarFilters: 'Filtros', toolbarColumns: 'Columnas' }}
-                        />
-                    </Box>
-                )}
-                {selectOption && !configuracionActual && !cargando && <Alert severity="warning" sx={{ mt: 2 }}>No hay configuración para "{selectOption}".</Alert>}
-                {selectOption && configuracionActual && filasFiltradas.length === 0 && filtroGeneralInput && !cargando && <Alert severity="info" sx={{ mt: 2 }}>No se encontraron resultados para "{filtroGeneralInput}" en {selectOption}.</Alert>}
-                {selectOption && configuracionActual && filasOriginales.length === 0 && !filtroGeneralInput && !cargando && <Alert severity="info" sx={{ mt: 2 }}>No hay datos disponibles para {selectOption}.</Alert>}
-            </div>
-
-            {/* Modal de Edición General */}
+            {/* MODALES (sin cambios) */}
             {editModalOpen && currentEditingRow && configuracionActual && (
                 <Dialog open={editModalOpen} onClose={handleEditModalClose} maxWidth="md" fullWidth>
                     <DialogTitle>

@@ -55,6 +55,20 @@ const formatBooleanToSiNo = (value) => {
     return 'N/A';
 };
 
+// --- ESTILOS PARA LA MAQUETACIÓN DE GRID ---
+const gridContainerStyle = {
+    display: 'grid',
+    gap: '20px',
+    padding: '20px',
+    gridTemplateColumns: '1fr',
+    gridTemplateAreas: `
+      "titulo"
+      "divider"
+      "filtros-cronograma"
+      "tabla-cronograma"
+    `,
+};
+
 const Cronograma = () => {
   const [cursosData, setCursosData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -75,10 +89,11 @@ const Cronograma = () => {
   const columnsForGrid = useMemo(() => {
     return COLUMNAS_VISIBLES.map(headerKey => {
       let flex = 1;
-      if (headerKey === "Nombre del curso") flex = 2.5;
-      if (headerKey === "Ministerio" || headerKey === "Area") flex = 1.5;
-      if (headerKey.toLowerCase().includes("fecha")) flex = 1.2;
-      return { field: headerKey, headerName: headerKey, flex, minWidth: 130 };
+      let minWidth = 130;
+      if (headerKey === "Nombre del curso") { flex = 2.5; minWidth = 250; }
+      if (headerKey === "Ministerio" || headerKey === "Area") { flex = 1.5; minWidth = 150; }
+      if (headerKey.toLowerCase().includes("fecha")) { flex = 1.2; minWidth = 140; }
+      return { field: headerKey, headerName: headerKey, flex, minWidth };
     });
   }, [COLUMNAS_VISIBLES]);
 
@@ -178,7 +193,15 @@ const Cronograma = () => {
 
   const handleRowClick = useCallback(params => { setSelectedRowData(params.row); setModalOpen(true); }, []);
   const handleCloseModal = useCallback(() => { setModalOpen(false); setSelectedRowData(null); }, []);
-  const handleDescargarExcel = useCallback(async () => { /* ... (sin cambios) ... */ }, []);
+  const handleDescargarExcel = useCallback(async () => {
+      if (!filteredData.length) return;
+      try {
+          await descargarExcel(filteredData, COLUMNAS_VISIBLES, "Cronograma_General");
+      } catch (e) {
+          setError("Error al generar el archivo Excel.");
+          console.error(e);
+      }
+  }, [filteredData, COLUMNAS_VISIBLES]);
   const handleMinisterioChange = useCallback(e => setMinisterioFilter(e.target.value), []);
   const handleAreaChange = useCallback(e => setAreaFilter(e.target.value), []);
   const handleNombreChange = useCallback(e => setNombreFilter(e.target.value), []);
@@ -205,28 +228,40 @@ const Cronograma = () => {
   if (!loading && !cursosData.length) return (<Box sx={{ p: 3 }}><Typography>No se encontraron datos en el cronograma.</Typography></Box>);
 
   return (
-    <div style={{ padding: 20 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
-        <Titulo texto="Cronograma" />
-        <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={loading || !filteredData.length} />
-      </Box>
-      <Divider sx={{ mb: 3, borderBottomWidth: 2 }} />
-      <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6} md={3}><TextField fullWidth label="Buscar por Nombre" variant="outlined" size="small" value={nombreFilter} onChange={handleNombreChange} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>), }} /></Grid>
-          <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={ministerioOptions.length <= 1}><InputLabel>Ministerio</InputLabel><Select value={ministerioFilter} label="Ministerio" onChange={handleMinisterioChange}><MenuItem value="all"><em>Todos</em></MenuItem>{ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}</Select></FormControl></Grid>
-          <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={areaOptions.length <= 1}><InputLabel>Área</InputLabel><Select value={areaFilter} label="Área" onChange={handleAreaChange}><MenuItem value="all"><em>Todas</em></MenuItem>{areaOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}{ministerioFilter !== 'all' && areaOptions.length <= 1 && (<MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>)}</Select></FormControl></Grid>
-          <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined"><InputLabel>Mes Inicio Curso</InputLabel><Select value={monthFilter} label="Mes Inicio Curso" onChange={handleMonthChange}><MenuItem value="all"><em>Todos</em></MenuItem>{MONTH_NAMES.map((m, i) => (<MenuItem key={i} value={i.toString()}>{m}</MenuItem>))}</Select></FormControl></Grid>
-          <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Tooltip title={activosFilterActive ? "Mostrar todos" : "Mostrar solo activos"}><Button fullWidth variant={activosFilterActive ? "contained" : "outlined"} size="medium" onClick={handleToggleActivosFilter} startIcon={<AccessTimeIcon />} sx={{ height: '40px' }}>Activos</Button></Tooltip></Grid>
-          <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters} disabled={!isFilterActive} startIcon={<ClearAllIcon />} sx={{ height: '40px' }}>Limpiar</Button></Grid>
-        </Grid>
-      </Paper>
+    <>
+      <div style={gridContainerStyle}>
+        <div style={{ gridArea: 'titulo' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <Titulo texto="Cronograma" />
+                <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={loading || !filteredData.length} />
+            </Box>
+        </div>
+        
+        <div style={{ gridArea: 'divider' }}>
+            <Divider sx={{ mb: 1, borderBottomWidth: 2 }} />
+        </div>
+
+        <div style={{ gridArea: 'filtros-cronograma' }}>
+            <Paper elevation={1} sx={{ p: 2, width: '100%' }}>
+                <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} sm={6} md={3}><TextField fullWidth label="Buscar por Nombre" variant="outlined" size="small" value={nombreFilter} onChange={handleNombreChange} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>), }} /></Grid>
+                    <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={ministerioOptions.length <= 1}><InputLabel>Ministerio</InputLabel><Select value={ministerioFilter} label="Ministerio" onChange={handleMinisterioChange}><MenuItem value="all"><em>Todos</em></MenuItem>{ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}</Select></FormControl></Grid>
+                    <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={areaOptions.length <= 1}><InputLabel>Área</InputLabel><Select value={areaFilter} label="Área" onChange={handleAreaChange}><MenuItem value="all"><em>Todas</em></MenuItem>{areaOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}{ministerioFilter !== 'all' && areaOptions.length <= 1 && (<MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>)}</Select></FormControl></Grid>
+                    <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined"><InputLabel>Mes Inicio Curso</InputLabel><Select value={monthFilter} label="Mes Inicio Curso" onChange={handleMonthChange}><MenuItem value="all"><em>Todos</em></MenuItem>{MONTH_NAMES.map((m, i) => (<MenuItem key={i} value={i.toString()}>{m}</MenuItem>))}</Select></FormControl></Grid>
+                    <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Tooltip title={activosFilterActive ? "Mostrar todos" : "Mostrar solo activos"}><Button fullWidth variant={activosFilterActive ? "contained" : "outlined"} size="medium" onClick={handleToggleActivosFilter} startIcon={<AccessTimeIcon />} sx={{ height: '40px' }}>Activos</Button></Tooltip></Grid>
+                    <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters} disabled={!isFilterActive} startIcon={<ClearAllIcon />} sx={{ height: '40px' }}>Limpiar</Button></Grid>
+                </Grid>
+            </Paper>
+        </div>
       
-      {(loading && cursosData.length > 0) && (<Box sx={{ display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}><CircularProgress size={20} sx={{ mr: 1 }} /><Typography variant="body2">Actualizando...</Typography></Box>)}
+        {(loading && cursosData.length > 0) && (<Box sx={{ gridArea: 'tabla-cronograma', display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}><CircularProgress size={20} sx={{ mr: 1 }} /><Typography variant="body2">Actualizando...</Typography></Box>)}
       
-      <Paper elevation={3} sx={{ height: 600, width: '100%' }}>
-        <DataGrid rows={filteredData} columns={columnsForGrid} localeText={esES.components.MuiDataGrid.defaultProps.localeText} onRowClick={handleRowClick} getRowId={r => r.id} loading={loading} density="compact" disableRowSelectionOnClick />
-      </Paper>
+        <div style={{ gridArea: 'tabla-cronograma', overflowX: 'auto' }}>
+            <Paper elevation={3} sx={{ height: 600, width: '100%' }}>
+                <DataGrid rows={filteredData} columns={columnsForGrid} localeText={esES.components.MuiDataGrid.defaultProps.localeText} onRowClick={handleRowClick} getRowId={r => r.id} loading={loading} density="compact" disableRowSelectionOnClick />
+            </Paper>
+        </div>
+      </div>
 
       <Modal open={modalOpen} onClose={handleCloseModal} aria-labelledby="course-detail-title">
         <Box sx={modalStyle}>
@@ -293,7 +328,7 @@ const Cronograma = () => {
           )}
         </Box>
       </Modal>
-    </div>
+    </>
   );
 };
 

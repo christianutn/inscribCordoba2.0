@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react"; // Importar useRef
 import { getInstancias } from "../services/instancias.service";
 import {
     Box,
@@ -124,8 +124,33 @@ const ReporteCursosCC = () => {
     const [displaySummaryData, setDisplaySummaryData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    // const currentYear = new Date().getFullYear();
     const currentYear = selectedYear;
+
+    // --- Inicio: Lógica para forzar re-renderizado de gráficos ---
+    const containerRef = useRef(null);
+    const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+    useEffect(() => {
+        const resizeObserver = new ResizeObserver(entries => {
+            if (entries && entries.length > 0) {
+                const { width, height } = entries[0].contentRect;
+                setContainerSize({ width, height });
+            }
+        });
+
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
+
+        return () => {
+            if (containerRef.current) {
+                resizeObserver.unobserve(containerRef.current);
+            }
+        };
+    }, []);
+    // --- Fin: Lógica para forzar re-renderizado de gráficos ---
+
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -244,17 +269,17 @@ const ReporteCursosCC = () => {
 
                 const participantes = parseInt(instancia.cupo, 10) || 0;
 
-                const fechaInicioObj = getValidDayjsObject(fechaInicioCursoStr); // Usa el helper
-                const fechaFinObj = getValidDayjsObject(fechaFinCursoStr);     // Usa el helper
+                const fechaInicioObj = getValidDayjsObject(fechaInicioCursoStr);
+                const fechaFinObj = getValidDayjsObject(fechaFinCursoStr);
 
                 if (!fechaInicioObj) return;
-                const anioInicioCurso = fechaInicioObj.year(); // Dayjs usa .year()
+                const anioInicioCurso = fechaInicioObj.year();
 
                 if (anioInicioCurso !== currentYear) return;
 
-                const mesInicioCurso = fechaInicioObj.month(); // Dayjs usa .month() (0-11)
+                const mesInicioCurso = fechaInicioObj.month();
 
-                const esFechaFinValida = fechaFinObj !== null; // Simplificado gracias al helper
+                const esFechaFinValida = fechaFinObj !== null;
 
                 const mesFinCurso = esFechaFinValida ? fechaFinObj.month() : -1;
                 const anioFinCurso = esFechaFinValida ? fechaFinObj.year() : -1;
@@ -277,11 +302,6 @@ const ReporteCursosCC = () => {
                     (fechaInicioObj.isBefore(dayjs().year(currentYear).month(mesIndex).startOf('month'))) &&
                     (fechaFinObj.isSameOrAfter(dayjs().year(currentYear).month(mesIndex).startOf('month')))
                 ) {
-                    // Lógica más precisa para cursos activos de meses anteriores:
-                    // Inició antes del mes actual Y termina en o después del mes actual
-                    // (Considerando que el curso pudo haber iniciado en un año anterior)
-                    // (O que inicia en un mes anterior del mismo año)
-                    // Y que termina en este mes, o en un mes posterior, o en un año posterior.
                     if ((anioInicioCurso < currentYear || (anioInicioCurso === currentYear && mesInicioCurso < mesIndex)) &&
                         (anioFinCurso > currentYear || (anioFinCurso === currentYear && mesFinCurso >= mesIndex))
                     ) {
@@ -457,7 +477,6 @@ const ReporteCursosCC = () => {
 
     const defaultYear = new Date().getFullYear();
 
-
     const isFilterActive = useMemo(() =>
         selectedYear !== defaultYear ||
         selectedMonth !== 'all' ||
@@ -466,154 +485,176 @@ const ReporteCursosCC = () => {
         [defaultYear, selectedYear, selectedMonth, selectedMinisterio, selectedArea]);
 
     return (
-        <Box sx={{
-            width: '100%',
-            py: 4,
-        }}>
-            <Typography variant="h4" gutterBottom component="h1" sx={{ mb: 2, textAlign: 'center', fontWeight: 'bold' }}>
-                {getReportTitle()}
-            </Typography>
+        <Box
+            ref={containerRef}
+            sx={{
+                width: '100%',
+                boxSizing: 'border-box',
+                display: 'grid',
+                gap: '24px',
+                padding: '20px',
+                gridTemplateColumns: '1fr',
+                gridTemplateAreas: `
+                    "titulo"
+                    "filtros"
+                    "kpis"
+                    "graficos-y-resumen"
+                `,
+            }}
+        >
+            <div style={{ gridArea: 'titulo', textAlign: 'center' }}>
+                <Typography variant="h4" gutterBottom component="h1" sx={{ mb: 0, fontWeight: 'bold' }}>
+                    {getReportTitle()}
+                </Typography>
+            </div>
 
-            <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-                <Grid container spacing={2} alignItems="flex-end">
-                    <Grid item xs={12} sm={6} md={3}>
-                        <FormControl fullWidth size="small" disabled={loading}>
-                            <InputLabel id="select-year-label">Año</InputLabel>
-                            <Select
-                                labelId="select-year-label"
-                                id="select-year"
-                                value={selectedYear}
-                                label="Año"
-                                onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
-                                startAdornment={<CalendarMonthIcon sx={{ mr: 1, color: 'action.active' }} />}
+            <div style={{ gridArea: 'filtros' }}>
+                <Paper elevation={1} sx={{ p: 2 }}>
+                    <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} sm={6} md={3}>
+                            <FormControl fullWidth size="small" disabled={loading}>
+                                <InputLabel id="select-year-label">Año</InputLabel>
+                                <Select
+                                    labelId="select-year-label"
+                                    id="select-year"
+                                    value={selectedYear}
+                                    label="Año"
+                                    onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
+                                    startAdornment={<CalendarMonthIcon sx={{ mr: 1, color: 'action.active' }} />}
+                                >
+                                    {yearsOptions.map((year) => (
+                                        <MenuItem
+                                            key={year}
+                                            value={year}
+                                            sx={year === new Date().getFullYear() ? {
+                                                fontWeight: 600,
+                                                color: 'primary.main',
+                                                '& .MuiTypography-root': { fontWeight: 700 }
+                                            } : {}}
+                                        >
+                                            {year === new Date().getFullYear() ? `${year} (Año Actual)` : year}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <FormControl fullWidth size="small" disabled={loading}>
+                                <InputLabel id="select-month-label">Mes</InputLabel>
+                                <Select labelId="select-month-label" id="select-month" value={selectedMonth} label="Mes" onChange={handleMonthChange} startAdornment={<CalendarMonthIcon sx={{ mr: 1, color: 'action.active' }} />}>
+                                    <MenuItem value="all"> <em>Todos (Anual)</em> </MenuItem>
+                                    {mesesFull.map((nombreMes, index) => (<MenuItem key={index} value={index}>{nombreMes}</MenuItem>))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <FormControl fullWidth size="small" disabled={loading || !allMinisterios || allMinisterios.length <= 1}>
+                                <InputLabel id="select-ministerio-label">Ministerio</InputLabel>
+                                <Select labelId="select-ministerio-label" id="select-ministerio" value={selectedMinisterio} label="Ministerio" onChange={handleMinisterioChange} startAdornment={<AccountBalanceIcon sx={{ mr: 1, color: 'action.active' }} />}>
+                                    {allMinisterios.map((min, index) => (<MenuItem key={index} value={min}>{min === 'all' ? <em>Todos los Ministerios</em> : min}</MenuItem>))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <FormControl fullWidth size="small" disabled={loading || selectedMinisterio === 'all' || !availableAreas || availableAreas.length <= 1}>
+                                <InputLabel id="select-area-label">Área</InputLabel>
+                                <Select labelId="select-area-label" id="select-area" value={selectedArea} label="Área" onChange={handleAreaChange} startAdornment={<FolderSpecialIcon sx={{ mr: 1, color: 'action.active' }} />}>
+                                    {availableAreas.map((area, index) => (
+                                        <MenuItem key={index} value={area}>{area === 'all' ? <em>Todas las Áreas</em> : area}</MenuItem>
+                                    ))}
+                                    {selectedMinisterio !== 'all' && availableAreas.length <= 1 && (
+                                        <MenuItem value="all" disabled><em>(No hay áreas)</em></MenuItem>
+                                    )}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                size="medium"
+                                onClick={handleClearFilters}
+                                disabled={!isFilterActive || loading}
+                                startIcon={<ClearAllIcon />}
                             >
-                                {yearsOptions.map((year) => (
-                                    <MenuItem
-                                        key={year}
-                                        value={year}
-                                        sx={year === new Date().getFullYear() ? {
-                                            fontWeight: 600,
-                                            color: 'primary.main',
-                                            '& .MuiTypography-root': { fontWeight: 700 }
-                                        } : {}}
-                                    >
-                                        {year === new Date().getFullYear() ? `${year} (Año Actual)` : year}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                                Limpiar Filtros
+                            </Button>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <FormControl fullWidth size="small" disabled={loading}>
-                            <InputLabel id="select-month-label">Mes</InputLabel>
-                            <Select labelId="select-month-label" id="select-month" value={selectedMonth} label="Mes" onChange={handleMonthChange} startAdornment={<CalendarMonthIcon sx={{ mr: 1, color: 'action.active' }} />}>
-                                <MenuItem value="all"> <em>Todos (Anual)</em> </MenuItem>
-                                {mesesFull.map((nombreMes, index) => (<MenuItem key={index} value={index}>{nombreMes}</MenuItem>))}
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <FormControl fullWidth size="small" disabled={loading || !allMinisterios || allMinisterios.length <= 1}>
-                            <InputLabel id="select-ministerio-label">Ministerio</InputLabel>
-                            <Select labelId="select-ministerio-label" id="select-ministerio" value={selectedMinisterio} label="Ministerio" onChange={handleMinisterioChange} startAdornment={<AccountBalanceIcon sx={{ mr: 1, color: 'action.active' }} />}>
-                                {allMinisterios.map((min, index) => (<MenuItem key={index} value={min}>{min === 'all' ? <em>Todos los Ministerios</em> : min}</MenuItem>))}
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <FormControl fullWidth size="small" disabled={loading || selectedMinisterio === 'all' || !availableAreas || availableAreas.length <= 1}>
-                            <InputLabel id="select-area-label">Área</InputLabel>
-                            <Select labelId="select-area-label" id="select-area" value={selectedArea} label="Área" onChange={handleAreaChange} startAdornment={<FolderSpecialIcon sx={{ mr: 1, color: 'action.active' }} />}>
-                                {availableAreas.map((area, index) => (
-                                    <MenuItem key={index} value={area}>{area === 'all' ? <em>Todas las Áreas</em> : area}</MenuItem>
-                                ))}
-                                {selectedMinisterio !== 'all' && availableAreas.length <= 1 && (
-                                    <MenuItem value="all" disabled><em>(No hay áreas)</em></MenuItem>
-                                )}
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            size="medium"
-                            onClick={handleClearFilters}
-                            disabled={!isFilterActive || loading}
-                            startIcon={<ClearAllIcon />}
-                            sx={{ height: '40px' }}
-                        >
-                            Limpiar Filtros
-                        </Button>
-                    </Grid>
-                </Grid>
-            </Paper>
-
-            {loading && (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}> <CircularProgress /> <Typography sx={{ ml: 2 }}>Cargando datos...</Typography> </Box>)}
-            {error && !loading && (<Alert severity="error" sx={{ my: 2 }} elevation={3}> <strong>Error al cargar el reporte:</strong> {error} </Alert>)}
+                </Paper>
+            </div>
+            
+            {loading && (<div style={{ gridArea: 'kpis', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}> <CircularProgress /> <Typography sx={{ ml: 2 }}>Cargando datos...</Typography> </div>)}
+            {error && !loading && (<div style={{ gridArea: 'kpis' }}><Alert severity="error" elevation={3}> <strong>Error al cargar el reporte:</strong> {error} </Alert></div>)}
 
             {!loading && !error && rawCronogramaData && rawCronogramaData.length > 0 && (
                 <>
                     {displayKpiData && (
-                        <Grid container spacing={2} sx={{ mb: 3 }}>
-                            <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title="Nuevos Cursos" value={displayKpiData.nuevos ?? '0'} icon={<AddCircleOutlineIcon />} color="primary" description={displayKpiData.isAnnual ? `Total ${currentYear}` : `En ${displayKpiData.monthName}`} /> </Grid>
-                            <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title="Cancelados/Susp." value={displayKpiData.cancelados ?? '0'} icon={<CancelIcon />} color="error" description={displayKpiData.isAnnual ? `Iniciaban ${currentYear}` : `Iniciaban en ${displayKpiData.monthName}`} /> </Grid>
-                            <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title={displayKpiData.isAnnual ? "Activos Prom./Mes" : "Total Activos Mes"} value={displayKpiData.activosPromedio ?? '0'} icon={<TrendingUpIcon />} color="success" description={displayKpiData.isAnnual ? `Promedio ${currentYear}` : `En ${displayKpiData.monthName}`} /> </Grid>
-                            <Grid item xs={12} sm={6} md={6} lg={2.4}> <KpiCard title="Participantes" value={displayKpiData.totalParticipantes ?? '0'} icon={<PeopleIcon />} color="info" description={displayKpiData.isAnnual ? `Total ${currentYear} (Nuevos)` : `En ${displayKpiData.monthName} (Nuevos)`} /> </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={2.4}> <KpiCard title="% Autogestionados" value={displayKpiData.porcAutogestionado ?? '0%'} icon={<SettingsSuggestIcon />} color="warning" description={displayKpiData.isAnnual ? `Anual (s/ nuevos)` : `Mes (s/ nuevos)`} /> </Grid>
-                        </Grid>
+                        <div style={{ gridArea: 'kpis' }}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title="Nuevos Cursos" value={displayKpiData.nuevos ?? '0'} icon={<AddCircleOutlineIcon />} color="primary" description={displayKpiData.isAnnual ? `Total ${currentYear}` : `En ${displayKpiData.monthName}`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title="Cancelados/Susp." value={displayKpiData.cancelados ?? '0'} icon={<CancelIcon />} color="error" description={displayKpiData.isAnnual ? `Iniciaban ${currentYear}` : `Iniciaban en ${displayKpiData.monthName}`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title={displayKpiData.isAnnual ? "Activos Prom./Mes" : "Total Activos Mes"} value={displayKpiData.activosPromedio ?? '0'} icon={<TrendingUpIcon />} color="success" description={displayKpiData.isAnnual ? `Promedio ${currentYear}` : `En ${displayKpiData.monthName}`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={6} lg={2.4}> <KpiCard title="Participantes" value={displayKpiData.totalParticipantes ?? '0'} icon={<PeopleIcon />} color="info" description={displayKpiData.isAnnual ? `Total ${currentYear} (Nuevos)` : `En ${displayKpiData.monthName} (Nuevos)`} /> </Grid>
+                                <Grid item xs={12} sm={12} md={6} lg={2.4}> <KpiCard title="% Autogestionados" value={displayKpiData.porcAutogestionado ?? '0%'} icon={<SettingsSuggestIcon />} color="warning" description={displayKpiData.isAnnual ? `Anual (s/ nuevos)` : `Mes (s/ nuevos)`} /> </Grid>
+                            </Grid>
+                        </div>
                     )}
+                    
+                    <div style={{ gridArea: 'graficos-y-resumen' }}>
+                        {allMonthsData && allMonthsData.length > 0 ? (
+                            <Grid container spacing={3}>
+                                {displayChartData && selectedMonth === 'all' && (
+                                    <>
+                                        <Grid item xs={12} lg={6}> <Paper elevation={2} sx={{ p: { xs: 1, sm: 2 }, height: { xs: 300, md: 400 } }}> <Line key={`line-chart-${containerSize.width}`} options={lineTrendsOptionsAnnual} data={{ labels: displayChartData.labels, datasets: displayChartData.tendencias?.datasets ?? [] }} /> </Paper> </Grid>
+                                        <Grid item xs={12} lg={6}> <Paper elevation={2} sx={{ p: { xs: 1, sm: 2 }, height: { xs: 300, md: 400 } }}> <Bar key={`bar-chart-stacked-${containerSize.width}`} options={stackedBarOptionsAnnual} data={{ labels: displayChartData.labels, datasets: displayChartData.composicionActivos?.datasets ?? [] }} /> </Paper> </Grid>
+                                        <Grid item xs={12}>
+                                            <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, mt: { xs: 2, lg: 0 }, height: '100%' }}>
+                                                <Typography variant="h5" component="h2" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                    <BarChartIcon sx={{ mr: 1 }} color="primary" /> Resumen Anual ({currentYear})
+                                                </Typography>
+                                                {renderSummaryText()}
+                                            </Paper>
+                                        </Grid>
+                                    </>
+                                )}
 
-                    {allMonthsData && allMonthsData.length > 0 ? (
-                        <Grid container spacing={3}>
-                            {displayChartData && selectedMonth === 'all' && (
-                                <>
-                                    <Grid item xs={12} lg={6}> <Paper elevation={2} sx={{ p: { xs: 1, sm: 2 }, height: { xs: 300, md: 400 } }}> <Line options={lineTrendsOptionsAnnual} data={{ labels: displayChartData.labels, datasets: displayChartData.tendencias?.datasets ?? [] }} /> </Paper> </Grid>
-                                    <Grid item xs={12} lg={6}> <Paper elevation={2} sx={{ p: { xs: 1, sm: 2 }, height: { xs: 300, md: 400 } }}> <Bar options={stackedBarOptionsAnnual} data={{ labels: displayChartData.labels, datasets: displayChartData.composicionActivos?.datasets ?? [] }} /> </Paper> </Grid>
-                                    <Grid item xs={12}>
-                                        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, mt: { xs: 2, lg: 0 }, height: '100%' }}>
-                                            <Typography variant="h5" component="h2" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                <BarChartIcon sx={{ mr: 1 }} color="primary" /> Resumen Anual ({currentYear})
-                                            </Typography>
-                                            {renderSummaryText()}
-                                        </Paper>
-                                    </Grid>
-                                </>
-                            )}
-
-                            {displayChartData && selectedMonth !== 'all' && (
-                                <>
-                                    <Grid item xs={12} md={6}>
-                                        <Paper elevation={2} sx={{ p: { xs: 1, sm: 2 }, height: { xs: 300, md: 400 } }}>
-                                            {displayChartData.monthlyCourseDetail ? (<Bar options={barMonthlyCourseDetailOptions} data={displayChartData.monthlyCourseDetail} />)
-                                                : <Typography sx={{ textAlign: 'center', pt: 'calc(50% - 1em)' }}>No hay datos para el mes seleccionado.</Typography>} {/* Centrado vertical aproximado */}
-                                        </Paper>
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
-                                        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, height: '100%' }}>
-                                            <Typography variant="h6" component="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                                <BarChartIcon sx={{ mr: 1 }} color="primary" /> {`Resumen ${(typeof selectedMonth === 'number' && mesesFull[selectedMonth]) ? mesesFull[selectedMonth] : ''} ${currentYear}`}
-                                            </Typography>
-                                            {renderSummaryText()}
-                                        </Paper>
-                                    </Grid>
-                                </>
-                            )}
-                        </Grid>
-                    ) : (
-                        !loading && rawCronogramaData && rawCronogramaData.length > 0 && <Paper elevation={3} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
-                            <Typography variant="h6" gutterBottom>Sin resultados</Typography>
-                            <Typography variant="body1" color="textSecondary"> No se encontraron datos de cursos que coincidan con los filtros seleccionados para el año {currentYear}. </Typography>
-                        </Paper>
-                    )}
+                                {displayChartData && selectedMonth !== 'all' && (
+                                    <>
+                                        <Grid item xs={12} md={6}>
+                                            <Paper elevation={2} sx={{ p: { xs: 1, sm: 2 }, height: { xs: 300, md: 400 } }}>
+                                                {displayChartData.monthlyCourseDetail ? (<Bar key={`bar-chart-monthly-${containerSize.width}`} options={barMonthlyCourseDetailOptions} data={displayChartData.monthlyCourseDetail} />)
+                                                    : <Typography sx={{ textAlign: 'center', pt: 'calc(50% - 1em)' }}>No hay datos para el mes seleccionado.</Typography>}
+                                            </Paper>
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, height: '100%' }}>
+                                                <Typography variant="h6" component="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                                    <BarChartIcon sx={{ mr: 1 }} color="primary" /> {`Resumen ${(typeof selectedMonth === 'number' && mesesFull[selectedMonth]) ? mesesFull[selectedMonth] : ''} ${currentYear}`}
+                                                </Typography>
+                                                {renderSummaryText()}
+                                            </Paper>
+                                        </Grid>
+                                    </>
+                                )}
+                            </Grid>
+                        ) : (
+                            !loading && rawCronogramaData && rawCronogramaData.length > 0 && <Paper elevation={3} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
+                                <Typography variant="h6" gutterBottom>Sin resultados</Typography>
+                                <Typography variant="body1" color="textSecondary"> No se encontraron datos de cursos que coincidan con los filtros seleccionados para el año {currentYear}. </Typography>
+                            </Paper>
+                        )}
+                    </div>
                 </>
             )}
 
             {!loading && !error && (!rawCronogramaData || rawCronogramaData.length === 0) && (
-                <Paper elevation={3} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
-                    <Typography variant="h6" gutterBottom>No hay datos disponibles</Typography>
-                    <Typography variant="body1" color="textSecondary"> No se encontraron datos de cursos para el año {currentYear}. Verifica la fuente de datos. </Typography>
-                </Paper>
+                <div style={{ gridArea: 'kpis' }}>
+                     <Paper elevation={3} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
+                        <Typography variant="h6" gutterBottom>No hay datos disponibles</Typography>
+                        <Typography variant="body1" color="textSecondary"> No se encontraron datos de cursos para el año {currentYear}. Verifica la fuente de datos. </Typography>
+                    </Paper>
+                </div>
             )}
         </Box>
     );

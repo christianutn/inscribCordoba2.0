@@ -215,8 +215,6 @@ const DetalleMesChart = () => {
       },
     },
     colors: ['#36A2EB'], // Color para el gráfico de cupo
-    // No necesitamos legend aquí si solo hay una serie por gráfico de tab
-    // legend: { show: true, position: 'top' }
   }), [baseOptions]);
 
   const cursosChartOptions = useMemo(() => ({
