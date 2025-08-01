@@ -24,12 +24,10 @@ import { validarOrdenFechas } from "../services/validarOrdenFechas.js";
 import { useNavigate } from 'react-router-dom';
 import OpcionesEvento from './OpcionesEvento.jsx';
 import CustomInput from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
 import NuevoEvento from './NuevoEvento.jsx';
 import Alerta from "./UIElements/Dialog.jsx";
 import { getDepartamentos } from "../services/departamentos.service.js";
-
-
+import { Autocomplete as MuiAutocomplete, TextField as MuiTextField, MenuItem } from '@mui/material';
 
 export default function Formulario() {
 
@@ -42,6 +40,7 @@ export default function Formulario() {
   const [plataformasDictado, setPlataformasDictado] = useState([]);
   const [tiposCapacitaciones, setTiposCapacitaciones] = useState([]);
   const [tutores, setTutores] = useState([]);
+  const [departamentos, setDepartamentos] = useState([]);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [cargando, setCargando] = useState(false);
@@ -57,8 +56,10 @@ export default function Formulario() {
   const [cupo, setCupo] = useState("");
   const [horas, setHoras] = useState("");
   const [cohortes, setCohortes] = useState([]);
-  const [comentario, setComentario] = useState("");
-  
+  const [edadDesde, setEdadDesde] = useState(16);
+  const [edadHasta, setEdadHasta] = useState("Sin Restricción");
+  const [departamentosSeleccionados, setDepartamentosSeleccionados] = useState([]);
+  const [cursosCorrelativosSeleccionados, setCursosCorrelativosSeleccionados] = useState([]);
 
 
   // OPciones de evento
@@ -71,9 +72,6 @@ export default function Formulario() {
     correlatividad: false
   });
 
-
-
-
   //Alerta
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
   const [tituloAlerta, setTituloAlerta] = useState('');
@@ -82,9 +80,17 @@ export default function Formulario() {
   // Función para actualizar los datos desde el hijo
   const manejarCambioOpciones = (nuevaOpciones) => {
     setOpciones(nuevaOpciones);
+    if (!nuevaOpciones.edad) {
+      setEdadDesde(16);
+      setEdadHasta("Sin Restricción");
+    }
+    if (!nuevaOpciones.departamento) {
+      setDepartamentosSeleccionados([]);
+    }
+    if (!nuevaOpciones.correlatividad) {
+      setCursosCorrelativosSeleccionados([]);
+    }
   };
-
-
 
   // Data grid de tutores
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
@@ -173,7 +179,7 @@ export default function Formulario() {
           return
         }
 
-        if (nuevoEvento) return; // Si se renderiza nuevo evento luego tendremos que recargar ministerios para actualizar los datos del curso por si cambian de selección
+        if (nuevoEvento) return; 
 
 
         limpiarFormulario();
@@ -191,6 +197,9 @@ export default function Formulario() {
 
         const listaTutores = await getTutores();
         setTutores(listaTutores);
+
+        const listaDepartamentos = await getDepartamentos();
+        setDepartamentos(listaDepartamentos);
 
       } catch (error) {
         setError(error.message || "Error al cargar los datos");
@@ -212,7 +221,10 @@ export default function Formulario() {
     setSelectTipoCapacitacion("");
     setCupo("");
     setHoras("");
-    setComentario("");
+    setEdadDesde(16);
+    setEdadHasta("Sin Restricción");
+    setDepartamentosSeleccionados([]);
+    setCursosCorrelativosSeleccionados([]);
   };
 
   const tiene_el_curso_evento_creado = (codCurso) => {
@@ -302,26 +314,21 @@ export default function Formulario() {
         throw new Error("El curso no tiene un evento creado, por favor cree un evento antes de continuar con la inscripción");
       }
 
-      // Si opciones.autogestionado, opciones.correlatividad, opciones.edad, opciones.departamento es true entonces comentario no puede ser vacío
-      if (opciones.correlatividad || opciones.edad || opciones.departamento) {
-        if (!comentario) {
-          throw new Error("Debes especificar un comentario con el detalle de las restricciones seleccionadas en 'Opciones de Evento'");
-        }
-      }
-
-      const newInstancia = await postInstancias({ 
-        curso: cursos.find(curso => curso.nombre === selectCurso)?.cod, 
-        cohortes: cohortes, 
-        opciones: opciones, 
-        cupo, 
-        cantidad_horas: horas, 
-        medio_inscripcion: mediosInscripcion.find(medio => medio.nombre === selectMedioInscripcion)?.cod, 
-        plataforma_dictado: plataformasDictado.find(plataforma => plataforma.nombre === selectPlataformaDictado)?.cod, 
-        tipo_capacitacion: tiposCapacitaciones.find(tipo => tipo.nombre === selectTipoCapacitacion)?.cod, 
-        tutores: tutoresSeleccionados, 
-        ministerio: ministerios.find(ministerio => ministerio.nombre === selectMinisterio)?.cod,
-        area: areas.find(area => area.nombre === selectArea)?.cod, 
-        comentario:comentario
+      const newInstancia = await postInstancias({
+        curso: cursos.find(curso => curso.nombre === selectCurso)?.cod,
+        tipo_capacitacion: tiposCapacitaciones.find(tipo => tipo.nombre === selectTipoCapacitacion)?.cod,
+        plataforma_dictado: plataformasDictado.find(plataforma => plataforma.nombre === selectPlataformaDictado)?.cod,
+        medio_inscripcion: mediosInscripcion.find(medio => medio.nombre === selectMedioInscripcion)?.cod,
+        cupo: parseInt(cupo),
+        cantidad_horas: parseInt(horas),
+        tutores: tutoresSeleccionados.map(tutor => ({ cuil: tutor.cuil })),
+        cohortes: cohortes,
+        es_autogestionado: opciones.autogestionado ? 1 : 0,
+        es_publicada_portal_cc: opciones.publicaPCC ? 1 : 0,
+        restriccion_edad_desde: opciones.edad ? parseInt(edadDesde) : 16,
+        restriccion_edad_hasta: opciones.edad && edadHasta !== "Sin Restricción" ? parseInt(edadHasta) : 0,
+        departamentos: opciones.departamento ? departamentosSeleccionados.map(d => d.id) : [],
+        cursos_correlativos: opciones.correlatividad ? cursosCorrelativosSeleccionados.map(c => c.cod) : []
       });
 
       limpiarFormulario();
@@ -387,113 +394,176 @@ export default function Formulario() {
                 <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} />
               </div>
 
+              <div className='info-curso'>
+                <div className='select-ministerio'>
+                  <Autocomplete options={ministerios.filter(ministerio => ministerio.esVigente === 1).map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio}
+                    getValue={(value) => {
+                      setSelectMinisterio(value);
+                      setSelectArea("")
+                      setSelectCurso("")
 
-              <div className='select-ministerio'>
-                <Autocomplete options={ministerios.filter(ministerio => ministerio.esVigente === 1).map(ministerio => ministerio.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio}
-                  getValue={(value) => {
-                    setSelectMinisterio(value);
-                    setSelectArea("")
-                    setSelectCurso("")
+                      const ministerioSeleccionado = ministerios.find(ministerio => ministerio.nombre === value);
 
-                    const ministerioSeleccionado = ministerios.find(ministerio => ministerio.nombre === value);
+                      if (ministerioSeleccionado) {
+                        setAreas(ministerioSeleccionado.detalle_areas);
+                        setCursos([]);
 
-                    if (ministerioSeleccionado) {
-                      setAreas(ministerioSeleccionado.detalle_areas);
-                      setCursos([]);
+                      } else {
+                        setAreas([]);
+                        setCursos([]);
+                      }
 
-                    } else {
-                      setAreas([]);
-                      setCursos([]);
-                    }
+                    }}
 
-                  }}
+                  />
+                </div>
 
-                />
+                <div className='select-area'>
+                  <Autocomplete options={areas.filter(area => area.esVigente === 1).map(area => area.nombre)} label={"Seleccione un área"} value={selectArea}
+                    getValue={(value) => {
+                      setSelectArea(value);
+                      setSelectCurso("")
 
+                      const areaSeleccionada = areas.find(area => area.nombre === value);
 
-              </div>
+                      if (areaSeleccionada) {
 
-              <div className='select-area'>
-                <Autocomplete options={areas.filter(area => area.esVigente === 1).map(area => area.nombre)} label={"Seleccione un área"} value={selectArea}
-                  getValue={(value) => {
-                    setSelectArea(value);
-                    setSelectCurso("")
+                        setCursos(areaSeleccionada.detalle_cursos);
+                      } else {
+                        setCursos([]);
+                      }
 
-                    const areaSeleccionada = areas.find(area => area.nombre === value);
+                    }}
+                  />
+                </div>
 
-                    if (areaSeleccionada) {
+                <div className='select-curso'>
+                  <Autocomplete options={cursos.filter(c => c.esVigente === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso}
+                    getValue={(value) => {
+                      setSelectCurso(value);
+                      const codCurso = cursos.find((curso) => curso.nombre === value)?.cod;
+                      if (!tiene_el_curso_evento_creado(codCurso)) {
+                        setTituloAlerta("El curso no tiene un evento creado");
+                        setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${value || '(Curso no encontrado)'}'. Por favor, complete primero este formulario y luego podrá cargar 'Nuevas cohortes'`);
+                        setOpenAlertDialog(true);
+                        setNuevoEvento(true);
+                      }
+                    }}
+                  />
+                </div>
 
-                      setCursos(areaSeleccionada.detalle_cursos);
-                    } else {
-                      setCursos([]);
-                    }
+                <div className='select-medio-inscripcion'>
+                  <Autocomplete options={mediosInscripcion.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion}
+                    getValue={(value) => {
+                      setSelectMedioInscripcion(value);
+                    }}
+                  />
+                </div>
 
-                  }}
+                <div className='select-plataforma-dictado'>
+                  <Autocomplete options={plataformasDictado.filter(p => p.esVigente === 1).map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado}
+                    getValue={(value) => {
+                      setSelectPlataformaDictado(value);
+                    }}
+                  />
+                </div>
 
+                <div className='select-tipo-capacitacion'>
+                  <Autocomplete options={tiposCapacitaciones.filter(t => t.esVigente === 1).map(t => t.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion}
+                    getValue={(value) => {
+                      setSelectTipoCapacitacion(value);
+                    }}
+                  />
+                </div>
 
-                />
-
-              </div>
-
-              <div className='select-curso'>
-                <Autocomplete options={cursos.filter(c => c.esVigente === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso}
-                  getValue={(value) => {
-                    setSelectCurso(value);
-                    const codCurso = cursos.find((curso) => curso.nombre === value)?.cod;
-                    if (!tiene_el_curso_evento_creado(codCurso)) {
-                      setTituloAlerta("El curso no tiene un evento creado");
-                      setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${value || '(Curso no encontrado)'}'. Por favor, complete primero este formulario y luego podrá cargar 'Nuevas cohortes'`);
-                      setOpenAlertDialog(true);
-                      setNuevoEvento(true);
-                    }
-                  }}
-
-                />
-
-              </div>
-
-              <div className='select-medio-inscripcion'>
-                <Autocomplete options={mediosInscripcion.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion}
-                  getValue={(value) => {
-                    setSelectMedioInscripcion(value);
-                  }}
-                />
-
-              </div>
-
-              <div className='select-plataforma-dictado'>
-                <Autocomplete options={plataformasDictado.filter(p => p.esVigente === 1).map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado}
-                  getValue={(value) => {
-                    setSelectPlataformaDictado(value);
-                  }}
-                />
-
-              </div>
-
-              <div className='select-tipo-capacitacion'>
-                <Autocomplete options={tiposCapacitaciones.filter(t => t.esVigente === 1).map(t => t.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion}
-                  getValue={(value) => {
-                    setSelectTipoCapacitacion(value);
-                  }}
-                />
-
-              </div>
-
-              <div className='input'>
-                <TextField label={"Cupo"} getValue={(value) => setCupo(value)} value={cupo}
-                />
-                <TextField label={"Cantidad de horas"} getValue={(value) => setHoras(value)} value={horas}
-                />
-
-
+                <div className='input'>
+                  <TextField label={"Cupo"} getValue={(value) => setCupo(value)} value={cupo} />
+                  <TextField label={"Cantidad de horas"} getValue={(value) => setHoras(value)} value={horas} />
+                </div>
               </div>
 
               <div className='opciones-evento'>
                 <OpcionesEvento opciones={opciones} onOpcionesChange={manejarCambioOpciones} />
               </div>
 
-              <div>
+              <div className='restricciones'>
+                {opciones.edad && (
+                  <div className='restriccion-edad'>
+                    <TextField
+                      label="Edad desde"
+                      type="number"
+                      value={edadDesde}
+                      getValue={(value) => {
+                        if (value >= 16) {
+                          setEdadDesde(value);
+                        }
+                      }}
+                    />
+                    <MuiTextField
+                      select
+                      label="Edad hasta"
+                      value={edadHasta}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "Sin Restricción" || value >= edadDesde) {
+                          setEdadHasta(value);
+                        }
+                      }}
+                      fullWidth
+                    >
+                      <MenuItem value="Sin Restricción">Sin Restricción</MenuItem>
+                      {Array.from({ length: 83 }, (_, i) => i + 18).map((edad) => (
+                        <MenuItem key={edad} value={edad} disabled={edad < edadDesde}>
+                          {edad}
+                        </MenuItem>
+                      ))}
+                    </MuiTextField>
+                  </div>
+                )}
 
+                {opciones.departamento && (
+                  <div className='restriccion-departamento'>
+                    <MuiAutocomplete
+                      multiple
+                      options={departamentos}
+                      getOptionLabel={(option) => option.nombre}
+                      value={departamentosSeleccionados}
+                      onChange={(event, newValue) => {
+                        setDepartamentosSeleccionados(newValue);
+                      }}
+                      renderInput={(params) => (
+                        <MuiTextField
+                          {...params}
+                          variant="standard"
+                          label="Seleccione departamentos"
+                          placeholder="Departamentos"
+                        />
+                      )}
+                    />
+                  </div>
+                )}
+
+                {opciones.correlatividad && (
+                  <div className='restriccion-correlatividad'>
+                    <MuiAutocomplete
+                      multiple
+                      options={cursos}
+                      getOptionLabel={(option) => option.nombre}
+                      value={cursosCorrelativosSeleccionados}
+                      onChange={(event, newValue) => {
+                        setCursosCorrelativosSeleccionados(newValue);
+                      }}
+                      renderInput={(params) => (
+                        <MuiTextField
+                          {...params}
+                          variant="standard"
+                          label="Seleccione cursos correlativos"
+                          placeholder="Cursos"
+                        />
+                      )}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className='tutores'>
@@ -528,42 +598,11 @@ export default function Formulario() {
 
               <div className='cohortes'>
                 <Cohortes getCohortes={handleCohortes}></Cohortes>
-
               </div>
 
               <div className='submit'>
                 <Button mensaje={"Registrar"} type="button" hanldeOnClick={handleEnviarFormulario} />
               </div>
-              <Tooltip title="En caso de aplicar restricciones como edad, correlatividad, departamento  ó cualquier aclaración relevante, favor de completar el campo de comentario"
-                placement="top"
-
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: '#333', // Fondo oscuro
-                      color: '#fff', // Texto blanco
-                      fontSize: '16px', // Tamaño de letra más grande
-                      maxWidth: '400px', // Ancho máximo del tooltip
-                      padding: '12px', // Espaciado interno
-                      borderRadius: '8px', // Bordes redondeados
-                    },
-                  },
-                }}
-              >
-                <div className='comentario'>
-                  <CustomInput
-                    id="outlined-multiline-static"
-                    label="Comentario"
-                    multiline
-                    rows={4}
-                    fullWidth
-                    value={comentario}
-                    onChange={(event) => setComentario(event.target.value)}
-                    
-                  />
-                </div>
-              </Tooltip>
-
             </div>
           </form>
 

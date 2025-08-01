@@ -11,6 +11,7 @@ import Instancia from '../../models/instancia.models.js';
 import Tutor from '../../models/tutor.models.js';
 import { DateTime } from 'luxon';
 import Departamento from '../../models/departamentos.models.js';
+import Usuario from '../../models/usuario.models.js';
 
 
 // Middleware de validación para una ruta de creación/actualización de Curso/Evento
@@ -148,7 +149,12 @@ const validarDatosCursoConCohortes = [
         }
 
 
-        const { esExcepcionParaFechas } = req.user.user;
+        const { cuil } = req.user.user;
+
+        const usuario = await Usuario.findByPk(cuil)
+
+        const esExcepcionParaFechas = parseInt(usuario.esExcepcionParaFechas)
+
         // Devolver error si esExcepcionParaFechas no existe o es distinto a bolean
         if (esExcepcionParaFechas != 0 && esExcepcionParaFechas != 1) {
             throw new AppError(`El campo 'esExcepcionParaFechas' debe ser un cero ó uno`, 400);

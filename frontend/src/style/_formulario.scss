@@ -1,78 +1,100 @@
 .grid-container-formulario {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr; // Dos columnas para una mejor distribución
     grid-template-rows: auto;
     grid-template-areas:
-        "titulo titulo titulo"
-        "divider divider divider"
-        "select-ministerio select-area  select-curso"
-        "select-medio-inscripcion select-plataforma-dictado  select-tipo-capacitacion"
-        "input . ."
-        "opciones-evento opciones-evento opciones-evento"
-        "comentario comentario comentario"
-        "tutores tutores tutores"
-        "cohortes cohortes cohortes"
-        "submit submit submit";
-    grid-gap: 20px;
-    margin-left: 50px;
-    margin-right: 50px;
+        "titulo titulo"
+        "divider divider"
+        "info-curso info-curso"
+        "opciones-evento opciones-evento"
+        "restricciones restricciones"
+        "tutores tutores"
+        "cohortes cohortes"
+        "submit submit";
+    grid-gap: 25px; // Aumento el espacio para mayor claridad
+    margin: 20px 50px; // Margen ajustado
 
-    .select-ministerio { grid-area: select-ministerio; }
-    .select-area { grid-area: select-area; }
-    .select-curso { grid-area: select-curso; }
-    .select-tipo-capacitacion { grid-area: select-tipo-capacitacion; }
-    .select-medio-inscripcion { grid-area: select-medio-inscripcion; }
+    .titulo { grid-area: titulo; }
+    .divider { grid-area: divider; }
+
+    // Contenedor para la información principal del curso
+    .info-curso {
+        grid-area: info-curso;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
     .input {
-        grid-area: input;
         display: flex;
         flex-direction: row;
         gap: 10px;
     }
-    .opciones-evento { grid-area: opciones-evento; }
-    .tutores { grid-area: tutores; display: flex; flex-direction: column; }
-    .cohortes { grid-area: cohortes; }
-    .submit { grid-area: submit; }
-    .select-plataforma-dictado { grid-area: select-plataforma-dictado; }
-    .titulo { grid-area: titulo; }
-    .divider { grid-area: divider; }
-    .comentario { grid-area: comentario; }
+
+    .opciones-evento { 
+        grid-area: opciones-evento;
+        border-top: 1px solid #ccc; // Separador visual
+        padding-top: 20px;
+    }
+
+    // Contenedor para todas las restricciones
+    .restricciones {
+        grid-area: restricciones;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        
+        .restriccion-edad {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+    }
+
+    .tutores { 
+        grid-area: tutores; 
+        display: flex; 
+        flex-direction: column; 
+        border-top: 1px solid #ccc; // Separador visual
+        padding-top: 20px;
+    }
+
+    .cohortes { 
+        grid-area: cohortes; 
+        border-top: 1px solid #ccc; // Separador visual
+        padding-top: 20px;
+    }
+
+    .submit { 
+        grid-area: submit; 
+        justify-self: end; // Alinea el botón a la derecha
+    }
 
     // Media query para pantallas pequeñas
     @media (max-width: 768px) {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; // Una sola columna
         grid-template-areas:
             "titulo"
-            "select-ministerio"
-            "select-area"
-            "select-curso"
-            "select-medio-inscripcion"
-            "select-plataforma-dictado"
-            "select-tipo-capacitacion"
-            "tutores"
-            "input"
+            "divider"
+            "info-curso"
             "opciones-evento"
-            "comentario"
+            "restricciones"
+            "tutores"
             "cohortes"
             "submit";
-        margin-left: 20px;
-        margin-right: 20px;
-        .select-ministerio { grid-area: select-ministerio; }
-        .select-area { grid-area: select-area; }
-        .select-curso { grid-area: select-curso; }
-        .select-tipo-capacitacion { grid-area: select-tipo-capacitacion; }
-        .select-medio-inscripcion { grid-area: select-medio-inscripcion; }
-        .input {
-            grid-area: input;
-            display: flex;
-            flex-direction: row;
-            gap: 10px;
+        margin: 20px;
+
+        .info-curso {
+            grid-template-columns: 1fr; // Apila los campos de info
         }
-        .tutores { grid-area: tutores; display: flex; flex-direction: column; }
-        .cohortes { grid-area: cohortes; }
-        .submit { grid-area: submit; }
-        .select-plataforma-dictado { grid-area: select-plataforma-dictado; }
-        .titulo { grid-area: titulo; }
-        .divider { grid-area: divider; }
-        .comentario { grid-area: comentario; }
+
+        .restricciones .restriccion-edad {
+            grid-template-columns: 1fr; // Apila los campos de edad
+        }
+
+        .submit {
+            justify-self: stretch; // El botón ocupa todo el ancho
+        }
     }
 }

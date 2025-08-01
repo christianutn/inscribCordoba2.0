@@ -7,6 +7,7 @@ import { DateTime } from 'luxon';
 import AppError from "../utils/appError.js";
 import RestriccionesPorCorrelatividad from "../models/restricciones_por_correlatividad.models.js";
 import RestriccionesPorDepartamento from "../models/restricciones_por_departamento.models.js";
+import Usuario from "../models/usuario.models.js"
 
 
 
@@ -111,7 +112,7 @@ export const getInstancias = async (req, res, next) => {
                     } catch (e) {
                         return null; // O manejar el error como prefieras
                     }
-                } 
+                }
                 return jsonString; // Si ya es un objeto, devuélvelo tal cual
             };
 
@@ -173,7 +174,11 @@ export const postInstancia = async (req, res, next) => {
 
             // banderas para tiene_correlatividad, tiene_restriccion_departamento
             let tiene_correlatividad = 0;
+            if (cursos_correlativos && cursos_correlativos.length > 0) tiene_correlatividad = 1;
+
             let tiene_restriccion_departamento = 0;
+            if (departamentos && departamentos.length > 0) tiene_restriccion_departamento = 1;
+
 
             // Verificamos si tiene restriccion de edad esto depende si restriccion_edad_desde es igual a 16 y restriccion_edad_desde el un falsy values
 
@@ -229,7 +234,6 @@ export const postInstancia = async (req, res, next) => {
             // Creamos restricciones_por_correlatividad en caso de existir
             if (cursos_correlativos && cursos_correlativos.length > 0) {
                 for (const correlativo of cursos_correlativos) {
-                    if (!tiene_correlatividad) tiene_correlatividad = 1;
                     await RestriccionesPorCorrelatividad.create({
                         curso: curso,
                         fecha_inicio_curso: fechaCursadaDesde,
@@ -241,7 +245,6 @@ export const postInstancia = async (req, res, next) => {
             // Creamos restricciones_por_departamento en caso de existir
             if (departamentos && departamentos.length > 0) {
                 for (const departamento of departamentos) {
-                    if (!tiene_restriccion_departamento) tiene_restriccion_departamento = 1;
                     await RestriccionesPorDepartamento.create({
                         curso: curso,
                         fecha_inicio_curso: fechaCursadaDesde,
@@ -317,29 +320,44 @@ export const deleteInstancia = async (req, res, next) => {
 
 
 export const get_fechas_invalidas = async (req, res, next) => {
+
     const targetYear = req.params.targetYear
 
+    let results = [];
+
+
     try {
-        // 1. Determinar el último año de la tabla 'instancias'
-        const maxFechaResult = await instanciaModel.findOne({
-            attributes: [
-                [sequelize.fn('MAX', sequelize.col('fecha_inicio_curso')), 'maxFecha']
-            ],
-            raw: true,
-        });
+        // Corroboramos si el usuario que hace la consulta aplica o restricciones
 
-        if (!maxFechaResult || !maxFechaResult.maxFecha) {
-            console.log("No se encontraron instancias para determinar el último año. Devolviendo lista vacía.");
-            return res.status(200).send([]);
-        }
+        const cuil = req.user.user.cuil
+
+        const usuario = await Usuario.findByPk(cuil);
+
+        const es_excepcion_para_fechas = parseInt(usuario.esExcepcionParaFechas)
 
 
-        console.log(`Año objetivo determinado dinámicamente: ${targetYear}`);
+        //Si no tiene excepción para fechas entonces buscar y devolver la lista con fechas inválidas.
+        if (!es_excepcion_para_fechas) {
+            // 1. Determinar el último año de la tabla 'instancias'
+            const maxFechaResult = await instanciaModel.findOne({
+                attributes: [
+                    [sequelize.fn('MAX', sequelize.col('fecha_inicio_curso')), 'maxFecha']
+                ],
+                raw: true,
+            });
 
-        // 2. Usar el año determinado en la consulta principal
-        // Esta es TU consulta SQL, adaptada para replacements de Sequelize
-        // (se eliminó "SET @target_year = 2025;" y se cambió @target_year por :target_year)
-        const sqlQuery = `
+            if (!maxFechaResult || !maxFechaResult.maxFecha) {
+                console.log("No se encontraron instancias para determinar el último año. Devolviendo lista vacía.");
+                return res.status(200).send([]);
+            }
+
+
+            console.log(`Año objetivo determinado dinámicamente: ${targetYear}`);
+
+            // 2. Usar el año determinado en la consulta principal
+            // Esta es TU consulta SQL, adaptada para replacements de Sequelize
+            // (se eliminó "SET @target_year = 2025;" y se cambió @target_year por :target_year)
+            const sqlQuery = `
             WITH RECURSIVE DatesCTE AS (
                 SELECT DATE(CONCAT(:target_year, '-01-01')) AS calendario_fecha
                 UNION ALL
@@ -432,17 +450,19 @@ export const get_fechas_invalidas = async (req, res, next) => {
             ORDER BY d.calendario_fecha;
         `;
 
-        // Nota: Para que la CTE recursiva (DatesCTE) funcione correctamente en MySQL
-        // a través de Sequelize, la variable de servidor MySQL 'cte_max_recursion_depth'
-        // debe ser suficientemente alta (e.g., 1000 o al menos 366).
-        // Si no está configurada globalmente, esta consulta podría fallar si el límite por defecto es bajo.
-        // SET SESSION cte_max_recursion_depth no es fiable con pools de conexión.
-        // Lo ideal es configurarlo a nivel de servidor.
+            // Nota: Para que la CTE recursiva (DatesCTE) funcione correctamente en MySQL
+            // a través de Sequelize, la variable de servidor MySQL 'cte_max_recursion_depth'
+            // debe ser suficientemente alta (e.g., 1000 o al menos 366).
+            // Si no está configurada globalmente, esta consulta podría fallar si el límite por defecto es bajo.
+            // SET SESSION cte_max_recursion_depth no es fiable con pools de conexión.
+            // Lo ideal es configurarlo a nivel de servidor.
 
-        const results = await sequelize.query(sqlQuery, {
-            replacements: { target_year: targetYear },
-            type: QueryTypes.SELECT,
-        });
+            results = await sequelize.query(sqlQuery, {
+                replacements: { target_year: targetYear },
+                type: QueryTypes.SELECT,
+            });
+
+        }
 
         res.status(200).send(results);
 
