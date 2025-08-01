@@ -73,3 +73,7 @@
 2025-08-01T14:39:31.860Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-LY, Fecha=2025-10-01, Datos={"tiene_correlatividad":1,"tiene_restriccion_edad":1,"tiene_restriccion_departamento":1}
 2025-08-01T14:39:33.216Z [INFO]: Instancia actualizada exitosamente por Roque Nicolás Carballo: 1 fila(s) afectadas.
 2025-08-01T14:42:24.748Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
+2025-08-01T14:47:37.602Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-IMD+26, Fecha=2025-01-06, Datos={"es_autogestionado":0}
+2025-08-01T14:47:37.952Z [INFO]: Instancia actualizada exitosamente por Roque Nicolás Carballo: 1 fila(s) afectadas.
+2025-08-01T14:57:45.096Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-HCS+26, Fecha=2025-01-06, Datos={"es_autogestionado":0}
+2025-08-01T14:57:46.439Z [INFO]: Instancia actualizada exitosamente por Roque Nicolás Carballo: 1 fila(s) afectadas.

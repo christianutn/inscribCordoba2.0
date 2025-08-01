@@ -109,6 +109,7 @@ const CronogramaAdminReducido = () => {
     const [otrosModalOpen, setOtrosModalOpen] = useState(false);
     const [loadingOtros, setLoadingOtros] = useState(false);
     const [otrosEditable, setOtrosEditable] = useState({ cantidad_inscriptos: '' });
+    const [autogestionadoConfirmOpen, setAutogestionadoConfirmOpen] = useState(false);
 
     // --- USESTATE PARA RESTRICCIONES ---
     const [allCursos, setAllCursos] = useState([]);
@@ -244,7 +245,6 @@ const CronogramaAdminReducido = () => {
             const currentCorrs = originalInstanciaData.detalle_restricciones_por_correlatividad || [];
             setEditableDepartamentos(currentDeps.map(d => allDepartamentos.find(ad => ad.id === d.departamento_id)).filter(Boolean));
             setEditableCorrelativos(currentCorrs.map(c => allCursos.find(ac => ac.cod === c.curso_correlativo)).filter(Boolean));
-            // Poblar estado de restricción de edad
             setEdadRestrictionEnabled(!!originalInstanciaData.tiene_restriccion_edad);
             setEditableEdadDesde(originalInstanciaData.restriccion_edad_desde || '');
             setEditableEdadHasta(originalInstanciaData.restriccion_edad_hasta || '');
@@ -310,13 +310,17 @@ const CronogramaAdminReducido = () => {
         setLoadingFechas(false);
     }, [fechasEditables, originalInstanciaData, handleApiUpdate, fetchData, handleCloseFechasModal, handleCloseModal]);
 
-    const handleToggleAutogestionado = useCallback(async () => {
+    const handleConfirmToggleAutogestionado = useCallback(async () => {
         const currentValue = originalInstanciaData?.es_autogestionado;
         const newValue = currentValue === 1 ? 0 : 1;
         const success = await handleApiUpdate({ es_autogestionado: newValue });
         if (success) {
             setSuccessMessage(`El estado 'Autogestionado' se cambió a "${formatBooleanToSiNo(newValue)}" exitosamente.`);
-            handleCloseModal(); fetchData();
+            setAutogestionadoConfirmOpen(false);
+            handleCloseModal();
+            fetchData();
+        } else {
+            setAutogestionadoConfirmOpen(false);
         }
     }, [originalInstanciaData, handleApiUpdate, fetchData, handleCloseModal]);
 
@@ -334,7 +338,9 @@ const CronogramaAdminReducido = () => {
         const success = await handleApiUpdate(payload);
         if (success) {
             setSuccessMessage("Restricciones actualizadas exitosamente.");
-            handleCloseRestrictionsModal(); handleCloseModal(); fetchData();
+            handleCloseRestrictionsModal();
+            handleCloseModal();
+            fetchData();
         }
         setLoadingRestrictions(false);
     }, [editableDepartamentos, editableCorrelativos, edadRestrictionEnabled, editableEdadDesde, editableEdadHasta, handleApiUpdate, fetchData, handleCloseRestrictionsModal, handleCloseModal]);
@@ -349,10 +355,10 @@ const CronogramaAdminReducido = () => {
         );
     }, [adminUsers, userSearchTerm]);
     
-    const handleDescargarExcel = useCallback(async () => {
+    const handleDescargarExcel = useCallback(async () => { 
         if (!filteredData.length) return;
         try {
-            await descargarExcel(filteredData, COLUMNAS_VISIBLES, "Cronograma_Admin");
+            await descargarExcel(filteredData, COLUMNAS_VISIBLES, "Cronograma_Admin_Reducido");
         } catch (error) {
             setError("Error al generar el archivo Excel.");
             console.error(error);
@@ -375,6 +381,20 @@ const CronogramaAdminReducido = () => {
     }, []);
 
     const isFilterActive = useMemo(() => nombreFilter || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive || asignadoFilter, [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive, asignadoFilter]);
+
+    // ** NUEVO HANDLER PARA EL CHECKBOX DE EDAD **
+    const handleEdadRestrictionChange = (event) => {
+        const isChecked = event.target.checked;
+        setEdadRestrictionEnabled(isChecked);
+        if (isChecked) {
+            // Al marcar, se fija la edad mínima en 16 por defecto.
+            setEditableEdadDesde('16');
+        } else {
+            // Al desmarcar, se limpian los campos.
+            setEditableEdadDesde('');
+            setEditableEdadHasta('');
+        }
+    };
 
     const renderDetailItem = useCallback((label, value, isBoolean = false, actionButton = null) => {
         const displayValue = isBoolean ? formatBooleanToSiNo(value) : (formatValue(value) || '-');
@@ -451,7 +471,7 @@ const CronogramaAdminReducido = () => {
                                         {renderDetailItem("Fecha Fin Inscripción", originalInstanciaData.fecha_fin_inscripcion, false, <ActionButton onClick={handleOpenFechasModal}>Cambiar</ActionButton>)}
                                         <Divider sx={{ my: 1 }}><Chip label="Detalles Instancia" size="small" /></Divider>
                                         {renderDetailItem("Cupo", originalInstanciaData.cupo)}
-                                        {renderDetailItem("Es Autogestionado", originalInstanciaData.es_autogestionado, true, <ActionButton onClick={handleToggleAutogestionado}>Cambiar</ActionButton>)}
+                                        {renderDetailItem("Es Autogestionado", originalInstanciaData.es_autogestionado, true, <ActionButton onClick={() => setAutogestionadoConfirmOpen(true)}>Cambiar</ActionButton>)}
                                         {renderDetailItem("Publicada en Portal", originalInstanciaData.es_publicada_portal_cc, true)}
                                         {renderDetailItem("Comentario", originalInstanciaData.comentario)}
                                         {renderDetailItem("Cantidad de Inscriptos", originalInstanciaData.cantidad_inscriptos || 0, false, <ActionButton onClick={() => setOtrosModalOpen(true)}>Cambiar</ActionButton>)}
@@ -561,18 +581,38 @@ const CronogramaAdminReducido = () => {
                         <Button onClick={() => setOtrosModalOpen(false)}>Cancelar</Button>
                         <Button onClick={async() => {
                             try {
-                                console.log("Sii")
+                                setLoadingOtros(true);
                                 await putInstancia(originalInstanciaData.curso, originalInstanciaData.fecha_inicio_curso, otrosEditable)
-                                setSuccessMessage('Modificado con éxito');
-                            } catch {
-                                console.log("CAmbiar")
+                                setSuccessMessage('Cantidad de inscriptos modificada con éxito');
+                                fetchData();
+                            } catch(err) {
+                                setError('Error al modificar la cantidad de inscriptos.');
+                                console.error(err);
                             } finally {
-                                setOtrosModalOpen(false)
-                                setModalOpen(false)
+                                setLoadingOtros(false);
+                                setOtrosModalOpen(false);
+                                setModalOpen(false);
                             }
                         }} 
                         variant="contained" 
-                        >{loadingEstado ? <CircularProgress size={24} color="inherit" /> : "Confirmar"}</Button>
+                        disabled={loadingOtros}
+                        >{loadingOtros ? <CircularProgress size={24} color="inherit" /> : "Confirmar"}</Button>
+                    </DialogActions>
+                </Dialog>
+
+                <Dialog open={autogestionadoConfirmOpen} onClose={() => setAutogestionadoConfirmOpen(false)}>
+                    <DialogTitle>Confirmar Cambio</DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            Está a punto de cambiar el estado 'Es Autogestionado' de 
+                            <strong> {formatBooleanToSiNo(originalInstanciaData?.es_autogestionado)} </strong> a 
+                            <strong> {formatBooleanToSiNo(!originalInstanciaData?.es_autogestionado)}</strong>.
+                        </Typography>
+                        <Typography sx={{mt: 2}}>¿Desea confirmar esta acción?</Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setAutogestionadoConfirmOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleConfirmToggleAutogestionado} variant="contained" color="primary">Confirmar</Button>
                     </DialogActions>
                 </Dialog>
 
@@ -583,7 +623,7 @@ const CronogramaAdminReducido = () => {
                         <Stack spacing={4} sx={{ pt: 2 }}>
                             <Box>
                                 <FormControlLabel
-                                    control={<Checkbox checked={edadRestrictionEnabled} onChange={(e) => setEdadRestrictionEnabled(e.target.checked)} />}
+                                    control={<Checkbox checked={edadRestrictionEnabled} onChange={handleEdadRestrictionChange} />}
                                     label="Aplicar restricción por edad"
                                 />
                                 <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
@@ -592,8 +632,17 @@ const CronogramaAdminReducido = () => {
                                         type="number"
                                         value={editableEdadDesde}
                                         onChange={(e) => setEditableEdadDesde(e.target.value)}
+                                        onBlur={(e) => {
+                                            const value = parseInt(e.target.value, 10);
+                                            if (edadRestrictionEnabled && (!value || value < 16)) {
+                                                setEditableEdadDesde('16');
+                                            }
+                                        }}
                                         disabled={!edadRestrictionEnabled}
                                         fullWidth
+                                        inputProps={{ min: 16 }}
+                                        error={edadRestrictionEnabled && editableEdadDesde && parseInt(editableEdadDesde, 10) < 16}
+                                        helperText={edadRestrictionEnabled && editableEdadDesde && parseInt(editableEdadDesde, 10) < 16 ? "La edad mínima por defecto es 16." : ""}
                                     />
                                     <TextField
                                         label="Edad Hasta"
@@ -602,6 +651,9 @@ const CronogramaAdminReducido = () => {
                                         onChange={(e) => setEditableEdadHasta(e.target.value)}
                                         disabled={!edadRestrictionEnabled}
                                         fullWidth
+                                        inputProps={{ min: editableEdadDesde ? parseInt(editableEdadDesde, 10) : 16 }}
+                                        error={edadRestrictionEnabled && editableEdadHasta && editableEdadDesde && parseInt(editableEdadHasta, 10) < parseInt(editableEdadDesde, 10)}
+                                        helperText={edadRestrictionEnabled && editableEdadHasta && editableEdadDesde && parseInt(editableEdadHasta, 10) < parseInt(editableEdadDesde, 10) ? "Debe ser mayor o igual a la edad 'desde'." : ""}
                                     />
                                 </Stack>
                             </Box>
@@ -627,7 +679,15 @@ const CronogramaAdminReducido = () => {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleCloseRestrictionsModal}>Cancelar</Button>
-                        <Button onClick={handleUpdateRestrictions} variant="contained" disabled={loadingRestrictions}>
+                        <Button
+                            onClick={handleUpdateRestrictions}
+                            variant="contained"
+                            disabled={
+                                loadingRestrictions ||
+                                (edadRestrictionEnabled && editableEdadDesde && parseInt(editableEdadDesde, 10) < 16) ||
+                                (edadRestrictionEnabled && editableEdadHasta && editableEdadDesde && parseInt(editableEdadHasta, 10) < parseInt(editableEdadDesde, 10))
+                            }
+                        >
                             {loadingRestrictions ? <CircularProgress size={24} color="inherit" /> : "Guardar Restricciones"}
                         </Button>
                     </DialogActions>
