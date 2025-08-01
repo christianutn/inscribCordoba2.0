@@ -230,7 +230,7 @@ const enviarCorreoDiarioContolDeCursos =  () => {
                 const emailSubject = `Alerta: ${coursesFoundCount} Curso${coursesFoundCount > 1 ? 's' : ''} inicia${coursesFoundCount > 1 ? 'n' : ''} en 5 días (${fechaObjetivoStr5} )`;
     
                 //Toma la lista de correos del .env sino por defecto manda a soporte
-                const emailRecipients = "soportecampuscordoba@gmail.com"; // Update default if needed
+                const emailRecipients = "rnicolascarballo@gmail.com"; // Update default if needed
     
                 if (!emailRecipients) {
                     console.error(`[${timestamp}] CRON TAREA: No se configuraron destinatarios de correo (la variable de entorno EMAIL_RECIPIENTS está vacía). No se puede enviar el correo.`);
