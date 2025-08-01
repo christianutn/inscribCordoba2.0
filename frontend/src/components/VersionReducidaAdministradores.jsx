@@ -109,15 +109,14 @@ const CronogramaAdminReducido = () => {
     const [otrosModalOpen, setOtrosModalOpen] = useState(false);
     const [loadingOtros, setLoadingOtros] = useState(false);
     const [otrosEditable, setOtrosEditable] = useState({ cantidad_inscriptos: '' });
-    
+
+    // --- USESTATE PARA RESTRICCIONES ---
     const [allCursos, setAllCursos] = useState([]);
     const [allDepartamentos, setAllDepartamentos] = useState([]);
     const [restrictionsModalOpen, setRestrictionsModalOpen] = useState(false);
     const [loadingRestrictions, setLoadingRestrictions] = useState(false);
     const [editableDepartamentos, setEditableDepartamentos] = useState([]);
     const [editableCorrelativos, setEditableCorrelativos] = useState([]);
-
-    // --- NUEVOS USESTATE PARA RESTRICCIÓN DE EDAD ---
     const [edadRestrictionEnabled, setEdadRestrictionEnabled] = useState(false);
     const [editableEdadDesde, setEditableEdadDesde] = useState('');
     const [editableEdadHasta, setEditableEdadHasta] = useState('');
@@ -144,6 +143,12 @@ const CronogramaAdminReducido = () => {
                 getInstancias(), getUsuarios(), getEstadosInstancia(), getCursos(), getDepartamentos()
             ]);
 
+            if (!Array.isArray(instanciasData)) throw new Error("Datos de instancias no válidos.");
+            if (!Array.isArray(usuariosData)) throw new Error("Datos de usuarios no válidos.");
+            if (!Array.isArray(estadosData)) throw new Error("Datos de estados no válidos.");
+            if (!Array.isArray(cursos)) throw new Error("Datos de cursos no válidos.");
+            if (!Array.isArray(departamentos)) throw new Error("Datos de departamentos no válidos.");
+
             setAllUsers(usuariosData); setAllEstados(estadosData); setAllCursos(cursos); setAllDepartamentos(departamentos);
             const filteredAdminUsers = usuariosData.filter(user => user.rol === 'ADM'); setAdminUsers(filteredAdminUsers);
             const usersMap = new Map(usuariosData.map(u => [u.cuil, `${u.detalle_persona?.nombre || ''} ${u.detalle_persona?.apellido || ''}`.trim()]));
@@ -166,6 +171,8 @@ const CronogramaAdminReducido = () => {
             setCursosData(dataObjs); setMinisterioOptions(['all', ...Array.from(admSet).sort()]);
         } catch (err) {
             console.error("Error loading data:", err); setError(err.message || "Error al cargar datos.");
+            setCursosData([]); setFilteredData([]); setMinisterioOptions(['all']);
+            setAllUsers([]); setAdminUsers([]); setAllEstados([]);
         } finally { setLoading(false); }
     }, [formatValue]);
 
@@ -173,7 +180,8 @@ const CronogramaAdminReducido = () => {
 
     useEffect(() => {
         if (loading || !cursosData.length) { setAreaOptions(['all']); if (areaFilter !== 'all') setAreaFilter('all'); return; }
-        let relevantCourses = ministerioFilter === 'all' ? cursosData : cursosData.filter(c => c["ADM"] === ministerioFilter);
+        let relevantCourses = [];
+        if (ministerioFilter === 'all') { relevantCourses = cursosData; } else { relevantCourses = cursosData.filter(c => c["ADM"] === ministerioFilter); }
         const areasSet = new Set(relevantCourses.map(c => c["Area"]).filter(Boolean));
         const newAreaOptions = ['all', ...Array.from(areasSet).sort()];
         setAreaOptions(newAreaOptions);
@@ -236,8 +244,7 @@ const CronogramaAdminReducido = () => {
             const currentCorrs = originalInstanciaData.detalle_restricciones_por_correlatividad || [];
             setEditableDepartamentos(currentDeps.map(d => allDepartamentos.find(ad => ad.id === d.departamento_id)).filter(Boolean));
             setEditableCorrelativos(currentCorrs.map(c => allCursos.find(ac => ac.cod === c.curso_correlativo)).filter(Boolean));
-            
-            // Poblar los estados de edad
+            // Poblar estado de restricción de edad
             setEdadRestrictionEnabled(!!originalInstanciaData.tiene_restriccion_edad);
             setEditableEdadDesde(originalInstanciaData.restriccion_edad_desde || '');
             setEditableEdadHasta(originalInstanciaData.restriccion_edad_hasta || '');
@@ -245,7 +252,14 @@ const CronogramaAdminReducido = () => {
         setRestrictionsModalOpen(true);
     }, [originalInstanciaData, allDepartamentos, allCursos]);
 
-    const handleCloseRestrictionsModal = useCallback(() => { setRestrictionsModalOpen(false); setEditableDepartamentos([]); setEditableCorrelativos([]); setEdadRestrictionEnabled(false); setEditableEdadDesde(''); setEditableEdadHasta(''); }, []);
+    const handleCloseRestrictionsModal = useCallback(() => {
+        setRestrictionsModalOpen(false);
+        setEditableDepartamentos([]);
+        setEditableCorrelativos([]);
+        setEdadRestrictionEnabled(false);
+        setEditableEdadDesde('');
+        setEditableEdadHasta('');
+    }, []);
 
     const handleApiUpdate = useCallback(async (payload) => {
         if (!originalInstanciaData) { setError("No hay una instancia seleccionada para actualizar."); return false; }
@@ -256,14 +270,54 @@ const CronogramaAdminReducido = () => {
         } catch (err) { console.error("Error en putInstancia:", err); setError(err.response?.data?.message || err.message || "Error al actualizar la instancia."); return false; }
     }, [originalInstanciaData]);
 
-    const handleReasign = useCallback(async () => { /* ... */ }, []);
-    const handleUpdateEstado = useCallback(async () => { /* ... */ }, []);
-    const handleUpdateFechas = useCallback(async () => { /* ... */ }, []);
+    const handleReasign = useCallback(async () => {
+        if (!selectedUserForReasign) { setError("No se ha seleccionado un usuario."); return; }
+        setLoadingReasign(true);
+        const success = await handleApiUpdate({ asignado: selectedUserForReasign.cuil });
+        if (success) {
+            const persona = selectedUserForReasign.detalle_persona;
+            setSuccessMessage(`Instancia reasignada a ${persona?.nombre || ''} ${persona?.apellido || ''} exitosamente.`);
+            handleCloseReasignModal(); handleCloseModal(); fetchData();
+        }
+        setLoadingReasign(false);
+    }, [selectedUserForReasign, handleApiUpdate, fetchData, handleCloseReasignModal, handleCloseModal]);
+    
+    const handleUpdateEstado = useCallback(async () => {
+        if (!selectedEstado) { setError("No se ha seleccionado un nuevo estado."); return; }
+        setLoadingEstado(true);
+        const success = await handleApiUpdate({ estado_instancia: selectedEstado });
+        if (success) {
+            const estadoDesc = allEstados.find(e => e.cod === selectedEstado)?.descripcion || selectedEstado;
+            setSuccessMessage(`Estado actualizado a "${estadoDesc}" exitosamente.`);
+            handleCloseEstadoModal(); handleCloseModal(); fetchData();
+        }
+        setLoadingEstado(false);
+    }, [selectedEstado, allEstados, handleApiUpdate, fetchData, handleCloseEstadoModal, handleCloseModal]);
+
+    const handleUpdateFechas = useCallback(async () => {
+        setLoadingFechas(true);
+        const payload = {};
+        Object.keys(fechasEditables).forEach(key => {
+            const newDate = fechasEditables[key]; const originalDateStr = originalInstanciaData?.[key];
+            const newDateStr = newDate && dayjs(newDate).isValid() ? dayjs(newDate).format('YYYY-MM-DD') : null;
+            if (newDateStr !== originalDateStr) payload[key] = newDateStr;
+        });
+        if (Object.keys(payload).length === 0) {
+            setSuccessMessage("No se realizaron cambios en las fechas."); handleCloseFechasModal(); setLoadingFechas(false); return;
+        }
+        const success = await handleApiUpdate(payload);
+        if (success) { setSuccessMessage("Fechas actualizadas exitosamente."); handleCloseFechasModal(); handleCloseModal(); fetchData(); }
+        setLoadingFechas(false);
+    }, [fechasEditables, originalInstanciaData, handleApiUpdate, fetchData, handleCloseFechasModal, handleCloseModal]);
 
     const handleToggleAutogestionado = useCallback(async () => {
-        const newValue = originalInstanciaData?.es_autogestionado === 1 ? 0 : 1;
+        const currentValue = originalInstanciaData?.es_autogestionado;
+        const newValue = currentValue === 1 ? 0 : 1;
         const success = await handleApiUpdate({ es_autogestionado: newValue });
-        if (success) { setSuccessMessage(`'Es Autogestionado' se cambió a "${formatBooleanToSiNo(newValue)}" exitosamente.`); handleCloseModal(); fetchData(); }
+        if (success) {
+            setSuccessMessage(`El estado 'Autogestionado' se cambió a "${formatBooleanToSiNo(newValue)}" exitosamente.`);
+            handleCloseModal(); fetchData();
+        }
     }, [originalInstanciaData, handleApiUpdate, fetchData, handleCloseModal]);
 
     const handleUpdateRestrictions = useCallback(async () => {
@@ -278,17 +332,33 @@ const CronogramaAdminReducido = () => {
             restriccion_edad_hasta: edadRestrictionEnabled ? (parseInt(editableEdadHasta, 10) || null) : null,
         };
         const success = await handleApiUpdate(payload);
-        if (success) { setSuccessMessage("Restricciones actualizadas exitosamente."); handleCloseRestrictionsModal(); handleCloseModal(); fetchData(); }
+        if (success) {
+            setSuccessMessage("Restricciones actualizadas exitosamente.");
+            handleCloseRestrictionsModal(); handleCloseModal(); fetchData();
+        }
         setLoadingRestrictions(false);
     }, [editableDepartamentos, editableCorrelativos, edadRestrictionEnabled, editableEdadDesde, editableEdadHasta, handleApiUpdate, fetchData, handleCloseRestrictionsModal, handleCloseModal]);
     
     const filteredAdminUsersForModal = useMemo(() => {
         if (!userSearchTerm) return adminUsers;
         const term = userSearchTerm.toLowerCase();
-        return adminUsers.filter(user => (user.detalle_persona?.nombre?.toLowerCase() || '').includes(term) || (user.detalle_persona?.apellido?.toLowerCase() || '').includes(term) || (user.cuil?.toLowerCase() || '').includes(term));
+        return adminUsers.filter(user =>
+            (user.detalle_persona?.nombre?.toLowerCase() || '').includes(term) ||
+            (user.detalle_persona?.apellido?.toLowerCase() || '').includes(term) ||
+            (user.cuil?.toLowerCase() || '').includes(term)
+        );
     }, [adminUsers, userSearchTerm]);
     
-    const handleDescargarExcel = useCallback(async () => { /* ... */ }, []);
+    const handleDescargarExcel = useCallback(async () => {
+        if (!filteredData.length) return;
+        try {
+            await descargarExcel(filteredData, COLUMNAS_VISIBLES, "Cronograma_Admin");
+        } catch (error) {
+            setError("Error al generar el archivo Excel.");
+            console.error(error);
+        }
+    }, [filteredData, COLUMNAS_VISIBLES]);
+
     const handleMinisterioChange = useCallback(e => setMinisterioFilter(e.target.value), []);
     const handleAreaChange = useCallback(e => setAreaFilter(e.target.value), []);
     const handleNombreChange = useCallback(e => setNombreFilter(e.target.value), []);
@@ -327,9 +397,10 @@ const CronogramaAdminReducido = () => {
         const hasta = originalInstanciaData.restriccion_edad_hasta;
         if (desde && hasta) return `Desde ${desde} hasta ${hasta} años`;
         if (desde && !hasta) return `Desde ${desde} años en adelante`;
+        if (!desde && hasta) return `Hasta ${hasta} años`;
         return "Definida pero incompleta";
     };
-    
+
     if (loading && !cursosData.length) return (<Backdrop open sx={{ zIndex: t => t.zIndex.drawer + 1, color: '#fff' }}><CircularProgress color="inherit" /></Backdrop>);
     if (error && !successMessage) return (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}><Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}><Typography variant="h6" color="error" gutterBottom>Error</Typography><Typography>{error}</Typography><Button onClick={fetchData} sx={{mt: 2}}>Reintentar</Button></Paper></Box>);
     if (!loading && !error && cursosData.length === 0) return (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}><Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}><Typography variant="h6" gutterBottom>No Hay Datos</Typography><Typography>No se encontraron datos en el cronograma.</Typography></Paper></Box>);
@@ -339,6 +410,7 @@ const CronogramaAdminReducido = () => {
             <div style={{ padding: 20 }}>
                 {successMessage && <Alert severity="success" onClose={() => setSuccessMessage('')} sx={{ mb: 2 }}>{successMessage}</Alert>}
                 {error && !successMessage && <Alert severity="error" onClose={() => {setError(null); setSuccessMessage('');}} sx={{ mb: 2 }}>{error}</Alert>}
+
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
                     <Titulo texto="Cronograma Admin Reducido" />
                     <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={(loading && cursosData.length > 0) || !filteredData.length} />
@@ -356,7 +428,7 @@ const CronogramaAdminReducido = () => {
                         <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Button fullWidth variant="outlined"size="medium"onClick={handleClearFilters}disabled={!isFilterActive || (loading && cursosData.length > 0)}startIcon={<ClearAllIcon />}sx={{ height: '40px', minWidth: 'auto' }}>Limpiar</Button></Grid>
                     </Grid>
                 </Paper>
-                
+
                 {(loading && cursosData.length > 0) && (<Box sx={{ display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}><CircularProgress size={20} sx={{ mr: 1 }} /><Typography variant="body2" color="text.secondary">Actualizando tabla...</Typography></Box>)}
                 
                 <Paper elevation={3} sx={{ height: 600, width: '100%' }}>
@@ -384,10 +456,31 @@ const CronogramaAdminReducido = () => {
                                         {renderDetailItem("Comentario", originalInstanciaData.comentario)}
                                         {renderDetailItem("Cantidad de Inscriptos", originalInstanciaData.cantidad_inscriptos || 0, false, <ActionButton onClick={() => setOtrosModalOpen(true)}>Cambiar</ActionButton>)}
                                         <Divider sx={{ my: 1 }}><Chip label="Restricciones" size="small" /></Divider>
-                                        <ListItem sx={{ py: 1, px: 0, display: 'block' }}><ListItemText primary="Edad" /><Typography variant="body2" color="text.secondary">{renderAgeRestriction()}</Typography></ListItem>
-                                        <ListItem sx={{ py: 1, px: 0, display: 'block' }}><ListItemText primary="Departamentos" /><Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>{(originalInstanciaData.detalle_restricciones_por_departamento?.length > 0) ? originalInstanciaData.detalle_restricciones_por_departamento.map(d => <Chip key={d.departamento_id} label={d.detalle_departamento?.nombre || d.departamento_id} size="small" />) : <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>}</Box></ListItem>
-                                        <ListItem sx={{ py: 1, px: 0, display: 'block' }}><ListItemText primary="Correlatividades" /><Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>{(originalInstanciaData.detalle_restricciones_por_correlatividad?.length > 0) ? originalInstanciaData.detalle_restricciones_por_correlatividad.map(c => <Chip key={c.curso_correlativo} label={c.detalle_curso_correlativo?.nombre || c.curso_correlativo} size="small" />) : <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>}</Box></ListItem>
-                                        <ListItem sx={{ justifyContent: 'flex-end', pt: 2, gap: 1 }}><Button variant="contained" onClick={handleOpenRestrictionsModal} startIcon={<SettingsIcon />}>Gestionar Restricciones</Button></ListItem>
+                                        <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
+                                            <ListItemText primary="Edad" secondary="Restricción por rango de edad" />
+                                            <Typography variant="body2" color="text.secondary">{renderAgeRestriction()}</Typography>
+                                        </ListItem>
+                                        <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
+                                            <ListItemText primary="Departamentos" secondary="Limitado a estas áreas" />
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+                                                {(originalInstanciaData.detalle_restricciones_por_departamento?.length > 0) ? 
+                                                    originalInstanciaData.detalle_restricciones_por_departamento.map(d => <Chip key={d.departamento_id} label={d.detalle_departamento?.nombre || d.departamento_id} size="small" />) : 
+                                                    <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>
+                                                }
+                                            </Box>
+                                        </ListItem>
+                                        <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
+                                            <ListItemText primary="Correlatividades" secondary="Requiere haber aprobado estos cursos" />
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+                                                {(originalInstanciaData.detalle_restricciones_por_correlatividad?.length > 0) ? 
+                                                    originalInstanciaData.detalle_restricciones_por_correlatividad.map(c => <Chip key={c.curso_correlativo} label={c.detalle_curso_correlativo?.nombre || c.curso_correlativo} size="small" />) : 
+                                                    <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>
+                                                }
+                                            </Box>
+                                        </ListItem>
+                                        <ListItem sx={{ justifyContent: 'flex-end', pt: 2, gap: 1 }}>
+                                            <Button variant="contained" onClick={handleOpenRestrictionsModal} startIcon={<SettingsIcon />}>Gestionar Restricciones</Button>
+                                        </ListItem>
                                     </List>
                                 </CardContent>
                             </Card>
@@ -396,19 +489,91 @@ const CronogramaAdminReducido = () => {
                 </Modal>
                 
                 <Dialog open={reasignModalOpen} onClose={handleCloseReasignModal} fullWidth maxWidth="sm">
-                    {/* ... (Contenido del modal de reasignación sin cambios) ... */}
+                    <DialogTitle>Reasignar Instancia de Curso</DialogTitle>
+                    <DialogContent dividers>
+                        {selectedRowData && (<><Typography gutterBottom>Curso: <strong>{selectedRowData["Nombre del curso"]}</strong> ({selectedRowData["Código del curso"]})</Typography><Typography gutterBottom>Asignado actual: <strong>{selectedRowData["Asignado"]}</strong></Typography></>)}
+                        <TextField fullWidth variant="outlined" size="small" label="Buscar usuario ADM (Nombre, Apellido, CUIL)" value={userSearchTerm} onChange={(e) => setUserSearchTerm(e.target.value)} sx={{ my: 2 }} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>),}}/>
+                        <Paper sx={{ maxHeight: 300, overflow: 'auto', border: '1px solid lightgrey' }}>
+                            <List dense>
+                                {filteredAdminUsersForModal.length === 0 && <ListItem><ListItemText primary="No se encontraron usuarios ADM."  /></ListItem>}
+                                {filteredAdminUsersForModal.map(user => (
+                                    <ListItem key={user.cuil} button selected={selectedUserForReasign?.cuil === user.cuil} onClick={() => setSelectedUserForReasign(user)}>
+                                        <ListItemText primary={`${user.detalle_persona?.nombre || ''} ${user.detalle_persona?.apellido || ''} - Cuil: ${user.cuil}`} primaryTypographyProps={{ fontWeight: 500, wordBreak: 'break-word', color: "black" }} />
+                                        {selectedUserForReasign?.cuil === user.cuil && <Chip label="Seleccionado" color="primary" size="small" />}
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Paper>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseReasignModal}>Cancelar</Button>
+                        <Button onClick={handleReasign} variant="contained" color="primary" disabled={!selectedUserForReasign || loadingReasign}>{loadingReasign ? <CircularProgress size={24} color="inherit" /> : "Confirmar Reasignación"}</Button>
+                    </DialogActions>
                 </Dialog>
                 
                 <Dialog open={estadoModalOpen} onClose={handleCloseEstadoModal} fullWidth maxWidth="xs">
-                    {/* ... (Contenido del modal de estado sin cambios) ... */}
+                    <DialogTitle>Cambiar Estado de la Instancia</DialogTitle>
+                    <DialogContent dividers>
+                        <Typography gutterBottom>Curso: <strong>{selectedRowData?.["Nombre del curso"]}</strong></Typography>
+                        <Typography gutterBottom>Estado actual: <strong>{originalInstanciaData?.estado_instancia}</strong></Typography>
+                        <FormControl fullWidth sx={{ mt: 2 }}>
+                            <InputLabel id="select-new-estado-label">Nuevo Estado</InputLabel>
+                            <Select labelId="select-new-estado-label" value={selectedEstado} label="Nuevo Estado" onChange={(e) => setSelectedEstado(e.target.value)}>
+                                {allEstados.map((estado) => (<MenuItem key={estado.cod} value={estado.cod}>{estado.descripcion} ({estado.cod})</MenuItem>))}
+                            </Select>
+                        </FormControl>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseEstadoModal}>Cancelar</Button>
+                        <Button onClick={handleUpdateEstado} variant="contained" disabled={!selectedEstado || loadingEstado}>{loadingEstado ? <CircularProgress size={24} color="inherit" /> : "Confirmar Estado"}</Button>
+                    </DialogActions>
                 </Dialog>
 
                 <Dialog open={fechasModalOpen} onClose={handleCloseFechasModal} fullWidth maxWidth="sm">
-                    {/* ... (Contenido del modal de fechas sin cambios) ... */}
+                    <DialogTitle>Cambiar Fechas de la Instancia</DialogTitle>
+                    <DialogContent dividers>
+                        <Typography gutterBottom>Curso: <strong>{selectedRowData?.["Nombre del curso"]}</strong></Typography>
+                        <Stack spacing={3} sx={{ pt: 1, mt: 2 }}>
+                            <DatePicker label="Fecha Inicio Curso" value={fechasEditables.fecha_inicio_curso} onChange={(newValue) => setFechasEditables(prev => ({ ...prev, fecha_inicio_curso: newValue }))} renderInput={(params) => <TextField {...params} fullWidth />} />
+                            <DatePicker label="Fecha Fin Curso" value={fechasEditables.fecha_fin_curso} onChange={(newValue) => setFechasEditables(prev => ({ ...prev, fecha_fin_curso: newValue }))} renderInput={(params) => <TextField {...params} fullWidth />} />
+                            <DatePicker label="Fecha Inicio Inscripción" value={fechasEditables.fecha_inicio_inscripcion} onChange={(newValue) => setFechasEditables(prev => ({ ...prev, fecha_inicio_inscripcion: newValue }))} renderInput={(params) => <TextField {...params} fullWidth />} />
+                            <DatePicker label="Fecha Fin Inscripción" value={fechasEditables.fecha_fin_inscripcion} onChange={(newValue) => setFechasEditables(prev => ({ ...prev, fecha_fin_inscripcion: newValue }))} renderInput={(params) => <TextField {...params} fullWidth />} />
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseFechasModal}>Cancelar</Button>
+                        <Button onClick={handleUpdateFechas} variant="contained" disabled={loadingFechas}>{loadingFechas ? <CircularProgress size={24} color="inherit" /> : "Guardar Fechas"}</Button>
+                    </DialogActions>
                 </Dialog>
 
                 <Dialog open={otrosModalOpen} onClose={() => setOtrosModalOpen(false)} fullWidth maxWidth="xs">
-                     {/* ... (Contenido del modal de otros sin cambios) ... */}
+                    <DialogTitle>Otros</DialogTitle>
+                    <DialogContent dividers>
+                        <Typography gutterBottom>Curso: <strong>{selectedRowData?.["Nombre del curso"]}</strong></Typography>
+                        <Typography gutterBottom>Cantidad Inscriptos:</Typography>
+                        <FormControl fullWidth sx={{ mt: 2 }}>
+                            <Input value = {otrosEditable.cantidad_inscriptos} onChange={(e) => {
+                                setOtrosEditable({...otrosEditable, cantidad_inscriptos: e.target.value})
+                            }}>Cantidad de Inscriptos</Input>
+                        </FormControl>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOtrosModalOpen(false)}>Cancelar</Button>
+                        <Button onClick={async() => {
+                            try {
+                                console.log("Sii")
+                                await putInstancia(originalInstanciaData.curso, originalInstanciaData.fecha_inicio_curso, otrosEditable)
+                                setSuccessMessage('Modificado con éxito');
+                            } catch {
+                                console.log("CAmbiar")
+                            } finally {
+                                setOtrosModalOpen(false)
+                                setModalOpen(false)
+                            }
+                        }} 
+                        variant="contained" 
+                        >{loadingEstado ? <CircularProgress size={24} color="inherit" /> : "Confirmar"}</Button>
+                    </DialogActions>
                 </Dialog>
 
                 <Dialog open={restrictionsModalOpen} onClose={handleCloseRestrictionsModal} fullWidth maxWidth="md">
@@ -417,14 +582,47 @@ const CronogramaAdminReducido = () => {
                         <Typography gutterBottom>Curso: <strong>{selectedRowData?.["Nombre del curso"]}</strong></Typography>
                         <Stack spacing={4} sx={{ pt: 2 }}>
                             <Box>
-                                <FormControlLabel control={<Checkbox checked={edadRestrictionEnabled} onChange={(e) => setEdadRestrictionEnabled(e.target.checked)}/>} label="Aplicar restricción por edad"/>
+                                <FormControlLabel
+                                    control={<Checkbox checked={edadRestrictionEnabled} onChange={(e) => setEdadRestrictionEnabled(e.target.checked)} />}
+                                    label="Aplicar restricción por edad"
+                                />
                                 <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                                    <TextField label="Edad Desde" type="number" value={editableEdadDesde} onChange={(e) => setEditableEdadDesde(e.target.value)} disabled={!edadRestrictionEnabled} fullWidth />
-                                    <TextField label="Edad Hasta" type="number" value={editableEdadHasta} onChange={(e) => setEditableEdadHasta(e.target.value)} disabled={!edadRestrictionEnabled} fullWidth />
+                                    <TextField
+                                        label="Edad Desde"
+                                        type="number"
+                                        value={editableEdadDesde}
+                                        onChange={(e) => setEditableEdadDesde(e.target.value)}
+                                        disabled={!edadRestrictionEnabled}
+                                        fullWidth
+                                    />
+                                    <TextField
+                                        label="Edad Hasta"
+                                        type="number"
+                                        value={editableEdadHasta}
+                                        onChange={(e) => setEditableEdadHasta(e.target.value)}
+                                        disabled={!edadRestrictionEnabled}
+                                        fullWidth
+                                    />
                                 </Stack>
                             </Box>
-                             <MuiAutocomplete multiple options={allDepartamentos} getOptionLabel={(option) => option.nombre || ''} value={editableDepartamentos} onChange={(event, newValue) => setEditableDepartamentos(newValue)} isOptionEqualToValue={(option, value) => option.id === value.id} renderInput={(params) => <TextField {...params} label="Restringir por Departamento" placeholder="Seleccionar..." />} />
-                             <MuiAutocomplete multiple options={allCursos} getOptionLabel={(option) => option.nombre || ''} value={editableCorrelativos} onChange={(event, newValue) => setEditableCorrelativos(newValue)} isOptionEqualToValue={(option, value) => option.cod === value.cod} renderInput={(params) => <TextField {...params} label="Restringir por Correlatividad" placeholder="Seleccionar..." />} />
+                             <MuiAutocomplete
+                                multiple
+                                options={allDepartamentos}
+                                getOptionLabel={(option) => option.nombre || ''}
+                                value={editableDepartamentos}
+                                onChange={(event, newValue) => setEditableDepartamentos(newValue)}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                renderInput={(params) => <TextField {...params} label="Restringir por Departamento" placeholder="Seleccionar..." />}
+                            />
+                             <MuiAutocomplete
+                                multiple
+                                options={allCursos}
+                                getOptionLabel={(option) => option.nombre || ''}
+                                value={editableCorrelativos}
+                                onChange={(event, newValue) => setEditableCorrelativos(newValue)}
+                                isOptionEqualToValue={(option, value) => option.cod === value.cod}
+                                renderInput={(params) => <TextField {...params} label="Restringir por Correlatividad" placeholder="Seleccionar..." />}
+                            />
                         </Stack>
                     </DialogContent>
                     <DialogActions>

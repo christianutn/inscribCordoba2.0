@@ -72,3 +72,4 @@
 2025-08-01T14:23:00.669Z [WARN]: Actualización de instancia por Roque Nicolás Carballo no afectó filas (Curso: C-EN1+26, Fecha: 2025-01-06).
 2025-08-01T14:39:31.860Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-LY, Fecha=2025-10-01, Datos={"tiene_correlatividad":1,"tiene_restriccion_edad":1,"tiene_restriccion_departamento":1}
 2025-08-01T14:39:33.216Z [INFO]: Instancia actualizada exitosamente por Roque Nicolás Carballo: 1 fila(s) afectadas.
+2025-08-01T14:42:24.748Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
