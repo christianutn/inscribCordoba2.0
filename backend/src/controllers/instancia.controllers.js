@@ -1,23 +1,20 @@
+// --- Contenido completo y CORRECTO para: instancia.controllers.js ---
+
 import instanciaModel from "../models/instancia.models.js";
 import Persona from "../models/persona.models.js";
 import sequelize from "../config/database.js";
-import { QueryTypes } from 'sequelize'; // Necesitas DataTypes si defines el modelo aquí
+import { QueryTypes } from 'sequelize';
 import TutoresXInstancia from "../models/tutorXInstancia.models.js";
 import { DateTime } from 'luxon';
 import AppError from "../utils/appError.js";
 import Usuario from "../models/usuario.models.js";
-import Rol from "../models/rol.models.js";
 import logger from '../utils/logger.js';
 import RestriccionesPorCorrelatividad from "../models/restricciones_por_correlatividad.models.js";
 import RestriccionesPorDepartamento from "../models/restricciones_por_departamento.models.js";
-import Usuario from "../models/usuario.models.js"
-
-
 
 export const getInstancias = async (req, res, next) => {
     try {
-        // Nota: Esta consulta asume que la tabla para el modelo TipoCapacitacion se llama 'tipos_capacitacion'.
-        // Si tiene un nombre diferente, deberás ajustarlo en la subconsulta para 'detalle_tipoCapacitacion'.
+        const usuario = req.user.user;
         const query = `
             SELECT
                 i.curso,
@@ -101,22 +98,18 @@ export const getInstancias = async (req, res, next) => {
             FROM instancias i;
         `;
 
-        const [results] = await sequelize.query(query, {
-            // Sequelize v5 y anteriores devuelven [results, metadata]. En v6, solo results por defecto para SELECT.
-            // Es buena práctica usar destructuring [results] para compatibilidad.
-        });
+        const [results] = await sequelize.query(query);
 
-        // La consulta devuelve objetos con campos de texto JSON. Sequelize no los parsea automáticamente.
         const parsedResults = results.map(item => {
             const safelyParseJSON = (jsonString) => {
                 if (typeof jsonString === 'string') {
                     try {
                         return JSON.parse(jsonString);
                     } catch (e) {
-                        return null; // O manejar el error como prefieras
+                        return null;
                     }
                 }
-                return jsonString; // Si ya es un objeto, devuélvelo tal cual
+                return jsonString;
             };
 
             return {
@@ -128,19 +121,19 @@ export const getInstancias = async (req, res, next) => {
             };
         });
 
+        // logger.info(`getInstancias ejecutado por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}`);
         res.status(200).json(parsedResults);
 
     } catch (error) {
+        logger.error(`Error en getInstancias por ${req.user?.user?.nombre || 'N/A'} ${req.user?.user?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
         next(error);
     }
-}
+};
 
 export const postInstancia = async (req, res, next) => {
     const t = await sequelize.transaction();
+    const usuario = req.user.user;
 
-    const nombreUsuario = req.user.user.nombre;
-    const apellidoUsuario = req.user.user.apellido;
-    const cuilUsuario = req.user.user.cuil;
     try {
         const {
             curso,
@@ -159,35 +152,18 @@ export const postInstancia = async (req, res, next) => {
             cursos_correlativos
         } = req.body;
 
-
-
-
-
-        // variable que guarda fecha y hora exacta en horas y minutos nada mas en que se ejecuta
         const fechaActual = DateTime.now().setZone('America/Argentina/Buenos_Aires');
         const fechaFormateada = fechaActual.toFormat('dd/MM/yyyy HH:mm');
 
         const datos_solicitud =
-            `Usuario: ${nombreUsuario} ${apellidoUsuario} | ` +
-            `Cuil: ${cuilUsuario} | ` +
+            `Usuario: ${usuario.nombre} ${usuario.apellido} | ` +
+            `Cuil: ${usuario.cuil} | ` +
             `Fecha y Hora: ${fechaFormateada}`;
 
-
         for (const cohorte of cohortes) {
-
-            // banderas para tiene_correlatividad, tiene_restriccion_departamento
-            let tiene_correlatividad = 0;
-            if (cursos_correlativos && cursos_correlativos.length > 0) tiene_correlatividad = 1;
-
-            let tiene_restriccion_departamento = 0;
-            if (departamentos && departamentos.length > 0) tiene_restriccion_departamento = 1;
-
-
-            // Verificamos si tiene restriccion de edad esto depende si restriccion_edad_desde es igual a 16 y restriccion_edad_desde el un falsy values
-
-            let tiene_restriccion_edad = 0;
-            if (restriccion_edad_desde && restriccion_edad_hasta) tiene_restriccion_edad = 1;
-
+            let tiene_correlatividad = (cursos_correlativos && cursos_correlativos.length > 0) ? 1 : 0;
+            let tiene_restriccion_departamento = (departamentos && departamentos.length > 0) ? 1 : 0;
+            let tiene_restriccion_edad = (restriccion_edad_desde && restriccion_edad_hasta) ? 1 : 0;
 
             const {
                 fechaInscripcionDesde,
@@ -196,22 +172,17 @@ export const postInstancia = async (req, res, next) => {
                 fechaCursadaHasta,
             } = cohorte;
 
-            //COntrolar si existe fecha cursada para esta fecha
             const existeInstancia = await instanciaModel.findOne({
                 where: {
                     curso: curso,
                     fecha_inicio_curso: fechaCursadaDesde
                 }
-
             })
 
             if (existeInstancia) {
                 throw new AppError(`Ya existe una instancia con el mismo curso y fecha de cursada.`, 400);
             }
 
-
-
-            // Crear la instancia
             await instanciaModel.create({
                 curso: curso,
                 fecha_inicio_inscripcion: fechaInscripcionDesde,
@@ -225,16 +196,15 @@ export const postInstancia = async (req, res, next) => {
                 tiene_correlatividad: tiene_correlatividad,
                 tiene_restriccion_edad: tiene_restriccion_edad,
                 tiene_restriccion_departamento: tiene_restriccion_departamento,
-                datos_solictud: datos_solicitud,
+                datos_solicitud: datos_solicitud,
                 estado_instancia: "PEND",
                 medio_inscripcion: medio_inscripcion,
                 plataforma_dictado: plataforma_dictado,
                 tipo_capacitacion: tipo_capacitacion,
                 restriccion_edad_desde: restriccion_edad_desde,
-                restriccion_edad_hasta: restriccion_edad_hasta | null,
+                restriccion_edad_hasta: restriccion_edad_hasta || null,
             }, { transaction: t });
 
-            // Creamos restricciones_por_correlatividad en caso de existir
             if (cursos_correlativos && cursos_correlativos.length > 0) {
                 for (const correlativo of cursos_correlativos) {
                     await RestriccionesPorCorrelatividad.create({
@@ -245,7 +215,6 @@ export const postInstancia = async (req, res, next) => {
                 }
             }
 
-            // Creamos restricciones_por_departamento en caso de existir
             if (departamentos && departamentos.length > 0) {
                 for (const departamento of departamentos) {
                     await RestriccionesPorDepartamento.create({
@@ -256,9 +225,6 @@ export const postInstancia = async (req, res, next) => {
                 }
             }
 
-
-
-            // Procesar tutores
             for (const tutor of tutores) {
                 const existeTutor = await Persona.findByPk(tutor.cuil);
                 if (!existeTutor) {
@@ -273,30 +239,23 @@ export const postInstancia = async (req, res, next) => {
             }
         }
 
-
         await t.commit();
-        logger.info(`Instancias y tutores creados exitosamente por ${nombreUsuario || 'N/A'} ${apellidoUsuario || 'N/A'}: (Curso: ${curso}, Fecha Inicio/Fin: ${fecha_inicio_curso}/${fecha_fin_curso}`);
+        
+        logger.info(`Instancia(s) creada(s) por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Curso=${curso}, Cantidad de Cohortes=${cohortes.length}`);
         res.status(201).json({ message: "Instancias y tutores creados exitosamente" });
 
     } catch (error) {
         await t.rollback();
+        logger.error(`Error en postInstancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
         next(error);
     }
 };
 
-// Función auxiliar para crear errores con un código de estado específico
-function crearError(statusCode, message) {
-    const error = new Error(message);
-    error.statusCode = statusCode;
-    return error;
-}
-
 export const deleteInstancia = async (req, res, next) => {
+    const usuario = req.user.user;
+    
     try {
         const { curso, fecha_inicio_curso } = req.body;
-
-        //Buscamos tutores por instancia
-
         const instancia = await instanciaModel.findOne({
             where: {
                 curso,
@@ -305,56 +264,33 @@ export const deleteInstancia = async (req, res, next) => {
         });
 
         if (!instancia) {
+            logger.warn(`Intento fallido de eliminación por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Instancia no encontrada (Curso: ${curso}, Fecha: ${fecha_inicio_curso})`);
             const error = new Error("La instancia no existe");
             error.statusCode = 404;
             throw error;
         }
 
         await instancia.destroy();
+        
+        logger.warn(`Instancia eliminada por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Curso=${curso}, Fecha=${fecha_inicio_curso}`);
         res.status(200).json({ message: "Instancia eliminada" });
+
     } catch (error) {
+        logger.error(`Error en deleteInstancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
         next(error);
     }
-}
+};
 
 export const get_fechas_invalidas = async (req, res, next) => {
-
-    const targetYear = req.params.targetYear
-
+    const targetYear = req.params.targetYear;
     let results = [];
 
-
     try {
-        // Corroboramos si el usuario que hace la consulta aplica o restricciones
-
-        const cuil = req.user.user.cuil
-
+        const cuil = req.user.user.cuil;
         const usuario = await Usuario.findByPk(cuil);
+        const es_excepcion_para_fechas = parseInt(usuario.esExcepcionParaFechas);
 
-        const es_excepcion_para_fechas = parseInt(usuario.esExcepcionParaFechas)
-
-
-        //Si no tiene excepción para fechas entonces buscar y devolver la lista con fechas inválidas.
         if (!es_excepcion_para_fechas) {
-            // 1. Determinar el último año de la tabla 'instancias'
-            const maxFechaResult = await instanciaModel.findOne({
-                attributes: [
-                    [sequelize.fn('MAX', sequelize.col('fecha_inicio_curso')), 'maxFecha']
-                ],
-                raw: true,
-            });
-
-            if (!maxFechaResult || !maxFechaResult.maxFecha) {
-                console.log("No se encontraron instancias para determinar el último año. Devolviendo lista vacía.");
-                return res.status(200).send([]);
-            }
-
-
-            console.log(`Año objetivo determinado dinámicamente: ${targetYear}`);
-
-            // 2. Usar el año determinado en la consulta principal
-            // Esta es TU consulta SQL, adaptada para replacements de Sequelize
-            // (se eliminó "SET @target_year = 2025;" y se cambió @target_year por :target_year)
             const sqlQuery = `
             WITH RECURSIVE DatesCTE AS (
                 SELECT DATE(CONCAT(:target_year, '-01-01')) AS calendario_fecha
@@ -375,7 +311,7 @@ export const get_fechas_invalidas = async (req, res, next) => {
                     curso, fecha_inicio_curso, fecha_fin_curso, cupo, estado_instancia
                 FROM instancias
                 WHERE estado_instancia NOT IN ('SUSP', 'CANC')
-                  AND YEAR(fecha_inicio_curso) = :target_year -- Usar el placeholder
+                  AND YEAR(fecha_inicio_curso) = :target_year
             ),
             DailyMetricsCTE AS (
                 SELECT
@@ -393,7 +329,7 @@ export const get_fechas_invalidas = async (req, res, next) => {
                     COALESCE(COUNT(fi.curso), 0) AS total_cursos_mes_calc,
                     COALESCE(SUM(fi.cupo), 0) AS total_cupos_mes_calc
                 FROM FilteredInstanciasCTE fi
-                WHERE YEAR(fi.fecha_inicio_curso) = :target_year -- Usar el placeholder
+                WHERE YEAR(fi.fecha_inicio_curso) = :target_year
                 GROUP BY YEAR(fi.fecha_inicio_curso), MONTH(fi.fecha_inicio_curso)
             ),
             AccumulatedCoursesCTE AS (
@@ -409,15 +345,15 @@ export const get_fechas_invalidas = async (req, res, next) => {
             SELECT DISTINCT
                 d.calendario_fecha,
                 dm.total_cursos_dia_calc AS totalCursosPorDia,
-                ctrl.maximoCursosXDia AS limiteCursosPorDia, -- Renombrado para claridad
+                ctrl.maximoCursosXDia AS limiteCursosPorDia,
                 dm.total_cupos_dia_calc AS totalCuposPorDia,
-                ctrl.maximoCuposXDia AS limiteCuposPorDia,   -- Renombrado para claridad
+                ctrl.maximoCuposXDia AS limiteCuposPorDia,
                 COALESCE(mm.total_cursos_mes_calc, 0) AS totalCursosPorMes,
-                ctrl.maximoCursosXMes AS limiteCursosPorMes, -- Renombrado para claridad
+                ctrl.maximoCursosXMes AS limiteCursosPorMes,
                 COALESCE(mm.total_cupos_mes_calc, 0) AS totalCuposPorMes,
-                ctrl.maximoCuposXMes AS limiteCuposPorMes,   -- Renombrado para claridad
+                ctrl.maximoCuposXMes AS limiteCuposPorMes,
                 ac.total_acumulado_dia_calc AS totalAcumulado,
-                ctrl.maximoAcumulado AS limiteAcumulado,     -- Renombrado para claridad
+                ctrl.maximoAcumulado AS limiteAcumulado,
                 MONTH(d.calendario_fecha) AS mesCalendario,
                 ctrl.mesBloqueado,
                 CASE
@@ -435,7 +371,6 @@ export const get_fechas_invalidas = async (req, res, next) => {
             LEFT JOIN MonthlyMetricsCTE mm ON MONTH(d.calendario_fecha) = mm.mes AND YEAR(d.calendario_fecha) = mm.anio
             LEFT JOIN AccumulatedCoursesCTE ac ON d.calendario_fecha = ac.calendario_fecha
             WHERE
-                -- Solo procesar si targetYear no es null (DatesCTE estaría vacía de todas formas)
                 (:target_year IS NOT NULL)
                 AND (
                     dm.total_cursos_dia_calc > ctrl.maximoCursosXDia
@@ -448,34 +383,24 @@ export const get_fechas_invalidas = async (req, res, next) => {
             ORDER BY d.calendario_fecha;
         `;
 
-            // Nota: Para que la CTE recursiva (DatesCTE) funcione correctamente en MySQL
-            // a través de Sequelize, la variable de servidor MySQL 'cte_max_recursion_depth'
-            // debe ser suficientemente alta (e.g., 1000 o al menos 366).
-            // Si no está configurada globalmente, esta consulta podría fallar si el límite por defecto es bajo.
-            // SET SESSION cte_max_recursion_depth no es fiable con pools de conexión.
-            // Lo ideal es configurarlo a nivel de servidor.
-
             results = await sequelize.query(sqlQuery, {
                 replacements: { target_year: targetYear },
                 type: QueryTypes.SELECT,
             });
-
         }
-
         res.status(200).send(results);
-
     } catch (error) {
-        console.error("Error al obtener detalles de fechas inválidas:", error);
+        logger.error(`Error en get_fechas_invalidas por ${req.user?.user?.nombre || 'N/A'} ${req.user?.user?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
         next(error);
     }
-}
+};
 
 export const putInstancia = async (req, res, next) => {
+    const usuario = req.user.user;
+    
     try {
-
         const { curso_params, fecha_inicio_curso_params } = req.params;
-
-        const where = {}
+        const where = {};
 
         if (req.body.hasOwnProperty('fecha_inicio_curso')) where.fecha_inicio_curso = req.body.fecha_inicio_curso;
         if (req.body.hasOwnProperty('fecha_fin_curso')) where.fecha_fin_curso = req.body.fecha_fin_curso;
@@ -497,17 +422,27 @@ export const putInstancia = async (req, res, next) => {
         if (req.body.hasOwnProperty('tiene_restriccion_edad')) where.tiene_restriccion_edad = req.body.tiene_restriccion_edad;
         if (req.body.hasOwnProperty('tiene_restriccion_departamento')) where.tiene_restriccion_departamento = req.body.tiene_restriccion_departamento;
         if (req.body.hasOwnProperty('asignado')) where.asignado = req.body.asignado;
-        if (req.body.hasOwnProperty('cantidad_inscriptos')) where.cantidad_inscriptos = req.body.cantidad_inscriptos
+        if (req.body.hasOwnProperty('cantidad_inscriptos')) where.cantidad_inscriptos = req.body.cantidad_inscriptos;
 
-        // actualizar con where 
-        const instancia = await instanciaModel.update(where, {
+        logger.info(`Intento de actualización de instancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Curso=${curso_params}, Fecha=${fecha_inicio_curso_params}, Datos=${JSON.stringify(where)}`);
+
+        const [updatedCount] = await instanciaModel.update(where, {
             where: {
                 curso: curso_params,
                 fecha_inicio_curso: fecha_inicio_curso_params
             }
         });
-        res.status(200).send(instancia);
+        
+        if(updatedCount > 0){
+             logger.info(`Instancia actualizada exitosamente por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${updatedCount} fila(s) afectadas.`);
+        } else {
+             logger.warn(`Actualización de instancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'} no afectó filas (Curso: ${curso_params}, Fecha: ${fecha_inicio_curso_params}).`);
+        }
+
+        res.status(200).send({ affectedRows: updatedCount });
+
     } catch (error) {
+        logger.error(`Error en putInstancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
         next(new AppError("Error al actualizar la instancia", 500));
     }
-}
+};

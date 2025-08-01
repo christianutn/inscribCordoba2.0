@@ -48,3 +48,27 @@
 2025-07-31T13:53:11.021Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
 2025-07-31T23:21:51.310Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
 2025-08-01T11:36:22.283Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
+2025-08-01T11:55:39.483Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
+2025-08-01T12:28:18.550Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
+2025-08-01T12:49:31.160Z [INFO]: Instancia(s) creada(s) por Roque Nicolás Carballo: Curso=C-ACIR, Cantidad de Cohortes=1
+2025-08-01T13:07:55.173Z [INFO]: Instancia(s) creada(s) por Roque Nicolás Carballo: Curso=C-PME, Cantidad de Cohortes=1
+2025-08-01T13:18:22.668Z [INFO]: Instancia(s) creada(s) por Roque Nicolás Carballo: Curso=C-LY, Cantidad de Cohortes=1
+2025-08-01T13:27:42.347Z [INFO]: Instancia(s) creada(s) por Roque Nicolás Carballo: Curso=C-LY, Cantidad de Cohortes=1
+2025-08-01T13:29:06.419Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20111111111
+2025-08-01T13:33:32.325Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
+2025-08-01T14:21:44.615Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-EN1+26, Fecha=2025-01-06, Datos={"es_autogestionado":0}
+2025-08-01T14:21:45.404Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-EN1+26, Fecha=2025-01-06, Datos={"es_autogestionado":0}
+2025-08-01T14:21:45.643Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-EN1+26, Fecha=2025-01-06, Datos={"es_autogestionado":0}
+2025-08-01T14:21:45.823Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-EN1+26, Fecha=2025-01-06, Datos={"es_autogestionado":0}
+2025-08-01T14:21:46.162Z [INFO]: Instancia actualizada exitosamente por Roque Nicolás Carballo: 1 fila(s) afectadas.
+2025-08-01T14:21:46.334Z [WARN]: Actualización de instancia por Roque Nicolás Carballo no afectó filas (Curso: C-EN1+26, Fecha: 2025-01-06).
+2025-08-01T14:21:46.506Z [WARN]: Actualización de instancia por Roque Nicolás Carballo no afectó filas (Curso: C-EN1+26, Fecha: 2025-01-06).
+2025-08-01T14:21:46.822Z [WARN]: Actualización de instancia por Roque Nicolás Carballo no afectó filas (Curso: C-EN1+26, Fecha: 2025-01-06).
+2025-08-01T14:21:53.101Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-EN1+26, Fecha=2025-01-06, Datos={"es_autogestionado":1}
+2025-08-01T14:21:53.276Z [INFO]: Instancia actualizada exitosamente por Roque Nicolás Carballo: 1 fila(s) afectadas.
+2025-08-01T14:22:32.064Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-EN1+26, Fecha=2025-01-06, Datos={"es_autogestionado":0}
+2025-08-01T14:22:33.420Z [INFO]: Instancia actualizada exitosamente por Roque Nicolás Carballo: 1 fila(s) afectadas.
+2025-08-01T14:23:00.668Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-EN1+26, Fecha=2025-01-06, Datos={}
+2025-08-01T14:23:00.669Z [WARN]: Actualización de instancia por Roque Nicolás Carballo no afectó filas (Curso: C-EN1+26, Fecha: 2025-01-06).
+2025-08-01T14:39:31.860Z [INFO]: Intento de actualización de instancia por Roque Nicolás Carballo: Curso=C-LY, Fecha=2025-10-01, Datos={"tiene_correlatividad":1,"tiene_restriccion_edad":1,"tiene_restriccion_departamento":1}
+2025-08-01T14:39:33.216Z [INFO]: Instancia actualizada exitosamente por Roque Nicolás Carballo: 1 fila(s) afectadas.
