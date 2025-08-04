@@ -85,3 +85,23 @@
 2025-08-01T15:42:25.924Z [INFO]: Instancia actualizada exitosamente por Roque Nicolás Carballo: 1 fila(s) afectadas.
 2025-08-01T18:02:03.254Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
 2025-08-01T19:09:08.200Z [INFO]: Login exitoso - Nombre: Roque Nicolás, DNI: 20296084043
+2025-08-04T01:17:45.565Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20378513376
+2025-08-04T01:24:49.364Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-IE+26, Fecha=2025-01-06, Datos={"tiene_correlatividad":1,"tiene_restriccion_edad":1,"tiene_restriccion_departamento":1}
+2025-08-04T01:24:49.376Z [ERROR]: Error en putInstancia por Christian Javier Bergero: The client was disconnected by the server because of inactivity. See wait_timeout and interactive_timeout for configuring this behavior.
+2025-08-04T02:07:33.219Z [ERROR]: Error en putInstancia por Christian Javier Bergero: Cannot read properties of undefined (reading 'uuid')
+2025-08-04T02:09:16.088Z [ERROR]: Error en putInstancia por Christian Javier Bergero: Cannot read properties of undefined (reading 'uuid')
+2025-08-04T09:59:03.340Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20378513376
+2025-08-04T09:59:23.644Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"restriccion_edad_desde":16,"restriccion_edad_hasta":35,"tiene_restriccion_edad":1}
+2025-08-04T09:59:23.992Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-04T09:59:55.491Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"asignado":"20296084043"}
+2025-08-04T09:59:55.837Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-04T10:00:11.055Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"fecha_fin_inscripcion":"2025-12-30"}
+2025-08-04T10:00:11.401Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-04T10:00:30.983Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"es_autogestionado":0}
+2025-08-04T10:00:31.333Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-04T10:00:45.026Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"cantidad_inscriptos":"10"}
+2025-08-04T10:00:45.373Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-04T10:01:20.629Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"restriccion_edad_desde":16,"restriccion_edad_hasta":35,"tiene_restriccion_edad":1}
+2025-08-04T10:01:20.977Z [WARN]: Actualización de instancia por Christian Javier Bergero no afectó filas (Curso: C-PJV, Fecha: 2024-11-14).
+2025-08-04T10:01:42.077Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"restriccion_edad_desde":16,"restriccion_edad_hasta":35,"tiene_restriccion_edad":1}
+2025-08-04T10:01:42.428Z [WARN]: Actualización de instancia por Christian Javier Bergero no afectó filas (Curso: C-PJV, Fecha: 2024-11-14).

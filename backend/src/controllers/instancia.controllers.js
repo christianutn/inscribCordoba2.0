@@ -3,7 +3,7 @@
 import instanciaModel from "../models/instancia.models.js";
 import Persona from "../models/persona.models.js";
 import sequelize from "../config/database.js";
-import { QueryTypes } from 'sequelize';
+import { fn, QueryTypes } from 'sequelize';
 import TutoresXInstancia from "../models/tutorXInstancia.models.js";
 import { DateTime } from 'luxon';
 import AppError from "../utils/appError.js";
@@ -240,7 +240,7 @@ export const postInstancia = async (req, res, next) => {
         }
 
         await t.commit();
-        
+
         logger.info(`Instancia(s) creada(s) por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Curso=${curso}, Cantidad de Cohortes=${cohortes.length}`);
         res.status(201).json({ message: "Instancias y tutores creados exitosamente" });
 
@@ -253,7 +253,7 @@ export const postInstancia = async (req, res, next) => {
 
 export const deleteInstancia = async (req, res, next) => {
     const usuario = req.user.user;
-    
+
     try {
         const { curso, fecha_inicio_curso } = req.body;
         const instancia = await instanciaModel.findOne({
@@ -271,7 +271,7 @@ export const deleteInstancia = async (req, res, next) => {
         }
 
         await instancia.destroy();
-        
+
         logger.warn(`Instancia eliminada por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Curso=${curso}, Fecha=${fecha_inicio_curso}`);
         res.status(200).json({ message: "Instancia eliminada" });
 
@@ -395,34 +395,67 @@ export const get_fechas_invalidas = async (req, res, next) => {
     }
 };
 
+
+
+
+
+const buildUpdateQuery = (body) => {
+    const where = {};
+    const properties = [
+        'fecha_inicio_curso', 'fecha_fin_curso', 'fecha_inicio_inscripcion',
+        'fecha_fin_inscripcion', 'es_publicada_portal_cc', 'estado_instancia',
+        'medio_inscripcion', 'plataforma_dictado', 'tipo_capacitacion', 'cupo',
+        'cantidad_horas', 'cohortes', 'tutores', 'opciones', 'comentario',
+        'es_autogestionado', 'asignado', 'cantidad_inscriptos',
+        'restriccion_edad_desde', 'restriccion_edad_hasta'
+    ];
+
+    properties.forEach(prop => {
+        if (body.hasOwnProperty(prop)) {
+            where[prop] = body[prop];
+        }
+    });
+
+    if (body.hasOwnProperty('restriccion_edad_desde') || body.hasOwnProperty('restriccion_edad_hasta')) {
+        where.tiene_restriccion_edad = tratar_restriccion_por_edad(
+            body.restriccion_edad_desde,
+            body.restriccion_edad_hasta
+        );
+    }
+
+    return where;
+};
+
+const updateRestricciones = async (model, body, params, transaction, field, values, fieldName) => {
+    if (body.hasOwnProperty(field)) {
+        await model.destroy({
+            where: {
+                curso: params.curso_params,
+                fecha_inicio_curso: params.fecha_inicio_curso_params
+            },
+            transaction
+        });
+
+        for (const value of values) {
+            await model.create({
+                curso: params.curso_params,
+                fecha_inicio_curso: params.fecha_inicio_curso_params,
+                [fieldName]: value
+            }, { transaction });
+        }
+    }
+};
+
 export const putInstancia = async (req, res, next) => {
     const usuario = req.user.user;
-    
+    const t = await sequelize.transaction();
+
     try {
         const { curso_params, fecha_inicio_curso_params } = req.params;
-        const where = {};
+        const where = buildUpdateQuery(req.body);
 
-        if (req.body.hasOwnProperty('fecha_inicio_curso')) where.fecha_inicio_curso = req.body.fecha_inicio_curso;
-        if (req.body.hasOwnProperty('fecha_fin_curso')) where.fecha_fin_curso = req.body.fecha_fin_curso;
-        if (req.body.hasOwnProperty('fecha_inicio_inscripcion')) where.fecha_inicio_inscripcion = req.body.fecha_inicio_inscripcion;
-        if (req.body.hasOwnProperty('fecha_fin_inscripcion')) where.fecha_fin_inscripcion = req.body.fecha_fin_inscripcion;
-        if (req.body.hasOwnProperty('es_publicada_portal_cc')) where.es_publicada_portal_cc = req.body.es_publicada_portal_cc;
-        if (req.body.hasOwnProperty('estado_instancia')) where.estado_instancia = req.body.estado_instancia;
-        if (req.body.hasOwnProperty('medio_inscripcion')) where.medio_inscripcion = req.body.medio_inscripcion;
-        if (req.body.hasOwnProperty('plataforma_dictado')) where.plataforma_dictado = req.body.plataforma_dictado;
-        if (req.body.hasOwnProperty('tipo_capacitacion')) where.tipo_capacitacion = req.body.tipo_capacitacion;
-        if (req.body.hasOwnProperty('cupo')) where.cupo = req.body.cupo;
-        if (req.body.hasOwnProperty('cantidad_horas')) where.cantidad_horas = req.body.cantidad_horas;
-        if (req.body.hasOwnProperty('cohortes')) where.cohortes = req.body.cohortes;
-        if (req.body.hasOwnProperty('tutores')) where.tutores = req.body.tutores;
-        if (req.body.hasOwnProperty('opciones')) where.opciones = req.body.opciones;
-        if (req.body.hasOwnProperty('comentario')) where.comentario = req.body.comentario;
-        if (req.body.hasOwnProperty('es_autogestionado')) where.es_autogestionado = req.body.es_autogestionado;
-        if (req.body.hasOwnProperty('tiene_correlatividad')) where.tiene_correlatividad = req.body.tiene_correlatividad;
-        if (req.body.hasOwnProperty('tiene_restriccion_edad')) where.tiene_restriccion_edad = req.body.tiene_restriccion_edad;
-        if (req.body.hasOwnProperty('tiene_restriccion_departamento')) where.tiene_restriccion_departamento = req.body.tiene_restriccion_departamento;
-        if (req.body.hasOwnProperty('asignado')) where.asignado = req.body.asignado;
-        if (req.body.hasOwnProperty('cantidad_inscriptos')) where.cantidad_inscriptos = req.body.cantidad_inscriptos;
+        await updateRestricciones(RestriccionesPorDepartamento, req.body, req.params, t, 'departamentos', req.body.departamentos, 'departamento_id');
+        await updateRestricciones(RestriccionesPorCorrelatividad, req.body, req.params, t, 'cursos_correlativos', req.body.cursos_correlativos, 'curso_correlativo');
 
         logger.info(`Intento de actualización de instancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Curso=${curso_params}, Fecha=${fecha_inicio_curso_params}, Datos=${JSON.stringify(where)}`);
 
@@ -430,19 +463,28 @@ export const putInstancia = async (req, res, next) => {
             where: {
                 curso: curso_params,
                 fecha_inicio_curso: fecha_inicio_curso_params
-            }
+            },
+            transaction: t
         });
-        
-        if(updatedCount > 0){
-             logger.info(`Instancia actualizada exitosamente por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${updatedCount} fila(s) afectadas.`);
+
+        if (updatedCount > 0) {
+            logger.info(`Instancia actualizada exitosamente por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${updatedCount} fila(s) afectadas.`);
         } else {
-             logger.warn(`Actualización de instancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'} no afectó filas (Curso: ${curso_params}, Fecha: ${fecha_inicio_curso_params}).`);
+            logger.warn(`Actualización de instancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'} no afectó filas (Curso: ${curso_params}, Fecha: ${fecha_inicio_curso_params}).`);
         }
 
+        await t.commit();
         res.status(200).send({ affectedRows: updatedCount });
 
     } catch (error) {
+        await t.rollback();
         logger.error(`Error en putInstancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
         next(new AppError("Error al actualizar la instancia", 500));
     }
 };
+
+
+const tratar_restriccion_por_edad = (restriccion_edad_desde, restriccion_edad_hasta) => {
+    if (restriccion_edad_desde > 16 || (restriccion_edad_hasta > 16)) return 1
+    return 0
+}
