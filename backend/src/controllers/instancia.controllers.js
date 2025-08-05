@@ -407,7 +407,7 @@ const buildUpdateQuery = (body) => {
         'medio_inscripcion', 'plataforma_dictado', 'tipo_capacitacion', 'cupo',
         'cantidad_horas', 'cohortes', 'tutores', 'opciones', 'comentario',
         'es_autogestionado', 'asignado', 'cantidad_inscriptos',
-        'restriccion_edad_desde', 'restriccion_edad_hasta'
+        'restriccion_edad_desde', 'restriccion_edad_hasta', 'cantidad_certificados'
     ];
 
     properties.forEach(prop => {

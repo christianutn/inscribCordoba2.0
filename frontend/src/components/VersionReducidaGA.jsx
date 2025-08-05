@@ -1,36 +1,24 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import dayjs from 'dayjs';
+import 'dayjs/locale/es'; // Importar locale para DatePicker
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-// Asegúrate que la ruta y exportación sean correctas
-import { getCronograma, getObjNroEventos } from "../services/googleSheets.service.js";
-import { descargarExcel } from "../services/excel.service.js";
+import { descargarExcelCronograma as descargarExcel } from "../services/excel.service.js";
 import { DataGrid } from '@mui/x-data-grid';
 import { esES } from '@mui/x-data-grid/locales';
-import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import IconButton from '@mui/material/IconButton';
-import Divider from '@mui/material/Divider';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import Paper from '@mui/material/Paper';
-import TextField from '@mui/material/TextField';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
-import InputAdornment from '@mui/material/InputAdornment';
-import Tooltip from '@mui/material/Tooltip';
+import {
+    Backdrop, CircularProgress, Box, Typography, Modal, Card, CardContent, CardHeader,
+    IconButton, Divider, List, ListItem, ListItemText, Paper, TextField, FormControl,
+    InputLabel, Select, MenuItem, Grid, Button, InputAdornment, Tooltip, Dialog,
+    DialogTitle, DialogContent, DialogActions, Chip, Alert, Stack,
+    Input, Autocomplete as MuiAutocomplete, FormControlLabel, Checkbox
+} from '@mui/material';
+// Imports para DatePicker
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
 import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
 import SearchIcon from '@mui/icons-material/Search';
@@ -39,598 +27,648 @@ import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import EditIcon from '@mui/icons-material/Edit';
+import EventIcon from '@mui/icons-material/Event';
+import SettingsIcon from '@mui/icons-material/Settings';
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Titulo from "../components/fonts/TituloPrincipal.jsx";
+import { getInstancias, putInstancia } from "../services/instancias.service.js";
+import { getUsuarios } from "../services/usuarios.service.js";
+import { getEstadosInstancia } from "../services/estadosInstancia.service.js";
+import { getDepartamentos } from "../services/departamentos.service.js";
+import { getCursos } from "../services/cursos.service.js"; // Se asume que este servicio existe
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
+dayjs.locale('es');
 
 const modalStyle = {
   position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-  width: '80%', maxWidth: 600, bgcolor: 'background.paper', border: 'none',
+  width: '80%', maxWidth: 700, bgcolor: 'background.paper',
   borderRadius: 2, boxShadow: 24, p: 0, maxHeight: '90vh', display: 'flex', flexDirection: 'column',
 };
 
-const MONTH_NAMES = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-];
-
+const MONTH_NAMES = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ];
 const DATE_FORMATS_TO_TRY = ['DD/MM/YYYY', 'D/M/YYYY', 'DD-MM-YYYY', 'D-M-YYYY', 'YYYY-MM-DD'];
 
 const parseDate = (dateString) => {
-  if (!dateString || typeof dateString !== 'string' || dateString.trim() === '') {
-    return null;
-  }
+  if (!dateString || typeof dateString !== 'string' || dateString.trim() === '') return null;
   const trimmedDateStr = dateString.trim();
   for (const format of DATE_FORMATS_TO_TRY) {
-    const d = dayjs(trimmedDateStr, format, true); // 'true' for strict parsing
-    if (d.isValid()) {
-      return d;
-    }
+    const d = dayjs(trimmedDateStr, format, true);
+    if (d.isValid()) return d;
   }
-  console.warn(`Could not parse date: "${dateString}" with formats: ${DATE_FORMATS_TO_TRY.join(', ')}`);
-  return null; // Return null if no format matches
+  return null;
 };
 
-const Cronograma = () => {
-  const [cursosData, setCursosData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [originalHeaders, setOriginalHeaders] = useState([]); // Sigue siendo útil para el modal si se quiere mostrar TODO
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const formatBooleanToSiNo = (value) => {
+    if (value === true || value === 1) return 'Sí';
+    if (value === false || value === 0) return 'No';
+    return 'N/A';
+};
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedRowData, setSelectedRowData] = useState(null);
+// Componente de Botón de Acción Reutilizable para el modal
+const ActionButton = ({ onClick, children, ...props }) => (
+    <Button size="small" variant="outlined" color="secondary" onClick={onClick} sx={{ ml: 'auto', flexShrink: 0 }} {...props}>
+        {children}
+    </Button>
+);
 
-  const [ministerioOptions, setMinisterioOptions] = useState([]);
-  const [areaOptions, setAreaOptions] = useState(['all']);
-  const [ministerioFilter, setMinisterioFilter] = useState('all');
-  const [areaFilter, setAreaFilter] = useState('all');
-  const [nombreFilter, setNombreFilter] = useState('');
-  const [monthFilter, setMonthFilter] = useState('all'); // Filtro por Mes Inicio Curso
-  const [activosFilterActive, setActivosFilterActive] = useState(false);
+const CronogramaGAReducido = () => {
+    const [cursosData, setCursosData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedRowData, setSelectedRowData] = useState(null);
+    const [originalInstanciaData, setOriginalInstanciaData] = useState(null);
+    const [ministerioOptions, setMinisterioOptions] = useState([]);
+    const [areaOptions, setAreaOptions] = useState(['all']);
+    const [ministerioFilter, setMinisterioFilter] = useState('all');
+    const [areaFilter, setAreaFilter] = useState('all');
+    const [nombreFilter, setNombreFilter] = useState('');
+    const [monthFilter, setMonthFilter] = useState('all');
+    const [activosFilterActive, setActivosFilterActive] = useState(false);
+    const [asignadoFilter, setAsignadoFilter] = useState('');
+    const [allUsers, setAllUsers] = useState([]);
+    const [adminUsers, setAdminUsers] = useState([]);
+    const [reasignModalOpen, setReasignModalOpen] = useState(false);
+    const [userSearchTerm, setUserSearchTerm] = useState('');
+    const [selectedUserForReasign, setSelectedUserForReasign] = useState(null);
+    const [loadingReasign, setLoadingReasign] = useState(false);
+    const [allEstados, setAllEstados] = useState([]);
+    const [estadoModalOpen, setEstadoModalOpen] = useState(false);
+    const [selectedEstado, setSelectedEstado] = useState('');
+    const [loadingEstado, setLoadingEstado] = useState(false);
+    const [fechasModalOpen, setFechasModalOpen] = useState(false);
+    const [loadingFechas, setLoadingFechas] = useState(false);
+    const [fechasEditables, setFechasEditables] = useState({ fecha_inicio_curso: null, fecha_fin_curso: null, fecha_inicio_inscripcion: null, fecha_fin_inscripcion: null });
+    const [otrosModalOpen, setOtrosModalOpen] = useState(false);
+    const [loadingOtros, setLoadingOtros] = useState(false);
+    const [otrosEditable, setOtrosEditable] = useState({ cantidad_inscriptos: '', cantidad_certificados: '' });
+    const [autogestionadoConfirmOpen, setAutogestionadoConfirmOpen] = useState(false);
 
-  // 1. Definir el orden de las columnas visibles deseadas
-  const COLUMNAS_VISIBLES_ORDENADAS = useMemo(() => [
-    "Mes", // Nueva
-    "Nombre del curso",
-    "Código del curso",
-    "Nro Evento", // Nueva
-    "Fecha inicio de inscripción",
-    "Fecha fin de inscripción",
-    "Fecha inicio del curso",
-    "Fecha fin del curso",
-    // --- Columnas que NO se mostrarán en el grid pero pueden estar en los datos ---
-    // "Ministerio", // Se usa para filtrar, no se muestra según el orden pedido
-    // "Area",       // Se usa para filtrar, no se muestra según el orden pedido
-  ], []);
+    // --- USESTATE PARA RESTRICCIONES ---
+    const [allCursos, setAllCursos] = useState([]);
+    const [allDepartamentos, setAllDepartamentos] = useState([]);
+    const [restrictionsModalOpen, setRestrictionsModalOpen] = useState(false);
+    const [loadingRestrictions, setLoadingRestrictions] = useState(false);
+    const [editableDepartamentos, setEditableDepartamentos] = useState([]);
+    const [editableCorrelativos, setEditableCorrelativos] = useState([]);
+    const [edadRestrictionEnabled, setEdadRestrictionEnabled] = useState(false);
+    const [editableEdadDesde, setEditableEdadDesde] = useState('');
+    const [editableEdadHasta, setEditableEdadHasta] = useState('');
 
-  // 2. Generar las columnas para el DataGrid basándose en el orden definido
-  const columnsForGrid = useMemo(() => {
-    // Asegurarse que originalHeaders tenga algo, aunque ahora nos basamos en COLUMNAS_VISIBLES_ORDENADAS
-    if (!originalHeaders.length && !cursosData.length) return [];
+    const COLUMNAS_VISIBLES = useMemo(() => [
+        "Nombre del curso",
+        "Código del curso",
+        "Número de evento",
+        "Fecha inicio de inscripción",
+        "Fecha fin de inscripción",
+        "Fecha inicio del curso",
+        "Fecha fin del curso",
+        "Cantidad de inscriptos",
+        "Cantidad de certificados",
+        "Medio de inscripción",
+        "Publica en PCC",
+        "Es autogestionado",
+        "Restricción por edad",
+        "Restricción por Departamento",
+        "Tiene Correlatividad",
+        "Estado"
+    ], []);
 
-    // Mapear sobre el orden deseado
-    return COLUMNAS_VISIBLES_ORDENADAS.map(header => {
-      let flex = 1;
-      let minWidth = 130;
-      let headerAlign = 'left';
-      let align = 'left';
+    const columnsForGrid = useMemo(() => {
+        return COLUMNAS_VISIBLES.map(headerKey => {
+            let flex = 1; let minWidth = 130;
+            if (headerKey === "Nombre del curso") { flex = 2.0; minWidth = 220; }
+            if (headerKey === "Código del curso") { flex = 0.7; minWidth = 100; }
+            if (headerKey.toLowerCase().includes("fecha")) { flex = 1.0; minWidth = 140; }
+            if (headerKey === "Cantidad de inscriptos" || headerKey === "Cantidad de certificados") { flex = 0.8; minWidth = 100; }
+            if (headerKey === "Medio de inscripción") { flex = 0.8; minWidth = 120; }
+            if (headerKey === "Publica en PCC" || headerKey === "Es autogestionado" || headerKey === "Restricción por edad" || headerKey === "Restricción por Departamento" || headerKey === "Tiene Correlatividad") { flex = 0.7; minWidth = 110; }
+            if (headerKey === "Estado") { flex = 0.7; minWidth = 110; }
+            return { field: headerKey, headerName: headerKey, flex, minWidth };
+        }).filter(Boolean);
+    }, [COLUMNAS_VISIBLES]);
+    const formatValue = useCallback((value) => (value == null ? '' : String(value).trim()), []);
 
-      if (header === "Nombre del curso") { flex = 2.5; minWidth = 350; }
-      if (header === "Mes") { flex = 0.8; minWidth = 90; }
-      if (header === "Código del curso") { flex = 1; minWidth = 120; }
-      if (header === "Nro Evento") { flex = 0.8; minWidth = 100; headerAlign='center'; align='center';}
-      if (header.toLowerCase().includes("fecha")) {
-        flex = 1.2; minWidth = 140;
-        headerAlign = 'center';
-        align = 'center'; // Centrar fechas
-      }
-      // Si la columna existe en originalHeaders o fue añadida (Mes, Nro Evento)
-      // Esta comprobación es menos necesaria si confiamos en COLUMNAS_VISIBLES_ORDENADAS
-      // if (originalHeaders.includes(header) || ["Mes", "Nro Evento"].includes(header)) {
-        return {
-            field: header,
-            headerName: header,
-            flex,
-            minWidth,
-            headerAlign,
-            align
-        };
-      // }
-      // return null; // O manejar de otra forma si una columna definida no existe en los datos
-    }).filter(Boolean); // Filtrar nulls si se añade la comprobación anterior
-  }, [originalHeaders, cursosData.length, COLUMNAS_VISIBLES_ORDENADAS]); // Depender de cursosData.length para re-evaluar si los datos llegan después
+    const fetchData = useCallback(async () => {
+        setLoading(true); setError(null); setSuccessMessage('');
+        try {
+            const [instanciasData, usuariosData, estadosData, cursos, departamentos] = await Promise.all([
+                getInstancias(), getUsuarios(), getEstadosInstancia(), getCursos(), getDepartamentos()
+            ]);
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // Fetch de ambos datos en paralelo
-        const [dataCronograma, eventosData] = await Promise.all([
-          getCronograma(),
-          getObjNroEventos() // Fetch Nro Eventos
-        ]);
+            if (!Array.isArray(instanciasData)) throw new Error("Datos de instancias no válidos.");
+            if (!Array.isArray(usuariosData)) throw new Error("Datos de usuarios no válidos.");
+            if (!Array.isArray(estadosData)) throw new Error("Datos de estados no válidos.");
+            if (!Array.isArray(cursos)) throw new Error("Datos de cursos no válidos.");
+            if (!Array.isArray(departamentos)) throw new Error("Datos de departamentos no válidos.");
 
-        // Validar dataCronograma
-        if (!dataCronograma || dataCronograma.length < 2) {
-          throw new Error("No se recibieron datos válidos del cronograma.");
+            setAllUsers(usuariosData); setAllEstados(estadosData); setAllCursos(cursos); setAllDepartamentos(departamentos);
+            const filteredAdminUsers = usuariosData.filter(user => user.rol === 'ADM'); setAdminUsers(filteredAdminUsers);
+            const usersMap = new Map(usuariosData.map(u => [u.cuil, `${u.detalle_persona?.nombre || ''} ${u.detalle_persona?.apellido || ''}`.trim()]));
+            const admSet = new Set();
+            const dataObjs = instanciasData.map((instancia, idx) => {
+                const detalle = instancia.detalle_curso || {}; const areaDetalle = detalle.detalle_area || {};
+                const ministerioDetalle = areaDetalle.detalle_ministerio || {}; const admValue = formatValue(ministerioDetalle.nombre);
+                if (admValue) admSet.add(admValue);
+                let autogestionadoVal = instancia.es_autogestionado;
+                if (autogestionadoVal === null && detalle.es_autogestionado !== null) autogestionadoVal = detalle.es_autogestionado;
+                const asignadoCuil = formatValue(instancia.asignado);
+                const asignadoNombreCompleto = usersMap.get(asignadoCuil) || asignadoCuil || 'No asignado';
+                return {
+                    id: idx,
+                    originalInstancia: instancia,
+                    "Nombre del curso": formatValue(detalle.nombre),
+                    "Código del curso": formatValue(instancia.curso || detalle.cod),
+                    "Número de evento": formatValue(detalle.numero_evento),
+                    "Fecha inicio de inscripción": formatValue(instancia.fecha_inicio_inscripcion),
+                    "Fecha fin de inscripción": formatValue(instancia.fecha_fin_inscripcion),
+                    "Fecha inicio del curso": formatValue(instancia.fecha_inicio_curso),
+                    "Fecha fin del curso": formatValue(instancia.fecha_fin_curso),
+                    "Cantidad de inscriptos": instancia.cantidad_inscriptos || 0,
+                    "Cantidad de certificados": instancia.cantidad_certificados || 0,
+                    "Medio de inscripción": formatValue(instancia.detalle_medioInscripcion?.nombre || detalle.detalle_medioInscripcion?.nombre),
+                    "Publica en PCC": formatBooleanToSiNo(instancia.es_publicada_portal_cc === null ? detalle.publica_pcc : instancia.es_publicada_portal_cc),
+                    "Es autogestionado": formatBooleanToSiNo(autogestionadoVal),
+                    "Restricción por edad": formatBooleanToSiNo(instancia.tiene_restriccion_edad),
+                    "Restricción por Departamento": formatBooleanToSiNo(instancia.tiene_restriccion_departamento),
+                    "Tiene Correlatividad": formatBooleanToSiNo(instancia.tiene_correlatividad),
+                    "Estado": formatValue(instancia.estado_instancia),
+                    "ADM": admValue,
+                    "Area": formatValue(areaDetalle.nombre),
+                    "Asignado": asignadoNombreCompleto,
+                };
+            });
+            setCursosData(dataObjs); setMinisterioOptions(['all', ...Array.from(admSet).sort()]);
+        } catch (err) {
+            console.error("Error loading data:", err); setError(err.message || "Error al cargar datos.");
+            setCursosData([]); setFilteredData([]); setMinisterioOptions(['all']);
+            setAllUsers([]); setAdminUsers([]); setAllEstados([]);
+        } finally { setLoading(false); }
+    }, [formatValue]);
+
+    useEffect(() => { fetchData(); }, [fetchData]);
+
+    useEffect(() => {
+        if (loading || !cursosData.length) { setAreaOptions(['all']); if (areaFilter !== 'all') setAreaFilter('all'); return; }
+        let relevantCourses = [];
+        if (ministerioFilter === 'all') { relevantCourses = cursosData; } else { relevantCourses = cursosData.filter(c => c["ADM"] === ministerioFilter); }
+        const areasSet = new Set(relevantCourses.map(c => c["Area"]).filter(Boolean));
+        const newAreaOptions = ['all', ...Array.from(areasSet).sort()];
+        setAreaOptions(newAreaOptions);
+        if (ministerioFilter !== 'all' && !newAreaOptions.includes(areaFilter)) { setAreaFilter('all'); }
+    }, [ministerioFilter, cursosData, loading, areaFilter]);
+
+    useEffect(() => {
+        if (loading && cursosData.length === 0) return;
+        let data = [...cursosData];
+        const today = dayjs().startOf('day');
+        if (ministerioFilter !== 'all') data = data.filter(c => c["ADM"] === ministerioFilter);
+        if (areaFilter !== 'all') data = data.filter(c => c["Area"] === areaFilter);
+        if (nombreFilter.trim()) {
+            const term = nombreFilter.trim().toLowerCase();
+            data = data.filter(c => c["Nombre del curso"]?.toLowerCase().includes(term) || c["Código del curso"]?.toLowerCase().includes(term));
         }
-        const headers = dataCronograma[0].map(h => h.trim());
-        setOriginalHeaders(headers); // Guardar headers originales
+        if (monthFilter !== 'all') {
+            const targetMonth = parseInt(monthFilter, 10);
+            data = data.filter(c => { const parsedDate = parseDate(c["Fecha inicio de inscripción"]); return parsedDate && parsedDate.month() === targetMonth; });
+        }
+        if (activosFilterActive) {
+            data = data.filter(c => {
+                const startDate = parseDate(c["Fecha inicio de inscripción"]); const endDate = parseDate(c["Fecha fin de inscripción"]);
+                return startDate && endDate && startDate.isSameOrBefore(today) && endDate.isSameOrAfter(today);
+            });
+        }
+        if (asignadoFilter.trim()) {
+            const term = asignadoFilter.trim().toLowerCase();
+            data = data.filter(c => c["Asignado"]?.toLowerCase().includes(term));
+        }
+        setFilteredData(data);
+    }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, asignadoFilter, loading]);
 
-        // Validar y procesar eventosData para crear un lookup eficiente
-        const eventosLookup = new Map();
-        const eventosLookupByName = new Map();
-        if (eventosData && Array.isArray(eventosData)) {
-           eventosData.forEach(evento => {
-             const nombreCorto = evento["Nombre corto"]?.trim();
-             const nombreCapacitacion = evento["Nombre de la capacitación"]?.trim();
-             const nroEvento = evento["Nro Evento"]?.toString().trim(); // Asegurar que sea string
+    const handleRowClick = useCallback(params => { setSelectedRowData(params.row); setOriginalInstanciaData(params.row.originalInstancia); setModalOpen(true); }, []);
+    const handleCloseModal = useCallback(() => { setModalOpen(false); setSelectedRowData(null); setOriginalInstanciaData(null); }, []);
+    
+    const handleOpenReasignModal = useCallback(() => setReasignModalOpen(true), []);
+    const handleCloseReasignModal = useCallback(() => { setReasignModalOpen(false); setSelectedUserForReasign(null); setUserSearchTerm(''); }, []);
+    
+    const handleOpenEstadoModal = useCallback(() => { if (originalInstanciaData) { setSelectedEstado(originalInstanciaData.estado_instancia || ''); } setEstadoModalOpen(true); }, [originalInstanciaData]);
+    const handleCloseEstadoModal = useCallback(() => { setEstadoModalOpen(false); setSelectedEstado(''); }, []);
 
-             if (nombreCorto && nroEvento) {
-                // Si ya existe, podría indicar duplicados o variaciones. Por ahora, sobrescribe.
-                eventosLookup.set(nombreCorto, nroEvento);
-             }
-             if (nombreCapacitacion && nroEvento) {
-                 // Guardar también por nombre completo, puede sobrescribir si hay duplicados
-                 eventosLookupByName.set(nombreCapacitacion.toLowerCase(), nroEvento);
-             }
-           });
+    const handleOpenFechasModal = useCallback(() => {
+        if (originalInstanciaData) {
+            setFechasEditables({
+                fecha_inicio_curso: originalInstanciaData.fecha_inicio_curso ? dayjs(originalInstanciaData.fecha_inicio_curso) : null,
+                fecha_fin_curso: originalInstanciaData.fecha_fin_curso ? dayjs(originalInstanciaData.fecha_fin_curso) : null,
+                fecha_inicio_inscripcion: originalInstanciaData.fecha_inicio_inscripcion ? dayjs(originalInstanciaData.fecha_inicio_inscripcion) : null,
+                fecha_fin_inscripcion: originalInstanciaData.fecha_fin_inscripcion ? dayjs(originalInstanciaData.fecha_fin_inscripcion) : null,
+            });
+        }
+        setFechasModalOpen(true);
+    }, [originalInstanciaData]);
+
+    const handleCloseFechasModal = useCallback(() => { setFechasModalOpen(false); setFechasEditables({ fecha_inicio_curso: null, fecha_fin_curso: null, fecha_inicio_inscripcion: null, fecha_fin_inscripcion: null }); }, []);
+    
+    const handleOpenOtrosModal = useCallback(() => {
+        if (originalInstanciaData) {
+            setOtrosEditable({
+                cantidad_inscriptos: originalInstanciaData.cantidad_inscriptos || '',
+                cantidad_certificados: originalInstanciaData.cantidad_certificados || '',
+            });
+        }
+        setOtrosModalOpen(true);
+    }, [originalInstanciaData]);
+
+    const handleCloseOtrosModal = useCallback(() => { setOtrosModalOpen(false); setOtrosEditable({ cantidad_inscriptos: '', cantidad_certificados: '' }); }, []);
+
+
+    const handleCloseRestrictionsModal = useCallback(() => {
+        setRestrictionsModalOpen(false);
+        setEditableDepartamentos([]);
+        setEditableCorrelativos([]);
+        setEdadRestrictionEnabled(false);
+        setEditableEdadDesde('');
+        setEditableEdadHasta('');
+    }, []);
+
+    const handleApiUpdate = useCallback(async (payload) => {
+        if (!originalInstanciaData) { setError("No hay una instancia seleccionada para actualizar."); return false; }
+        setError(null); setSuccessMessage('');
+        try {
+            await putInstancia(originalInstanciaData.curso, originalInstanciaData.fecha_inicio_curso, payload);
+            return true;
+        } catch (err) { console.error("Error en putInstancia:", err); setError(err.response?.data?.message || err.message || "Error al actualizar la instancia."); return false; }
+    }, [originalInstanciaData]);
+
+    const handleReasign = useCallback(async () => {
+        if (!selectedUserForReasign) { setError("No se ha seleccionado un usuario."); return; }
+        setLoadingReasign(true);
+        const success = await handleApiUpdate({ asignado: selectedUserForReasign.cuil });
+        if (success) {
+            const persona = selectedUserForReasign.detalle_persona;
+            setSuccessMessage(`Instancia reasignada a ${persona?.nombre || ''} ${persona?.apellido || ''} exitosamente.`);
+            handleCloseReasignModal(); handleCloseModal(); fetchData();
+        }
+        setLoadingReasign(false);
+    }, [selectedUserForReasign, handleApiUpdate, fetchData, handleCloseReasignModal, handleCloseModal]);
+    
+    const handleUpdateEstado = useCallback(async () => {
+        if (!selectedEstado) { setError("No se ha seleccionado un nuevo estado."); return; }
+        setLoadingEstado(true);
+        const success = await handleApiUpdate({ estado_instancia: selectedEstado });
+        if (success) {
+            const estadoDesc = allEstados.find(e => e.cod === selectedEstado)?.descripcion || selectedEstado;
+            setSuccessMessage(`Estado actualizado a "${estadoDesc}" exitosamente.`);
+            handleCloseEstadoModal(); handleCloseModal(); fetchData();
+        }
+        setLoadingEstado(false);
+    }, [selectedEstado, allEstados, handleApiUpdate, fetchData, handleCloseEstadoModal, handleCloseModal]);
+
+    const handleUpdateFechas = useCallback(async () => {
+        setLoadingFechas(true);
+        const payload = {};
+        Object.keys(fechasEditables).forEach(key => {
+            const newDate = fechasEditables[key]; const originalDateStr = originalInstanciaData?.[key];
+            const newDateStr = newDate && dayjs(newDate).isValid() ? dayjs(newDate).format('YYYY-MM-DD') : null;
+            if (newDateStr !== originalDateStr) payload[key] = newDateStr;
+        });
+        if (Object.keys(payload).length === 0) {
+            setSuccessMessage("No se realizaron cambios en las fechas."); handleCloseFechasModal(); setLoadingFechas(false); return;
+        }
+        const success = await handleApiUpdate(payload);
+        if (success) { setSuccessMessage("Fechas actualizadas exitosamente."); handleCloseFechasModal(); handleCloseModal(); fetchData(); }
+        setLoadingFechas(false);
+    }, [fechasEditables, originalInstanciaData, handleApiUpdate, fetchData, handleCloseFechasModal, handleCloseModal]);
+
+    const handleConfirmToggleAutogestionado = useCallback(async () => {
+        const currentValue = originalInstanciaData?.es_autogestionado;
+        const newValue = currentValue === 1 ? 0 : 1;
+        const success = await handleApiUpdate({ es_autogestionado: newValue });
+        if (success) {
+            setSuccessMessage(`El estado 'Autogestionado' se cambió a "${formatBooleanToSiNo(newValue)}" exitosamente.`);
+            setAutogestionadoConfirmOpen(false);
+            handleCloseModal();
+            fetchData();
         } else {
-            console.warn("No se recibieron datos válidos de Nro Eventos o el formato es incorrecto.");
+            setAutogestionadoConfirmOpen(false);
         }
+    }, [originalInstanciaData, handleApiUpdate, fetchData, handleCloseModal]);
 
+    const handleUpdateRestrictions = useCallback(async () => {
+        setLoadingRestrictions(true);
+        const payload = {
+            tiene_restriccion_departamento: editableDepartamentos.length > 0 ? 1 : 0,
+            departamentos: editableDepartamentos.map(d => d.id),
+            tiene_correlatividad: editableCorrelativos.length > 0 ? 1 : 0,
+            cursos_correlativos: editableCorrelativos.map(c => c.cod),
+            tiene_restriccion_edad: edadRestrictionEnabled ? 1 : 0,
+            restriccion_edad_desde: edadRestrictionEnabled ? (parseInt(editableEdadDesde, 10) || null) : null,
+            restriccion_edad_hasta: edadRestrictionEnabled ? (parseInt(editableEdadHasta, 10) || null) : null,
+        };
+        const success = await handleApiUpdate(payload);
+        if (success) {
+            setSuccessMessage("Restricciones actualizadas exitosamente.");
+            handleCloseRestrictionsModal();
+            handleCloseModal();
+            fetchData();
+        }
+        setLoadingRestrictions(false);
+    }, [editableDepartamentos, editableCorrelativos, edadRestrictionEnabled, editableEdadDesde, editableEdadHasta, handleApiUpdate, fetchData, handleCloseRestrictionsModal, handleCloseModal]);
+    
+    const filteredAdminUsersForModal = useMemo(() => {
+        if (!userSearchTerm) return adminUsers;
+        const term = userSearchTerm.toLowerCase();
+        return adminUsers.filter(user =>
+            (user.detalle_persona?.nombre?.toLowerCase() || '').includes(term) ||
+            (user.detalle_persona?.apellido?.toLowerCase() || '').includes(term) ||
+            (user.cuil?.toLowerCase() || '').includes(term)
+        );
+    }, [adminUsers, userSearchTerm]);
+    
+    const handleDescargarExcel = useCallback(async () => { 
+        if (!filteredData.length) return;
+        try {
+            await descargarExcel(filteredData, COLUMNAS_VISIBLES, "Cronograma_Admin_Reducido");
+        } catch (error) {
+            setError("Error al generar el archivo Excel.");
+            console.error(error);
+        }
+    }, [filteredData, COLUMNAS_VISIBLES]);
 
-        const minSet = new Set();
-        const dataObjs = dataCronograma.slice(1).map((row, idx) => {
-          const obj = { id: idx }; // ID único para DataGrid
-
-          // Poblar objeto con datos del cronograma
-          headers.forEach((h, i) => {
-            const val = row[i] != null ? String(row[i]).trim() : '';
-            obj[h] = val;
-            if (h === "Ministerio" && val) minSet.add(val);
-          });
-
-          // --- Procesamiento Adicional ---
-
-          // 1. Calcular Mes
-          const fechaInscripcionStr = obj["Fecha inicio de inscripción"];
-          const parsedDateInscripcion = parseDate(fechaInscripcionStr);
-          obj["Mes"] = parsedDateInscripcion ? MONTH_NAMES[parsedDateInscripcion.month()] : "N/A";
-
-          // 2. Encontrar Nro Evento
-          const codigoCurso = obj["Código del curso"]?.trim();
-          const nombreCurso = obj["Nombre del curso"]?.trim().toLowerCase();
-          let nroEventoEncontrado = "Sin coincidencia"; // Valor por defecto
-
-          if (codigoCurso && eventosLookup.has(codigoCurso)) {
-            nroEventoEncontrado = eventosLookup.get(codigoCurso);
-          } else if (nombreCurso && eventosLookupByName.has(nombreCurso)) {
-            nroEventoEncontrado = eventosLookupByName.get(nombreCurso);
-          }
-          obj["Nro Evento"] = nroEventoEncontrado;
-
-          // --- Fin Procesamiento Adicional ---
-
-          return obj;
-        });
-
-        setCursosData(dataObjs);
-        setFilteredData(dataObjs); // Inicialmente mostrar todos
-        setMinisterioOptions(['all', ...Array.from(minSet).sort()]);
-
-      } catch (err) {
-        console.error("Error loading data:", err);
-        setError(err.message || "Error al cargar datos.");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []); // Ejecutar solo una vez al montar
-
-  // Efecto para actualizar opciones de Área (sin cambios)
-  useEffect(() => {
-    if (loading || !cursosData.length) {
-      setAreaOptions(['all']);
-      if (areaFilter !== 'all') setAreaFilter('all');
-      return;
-    }
-
-    let relevantCourses = [];
-    if (ministerioFilter === 'all') {
-      relevantCourses = cursosData;
-      // Si se cambia a 'Todos' ministerios, resetear area si no es 'Todas'
-      // Esto ya no es estrictamente necesario si el Select de Area se deshabilita
-      // if (areaFilter !== 'all') setAreaFilter('all');
-    } else {
-      relevantCourses = cursosData.filter(c => c["Ministerio"] === ministerioFilter);
-    }
-
-    const areasSet = new Set(relevantCourses.map(c => c.Area).filter(Boolean));
-    const newAreaOptions = ['all', ...Array.from(areasSet).sort()];
-    setAreaOptions(newAreaOptions);
-
-    // Si el area seleccionada ya no es válida para el ministerio actual, resetearla
-    if (ministerioFilter !== 'all' && !newAreaOptions.includes(areaFilter)) {
-      setAreaFilter('all');
-    }
-
-  }, [ministerioFilter, cursosData, loading, areaFilter]);
-
-
-  // Efecto para aplicar filtros (sin cambios en la lógica central de filtrado)
-  useEffect(() => {
-    if (!cursosData.length || loading) return; // No filtrar si no hay datos o si está cargando inicialmente
-
-    // Indicar carga durante el filtrado si hay muchos datos
-    // (Considerar añadir un estado loadingFilters si es necesario)
-    // setLoading(true); // Podría parpadear mucho, evaluar necesidad
-
-    let data = [...cursosData];
-    const today = dayjs().startOf('day');
-
-    if (ministerioFilter !== 'all') {
-      data = data.filter(c => c["Ministerio"] === ministerioFilter);
-    }
-    // Aplicar filtro de área solo si un ministerio está seleccionado
-    if (ministerioFilter !== 'all' && areaFilter !== 'all') {
-      data = data.filter(c => c["Area"] === areaFilter);
-    }
-    if (nombreFilter.trim()) {
-      const term = nombreFilter.trim().toLowerCase();
-      data = data.filter(c => c["Nombre del curso"]?.toLowerCase().includes(term));
-    }
-    // Filtro por Mes de Inicio del CURSO (no de inscripción)
-    if (monthFilter !== 'all') {
-      const targetMonth = parseInt(monthFilter, 10);
-      data = data.filter(c => {
-        const fechaInicioStr = c["Fecha inicio del curso"];
-        const parsedDate = parseDate(fechaInicioStr);
-        // Asegurarse que parsedDate no sea null y el mes coincida
-        return parsedDate && parsedDate.month() === targetMonth;
-      });
-    }
-
-    if (activosFilterActive) {
-      data = data.filter(c => {
-        const startDateStr = c["Fecha inicio del curso"];
-        const endDateStr = c["Fecha fin del curso"];
-
-        const startDate = parseDate(startDateStr);
-        const endDate = parseDate(endDateStr);
-
-        // El curso está activo si hoy está entre la fecha de inicio y fin (inclusive)
-        // y ambas fechas son válidas
-        return startDate && endDate && startDate.isSameOrBefore(today) && endDate.isSameOrAfter(today);
-      });
-    }
-
-    setFilteredData(data);
-    // setLoading(false); // Si se activó el loading para filtros
-
-  }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, loading]); // Añadir loading como dependencia para evitar filtrar durante carga inicial
-
-  const handleRowClick = useCallback(params => {
-      // Buscamos la fila completa en cursosData por si filteredData omitiera columnas
-      const fullRow = cursosData.find(c => c.id === params.row.id);
-      setSelectedRowData(fullRow || params.row); // Usar fullRow si se encontró
-      setModalOpen(true);
-  }, [cursosData]); // Depender de cursosData por si cambia
-
-  const handleCloseModal = useCallback(() => {
-    setModalOpen(false);
-    setSelectedRowData(null);
-  }, []);
-
-  const handleDescargarExcel = useCallback(async () => {
-    if (!filteredData.length) return;
-    setLoading(true); // Indicar carga para la descarga
-    try {
-      // Usar los headers definidos y ordenados en columnsForGrid
-      const headersVis = columnsForGrid.map(c => c.headerName);
-      const dataToExport = filteredData.map(row => {
-        const exportedRow = {};
-        headersVis.forEach(header => {
-          // Usar el 'field' de la columna para obtener el dato correcto de la fila
-          const columnDef = columnsForGrid.find(c => c.headerName === header);
-          if (columnDef) {
-              exportedRow[header] = row[columnDef.field] ?? ''; // Usar field para mapeo
-          } else {
-              exportedRow[header] = row[header] ?? ''; // Fallback por si acaso
-          }
-        });
-        return exportedRow;
-      });
-      await descargarExcel(dataToExport, headersVis, "Cronograma_Filtrado");
-    } catch (e) {
-      console.error("Error generating Excel:", e);
-      setError("Error al generar el Excel."); // Mostrar error al usuario
-    } finally {
-      setLoading(false);
-    }
-  }, [filteredData, columnsForGrid]); // Depender de filteredData y columnsForGrid
-
-  // --- Handlers de Filtros (sin cambios funcionales) ---
-  const handleMinisterioChange = useCallback(e => {
-    setMinisterioFilter(e.target.value);
-    // Resetear área si se selecciona un ministerio específico y el área no es 'Todas'
-    // if (e.target.value !== 'all' && areaFilter !== 'all') {
-    //   setAreaFilter('all'); // El useEffect [ministerioFilter] ya maneja esto
-    // }
-     // Si se selecciona "Todos" los ministerios, resetear área para evitar inconsistencias
-     if (e.target.value === 'all') {
+    const handleMinisterioChange = useCallback(e => setMinisterioFilter(e.target.value), []);
+    const handleAreaChange = useCallback(e => setAreaFilter(e.target.value), []);
+    const handleNombreChange = useCallback(e => setNombreFilter(e.target.value), []);
+    const handleMonthChange = useCallback(e => setMonthFilter(e.target.value), []);
+    const handleToggleActivosFilter = useCallback(() => setActivosFilterActive(prev => !prev), []);
+    
+    const handleClearFilters = useCallback(() => {
+        setMinisterioFilter('all');
         setAreaFilter('all');
-     }
-  }, []);
+        setNombreFilter('');
+        setMonthFilter('all');
+        setActivosFilterActive(false);
+        setAsignadoFilter('');
+    }, []);
 
-  const handleAreaChange = useCallback(e => setAreaFilter(e.target.value), []);
-  const handleNombreChange = useCallback(e => setNombreFilter(e.target.value), []);
-  const handleMonthChange = useCallback(e => setMonthFilter(e.target.value), []);
-  const handleToggleActivosFilter = useCallback(() => setActivosFilterActive(prev => !prev), []);
+    const isFilterActive = useMemo(() => nombreFilter || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive || asignadoFilter, [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive, asignadoFilter]);
 
-  const handleClearFilters = useCallback(() => {
-    setNombreFilter('');
-    setMinisterioFilter('all');
-    setAreaFilter('all'); // Asegurarse que area también se limpie
-    setMonthFilter('all');
-    setActivosFilterActive(false);
-  }, []);
+    // ** NUEVO HANDLER PARA EL CHECKBOX DE EDAD **
+    const handleEdadRestrictionChange = (event) => {
+        const isChecked = event.target.checked;
+        setEdadRestrictionEnabled(isChecked);
+        if (isChecked) {
+            // Al marcar, se fija la edad mínima en 16 por defecto.
+            setEditableEdadDesde('16');
+        } else {
+            // Al desmarcar, se limpian los campos.
+            setEditableEdadDesde('');
+            setEditableEdadHasta('');
+        }
+    };
 
-  const isFilterActive = useMemo(() => {
-    return nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive;
-  }, [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive]);
+    const renderDetailItem = useCallback((label, value, isBoolean = false, actionButton = null) => {
+        const displayValue = isBoolean ? formatBooleanToSiNo(value) : (formatValue(value) || '-');
+        return (
+            <React.Fragment key={label}>
+                <ListItem sx={{ py: 0.8, px: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <ListItemText primary={displayValue} secondary={label} primaryTypographyProps={{ fontWeight: 500, wordBreak: 'break-word', color: "black" }} secondaryTypographyProps={{ fontSize: '0.8rem' }}/>
+                    {actionButton}
+                </ListItem>
+                <Divider component="li" sx={{ my: 0.5 }} />
+            </React.Fragment>
+        );
+    }, [formatValue]);
+    
+    const renderAgeRestriction = () => {
+        if (!originalInstanciaData?.tiene_restriccion_edad) {
+            return "Ninguna";
+        }
+        const desde = originalInstanciaData.restriccion_edad_desde;
+        const hasta = originalInstanciaData.restriccion_edad_hasta;
+        if (desde && hasta) return `Desde ${desde} hasta ${hasta} años`;
+        if (desde && !hasta) return `Desde ${desde} años en adelante`;
+        if (!desde && hasta) return `Hasta ${hasta} años`;
+        return "Definida pero incompleta";
+    };
 
+    if (loading && !cursosData.length) return (<Backdrop open sx={{ zIndex: t => t.zIndex.drawer + 1, color: '#fff' }}><CircularProgress color="inherit" /></Backdrop>);
+    if (error && !successMessage) return (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}><Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}><Typography variant="h6" color="error" gutterBottom>Error</Typography><Typography>{error}</Typography><Button onClick={fetchData} sx={{mt: 2}}>Reintentar</Button></Paper></Box>);
+    if (!loading && !error && cursosData.length === 0) return (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}><Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}><Typography variant="h6" gutterBottom>No Hay Datos</Typography><Typography>No se encontraron datos en el cronograma.</Typography></Paper></Box>);
 
-  // --- Renderizado ---
-
-  // Estado de carga inicial (antes de tener datos)
-  if (loading && !cursosData.length) {
     return (
-      <Backdrop open sx={{ zIndex: t => t.zIndex.drawer + 1, color: '#fff' }}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+            <div style={{ padding: 20 }}>
+                {successMessage && <Alert severity="success" onClose={() => setSuccessMessage('')} sx={{ mb: 2 }}>{successMessage}</Alert>}
+                {error && !successMessage && <Alert severity="error" onClose={() => {setError(null); setSuccessMessage('');}} sx={{ mb: 2 }}>{error}</Alert>}
+
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
+                    <Titulo texto="Cronograma Admin Reducido" />
+                    <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={(loading && cursosData.length > 0) || !filteredData.length} />
+                </Box>
+                <Divider sx={{ mb: 3, borderBottomWidth: 2 }} />
+
+                <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
+                    <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} sm={6} md={2.5}><TextField fullWidth label="Buscar por Asignado" variant="outlined" size="small" value={asignadoFilter} onChange={(e) => setAsignadoFilter(e.target.value)} InputProps={{ startAdornment: (<InputAdornment position="start"><AssignmentIndIcon color="action" fontSize="small" /></InputAdornment>), }} /></Grid>
+                        <Grid item xs={12} sm={6} md={2.5}><TextField fullWidth label="Buscar por Nombre/Código" variant="outlined" size="small" value={nombreFilter} onChange={handleNombreChange} disabled={loading && cursosData.length > 0} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>), }} /></Grid>
+                        <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={(loading && cursosData.length > 0) || ministerioOptions.length <= 1}><InputLabel id="adm-filter-label">ADM (Ministerio)</InputLabel><Select labelId="adm-filter-label" value={ministerioFilter} label="ADM (Ministerio)" onChange={handleMinisterioChange} startAdornment={ <InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><AccountBalanceIcon color="action" fontSize='small' /></InputAdornment> } sx={{ '& .MuiSelect-select': { pl: 1 } }} ><MenuItem value="all"><em>Todos</em></MenuItem>{ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}</Select></FormControl></Grid>
+                        <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={(loading && cursosData.length > 0) || ministerioFilter === 'all' || areaOptions.length <= 1}><InputLabel id="area-filter-label">Área</InputLabel><Select labelId="area-filter-label"value={areaFilter}label="Área"onChange={handleAreaChange}startAdornment={ <InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><FolderSpecialIcon color="action" fontSize='small' /></InputAdornment>}sx={{ '& .MuiSelect-select': { pl: 1 } }}><MenuItem value="all"><em>Todas</em></MenuItem>{areaOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}{ministerioFilter !== 'all' && areaOptions.length <= 1 && (<MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>)}</Select></FormControl></Grid>
+                        <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={loading && cursosData.length > 0}><InputLabel id="mes-filter-label">Mes Inicio Curso</InputLabel><Select labelId="mes-filter-label"value={monthFilter}label="Mes Inicio Curso"onChange={handleMonthChange}startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><CalendarMonthIcon color="action" fontSize='small' /></InputAdornment>}sx={{ '& .MuiSelect-select': { pl: 1 } }}><MenuItem value="all"><em>Todos</em></MenuItem>{MONTH_NAMES.map((m, i) => (<MenuItem key={i} value={i.toString()}>{m}</MenuItem>))}</Select></FormControl></Grid>
+                        <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Tooltip title={activosFilterActive ? "Mostrar todos los cursos" : "Mostrar solo cursos activos ahora"}><Button fullWidth variant={activosFilterActive ? "contained" : "outlined"}size="medium"onClick={handleToggleActivosFilter}disabled={loading && cursosData.length > 0}startIcon={<AccessTimeIcon />}sx={{ height: '40px', minWidth: 'auto' }}>Activos</Button></Tooltip></Grid>
+                        <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Button fullWidth variant="outlined"size="medium"onClick={handleClearFilters}disabled={!isFilterActive || (loading && cursosData.length > 0)}startIcon={<ClearAllIcon />}sx={{ height: '40px', minWidth: 'auto' }}>Limpiar</Button></Grid>
+                    </Grid>
+                </Paper>
+
+                {(loading && cursosData.length > 0) && (<Box sx={{ display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}><CircularProgress size={20} sx={{ mr: 1 }} /><Typography variant="body2" color="text.secondary">Actualizando tabla...</Typography></Box>)}
+                
+                <Paper elevation={3} sx={{ height: 600, width: '100%' }}>
+                    <DataGrid rows={filteredData} columns={columnsForGrid} localeText={esES.components.MuiDataGrid.defaultProps.localeText} onRowClick={handleRowClick} getRowId={r => r.id} loading={loading && cursosData.length > 0} density="compact" disableRowSelectionOnClick initialState={{ sorting: { sortModel: [{ field: 'Fecha inicio del curso', sort: 'asc' }] } }} sx={{ border: 0, '& .MuiDataGrid-columnHeaders': { backgroundColor: 'primary.light', color: 'text.primary', fontWeight: 'bold' }, '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none!important' }, '& .MuiDataGrid-row': { cursor: 'pointer' }, '& .MuiDataGrid-row:hover': { backgroundColor: 'action.hover', }, '& .MuiDataGrid-overlay': { backgroundColor: 'rgba(255,255,255,0.7)' } }} slots={{ noRowsOverlay: () => (<Box sx={{ mt: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', p: 2 }}><InfoIcon color="action" sx={{ mb: 1, fontSize: '3rem' }} /><Typography align="center">{cursosData.length === 0 ? "No hay datos disponibles." : "No hay cursos que coincidan."}</Typography></Box>) }} />
+                </Paper>
+                
+                <Modal open={modalOpen} onClose={handleCloseModal} aria-labelledby="course-detail-title">
+                    <Box sx={modalStyle}>
+                        {selectedRowData && originalInstanciaData && (
+                            <Card sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
+                                <CardHeader avatar={<InfoIcon color="primary" />} id="course-detail-title" title={originalInstanciaData.detalle_curso?.nombre || "Detalle de Instancia"} titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }} subheader={`Código Curso: ${originalInstanciaData.curso}`} action={<IconButton aria-label="Cerrar" onClick={handleCloseModal}><CloseIcon /></IconButton>} sx={{ borderBottom: 1, borderColor: 'divider', pb: 1, bgcolor: 'grey.100' }} />
+                                <CardContent sx={{ overflowY: 'auto', flexGrow: 1, p: 2 }}>
+                                    <List dense>
+                                        {renderDetailItem("Asignado", selectedRowData["Asignado"])}
+                                        {renderDetailItem("Estado", originalInstanciaData.estado_instancia, false, <ActionButton onClick={handleOpenEstadoModal}>Cambiar</ActionButton>)}
+                                        <Divider sx={{ my: 1 }}><Chip label="Fechas Instancia" size="small" /></Divider>
+                                        {renderDetailItem("Fecha Inicio Curso", originalInstanciaData.fecha_inicio_curso)}
+                                        {renderDetailItem("Fecha Fin Curso", originalInstanciaData.fecha_fin_curso)}
+                                        {renderDetailItem("Fecha Inicio Inscripción", originalInstanciaData.fecha_inicio_inscripcion)}
+                                        {renderDetailItem("Fecha Fin Inscripción", originalInstanciaData.fecha_fin_inscripcion)}
+                                        <Divider sx={{ my: 1 }}><Chip label="Detalles Instancia" size="small" /></Divider>
+                                        {renderDetailItem("Nombre del curso", originalInstanciaData.detalle_curso?.nombre)}
+                                        {renderDetailItem("Código del curso", originalInstanciaData.curso)}
+                                        {renderDetailItem("Número de evento", originalInstanciaData.detalle_curso?.numero_evento)}
+                                        {renderDetailItem("Cupo", originalInstanciaData.cupo)}
+                                        {renderDetailItem("Cantidad de inscriptos", originalInstanciaData.cantidad_inscriptos || 0, false)}
+                                        {renderDetailItem("Cantidad de certificados", originalInstanciaData.cantidad_certificados || 0, false, <ActionButton onClick={handleOpenOtrosModal}>Cambiar</ActionButton>)}
+                                        {renderDetailItem("Medio de inscripción", originalInstanciaData.detalle_medioInscripcion?.nombre || originalInstanciaData.detalle_curso?.detalle_medioInscripcion?.nombre)}
+                                        {renderDetailItem("Publica en PCC", originalInstanciaData.es_publicada_portal_cc === null ? originalInstanciaData.detalle_curso?.publica_pcc : originalInstanciaData.es_publicada_portal_cc, true)}
+                                        {renderDetailItem("Es autogestionado", originalInstanciaData.es_autogestionado === null ? originalInstanciaData.detalle_curso?.es_autogestionado : originalInstanciaData.es_autogestionado, true, <ActionButton onClick={() => setAutogestionadoConfirmOpen(true)}>Cambiar</ActionButton>)}
+                                        {renderDetailItem("Comentario", originalInstanciaData.comentario)}
+                                        <Divider sx={{ my: 1 }}><Chip label="Restricciones" size="small" /></Divider>
+                                        {renderDetailItem("Restricción por edad", originalInstanciaData.tiene_restriccion_edad, true)}
+                                        <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
+                                            <ListItemText primary="Edad" secondary="Restricción por rango de edad" />
+                                            <Typography variant="body2" color="text.secondary">{renderAgeRestriction()}</Typography>
+                                        </ListItem>
+                                        {renderDetailItem("Restricción por Departamento", originalInstanciaData.tiene_restriccion_departamento, true)}
+                                        <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
+                                            <ListItemText primary="Departamentos" secondary="Limitado a estas áreas" />
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+                                                {(originalInstanciaData.detalle_restricciones_por_departamento?.length > 0) ? 
+                                                    originalInstanciaData.detalle_restricciones_por_departamento.map(d => <Chip key={d.departamento_id} label={d.detalle_departamento?.nombre || d.departamento_id} size="small" />) : 
+                                                    <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>
+                                                }
+                                            </Box>
+                                        </ListItem>
+                                        {renderDetailItem("Tiene Correlatividad", originalInstanciaData.tiene_correlatividad, true)}
+                                        <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
+                                            <ListItemText primary="Correlatividades" secondary="Requiere haber aprobado estos cursos" />
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+                                                {(originalInstanciaData.detalle_restricciones_por_correlatividad?.length > 0) ? 
+                                                    originalInstanciaData.detalle_restricciones_por_correlatividad.map(c => <Chip key={c.curso_correlativo} label={c.detalle_curso_correlativo?.nombre || c.curso_correlativo} size="small" />) : 
+                                                    <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>
+                                                }
+                                            </Box>
+                                        </ListItem>
+                                    </List>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </Box>
+                </Modal>
+                
+                <Dialog open={reasignModalOpen} onClose={handleCloseReasignModal} fullWidth maxWidth="sm">
+                    <DialogTitle>Reasignar Instancia de Curso</DialogTitle>
+                    <DialogContent dividers>
+                        {selectedRowData && (<><Typography gutterBottom>Curso: <strong>{selectedRowData["Nombre del curso"]}</strong> ({selectedRowData["Código del curso"]})</Typography><Typography gutterBottom>Asignado actual: <strong>{selectedRowData["Asignado"]}</strong></Typography></>)}
+                        <TextField fullWidth variant="outlined" size="small" label="Buscar usuario ADM (Nombre, Apellido, CUIL)" value={userSearchTerm} onChange={(e) => setUserSearchTerm(e.target.value)} sx={{ my: 2 }} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>),}}/>
+                        <Paper sx={{ maxHeight: 300, overflow: 'auto', border: '1px solid lightgrey' }}>
+                            <List dense>
+                                {filteredAdminUsersForModal.length === 0 && <ListItem><ListItemText primary="No se encontraron usuarios ADM."  /></ListItem>}
+                                {filteredAdminUsersForModal.map(user => (
+                                    <ListItem key={user.cuil} button selected={selectedUserForReasign?.cuil === user.cuil} onClick={() => setSelectedUserForReasign(user)}>
+                                        <ListItemText primary={`${user.detalle_persona?.nombre || ''} ${user.detalle_persona?.apellido || ''} - Cuil: ${user.cuil}`} primaryTypographyProps={{ fontWeight: 500, wordBreak: 'break-word', color: "black" }} />
+                                        {selectedUserForReasign?.cuil === user.cuil && <Chip label="Seleccionado" color="primary" size="small" />}
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Paper>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseReasignModal}>Cancelar</Button>
+                        <Button onClick={handleReasign} variant="contained" color="primary" disabled={!selectedUserForReasign || loadingReasign}>{loadingReasign ? <CircularProgress size={24} color="inherit" /> : "Confirmar Reasignación"}</Button>
+                    </DialogActions>
+                </Dialog>
+                
+                <Dialog open={estadoModalOpen} onClose={handleCloseEstadoModal} fullWidth maxWidth="xs">
+                    <DialogTitle>Cambiar Estado de la Instancia</DialogTitle>
+                    <DialogContent dividers>
+                        <Typography gutterBottom>Curso: <strong>{selectedRowData?.["Nombre del curso"]}</strong></Typography>
+                        <Typography gutterBottom>Estado actual: <strong>{originalInstanciaData?.estado_instancia}</strong></Typography>
+                        <FormControl fullWidth sx={{ mt: 2 }}>
+                            <InputLabel id="select-new-estado-label">Nuevo Estado</InputLabel>
+                            <Select labelId="select-new-estado-label" value={selectedEstado} label="Nuevo Estado" onChange={(e) => setSelectedEstado(e.target.value)}>
+                                {allEstados.map((estado) => (<MenuItem key={estado.cod} value={estado.cod}>{estado.descripcion} ({estado.cod})</MenuItem>))}
+                            </Select>
+                        </FormControl>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseEstadoModal}>Cancelar</Button>
+                        <Button onClick={handleUpdateEstado} variant="contained" disabled={!selectedEstado || loadingEstado}>{loadingEstado ? <CircularProgress size={24} color="inherit" /> : "Confirmar Estado"}</Button>
+                    </DialogActions>
+                </Dialog>
+
+                
+
+                <Dialog open={otrosModalOpen} onClose={handleCloseOtrosModal} fullWidth maxWidth="xs">
+                    <DialogTitle>Editar Cantidades</DialogTitle>
+                    <DialogContent dividers>
+                        <Typography gutterBottom>Curso: <strong>{selectedRowData?.["Nombre del curso"]}</strong></Typography>
+                        <Stack spacing={2} sx={{ mt: 2 }}>
+                            <TextField
+                                label="Cantidad de Inscriptos"
+                                type="number"
+                                value={otrosEditable.cantidad_inscriptos}
+                                onChange={(e) => setOtrosEditable({ ...otrosEditable, cantidad_inscriptos: e.target.value })}
+                                fullWidth
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                label="Cantidad de Certificados"
+                                type="number"
+                                value={otrosEditable.cantidad_certificados}
+                                onChange={(e) => setOtrosEditable({ ...otrosEditable, cantidad_certificados: e.target.value })}
+                                fullWidth
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseOtrosModal}>Cancelar</Button>
+                        <Button onClick={async() => {
+                            try {
+                                setLoadingOtros(true);
+                                const payload = {};
+                                if (otrosEditable.cantidad_inscriptos !== originalInstanciaData.cantidad_inscriptos) {
+                                    payload.cantidad_inscriptos = parseInt(otrosEditable.cantidad_inscriptos, 10);
+                                }
+                                if (otrosEditable.cantidad_certificados !== originalInstanciaData.cantidad_certificados) {
+                                    payload.cantidad_certificados = parseInt(otrosEditable.cantidad_certificados, 10);
+                                }
+                                if (Object.keys(payload).length > 0) {
+                                    await putInstancia(originalInstanciaData.curso, originalInstanciaData.fecha_inicio_curso, payload);
+                                    setSuccessMessage('Cantidades modificadas con éxito');
+                                } else {
+                                    setSuccessMessage('No se realizaron cambios.');
+                                }
+                                fetchData();
+                            } catch(err) {
+                                setError('Error al modificar las cantidades.');
+                                console.error(err);
+                            } finally {
+                                setLoadingOtros(false);
+                                handleCloseOtrosModal();
+                                setModalOpen(false);
+                            }
+                        }} 
+                        variant="contained" 
+                        disabled={loadingOtros}
+                        >{loadingOtros ? <CircularProgress size={24} color="inherit" /> : "Confirmar"}</Button>
+                    </DialogActions>
+                </Dialog>
+
+                <Dialog open={autogestionadoConfirmOpen} onClose={() => setAutogestionadoConfirmOpen(false)}>
+                    <DialogTitle>Confirmar Cambio</DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            Está a punto de cambiar el estado 'Es Autogestionado' de 
+                            <strong> {formatBooleanToSiNo(originalInstanciaData?.es_autogestionado)} </strong> a 
+                            <strong> {formatBooleanToSiNo(!originalInstanciaData?.es_autogestionado)}</strong>.
+                        </Typography>
+                        <Typography sx={{mt: 2}}>¿Desea confirmar esta acción?</Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setAutogestionadoConfirmOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleConfirmToggleAutogestionado} variant="contained" color="primary">Confirmar</Button>
+                    </DialogActions>
+                </Dialog>
+
+              
+            </div>
+        </LocalizationProvider>
     );
-  }
-
-  // Estado de error
-  if (error) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}>
-        <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h6" color="error" gutterBottom>Error</Typography>
-          <Typography>{error}</Typography>
-          {/* Podría añadirse un botón para reintentar */}
-        </Paper>
-      </Box>
-    );
-  }
-
-  // Estado sin datos (después de intentar cargar)
-  if (!loading && !cursosData.length && !error) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}>
-        <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h6" gutterBottom>No Hay Datos</Typography>
-          <Typography>No se encontraron datos en el cronograma o no se pudieron cargar.</Typography>
-        </Paper>
-      </Box>
-    );
-  }
-
-  return (
-    <div style={{ padding: 20 }}>
-      {/* --- Cabecera y Botón Descargar --- */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
-        <Titulo texto="Versión reducida para Gestión Académica" />
-        <BotonCircular
-          icon="descargar"
-          onClick={handleDescargarExcel}
-          tooltip="Descargar Vista Actual (Excel)"
-          disabled={loading || !filteredData.length} // Deshabilitar si carga o no hay datos filtrados
-        />
-      </Box>
-      <Divider sx={{ mb: 3, borderBottomWidth: 2 }} />
-
-      {/* --- Controles de Filtro --- */}
-      <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-        <Grid container spacing={2} alignItems="center">
-          {/* Nombre */}
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField fullWidth label="Buscar por Nombre" variant="outlined" size="small"
-              value={nombreFilter} onChange={handleNombreChange} disabled={loading}
-              InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>), }}
-            />
-          </Grid>
-          {/* Ministerio */}
-          <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth size="small" variant="outlined" disabled={loading || ministerioOptions.length <= 1}>
-              <InputLabel id="ministerio-filter-label">Ministerio</InputLabel>
-              <Select labelId="ministerio-filter-label" id="select-ministerio" value={ministerioFilter} label="Ministerio"
-                onChange={handleMinisterioChange}
-                startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><AccountBalanceIcon color="action" fontSize='small' /></InputAdornment>}
-                sx={{ '& .MuiSelect-select': { pl: 1 } }}
-              >
-                <MenuItem value="all"><em>Todos</em></MenuItem>
-                {ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}
-              </Select>
-            </FormControl>
-          </Grid>
-          {/* Área */}
-          <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth size="small" variant="outlined"
-              // Deshabilitar si carga, si no hay ministerio seleccionado, o si no hay opciones de área (aparte de 'all')
-              disabled={loading || ministerioFilter === 'all' || areaOptions.length <= 1}
-            >
-              <InputLabel id="area-filter-label">Área</InputLabel>
-              <Select labelId="area-filter-label" id="select-area" value={areaFilter} label="Área"
-                onChange={handleAreaChange}
-                startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><FolderSpecialIcon color="action" fontSize='small' /></InputAdornment>}
-                sx={{ '& .MuiSelect-select': { pl: 1 } }}
-              >
-                <MenuItem value="all"><em>Todas</em></MenuItem>
-                {areaOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}
-                {/* Mensaje si no hay áreas disponibles para el ministerio seleccionado */}
-                {ministerioFilter !== 'all' && areaOptions.length <= 1 && (
-                  <MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>
-                )}
-              </Select>
-            </FormControl>
-          </Grid>
-          {/* Mes Inicio Curso */}
-          <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth size="small" variant="outlined" disabled={loading}>
-              <InputLabel id="mes-filter-label">Mes Inicio Curso</InputLabel>
-              <Select labelId="mes-filter-label" id="select-month" value={monthFilter} label="Mes Inicio Curso"
-                onChange={handleMonthChange}
-                startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><CalendarMonthIcon color="action" fontSize='small' /></InputAdornment>}
-                sx={{ '& .MuiSelect-select': { pl: 1 } }}
-              >
-                <MenuItem value="all"><em>Todos</em></MenuItem>
-                {MONTH_NAMES.map((m, i) => (<MenuItem key={i} value={i.toString()}>{m}</MenuItem>))}
-              </Select>
-            </FormControl>
-          </Grid>
-          {/* Botón Activos */}
-          <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}>
-            <Tooltip title={activosFilterActive ? "Mostrar todos los cursos" : "Mostrar solo cursos activos ahora"}>
-              <span> {/* Span para Tooltip cuando el botón está disabled */}
-                <Button fullWidth variant={activosFilterActive ? "contained" : "outlined"} size="medium"
-                  onClick={handleToggleActivosFilter} disabled={loading} startIcon={<AccessTimeIcon />}
-                  sx={{ height: '40px', minWidth: 'auto' }}
-                >
-                  Activos
-                </Button>
-              </span>
-            </Tooltip>
-          </Grid>
-          {/* Botón Limpiar */}
-          <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}>
-             <Tooltip title="Limpiar todos los filtros">
-               <span> {/* Span para Tooltip cuando el botón está disabled */}
-                 <Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters}
-                   disabled={!isFilterActive || loading} // Deshabilitar si no hay filtros activos o si está cargando
-                   startIcon={<ClearAllIcon />} sx={{ height: '40px', minWidth: 'auto' }}
-                 >
-                   Limpiar
-                 </Button>
-               </span>
-             </Tooltip>
-          </Grid>
-        </Grid>
-      </Paper>
-
-      {/* --- Indicador de Carga durante Filtrado (Opcional) --- */}
-      {loading && cursosData.length > 0 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}>
-          <CircularProgress size={20} sx={{ mr: 1 }} />
-          <Typography variant="body2" color="text.secondary">Actualizando tabla...</Typography>
-        </Box>
-      )} 
-
-      {/* --- DataGrid --- */}
-      <Paper elevation={3} sx={{ height: 650, width: '100%' }}> {/* Aumenté un poco la altura */}
-        <DataGrid
-          rows={filteredData}
-          columns={columnsForGrid}
-          localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-          onRowClick={handleRowClick}
-          getRowId={r => r.id} // Usar el id generado
-          loading={loading && cursosData.length > 0} // Mostrar overlay de carga si está cargando Y ya hay datos previos
-          density="compact"
-          disableRowSelectionOnClick
-          // 3. Establecer ordenación inicial
-          initialState={{
-            sorting: {
-                // Ordenar por 'Fecha inicio de inscripción' si la columna existe
-                sortModel: columnsForGrid.some(c => c.field === 'Fecha inicio de inscripción')
-                           ? [{ field: 'Fecha inicio de inscripción', sort: 'asc' }]
-                           : [],
-            },
-            pagination: { paginationModel: { pageSize: 100 } }, // Opcional: Mostrar más filas por página
-          }}
-          pageSizeOptions={[10, 25, 50, 100]} // Opcional: Opciones de tamaño de página
-          sx={{
-            border: 0,
-            '& .MuiDataGrid-columnHeaders': { backgroundColor: 'primary.light', color: 'text.primary', fontWeight: 'bold' },
-            '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none!important' },
-            '& .MuiDataGrid-row': { cursor: 'pointer' },
-            '& .MuiDataGrid-row:hover': { backgroundColor: 'action.hover' },
-            '& .MuiDataGrid-overlay': { backgroundColor: 'rgba(255,255,255,0.7)' },
-            '& .MuiDataGrid-cell': { // Ajuste para evitar overflow con texto largo
-              whiteSpace: 'normal', // Permite que el texto se ajuste
-              lineHeight: '1.4',    // Espaciado entre líneas si se ajusta
-              py: '8px'             // Padding vertical para celdas compactas
-            },
-            '& .MuiDataGrid-columnHeader': { // Para headers también
-                 whiteSpace: 'normal',
-                 lineHeight: '1.4'
-            },
-          }}
-          slots={{
-            noRowsOverlay: () => (
-              <Box sx={{ mt: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', p: 2 }}>
-                <InfoIcon color="action" sx={{ mb: 1, fontSize: '3rem' }} />
-                <Typography align="center">
-                  {/* Mensaje dinámico */}
-                  {!cursosData.length
-                    ? "No hay datos de cronograma disponibles."
-                    : isFilterActive
-                      ? "No hay cursos que coincidan con los filtros seleccionados."
-                      : "No se encontraron cursos." // Mensaje genérico si no hay filtros pero tampoco datos
-                  }
-                </Typography>
-              </Box>
-            )
-          }}
-        />
-      </Paper>
-
-      {/* --- Modal de Detalles --- */}
-      <Modal open={modalOpen} onClose={handleCloseModal} aria-labelledby="course-detail-title">
-        <Box sx={modalStyle}>
-          {selectedRowData && (
-            <Card sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
-              <CardHeader
-                avatar={<InfoIcon color="primary" />}
-                id="course-detail-title"
-                title={selectedRowData["Nombre del curso"] || "Detalle del Curso"}
-                titleTypographyProps={{ variant: 'h6', fontWeight: 'bold', color: 'text.primary' }}
-                subheader={selectedRowData["Código del curso"] || ''} // Mostrar código como subheader
-                subheaderTypographyProps={{ color: 'text.secondary' }}
-                action={<IconButton aria-label="Cerrar" onClick={handleCloseModal}><CloseIcon /></IconButton>}
-                sx={{ borderBottom: 1, borderColor: 'divider', pb: 1, bgcolor: 'grey.100' }}
-              />
-              <CardContent sx={{ overflowY: 'auto', flexGrow: 1, p: 2 }}>
-                <List dense>
-                  {/* Mostrar todos los campos de la fila seleccionada (excepto id) */}
-                  {Object.entries(selectedRowData)
-                    .filter(([key, value]) => key !== 'id' && value != null && value !== '') // Filtrar id y valores vacíos/nulos
-                    .map(([key, value], index, arr) => (
-                      <React.Fragment key={key}>
-                        <ListItem sx={{ py: 0.8, px: 0 }}>
-                          <ListItemText
-                            primary={String(value)} // Asegurar que sea string
-                            secondary={key} // Usar la clave como etiqueta
-                            primaryTypographyProps={{ fontWeight: 500, color: 'text.primary', wordBreak: 'break-word' }}
-                            secondaryTypographyProps={{ fontSize: '0.8rem', color: 'text.secondary' }}
-                          />
-                        </ListItem>
-                        {index < arr.length - 1 && <Divider component="li" sx={{ my: 0.5 }} />}
-                      </React.Fragment>
-                    ))}
-                </List>
-              </CardContent>
-            </Card>
-          )}
-        </Box>
-      </Modal>
-    </div>
-  );
 };
 
-export default Cronograma;
+export default CronogramaGAReducido;

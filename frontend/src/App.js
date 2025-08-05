@@ -20,6 +20,7 @@ import ReporteCursosCC from './components/ReporteCursosCC';
 import CrearAviso from './components/CrearAviso';
 import MostrarAvisos from "./components/MostrarAvisos"
 import CardAvisos from "./components/Avisos";
+import VersionReducidaGA from './components/VersionReducidaGA';
 
 
 
@@ -49,6 +50,7 @@ function App() {
         <Route path='/crearAvisos' element={<CrearAviso />} />
         <Route path='/mostrarAvisos' element={<MostrarAvisos />} />
         <Route path='/cardAvisos' element={<CardAvisos />} />
+        <Route path='/version-reducida-ga' element={<VersionReducidaGA />} />
 
 
       </Routes>

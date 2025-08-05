@@ -105,3 +105,24 @@
 2025-08-04T10:01:20.977Z [WARN]: Actualización de instancia por Christian Javier Bergero no afectó filas (Curso: C-PJV, Fecha: 2024-11-14).
 2025-08-04T10:01:42.077Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"restriccion_edad_desde":16,"restriccion_edad_hasta":35,"tiene_restriccion_edad":1}
 2025-08-04T10:01:42.428Z [WARN]: Actualización de instancia por Christian Javier Bergero no afectó filas (Curso: C-PJV, Fecha: 2024-11-14).
+2025-08-04T10:06:32.522Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-IVN+26, Fecha=2025-01-06, Datos={"estado_instancia":"PEND"}
+2025-08-04T10:06:32.874Z [WARN]: Actualización de instancia por Christian Javier Bergero no afectó filas (Curso: C-IVN+26, Fecha: 2025-01-06).
+2025-08-05T11:30:25.892Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20378513376
+2025-08-05T11:39:00.596Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20378513376
+2025-08-05T11:39:37.617Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20378513376
+2025-08-05T12:38:05.598Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20378513376
+2025-08-05T13:28:44.182Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20378513376
+2025-08-05T13:53:58.722Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-HCS+26, Fecha=2025-01-06, Datos={"estado_instancia":"CANC"}
+2025-08-05T13:53:59.074Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-05T13:54:13.036Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"estado_instancia":"CERR"}
+2025-08-05T13:54:13.378Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-05T13:54:21.790Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"estado_instancia":"ACT"}
+2025-08-05T13:54:21.962Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-05T13:54:43.973Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-EV+26, Fecha=2025-01-06, Datos={"es_autogestionado":0}
+2025-08-05T13:54:44.321Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-05T13:54:44.672Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-EV+26, Fecha=2025-01-06, Datos={"es_autogestionado":0}
+2025-08-05T13:54:44.845Z [WARN]: Actualización de instancia por Christian Javier Bergero no afectó filas (Curso: C-EV+26, Fecha: 2025-01-06).
+2025-08-05T13:54:54.583Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"es_autogestionado":1}
+2025-08-05T13:54:54.932Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-05T13:56:29.345Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"cantidad_inscriptos":11}
+2025-08-05T13:56:29.690Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
