@@ -126,3 +126,13 @@
 2025-08-05T13:54:54.932Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
 2025-08-05T13:56:29.345Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"cantidad_inscriptos":11}
 2025-08-05T13:56:29.690Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-05T15:06:50.708Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"restriccion_edad_desde":25,"restriccion_edad_hasta":35,"tiene_restriccion_edad":1}
+2025-08-05T15:06:51.063Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-05T15:07:32.772Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"es_autogestionado":0}
+2025-08-05T15:07:33.118Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
+2025-08-05T15:07:33.480Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-PJV, Fecha=2024-11-14, Datos={"es_autogestionado":0}
+2025-08-05T15:07:33.654Z [WARN]: Actualización de instancia por Christian Javier Bergero no afectó filas (Curso: C-PJV, Fecha: 2024-11-14).
+2025-08-05T15:22:56.161Z [WARN]: Asignación eliminada por Christian Javier Bergero: Usuario=20111111111, Área=ATD
+2025-08-05T15:23:02.132Z [WARN]: Asignación eliminada por Christian Javier Bergero: Usuario=20111111111, Área=DGCDDH
+2025-08-05T15:23:11.766Z [INFO]: Error en postLogin: Usuario: undefined (Contraseña/Usuario incorrectos)
+2025-08-05T15:23:14.852Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20111111111

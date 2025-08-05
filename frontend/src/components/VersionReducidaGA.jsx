@@ -255,23 +255,11 @@ const CronogramaGAReducido = () => {
     const handleRowClick = useCallback(params => { setSelectedRowData(params.row); setOriginalInstanciaData(params.row.originalInstancia); setModalOpen(true); }, []);
     const handleCloseModal = useCallback(() => { setModalOpen(false); setSelectedRowData(null); setOriginalInstanciaData(null); }, []);
     
-    const handleOpenReasignModal = useCallback(() => setReasignModalOpen(true), []);
     const handleCloseReasignModal = useCallback(() => { setReasignModalOpen(false); setSelectedUserForReasign(null); setUserSearchTerm(''); }, []);
     
     const handleOpenEstadoModal = useCallback(() => { if (originalInstanciaData) { setSelectedEstado(originalInstanciaData.estado_instancia || ''); } setEstadoModalOpen(true); }, [originalInstanciaData]);
     const handleCloseEstadoModal = useCallback(() => { setEstadoModalOpen(false); setSelectedEstado(''); }, []);
 
-    const handleOpenFechasModal = useCallback(() => {
-        if (originalInstanciaData) {
-            setFechasEditables({
-                fecha_inicio_curso: originalInstanciaData.fecha_inicio_curso ? dayjs(originalInstanciaData.fecha_inicio_curso) : null,
-                fecha_fin_curso: originalInstanciaData.fecha_fin_curso ? dayjs(originalInstanciaData.fecha_fin_curso) : null,
-                fecha_inicio_inscripcion: originalInstanciaData.fecha_inicio_inscripcion ? dayjs(originalInstanciaData.fecha_inicio_inscripcion) : null,
-                fecha_fin_inscripcion: originalInstanciaData.fecha_fin_inscripcion ? dayjs(originalInstanciaData.fecha_fin_inscripcion) : null,
-            });
-        }
-        setFechasModalOpen(true);
-    }, [originalInstanciaData]);
 
     const handleCloseFechasModal = useCallback(() => { setFechasModalOpen(false); setFechasEditables({ fecha_inicio_curso: null, fecha_fin_curso: null, fecha_inicio_inscripcion: null, fecha_fin_inscripcion: null }); }, []);
     
@@ -288,14 +276,6 @@ const CronogramaGAReducido = () => {
     const handleCloseOtrosModal = useCallback(() => { setOtrosModalOpen(false); setOtrosEditable({ cantidad_inscriptos: '', cantidad_certificados: '' }); }, []);
 
 
-    const handleCloseRestrictionsModal = useCallback(() => {
-        setRestrictionsModalOpen(false);
-        setEditableDepartamentos([]);
-        setEditableCorrelativos([]);
-        setEdadRestrictionEnabled(false);
-        setEditableEdadDesde('');
-        setEditableEdadHasta('');
-    }, []);
 
     const handleApiUpdate = useCallback(async (payload) => {
         if (!originalInstanciaData) { setError("No hay una instancia seleccionada para actualizar."); return false; }
@@ -330,21 +310,6 @@ const CronogramaGAReducido = () => {
         setLoadingEstado(false);
     }, [selectedEstado, allEstados, handleApiUpdate, fetchData, handleCloseEstadoModal, handleCloseModal]);
 
-    const handleUpdateFechas = useCallback(async () => {
-        setLoadingFechas(true);
-        const payload = {};
-        Object.keys(fechasEditables).forEach(key => {
-            const newDate = fechasEditables[key]; const originalDateStr = originalInstanciaData?.[key];
-            const newDateStr = newDate && dayjs(newDate).isValid() ? dayjs(newDate).format('YYYY-MM-DD') : null;
-            if (newDateStr !== originalDateStr) payload[key] = newDateStr;
-        });
-        if (Object.keys(payload).length === 0) {
-            setSuccessMessage("No se realizaron cambios en las fechas."); handleCloseFechasModal(); setLoadingFechas(false); return;
-        }
-        const success = await handleApiUpdate(payload);
-        if (success) { setSuccessMessage("Fechas actualizadas exitosamente."); handleCloseFechasModal(); handleCloseModal(); fetchData(); }
-        setLoadingFechas(false);
-    }, [fechasEditables, originalInstanciaData, handleApiUpdate, fetchData, handleCloseFechasModal, handleCloseModal]);
 
     const handleConfirmToggleAutogestionado = useCallback(async () => {
         const currentValue = originalInstanciaData?.es_autogestionado;
@@ -360,26 +325,6 @@ const CronogramaGAReducido = () => {
         }
     }, [originalInstanciaData, handleApiUpdate, fetchData, handleCloseModal]);
 
-    const handleUpdateRestrictions = useCallback(async () => {
-        setLoadingRestrictions(true);
-        const payload = {
-            tiene_restriccion_departamento: editableDepartamentos.length > 0 ? 1 : 0,
-            departamentos: editableDepartamentos.map(d => d.id),
-            tiene_correlatividad: editableCorrelativos.length > 0 ? 1 : 0,
-            cursos_correlativos: editableCorrelativos.map(c => c.cod),
-            tiene_restriccion_edad: edadRestrictionEnabled ? 1 : 0,
-            restriccion_edad_desde: edadRestrictionEnabled ? (parseInt(editableEdadDesde, 10) || null) : null,
-            restriccion_edad_hasta: edadRestrictionEnabled ? (parseInt(editableEdadHasta, 10) || null) : null,
-        };
-        const success = await handleApiUpdate(payload);
-        if (success) {
-            setSuccessMessage("Restricciones actualizadas exitosamente.");
-            handleCloseRestrictionsModal();
-            handleCloseModal();
-            fetchData();
-        }
-        setLoadingRestrictions(false);
-    }, [editableDepartamentos, editableCorrelativos, edadRestrictionEnabled, editableEdadDesde, editableEdadHasta, handleApiUpdate, fetchData, handleCloseRestrictionsModal, handleCloseModal]);
     
     const filteredAdminUsersForModal = useMemo(() => {
         if (!userSearchTerm) return adminUsers;
@@ -468,7 +413,7 @@ const CronogramaGAReducido = () => {
                 {error && !successMessage && <Alert severity="error" onClose={() => {setError(null); setSuccessMessage('');}} sx={{ mb: 2 }}>{error}</Alert>}
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
-                    <Titulo texto="Cronograma Admin Reducido" />
+                    <Titulo texto="Cronograma GA Reducido" />
                     <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={(loading && cursosData.length > 0) || !filteredData.length} />
                 </Box>
                 <Divider sx={{ mb: 3, borderBottomWidth: 2 }} />

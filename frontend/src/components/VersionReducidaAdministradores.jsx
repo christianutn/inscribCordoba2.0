@@ -468,7 +468,8 @@ const CronogramaAdminReducido = () => {
                                         {renderDetailItem("Fecha Inicio Curso", originalInstanciaData.fecha_inicio_curso)}
                                         {renderDetailItem("Fecha Fin Curso", originalInstanciaData.fecha_fin_curso)}
                                         {renderDetailItem("Fecha Inicio Inscripción", originalInstanciaData.fecha_inicio_inscripcion)}
-                                        {renderDetailItem("Fecha Fin Inscripción", originalInstanciaData.fecha_fin_inscripcion, false, <ActionButton onClick={handleOpenFechasModal}>Cambiar</ActionButton>)}
+                                        {renderDetailItem("Fecha Fin Inscripción", originalInstanciaData.fecha_fin_inscripcion, false)}
+                                        
                                         <Divider sx={{ my: 1 }}><Chip label="Detalles Instancia" size="small" /></Divider>
                                         {renderDetailItem("Cupo", originalInstanciaData.cupo)}
                                         {renderDetailItem("Es Autogestionado", originalInstanciaData.es_autogestionado, true, <ActionButton onClick={() => setAutogestionadoConfirmOpen(true)}>Cambiar</ActionButton>)}

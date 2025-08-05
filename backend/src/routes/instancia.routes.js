@@ -8,7 +8,7 @@ import passport from "passport";
 const instanciaRouter = Router();
 
 
-instanciaRouter.get("/", passport.authenticate('jwt', { session: false }), autorizar(['ADM']), getInstancias)
+instanciaRouter.get("/", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'GA', 'REF']), getInstancias)
 
 instanciaRouter.post("/",
     passport.authenticate('jwt', { session: false }),
