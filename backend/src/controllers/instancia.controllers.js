@@ -11,107 +11,133 @@ import Usuario from "../models/usuario.models.js";
 import logger from '../utils/logger.js';
 import RestriccionesPorCorrelatividad from "../models/restricciones_por_correlatividad.models.js";
 import RestriccionesPorDepartamento from "../models/restricciones_por_departamento.models.js";
+import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
+import Area from "../models/area.models.js";
 
 export const getInstancias = async (req, res, next) => {
     try {
-        const usuario = req.user.user;
-        const query = `
-            SELECT
-                i.curso,
-                i.fecha_inicio_curso,
-                i.fecha_fin_curso,
-                i.fecha_inicio_inscripcion,
-                i.fecha_fin_inscripcion,
-                i.es_publicada_portal_cc,
-                i.cupo,
-                i.cantidad_horas,
-                i.es_autogestionado,
-                i.tiene_correlatividad,
-                i.tiene_restriccion_edad,
-                i.tiene_restriccion_departamento,
-                i.datos_solictud,
-                i.estado_instancia,
-                i.medio_inscripcion,
-                i.plataforma_dictado,
-                i.tipo_capacitacion,
-                i.comentario,
-                i.asignado,
-                i.cantidad_inscriptos,
-                i.cantidad_certificados,
-                i.fecha_suba_certificados,
-                i.restriccion_edad_desde,
-                i.restriccion_edad_hasta,
-                (
-                    SELECT JSON_OBJECT(
-                        'cod', c.cod, 'nombre', c.nombre, 'cupo', c.cupo, 'cantidad_horas', c.cantidad_horas,
-                        'medio_inscripcion', c.medio_inscripcion, 'plataforma_dictado', c.plataforma_dictado,
-                        'tipo_capacitacion', c.tipo_capacitacion, 'area', c.area, 'esVigente', c.esVigente,
-                        'tiene_evento_creado', c.tiene_evento_creado, 'es_autogestionado', c.es_autogestionado,
-                        'tiene_restriccion_edad', c.tiene_restriccion_edad,
-                        'tiene_restriccion_departamento', c.tiene_restriccion_departamento, 'publica_pcc', c.publica_pcc,
-                        'tiene_correlatividad', c.tiene_correlatividad, 'numero_evento', c.numero_evento,
-                        'esta_maquetado', c.esta_maquetado, 'esta_configurado', c.esta_configurado,
-                        'aplica_sincronizacion_certificados', c.aplica_sincronizacion_certificados, 'url_curso', c.url_curso,
-                        'detalle_medioInscripcion', (SELECT JSON_OBJECT('cod', mi.cod, 'nombre', mi.nombre, 'esVigente', mi.esVigente) FROM medios_inscripcion mi WHERE mi.cod = c.medio_inscripcion),
-                        'detalle_tipoCapacitacion', (SELECT JSON_OBJECT('cod', tc.cod, 'nombre', tc.nombre, 'esVigente', tc.esVigente) FROM tipos_capacitacion tc WHERE tc.cod = c.tipo_capacitacion),
-                        'detalle_plataformaDictado', (SELECT JSON_OBJECT('cod', pd.cod, 'nombre', pd.nombre, 'esVigente', pd.esVigente) FROM plataformas_dictado pd WHERE pd.cod = c.plataforma_dictado),
-                        'detalle_area', (
-                            SELECT JSON_OBJECT(
-                                'cod', a.cod, 'nombre', a.nombre, 'ministerio', a.ministerio, 'esVigente', a.esVigente,
-                                'detalle_ministerio', (SELECT JSON_OBJECT('cod', m.cod, 'nombre', m.nombre, 'esVigente', m.esVigente) FROM ministerios m WHERE m.cod = a.ministerio)
-                            ) FROM areas a WHERE a.cod = c.area
-                        )
-                    )
-                    FROM cursos c WHERE c.cod = i.curso
-                ) AS detalle_curso,
-                (
-                    SELECT JSON_OBJECT(
-                        'cuil', u.cuil, 'contrasenia', u.contrasenia, 'rol', u.rol, 'area', u.area,
-                        'necesitaCbioContrasenia', u.necesitaCbioContrasenia, 'esExcepcionParaFechas', u.esExcepcionParaFechas,
-                        'detalle_persona', (SELECT JSON_OBJECT('cuil', p.cuil, 'nombre', p.nombre, 'apellido', p.apellido, 'mail', p.mail, 'celular', p.celular) FROM personas p WHERE p.cuil = u.cuil),
-                        'detalle_rol', (SELECT JSON_OBJECT('cod', r.cod, 'nombre', r.nombre) FROM roles r WHERE r.cod = u.rol),
-                        'detalle_area', (SELECT JSON_OBJECT('cod', a.cod, 'nombre', a.nombre) FROM areas a WHERE a.cod = u.area)
-                    )
-                    FROM usuarios u WHERE u.cuil = i.asignado
-                ) AS detalle_asignado,
-                (
-                    SELECT COALESCE(JSON_ARRAYAGG(
-                        JSON_OBJECT(
-                            'curso', rpd.curso, 'fecha_inicio_curso', rpd.fecha_inicio_curso, 'departamento_id', rpd.departamento_id,
-                            'detalle_departamento', (SELECT JSON_OBJECT('id', d.id, 'nombre', d.nombre) FROM departamentos d WHERE d.id = rpd.departamento_id)
-                        )
-                    ), JSON_ARRAY())
-                    FROM restricciones_por_departamento rpd
-                    WHERE rpd.curso = i.curso AND rpd.fecha_inicio_curso = i.fecha_inicio_curso
-                ) AS detalle_restricciones_por_departamento,
-                (
-                    SELECT COALESCE(JSON_ARRAYAGG(
-                        JSON_OBJECT(
-                            'curso', rpc.curso, 'fecha_inicio_curso', rpc.fecha_inicio_curso, 'curso_correlativo', rpc.curso_correlativo,
-                            'detalle_curso', (SELECT JSON_OBJECT('cod', dc.cod, 'nombre', dc.nombre) FROM cursos dc WHERE dc.cod = rpc.curso),
-                            'detalle_curso_correlativo', (SELECT JSON_OBJECT('cod', dcc.cod, 'nombre', dcc.nombre) FROM cursos dcc WHERE dcc.cod = rpc.curso_correlativo)
-                        )
-                    ), JSON_ARRAY())
-                    FROM restricciones_por_correlatividad rpc
-                    WHERE rpc.curso = i.curso AND rpc.fecha_inicio_curso = i.fecha_inicio_curso
-                ) AS detalle_restricciones_por_correlatividad
-            FROM instancias i;
-        `;
+        // 1. Obtener los valores del token
+        const { rol, area: areaPrincipal, cuil } = req.user.user;
 
+        // 2. Crear la lista de áreas permitidas para el usuario
+        //    Esta lógica se ejecuta para todos los roles, pero solo se usará para filtrar si no es ADM/GA.
+
+        // Validar que el área principal del usuario exista si no es un rol de super admin.
+        if (!areaPrincipal && rol !== 'ADM' && rol !== 'GA') {
+            const error = new Error("El usuario no tiene un área principal asignada.");
+            error.statusCode = 404; // 404 o 403 podría ser apropiado
+            throw error;
+        }
+
+        const areasAsignadas = await AreasAsignadasUsuario.findAll({
+            where: { usuario: cuil },
+            // El 'include' no es estrictamente necesario para obtener los códigos, 
+            // pero lo mantenemos si lo usas para otros fines.
+            attributes: ['area']
+        });
+
+        // Crear un Set para un rendimiento óptimo en la búsqueda (mejor que .includes() en arrays grandes)
+        const codigosAreaPermitidos = new Set();
+        if (areaPrincipal) {
+            codigosAreaPermitidos.add(areaPrincipal);
+        }
+        areasAsignadas.forEach(areaAsignada => {
+            codigosAreaPermitidos.add(areaAsignada.area);
+        });
+
+        // 3. Ejecutar la consulta SQL (sin cambios)
+        const query = `
+        SELECT
+            i.curso,
+            i.fecha_inicio_curso,
+            i.fecha_fin_curso,
+            i.fecha_inicio_inscripcion,
+            i.fecha_fin_inscripcion,
+            i.es_publicada_portal_cc,
+            i.cupo,
+            i.cantidad_horas,
+            i.es_autogestionado,
+            i.tiene_correlatividad,
+            i.tiene_restriccion_edad,
+            i.tiene_restriccion_departamento,
+            i.datos_solictud,
+            i.estado_instancia,
+            i.medio_inscripcion,
+            i.plataforma_dictado,
+            i.tipo_capacitacion,
+            i.comentario,
+            i.asignado,
+            i.cantidad_inscriptos,
+            i.cantidad_certificados,
+            i.fecha_suba_certificados,
+            i.restriccion_edad_desde,
+            i.restriccion_edad_hasta,
+            (
+                SELECT JSON_OBJECT(
+                    'cod', c.cod, 'nombre', c.nombre, 'cupo', c.cupo, 'cantidad_horas', c.cantidad_horas,
+                    'medio_inscripcion', c.medio_inscripcion, 'plataforma_dictado', c.plataforma_dictado,
+                    'tipo_capacitacion', c.tipo_capacitacion, 'area', c.area, 'esVigente', c.esVigente,
+                    'tiene_evento_creado', c.tiene_evento_creado, 'es_autogestionado', c.es_autogestionado,
+                    'tiene_restriccion_edad', c.tiene_restriccion_edad,
+                    'tiene_restriccion_departamento', c.tiene_restriccion_departamento, 'publica_pcc', c.publica_pcc,
+                    'tiene_correlatividad', c.tiene_correlatividad, 'numero_evento', c.numero_evento,
+                    'esta_maquetado', c.esta_maquetado, 'esta_configurado', c.esta_configurado,
+                    'aplica_sincronizacion_certificados', c.aplica_sincronizacion_certificados, 'url_curso', c.url_curso,
+                    'detalle_medioInscripcion', (SELECT JSON_OBJECT('cod', mi.cod, 'nombre', mi.nombre, 'esVigente', mi.esVigente) FROM medios_inscripcion mi WHERE mi.cod = c.medio_inscripcion),
+                    'detalle_tipoCapacitacion', (SELECT JSON_OBJECT('cod', tc.cod, 'nombre', tc.nombre, 'esVigente', tc.esVigente) FROM tipos_capacitacion tc WHERE tc.cod = c.tipo_capacitacion),
+                    'detalle_plataformaDictado', (SELECT JSON_OBJECT('cod', pd.cod, 'nombre', pd.nombre, 'esVigente', pd.esVigente) FROM plataformas_dictado pd WHERE pd.cod = c.plataforma_dictado),
+                    'detalle_area', (
+                        SELECT JSON_OBJECT(
+                            'cod', a.cod, 'nombre', a.nombre, 'ministerio', a.ministerio, 'esVigente', a.esVigente,
+                            'detalle_ministerio', (SELECT JSON_OBJECT('cod', m.cod, 'nombre', m.nombre, 'esVigente', m.esVigente) FROM ministerios m WHERE m.cod = a.ministerio)
+                        ) FROM areas a WHERE a.cod = c.area
+                    )
+                )
+                FROM cursos c WHERE c.cod = i.curso
+            ) AS detalle_curso,
+            (
+                SELECT JSON_OBJECT(
+                    'cuil', u.cuil, 'contrasenia', u.contrasenia, 'rol', u.rol, 'area', u.area,
+                    'necesitaCbioContrasenia', u.necesitaCbioContrasenia, 'esExcepcionParaFechas', u.esExcepcionParaFechas,
+                    'detalle_persona', (SELECT JSON_OBJECT('cuil', p.cuil, 'nombre', p.nombre, 'apellido', p.apellido, 'mail', p.mail, 'celular', p.celular) FROM personas p WHERE p.cuil = u.cuil),
+                    'detalle_rol', (SELECT JSON_OBJECT('cod', r.cod, 'nombre', r.nombre) FROM roles r WHERE r.cod = u.rol),
+                    'detalle_area', (SELECT JSON_OBJECT('cod', a.cod, 'nombre', a.nombre) FROM areas a WHERE a.cod = u.area)
+                )
+                FROM usuarios u WHERE u.cuil = i.asignado
+            ) AS detalle_asignado,
+            (
+                SELECT COALESCE(JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'curso', rpd.curso, 'fecha_inicio_curso', rpd.fecha_inicio_curso, 'departamento_id', rpd.departamento_id,
+                        'detalle_departamento', (SELECT JSON_OBJECT('id', d.id, 'nombre', d.nombre) FROM departamentos d WHERE d.id = rpd.departamento_id)
+                    )
+                ), JSON_ARRAY())
+                FROM restricciones_por_departamento rpd
+                WHERE rpd.curso = i.curso AND rpd.fecha_inicio_curso = i.fecha_inicio_curso
+            ) AS detalle_restricciones_por_departamento,
+            (
+                SELECT COALESCE(JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'curso', rpc.curso, 'fecha_inicio_curso', rpc.fecha_inicio_curso, 'curso_correlativo', rpc.curso_correlativo,
+                        'detalle_curso', (SELECT JSON_OBJECT('cod', dc.cod, 'nombre', dc.nombre) FROM cursos dc WHERE dc.cod = rpc.curso),
+                        'detalle_curso_correlativo', (SELECT JSON_OBJECT('cod', dcc.cod, 'nombre', dcc.nombre) FROM cursos dcc WHERE dcc.cod = rpc.curso_correlativo)
+                    )
+                ), JSON_ARRAY())
+                FROM restricciones_por_correlatividad rpc
+                WHERE rpc.curso = i.curso AND rpc.fecha_inicio_curso = i.fecha_inicio_curso
+            ) AS detalle_restricciones_por_correlatividad
+        FROM instancias i;
+    `
         const [results] = await sequelize.query(query);
 
+        // 4. Parsear los resultados JSON (sin cambios)
         const parsedResults = results.map(item => {
             const safelyParseJSON = (jsonString) => {
                 if (typeof jsonString === 'string') {
-                    try {
-                        return JSON.parse(jsonString);
-                    } catch (e) {
-                        return null;
-                    }
+                    try { return JSON.parse(jsonString); } catch (e) { return null; }
                 }
                 return jsonString;
             };
-
             return {
                 ...item,
                 detalle_curso: safelyParseJSON(item.detalle_curso),
@@ -121,10 +147,28 @@ export const getInstancias = async (req, res, next) => {
             };
         });
 
-        // logger.info(`getInstancias ejecutado por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}`);
-        res.status(200).json(parsedResults);
+        // 5. Aplicar el filtro basado en el rol del usuario
+        let finalResults;
+
+        if (rol === 'ADM' || rol === 'GA') {
+            // Si el rol es ADM o GA, no se aplica ningún filtro.
+            finalResults = parsedResults;
+        } else {
+            // Para otros roles, filtrar los resultados.
+            finalResults = parsedResults.filter(instancia => {
+                // Usar encadenamiento opcional para evitar errores si las propiedades anidadas no existen
+                const areaCod = instancia.detalle_curso?.detalle_area?.cod;
+
+                // Si el área del curso existe y está en el set de áreas permitidas, mantener la instancia.
+                return areaCod && codigosAreaPermitidos.has(areaCod);
+            });
+        }
+
+        // 6. Enviar la respuesta
+        res.status(200).json(finalResults);
 
     } catch (error) {
+        // Tu logger y manejo de errores (sin cambios)
         logger.error(`Error en getInstancias por ${req.user?.user?.nombre || 'N/A'} ${req.user?.user?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
         next(error);
     }

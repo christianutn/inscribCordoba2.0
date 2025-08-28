@@ -39,7 +39,7 @@ export const getMinisterios = async (req, res, next) => {
         let ministerios;
 
         // Lógica para obtener ministerios según el rol
-        if (rol === "ADM" || rol === "GA") {
+        if (rol == "ADM" || rol == "GA") {
             ministerios = await Ministerio.findAll({
                 include: [
                     {
@@ -56,6 +56,7 @@ export const getMinisterios = async (req, res, next) => {
             });
         } else {
             // Validar área para roles no administradores
+
             if (!area) {
                 const error = new Error("No se encontraron los datos del usuario (area)");
                 error.statusCode = 404;
