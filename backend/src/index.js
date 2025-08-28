@@ -43,7 +43,7 @@ app.use(cors());
 const accessLogStream = fs.createWriteStream(path.join(__dirname, '../logs/access.log'), { flags: 'a' });
 app.use(morgan('combined', { stream: accessLogStream }));
 
-const PORT = 4000 // para producción cambiar a 4000
+const PORT = 8080
 
 // Middleware
 app.use(express.json());

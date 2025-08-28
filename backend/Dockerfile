@@ -17,7 +17,7 @@ RUN npm install --production=false
 COPY . .
 
 # Expone el puerto en el que la aplicación está escuchando
-EXPOSE 4000
+EXPOSE 8080
 
 # Comando por defecto para iniciar la app
 CMD ["npm", "start"]

@@ -136,3 +136,7 @@
 2025-08-05T15:23:02.132Z [WARN]: Asignación eliminada por Christian Javier Bergero: Usuario=20111111111, Área=DGCDDH
 2025-08-05T15:23:11.766Z [INFO]: Error en postLogin: Usuario: undefined (Contraseña/Usuario incorrectos)
 2025-08-05T15:23:14.852Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20111111111
+2025-08-28T12:04:55.611Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20378513376
+2025-08-28T12:05:52.683Z [INFO]: Login exitoso - Nombre: Christian Javier, DNI: 20378513376
+2025-08-28T12:06:36.895Z [INFO]: Intento de actualización de instancia por Christian Javier Bergero: Curso=C-EN1+26, Fecha=2025-01-06, Datos={"estado_instancia":"CERR"}
+2025-08-28T12:06:37.253Z [INFO]: Instancia actualizada exitosamente por Christian Javier Bergero: 1 fila(s) afectadas.
