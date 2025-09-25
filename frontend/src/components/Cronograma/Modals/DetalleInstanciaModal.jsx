@@ -19,7 +19,10 @@ const DetalleInstanciaModal = ({
     onOpenOtrosModal,
     onOpenRestrictionsModal,
     onToggleAutogestionado,
-    onOpenFechasModal
+    onOpenFechasModal,
+    onOpenComentariosModal,
+    onOpenPublicadaModal,
+    onOpenCupoModal
 }) => {
 
     const originalInstanciaData = selectedRowData?.originalInstancia;
@@ -86,10 +89,10 @@ const DetalleInstanciaModal = ({
                             </Box>
 
                             <Divider sx={{ my: 1 }}><Chip label="Detalles Instancia" size="small" /></Divider>
-                            {renderDetailItem("Cupo", originalInstanciaData.cupo, false, <ActionButton onClick={onOpenOtrosModal}>Cambiar</ActionButton>)}
+                            {renderDetailItem("Cupo", originalInstanciaData.cupo || 0, false, <ActionButton onClick={onOpenCupoModal}>Cambiar</ActionButton>)}
                             {renderDetailItem("Es Autogestionado", originalInstanciaData.es_autogestionado, true, <ActionButton onClick={onToggleAutogestionado}>Cambiar</ActionButton>)}
-                            {renderDetailItem("Publicada en Portal", originalInstanciaData.es_publicada_portal_cc, true)}
-                            {renderDetailItem("Comentario", originalInstanciaData.comentario)}
+                            {renderDetailItem("Publicada en Portal", originalInstanciaData.es_publicada_portal_cc, true, <ActionButton onClick={onOpenPublicadaModal}>Cambiar</ActionButton>)}
+                            {renderDetailItem("Comentario", originalInstanciaData.comentario, false, <ActionButton onClick={onOpenComentariosModal}>Cambiar</ActionButton>)}
                             {renderDetailItem("Cantidad de Inscriptos", originalInstanciaData.cantidad_inscriptos || 0, false, <ActionButton onClick={onOpenOtrosModal}>Cambiar</ActionButton>)}
 
                             <Divider sx={{ my: 1 }}><Chip label="Restricciones" size="small" /></Divider>

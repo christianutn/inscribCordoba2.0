@@ -4,19 +4,19 @@ import {
     FormControl, Input, Typography, CircularProgress
 } from '@mui/material';
 
-const CambiarCupoModal = ({ open, onClose, onUpdate, loading, selectedRowData }) => {
+const CambiarComentariosModal = ({ open, onClose, onUpdate, loading, selectedRowData }) => {
     const [cantidadCupos, setCantidadCupos] = useState('');
 
     useEffect(() => {
         if (open && selectedRowData) {
-            setCantidadCupos(selectedRowData.originalInstancia.cantidad_cupos || '');
+            setCantidadCupos(selectedRowData.originalInstancia.cupo || '');
         } else if (!open) {
             setCantidadCupos('');
         }
     }, [open, selectedRowData]);
 
     const handleConfirm = () => {
-        onUpdate({ cantidad_cupos: cantidadCupos });
+        onUpdate({ cupo: cantidadCupos });
     };
 
     return (
@@ -29,7 +29,7 @@ const CambiarCupoModal = ({ open, onClose, onUpdate, loading, selectedRowData })
                     <Input 
                         value={cantidadCupos} 
                         onChange={(e) => setCantidadCupos(e.target.value)}
-                        placeholder="Cantidad de Cupos"
+                        placeholder="Cantidad de cupos"
                     />
                 </FormControl>
             </DialogContent>
@@ -43,4 +43,5 @@ const CambiarCupoModal = ({ open, onClose, onUpdate, loading, selectedRowData })
     );
 };
 
-export default CambiarCupoModal;
+export default CambiarComentariosModal;
+
