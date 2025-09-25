@@ -1,0 +1,27 @@
+# Archivos de entorno
+# Contienen claves de API y configuración sensible.
+# ¡NUNCA los subas al repositorio!
+.env
+.env.*
+!.env.example
+
+# Dependencias
+# Se regeneran al ejecutar 'npm install' o similar.
+/node_modules
+/backend/node_modules
+/frontend/node_modules
+
+# Logs
+# No deben ser parte del control de versiones.
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Archivos de configuración del editor/IDE
+.vscode/
+.idea/
+
+# Archivos generados por el sistema operativo
+.DS_Store
+Thumbs.db

@@ -1,4 +1,0 @@
-2025-07-18T16:49:02.101Z [ERROR]: Error en putArea por N/A N/A: nom is not defined
-2025-08-04T01:24:49.376Z [ERROR]: Error en putInstancia por Christian Javier Bergero: The client was disconnected by the server because of inactivity. See wait_timeout and interactive_timeout for configuring this behavior.
-2025-08-04T02:07:33.219Z [ERROR]: Error en putInstancia por Christian Javier Bergero: Cannot read properties of undefined (reading 'uuid')
-2025-08-04T02:09:16.088Z [ERROR]: Error en putInstancia por Christian Javier Bergero: Cannot read properties of undefined (reading 'uuid')
