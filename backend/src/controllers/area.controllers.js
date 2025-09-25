@@ -3,6 +3,8 @@ import Ministerio from "../models/ministerio.models.js";
 import Curso from "../models/curso.models.js";
 import logger from '../utils/logger.js';
 
+
+
 export const getAreas = async (req, res, next) => {
     try {
         const usuario = req.user.user;
