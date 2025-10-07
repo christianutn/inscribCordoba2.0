@@ -27,9 +27,12 @@ const DetalleInstanciaModal = ({
 
     const originalInstanciaData = selectedRowData?.originalInstancia;
 
-    const renderDetailItem = useCallback((label, value, isBoolean = false, actionButton = null) => {
+    const renderDetailItem = useCallback((label, value, isBoolean = false, actionButton = null, showIf = true) => {
+        if (!showIf) {
+            return null;
+        }
         const displayValue = isBoolean ? formatBooleanToSiNo(value) : (formatValue(value) || '-');
-        return (
+        return ( 
             <React.Fragment key={label}>
                 <ListItem sx={{ py: 0.8, px: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <ListItemText
