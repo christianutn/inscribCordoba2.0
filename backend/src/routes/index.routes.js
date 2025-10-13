@@ -27,6 +27,9 @@ import AreasAsignadasUsuario from "./areasAsignadasUsuario.routes.js";
 import EstadosInstanciaRouter from "./estadosInstancia.routes.js";
 import DepartamentoRouter from "./departamento.routes.js"
 
+import CidiRouter from "./cidi.routes.js";
+
+
 
 const router = Router();
 
@@ -56,6 +59,8 @@ router.use("/argentina/feriados", ApiArgentinaFeriadosRouter)
 router.use("/areasAsignadasUsuario", AreasAsignadasUsuario)
 router.use("/estadosInstancia", EstadosInstanciaRouter)
 router.use("/departamentos", DepartamentoRouter)
+router.use("/cidi", CidiRouter)
+
 
 
 
