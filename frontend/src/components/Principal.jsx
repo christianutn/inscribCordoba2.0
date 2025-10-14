@@ -32,6 +32,7 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
+import QrCodeIcon from '@mui/icons-material/QrCode';
 
 import Formulario from './Formulario';
 import Cronograma from "./Cronograma.jsx";
@@ -43,6 +44,7 @@ import ReporteCursos from "./ReporteCursosCC.jsx";
 import CrearAviso from './CrearAviso.jsx';
 import VersionReducidaGa from './VersionReducidaGA.jsx';
 import VersionReducidaAdministradores from './VersionReducidaAdministradores.jsx';
+import AsistenciasMain from './AsistenciasMain.jsx';
 
 import { getMyUser } from "../services/usuarios.service.js";
 
@@ -57,6 +59,7 @@ const menuItemsConfig = [
   { label: "Administrar Usuarios/Cursos", identifier: "AltaBajaModificion", icon: <SettingsSuggestIcon />, roles: ["ADM"] },
   { label: "Restricciones Fechas", identifier: "RestriccionesFechasInicioCursada", icon: <GavelIcon />, roles: ["ADM"] },
   { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon />, roles: ["ADM"] },
+  { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["ADM", "REF", "GA"] },
   { label: "Version reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon />, roles: ['GA', 'ADM'] },
   { label: "Version reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
 ];
@@ -204,6 +207,7 @@ export default function Principal() {
       case "Eventos": return <NuevoEvento />;
       case "ReporteCursosIdentifier": return <ReporteCursos />;
       case "CrearAviso": return <CrearAviso />;
+      case "AsistenciasMain": return <AsistenciasMain />;
       case "VersionReducidaGa": return <VersionReducidaGa />;
       case "VersionReducidaAdministradores": return <VersionReducidaAdministradores />;
       case "Home":
