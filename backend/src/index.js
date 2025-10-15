@@ -18,6 +18,7 @@ import 'dotenv/config';
 import enviarCorreoDiarioContolDeCursos from "./googleSheets/utils/enviarCorreoDiarioControlDeCursos.js";
 import syncModels from "./config/sync.database.js";
 import manejarErrorGlobales from "./middlewares/manejoGlobalErrores.js"
+import associateAllModels from './associateAllModels.js';
 
 const app = express();
 
@@ -30,6 +31,8 @@ export const initDb = async () => {
             //await syncModels();
             console.log('All models were synchronized successfully.');
         }
+
+        associateAllModels()
     } catch (error) {
         console.error('Unable to connect to the database:', error);
         throw error;
@@ -43,7 +46,7 @@ app.use(cors());
 const accessLogStream = fs.createWriteStream(path.join(__dirname, '../logs/access.log'), { flags: 'a' });
 app.use(morgan('combined', { stream: accessLogStream }));
 
-const PORT = 8080
+const PORT = process.env.PORT || 80;
 
 // Middleware
 app.use(express.json());
