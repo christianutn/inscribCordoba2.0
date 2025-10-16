@@ -17,4 +17,17 @@ export default class InscripcionService {
         }
     }
 
+    async crearVarios(inscripcionesData, transaction = null) {
+        try {
+            // Optional: Add validation for each item
+            const inscripcionesSonValidas = inscripcionesData.every(i => i.cuil && i.id_evento);
+            if (!inscripcionesSonValidas) {
+                throw new Error("Todas las inscripciones deben tener cuil y id_evento");
+            }
+            return await this.inscripcionRepository.crearVarios(inscripcionesData, transaction);
+        } catch (err) {
+            console.error("Error en el servicio al crear varias inscripciones:", err.message);
+            throw err;
+        }
+    }
 }

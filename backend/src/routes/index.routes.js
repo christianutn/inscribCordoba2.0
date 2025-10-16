@@ -29,7 +29,7 @@ import DepartamentoRouter from "./departamento.routes.js"
 
 import CidiRouter from "./cidi.routes.js";
 
-import inscripcionesRouter from "./asistenciaInscripciones.routes.js";
+import AsistenciaRouter from "./asistencia.routes.js";
 
 
 
@@ -62,7 +62,7 @@ router.use("/areasAsignadasUsuario", AreasAsignadasUsuario)
 router.use("/estadosInstancia", EstadosInstanciaRouter)
 router.use("/departamentos", DepartamentoRouter)
 router.use("/cidi", CidiRouter)
-router.use("/asistencias", inscripcionesRouter)
+router.use("/asistencias", AsistenciaRouter)
 
 
 export default router

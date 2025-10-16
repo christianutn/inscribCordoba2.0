@@ -7,4 +7,8 @@ export default class DiaEventoRepository {
     
     }
 
+    async crearVarios(data, transaction = null) {
+        return await DiaEvento.bulkCreate(data, { transaction });
+    }
+
 }

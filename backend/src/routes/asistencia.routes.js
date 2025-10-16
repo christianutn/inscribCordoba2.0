@@ -5,6 +5,7 @@ import passport from "passport";
 import autorizar from "../utils/autorizar.js"
 import upload from "../middlewares/upload.js";
 
+
 const inscripcionesRouter = Router();
 
 

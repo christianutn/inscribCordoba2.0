@@ -7,4 +7,7 @@ export default class InscripcionRepository {
         return await Inscripcion.create(inscripcionData, { transaction });
     }
 
+    async crearVarios(inscripcionesData, transaction = null) {
+        return await Inscripcion.bulkCreate(inscripcionesData, { transaction });
+    }
 }

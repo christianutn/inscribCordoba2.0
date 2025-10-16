@@ -11,7 +11,7 @@ import DiaEventoRepository from '../core/repositories/DiaEventoRepository.js';
 import InscripcionService from '../core/services/InscripcionService.js';
 import InscripcionRepository from '../core/repositories/InscipcionRepository.js';
 
-class RegistrarInscripcionesMasivasUseCase {
+export default class RegistrarInscripcionesMasivasUseCase {
 
   constructor() {
     this.excelParserService = new ExcelParserService();
@@ -47,8 +47,6 @@ class RegistrarInscripcionesMasivasUseCase {
       }
       this.curso = cursoExistente;
 
-      // Aquí podrías asociar `diasEventoIds` al evento si tu modelo lo requiere.
-      
       // 4. Crear Evento
       const eventoData = {
         id: data.nroEvento, // Asumiendo que este es el ID que quieres forzar
@@ -64,28 +62,39 @@ class RegistrarInscripcionesMasivasUseCase {
       const nuevoEvento = await eventoService.crearEvento(eventoData, transaction);
       this.evento = nuevoEvento;
       
-      // 3. Crear Días de Evento
-      
-      for (let i = 0; i < data.diasEvento.length; i++) {
-        const nuevoDiaEvento = await diaEventoRepository.crear({fecha: data.diasEvento[i], id_evento: this.evento.id}, transaction);
-       // data.diasEvento[i].id = nuevoDiaEvento.id;
-        
+      // 3. Crear Días de Evento (Carga Masiva)
+      const diasEventoParaCrear = data.diasEvento.map(fecha => ({
+        fecha: fecha,
+        id_evento: this.evento.id
+      }));
+
+      if (diasEventoParaCrear.length > 0) {
+        // Se asume que el repositorio tiene un método para creación en masa (bulkCreate)
+        await diaEventoRepository.crearVarios(diasEventoParaCrear, transaction);
       }
-      // 5. Gestionar Participantes e Inscripciones
-      for (let i = 0; i < data.participantes.length; i++) {
-        let participanteExistente = await participanteService.buscarParticipantePorCuil(data.participantes[i].cuil);
+      
+      // 5. Gestionar Participantes (Carga Masiva)
+      const cuilsParticipantes = data.participantes.map(p => p.cuil);
+      const participantesExistentes = await participanteService.buscarParticipantesPorCuils(cuilsParticipantes);
+      const cuilsExistentes = new Set(participantesExistentes.map(p => p.cuil));
 
-        if (!participanteExistente) {
-          participanteExistente = await participanteService.crearParticipante(data.participantes[i], transaction);
-        }
+      const participantesParaCrear = data.participantes.filter(p => !cuilsExistentes.has(p.cuil));
 
-        // 6. Crear la inscripción
-        const inscripcionData = {
-          cuil: data.participantes[i].cuil,
-          id_evento: data.nroEvento,
-          // otros campos de inscripción si son necesarios
-        };
-        await inscripcionService.crear(inscripcionData, transaction);
+      if (participantesParaCrear.length > 0) {
+        // Se asume que el servicio tiene un método para creación en masa (bulkCreate)
+        await participanteService.crearVarios(participantesParaCrear, transaction);
+      }
+
+      // 6. Crear Inscripciones (Carga Masiva)
+      const inscripcionesParaCrear = data.participantes.map(participante => ({
+        cuil: participante.cuil,
+        id_evento: data.nroEvento,
+        // otros campos de inscripción si son necesarios
+      }));
+
+      if (inscripcionesParaCrear.length > 0) {
+        // Se asume que el servicio tiene un método para creación en masa (bulkCreate)
+        await inscripcionService.crearVarios(inscripcionesParaCrear, transaction);
       }
 
       // Si todo fue exitoso, confirmar la transacción
@@ -93,7 +102,7 @@ class RegistrarInscripcionesMasivasUseCase {
       
       return {
         success: true,
-        message: 'Archivo procesado exitosamente.',
+        message: 'Archivo procesado exitosamente con carga masiva.',
         data: data
       };
     } catch (error) {
@@ -111,4 +120,4 @@ class RegistrarInscripcionesMasivasUseCase {
 
 }
 
-export default RegistrarInscripcionesMasivasUseCase;
+
