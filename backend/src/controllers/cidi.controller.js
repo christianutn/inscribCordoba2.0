@@ -30,16 +30,18 @@ export const getCuilPorCidi = async (req, res, next) => {
         const timeStamp = getTimeStamp();
         
         // Variables de entorno
-        const CUIL_OPERADOR = process.env.CUIL_OPERADOR;
-        const HASH_COOKIE_OPERADOR = process.env.HASH_COOKIE_OPERADOR;
-        const ID_APLICATION = process.env.ID_APLICATION;
-        const CONTRASENIA = process.env.CONTRASENIA;
+        const CUIL_OPERADOR = process.env.CUIL_OPERADOR_TEST;
+        const HASH_COOKIE_OPERADOR = process.env.HASH_COOKIE_OPERADOR_TEST;
+        const ID_APLICATION = process.env.ID_APLICATION_TEST;
+        const CONTRASENIA = process.env.CONTRASENIA_TEST;
+        const KEY_APP = process.env.KEY_APP_TEST;
+        
 
         console.log("CUILoperador:", CUIL_OPERADOR);
         
         
         // Generar el valor del token
-        const tokenValue = generateTokenValue(timeStamp, "7978615148664C41784C38614E5A7559");
+        const tokenValue = generateTokenValue(timeStamp, KEY_APP);
         
         // Obtener el CUIL a consultar desde los parámetros de la solicitud
         const cuil_a_consultar = req.params.cuil;

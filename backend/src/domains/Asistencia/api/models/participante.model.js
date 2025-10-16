@@ -8,7 +8,7 @@ const Participante = sequelize.define('asistencia_participantes', {
         primaryKey: true,
         allowNull: false
     },
-    nombre: {
+    nombres: {
         type: DataTypes.STRING(100),
         allowNull: true
     },

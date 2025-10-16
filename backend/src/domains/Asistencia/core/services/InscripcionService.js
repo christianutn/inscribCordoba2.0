@@ -1,43 +1,20 @@
 // core/repositories/InscripcionRepository.js
-import sequelize from '../models/index.js';
-import InscripcionRepository from '../repositories/InscipcionRepository.js'
+import InscripcionRepository from '../repositories/InscipcionRepository.js';
+export default class InscripcionService {
 
-export class InscripcionService {
+    constructor(inscripcionRepository) {
+        this.inscripcionRepository = inscripcionRepository;
+    }
+
     async crear(inscripcionData, transaction = null) {
-        const t = transaction || await sequelize.transaction();
-        const isLocalTransaction = !transaction;
-
         try {
-            const inscripcion = await Inscripcion.create(inscripcionData, { transaction: t });
-              if (isLocalTransaction) {
-                await t.commit();
-            }
+
+            const inscripcion = await this.inscripcionRepository.crear(inscripcionData, transaction);
             return inscripcion;
         } catch (err) {
-            if (isLocalTransaction) {
-                await t.rollback();
-            }
+            console.error("Error en el servicio al crear la inscripción:", err.message);
             throw err;
         }
     }
 
-    async actualizar(inscripcionData, options, transaction = null) {
-        const t = transaction || await sequelize.transaction();
-        const isLocalTransaction = !transaction;
-
-        try {
-            // Es crucial que 'update' reciba un objeto de opciones con un 'where'
-            const resultado = await Inscripcion.update(inscripcionData, { ...options, transaction: t });
-
-            if (isLocalTransaction) {
-                await t.commit();
-            }
-            return resultado;
-        } catch (err) {
-            if (isLocalTransaction) {
-                await t.rollback();
-            }
-            throw err;
-        }
-    }
 }
