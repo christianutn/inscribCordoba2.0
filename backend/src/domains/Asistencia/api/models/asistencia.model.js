@@ -24,7 +24,7 @@ const Asistencia = sequelize.define('asistencia_asistencias', {
     },
     estado_asistencia: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     }
 }, {
     tableName: 'asistencia_asistencias',

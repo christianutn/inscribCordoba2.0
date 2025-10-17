@@ -1,5 +1,5 @@
 // core/repositories/EventoRepository.js
-import Evento from '../../api/models/Evento.model.js';
+import Evento from '../../api/models/eventoAsistencia.model.js';
 import sequelize from '../../../../config/database.js';
 
 export default class EventoRepository {

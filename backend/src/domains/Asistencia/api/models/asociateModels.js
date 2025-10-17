@@ -1,11 +1,12 @@
 import Participante from './participante.model.js';
 import CursoAsistencia from './curso.model.js';
-import Evento from './evento.model.js';
 import DiasEvento from './diaEvento.model.js';
 import Inscripto from './inscripcion.model.js';
-import EstadoAsistencia from './estadoAsistencia.model.js';
 import Asistencia from './asistencia.model.js';
 import Nota from './nota.model.js'; 
+import Evento from './eventoAsistencia.model.js';
+
+
 
 const associateAsistenciaModels = () => {
     // Evento <-> CursoAsistencia (Un curso tiene muchos eventos)
@@ -23,12 +24,6 @@ const associateAsistenciaModels = () => {
     // Participante <-> Inscripto (Un participante puede estar inscripto en muchos eventos)
     Participante.hasMany(Inscripto, { foreignKey: 'cuil', as: 'inscripciones' });
     Inscripto.belongsTo(Participante, { foreignKey: 'cuil', as: 'participante' });
-
-    // Asistencia se relaciona con varias tablas (es una tabla de unión con estado)
-    // Asistencia -> EstadoAsistencia
-    EstadoAsistencia.hasMany(Asistencia, { foreignKey: 'estado_asistencia', as: 'asistencias' });
-    Asistencia.belongsTo(EstadoAsistencia, { foreignKey: 'estado_asistencia', as: 'estado' });
-
     // Asistencia -> Inscripto (Más complejo, por la clave compuesta)
     // Una asistencia pertenece a una inscripción específica (evento + cuil)
     Inscripto.hasMany(Asistencia, { foreignKey: 'id_evento', sourceKey: 'id_evento', as: 'registros_asistencia' });

@@ -10,6 +10,8 @@ import CidiService from '../../../services/CidiService.js';
 import DiaEventoRepository from '../core/repositories/DiaEventoRepository.js';
 import InscripcionService from '../core/services/InscripcionService.js';
 import InscripcionRepository from '../core/repositories/InscipcionRepository.js';
+import AsistenciaRepository from '../core/repositories/AsistenciaRepository.js';
+import AsistenciaService from '../core/services/AsistenciaService.js';
 
 export default class RegistrarInscripcionesMasivasUseCase {
 
@@ -34,6 +36,9 @@ export default class RegistrarInscripcionesMasivasUseCase {
       const inscripcionRepository = new InscripcionRepository();
       const inscripcionService = new InscripcionService(inscripcionRepository);
       const cidiService = new CidiService();
+      const asistenciaRepository = new AsistenciaRepository();
+      const asistenciaService = new AsistenciaService(asistenciaRepository);
+
 
       // 1. Parsear el archivo Excel
       const data = this.excelParserService.parse(fileBuffer);
@@ -69,7 +74,6 @@ export default class RegistrarInscripcionesMasivasUseCase {
       }));
 
       if (diasEventoParaCrear.length > 0) {
-        // Se asume que el repositorio tiene un método para creación en masa (bulkCreate)
         await diaEventoRepository.crearVarios(diasEventoParaCrear, transaction);
       }
       
@@ -81,7 +85,6 @@ export default class RegistrarInscripcionesMasivasUseCase {
       const participantesParaCrear = data.participantes.filter(p => !cuilsExistentes.has(p.cuil));
 
       if (participantesParaCrear.length > 0) {
-        // Se asume que el servicio tiene un método para creación en masa (bulkCreate)
         await participanteService.crearVarios(participantesParaCrear, transaction);
       }
 
@@ -89,12 +92,27 @@ export default class RegistrarInscripcionesMasivasUseCase {
       const inscripcionesParaCrear = data.participantes.map(participante => ({
         cuil: participante.cuil,
         id_evento: data.nroEvento,
-        // otros campos de inscripción si son necesarios
       }));
 
       if (inscripcionesParaCrear.length > 0) {
-        // Se asume que el servicio tiene un método para creación en masa (bulkCreate)
         await inscripcionService.crearVarios(inscripcionesParaCrear, transaction);
+      }
+
+      // 7. Cargar Asistencias (Carga Masiva)
+      const asistenciasParaCrear = [];
+      data.diasEvento.forEach(dia => {
+          data.participantes.forEach(participante => {
+              asistenciasParaCrear.push({
+                  cuil: participante.cuil,
+                  id_evento: data.nroEvento,
+                  fecha: dia,
+                  estado_asistencia: 0 // Asumiendo un estado por defecto
+              });
+          });
+      });
+
+      if (asistenciasParaCrear.length > 0) {
+          await asistenciaService.crearVarios(asistenciasParaCrear, transaction);
       }
 
       // Si todo fue exitoso, confirmar la transacción
@@ -119,5 +137,3 @@ export default class RegistrarInscripcionesMasivasUseCase {
   }
 
 }
-
-
