@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.6.1",
     "morgan": "^1.10.0",
+    "multer": "^2.0.2",
     "mysql2": "^3.10.0",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.10.1",
@@ -31,7 +32,8 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "sequelize": "^6.37.3",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "xlsx": "^0.18.5"
   },
   "type": "module",
   "devDependencies": {

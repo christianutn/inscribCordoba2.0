@@ -22,6 +22,9 @@ import RestriccionesPorCorrelatividad from "./restricciones_por_correlatividad.m
 import RestriccionesPorDepartamento from "./restricciones_por_departamento.models.js";
 import Departamento from "./departamentos.models.js"
 
+
+const associateInscribModels = () => {
+
 Ministerio.hasMany(Area, { foreignKey: 'ministerio', as: 'detalle_areas' });
 Area.belongsTo(Ministerio, { foreignKey: 'ministerio', as: 'detalle_ministerio' });
 Area.hasMany(Curso, { foreignKey: 'area', as: 'detalle_cursos' });
@@ -88,27 +91,7 @@ RestriccionesPorCorrelatividad.belongsTo(Curso, { foreignKey: 'curso_correlativo
 
 RestriccionesPorDepartamento.belongsTo(Departamento, { foreignKey: "departamento_id", as: 'detalle_departamento'})
 
+};
 
+export default associateInscribModels;
 
-export default {
-    Area,
-    Ministerio,
-    TutoresXInstancia,
-    Instancia,
-    Persona,
-    Curso,
-    MedioInscripcion,
-    TipoCapacitacion,
-    PlataformaDictado,
-    EstadoInstancia,
-    Autorizador,
-    Rol,
-    Usuario,
-    Tutor,
-    TipoRolTutor,
-    AreasAsignadasUsuario,
-    TipoCertificacion,
-    AreaTematica,
-    Evento,
-    Perfil,
-}
