@@ -31,6 +31,7 @@ import {
   School as SchoolIcon
 } from '@mui/icons-material';
 import QRCode from 'qrcode';
+import {postSubaMasiva} from '../services/asistencias.service.js'
 
 export default function AsistenciasMain() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -150,13 +151,16 @@ export default function AsistenciasMain() {
 
   // Funciones para importar planilla
   const handleImportClick = () => {
-    setShowImportModal(true);
+    setShowImportModal(true)
+
     setSelectedFile(null);
     setUploadMessage('');
+
   };
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
+    
     if (file) {
       // Validar que sea un archivo Excel
       const validTypes = [
@@ -183,10 +187,11 @@ export default function AsistenciasMain() {
     setIsUploading(true);
     setUploadMessage('Procesando archivo...');
 
+
     try {
       // Aquí iría la lógica para procesar el archivo Excel
       // Por ahora simulamos el proceso
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await postSubaMasiva(selectedFile)
       
       setUploadMessage('✅ Archivo procesado exitosamente.');
       
