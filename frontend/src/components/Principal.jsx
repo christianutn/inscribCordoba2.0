@@ -147,9 +147,12 @@ export default function Principal() {
         }
 
         const userRol = res.rol;
+        console.log('🔍 DEBUG - User role:', userRol);
+        console.log('🔍 DEBUG - Menu config:', menuItemsConfig);
         const filteredOptions = menuItemsConfig.filter(item =>
           item.roles.includes(userRol)
         );
+        console.log('🔍 DEBUG - Filtered options:', filteredOptions);
         setOpcionesAMostrar(filteredOptions);
 
         const currentOptionIsValid = filteredOptions.some(opt => opt.identifier === opcionSeleccionada);
@@ -277,6 +280,7 @@ export default function Principal() {
         </DrawerHeader>
         <Divider />
         <List sx={{ flexGrow: 1, py: 1 }}>
+          {console.log('🔍 DEBUG - Rendering menu items:', opcionesAMostrar)}
           {opcionesAMostrar.map((item) => (
             <ListItem key={item.identifier} disablePadding sx={{ display: 'block' }}>
               <ListItemButton

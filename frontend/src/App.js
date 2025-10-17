@@ -21,6 +21,7 @@ import CrearAviso from './components/CrearAviso';
 import MostrarAvisos from "./components/MostrarAvisos"
 import CardAvisos from "./components/Avisos";
 import VersionReducidaGA from './components/VersionReducidaGA';
+import AsistenciasMain from './components/AsistenciasMain';
 
 
 
@@ -51,6 +52,7 @@ function App() {
         <Route path='/mostrarAvisos' element={<MostrarAvisos />} />
         <Route path='/cardAvisos' element={<CardAvisos />} />
         <Route path='/version-reducida-ga' element={<VersionReducidaGA />} />
+        <Route path='/asistencias' element={<AsistenciasMain />} />
 
 
       </Routes>
