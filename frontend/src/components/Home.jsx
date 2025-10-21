@@ -244,6 +244,31 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
           >
             Ver Capacitaciones
           </Button>
+          
+          <Button
+            variant="outlined"
+            size="large"
+            onClick={() => setOpcionSeleccionada('AsistenciasMain')}
+            endIcon={<ArrowForwardIcon />}
+            sx={{
+              borderRadius: '50px',
+              px: 4,
+              py: 1.5,
+              fontWeight: 600,
+              ml: 2,
+              borderColor: '#00519C',
+              color: '#00519C',
+              '&:hover': {
+                backgroundColor: '#00519C',
+                color: 'white',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 15px rgba(0, 81, 156, 0.3)'
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Registro de Asistencias
+          </Button>
         </Container>
       </Box>
 

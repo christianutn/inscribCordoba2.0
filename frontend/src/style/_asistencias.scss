@@ -1,0 +1,66 @@
+// Estilos específicos para el módulo de asistencias
+.asistencias-container {
+  .qr-display {
+    text-align: center;
+    padding: 20px;
+    
+    img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 10px;
+      background: white;
+    }
+  }
+
+  .course-table {
+    .status-badge {
+      &.active {
+        background-color: #e8f5e8;
+        color: #2e7d32;
+      }
+      
+      &.scheduled {
+        background-color: #fff3e0;
+        color: #ef6c00;
+      }
+    }
+  }
+
+  .tab-navigation {
+    .active-tab {
+      background-color: #1976d2;
+      color: white;
+    }
+  }
+}
+
+// Estilos para impresión del QR
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .qr-print-container {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    
+    .qr-image {
+      max-width: 300px;
+      margin: 20px auto;
+    }
+    
+    .course-info {
+      margin: 20px 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .instructions {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #666;
+    }
+  }
+}
