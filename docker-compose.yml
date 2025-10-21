@@ -1,27 +1,33 @@
-services:
-  frontend:
-    build: ./frontend
-    container_name: inscribcordoba-frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=https://inscribcordoba.cunix.net/api
-    networks:
-      app-network:
-        aliases:
-          - frontend
+version: '3.8'
 
+services:
   backend:
     build: ./backend
     container_name: inscribcordoba-backend
     ports:
-      - "4001:4000"
+      - "4000:4000"          # Acceso directo desde host para debugging
     env_file:
       - ./backend/.env
     networks:
       app-network:
         aliases:
           - backend
+    restart: always
+
+  frontend:
+    build: ./frontend
+    container_name: inscribcordoba-frontend
+    ports:
+      - "80:80"              # Puerto público del frontend
+    environment:
+      - REACT_APP_API_URL=/api   # Ahora apunta al proxy Nginx
+    depends_on:
+      - backend
+    networks:
+      app-network:
+        aliases:
+          - frontend
+    restart: always
 
 networks:
   app-network:

@@ -1,20 +1,20 @@
-# Usa una imagen más ligera basada en Alpine
-FROM node:20-alpine
+# Etapa 1: build de React
+FROM node:20-alpine as build
 
-# Establece el directorio de trabajo en /app
 WORKDIR /app
-
-# Copia el archivo package.json y package-lock.json
 COPY package*.json ./
-
-# Instala las dependencias (incluyendo devDependencies)
 RUN npm install --production=false
-
-# Copia todo el contenido de la carpeta actual al contenedor
 COPY . .
+RUN npm run build
 
-# Expone el puerto 3000 (ajústalo si es necesario)
-EXPOSE 3000
+# Etapa 2: servir con Nginx
+FROM nginx:alpine
 
-# Comando por defecto para iniciar la app
-CMD ["npm", "start"]
+# Copiar build al directorio de Nginx
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Copiar configuración de Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
