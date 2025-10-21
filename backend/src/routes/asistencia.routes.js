@@ -14,8 +14,8 @@ const inscripcionesRouter = Router();
 // 3. Se añade el middleware 'upload.single('archivo')'. Esto le dice a multer que espere
 //    un único archivo en un campo del formulario llamado 'archivo'.
 inscripcionesRouter.post("/inscripciones/cargas-masivas",
-    // passport.authenticate('jwt', { session: false }),
-    // autorizar(['ADM']), // O los roles que correspondan
+    passport.authenticate('jwt', { session: false }),
+    autorizar(['ADM', 'REF', 'GA']), // O los roles que correspondan
     upload.single('excelFile'),
     registrarInscripcionesMasivas)
 
