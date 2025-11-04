@@ -1,13 +1,13 @@
-import {getEventos, getEventoByCod, postEvento, deleteEvento } from '../controllers/evento.controllers.js';
+import {getEventos, getEventoByCod, postEvento, deleteEvento } from '../domains/Inscribcordoba/api/controllers/evento.controllers.js';
 import { Router } from 'express';
 import passport from 'passport';
 import autorizar from '../utils/autorizar.js';
 import manejarValidacionErrores from "../utils/manejarValidacionErrores.js";
 import { check, param, body } from "express-validator";
 import AppError from "../utils/appError.js"
-import Curso from "../models/curso.models.js"
-import Perfil from "../models/perfil.models.js"
-import TipoCertificación from "../models/tipoCertificacion.models.js"
+import Curso from "../domains/Inscribcordoba/api/models/curso.models.js"
+import Perfil from "../domains/Inscribcordoba/api/models/perfil.models.js"
+import TipoCertificación from "../domains/Inscribcordoba/api/models/tipoCertificacion.models.js"
 
 const eventoRouter = Router();
 

@@ -1,4 +1,4 @@
-import {postAviso, getAvisos, deleteAviso} from "../controllers/aviso.controllers.js";
+import {postAviso, getAvisos, deleteAviso} from "../domains/Inscribcordoba/api/controllers/aviso.controllers.js";
 import { Router } from "express"
 import passport from "passport";
 import autorizar from "../utils/autorizar.js"

@@ -1,4 +1,4 @@
-import {getTiposCertificacion, getTipoCertificacionByCod} from "../controllers/tipoCertificacion.controllers.js";
+import {getTiposCertificacion, getTipoCertificacionByCod} from "../domains/Inscribcordoba/api/controllers/tipoCertificacion.controllers.js";
 import {Router} from "express";
 
 import autorizar from "../utils/autorizar.js"

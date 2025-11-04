@@ -1,4 +1,4 @@
-import {getRestricciones, putRestriccion} from "../controllers/restriccionesFechasInicioCursada.controllers.js";
+import {getRestricciones, putRestriccion} from "../domains/Inscribcordoba/api/controllers/restriccionesFechasInicioCursada.controllers.js";
 import {Router} from "express";
 import autorizar from "../utils/autorizar.js"
 import passport from "passport";

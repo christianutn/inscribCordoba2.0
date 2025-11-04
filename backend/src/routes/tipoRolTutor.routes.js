@@ -1,4 +1,4 @@
-import {getTipoRolTutor} from "../controllers/tipo_rol_tutor.controllers.js";
+import {getTipoRolTutor} from "../domains/Inscribcordoba/api/controllers/tipo_rol_tutor.controllers.js";
 import {Router} from "express";
 import autorizar from "../utils/autorizar.js"
 import passport from "passport";

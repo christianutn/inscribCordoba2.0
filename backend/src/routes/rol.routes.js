@@ -1,4 +1,4 @@
-import {getRoles} from "../controllers/rol.controllers.js";
+import {getRoles} from "../domains/Inscribcordoba/api/controllers/rol.controllers.js";
 import {Router} from "express";
 import autorizar from "../utils/autorizar.js"
 import passport from "passport";

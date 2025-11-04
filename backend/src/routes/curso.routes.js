@@ -1,4 +1,4 @@
-import {getCursos, postCurso, updateCurso, deleteCurso} from "../controllers/curso.controllers.js";
+import {getCursos, postCurso, updateCurso, deleteCurso} from "../domains/Inscribcordoba/api/controllers/curso.controllers.js";
 import {Router} from "express";
 import autorizar from "../utils/autorizar.js"
 import passport from "passport";

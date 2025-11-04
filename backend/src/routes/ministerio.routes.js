@@ -1,4 +1,4 @@
-import {getMinisterios, putMinisterio, deleteMinisterio, postMinisterio} from "../controllers/ministerio.controllers.js"
+import {getMinisterios, putMinisterio, deleteMinisterio, postMinisterio} from "../domains/Inscribcordoba/api/controllers/ministerio.controllers.js"
 import {Router} from "express"
 import passport from "passport";
 import autorizar from "../utils/autorizar.js"

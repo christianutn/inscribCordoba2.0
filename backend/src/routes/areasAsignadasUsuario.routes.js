@@ -5,15 +5,15 @@ import {
     putAreaAsignada,
     deleteAreaAsignada,
     getAreasAsignadasPorUsuario
-} from "../controllers/areasAsignadasUsuario.controllers.js";
+} from "../domains/Inscribcordoba/api/controllers/areasAsignadasUsuario.controllers.js";
 import passport from "passport";
 import autorizar from "../utils/autorizar.js"
 import AppError from "../utils/appError.js";
 import manejarValidacionErrores from "../utils/manejarValidacionErrores.js";
 import { check } from "express-validator";
-import Usuario from "../models/usuario.models.js";
-import Area from "../models/area.models.js";
-import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
+import Usuario from "../domains/Inscribcordoba/api/models/usuario.models.js";
+import Area from "../domains/Inscribcordoba/api/models/area.models.js";
+import AreasAsignadasUsuario from "../domains/Inscribcordoba/api/models/areasAsignadasUsuario.models.js";
 
 
 const router = Router();

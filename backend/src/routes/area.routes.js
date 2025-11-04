@@ -1,12 +1,12 @@
-import { getAreas, putArea, postArea, deleteArea } from "../controllers/area.controllers.js"
+import { getAreas, putArea, postArea, deleteArea } from "../domains/Inscribcordoba/api/controllers/area.controllers.js"
 import { Router } from "express"
 import passport from "passport";
 import autorizar from "../utils/autorizar.js"
 import AppError from "../utils/appError.js";
 import manejarValidacionErrores from "../utils/manejarValidacionErrores.js";
 import { check, param, body } from "express-validator";
-import AreaModel from "../models/area.models.js";
-import MinisterioModel from "../models/ministerio.models.js";
+import AreaModel from "../domains/Inscribcordoba/api/models/area.models.js";
+import MinisterioModel from "../domains/Inscribcordoba/api/models/ministerio.models.js";
 
 const areaRouter = Router();
 

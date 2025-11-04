@@ -1,5 +1,4 @@
 // Importa tu clase AppError para poder usar 'instanceof'
-import AppError from "../utils/appError.js"; // Ajusta la ruta si es necesario
 
 // Función para manejar errores en modo desarrollo (más detalles para el desarrollador)
 const sendErrorDev = (err, res) => {

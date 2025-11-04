@@ -13,12 +13,11 @@ import indexRoutes from "./routes/index.routes.js";
 import inicializarPassport from "../src/config/passport.js"; // Asegúrate que esta ruta es correcta
 import cors from "cors";
 import sequelize from "./config/database.js";
-import   "./models/asociateModelos.js";
 import 'dotenv/config';
-import enviarCorreoDiarioContolDeCursos from "./googleSheets/utils/enviarCorreoDiarioControlDeCursos.js";
+import enviarCorreoDiarioContolDeCursos from "./domains/Inscribcordoba/services/enviarCorreoDiarioControlDeCursos.js";
 import syncModels from "./config/sync.database.js";
 import manejarErrorGlobales from "./middlewares/manejoGlobalErrores.js"
-import associateAllModels from './associateAllModels.js';
+import associateAllModels from './models/associateAllModels.js';
 
 const app = express();
 

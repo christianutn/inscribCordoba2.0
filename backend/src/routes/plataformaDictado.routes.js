@@ -1,4 +1,4 @@
-import {getPlataformasDictado, putPlataformaDictado, postPlataformaDictado, deletePlataformaDictado} from "../controllers/plataformaDictado.controllers.js";
+import {getPlataformasDictado, putPlataformaDictado, postPlataformaDictado, deletePlataformaDictado} from "../domains/Inscribcordoba/api/controllers/plataformaDictado.controllers.js";
 import {Router} from "express";
 import autorizar from "../utils/autorizar.js"
 import passport from "passport";

@@ -1,4 +1,4 @@
-import {getTiposCapacitacion, postTiposCapacitacion, deleteTiposCapacitacion, putTiposCapacitacion} from "../controllers/tipoCapacitacion.controllers.js";
+import {getTiposCapacitacion, postTiposCapacitacion, deleteTiposCapacitacion, putTiposCapacitacion} from "../domains/Inscribcordoba/api/controllers/tipoCapacitacion.controllers.js";
 import {Router} from "express";
 import autorizar from "../utils/autorizar.js"
 import passport from "passport";

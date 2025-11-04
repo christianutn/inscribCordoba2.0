@@ -1,4 +1,4 @@
-import {getMediosInscripcion, putMedioInscripcion, postMedioInscripcion, deleteMedioInscripcion} from "../controllers/medioInscripcion.controllers.js"
+import {getMediosInscripcion, putMedioInscripcion, postMedioInscripcion, deleteMedioInscripcion} from "../domains/Inscribcordoba/api/controllers/medioInscripcion.controllers.js"
 import {Router} from "express"
 import autorizar from "../utils/autorizar.js"
 import passport from "passport";

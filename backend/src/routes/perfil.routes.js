@@ -2,7 +2,7 @@
 import  {Router} from "express";
 import autorizar from "../utils/autorizar.js"
 import passport from "passport";
-import {getPerfiles, getPerfilByCod} from "../controllers/perfil.controllers.js"
+import {getPerfiles, getPerfilByCod} from "../domains/Inscribcordoba/api/controllers/perfil.controllers.js"
 
 
 const perfilRouter = Router();

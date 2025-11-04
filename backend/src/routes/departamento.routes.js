@@ -1,4 +1,4 @@
-import {getDepartamentos} from "../controllers/departamentos.controller.js";
+import {getDepartamentos} from "../domains/Inscribcordoba/api/controllers/departamentos.controller.js";
 import { Router } from "express";
 import passport from 'passport';
 import autorizar from '../utils/autorizar.js';

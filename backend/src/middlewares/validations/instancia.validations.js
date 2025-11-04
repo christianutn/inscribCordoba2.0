@@ -3,15 +3,15 @@ import AppError from '../../utils/appError.js'; // Ajusta la ruta a tu clase App
 
 // Importa todos tus modelos aquí (ajusta las rutas según tu estructura de carpetas)
 
-import MedioInscripcion from '../../models/medioInscripcion.models.js';
-import PlataformaDictado from '../../models/plataformaDictado.models.js';
-import TipoCapacitacion from '../../models/tipoCapacitacion.models.js';
-import Curso from '../../models/curso.models.js';
-import Instancia from '../../models/instancia.models.js';
-import Tutor from '../../models/tutor.models.js';
+import MedioInscripcion from '../../domains/Inscribcordoba/api/models/medioInscripcion.models.js';
+import PlataformaDictado from '../../domains/Inscribcordoba/api/models/plataformaDictado.models.js';
+import TipoCapacitacion from '../../domains/Inscribcordoba/api/models/tipoCapacitacion.models.js';
+import Curso from '../../domains/Inscribcordoba/api/models/curso.models.js';
+import Instancia from '../../domains/Inscribcordoba/api/models/instancia.models.js';
+import Tutor from '../../domains/Inscribcordoba/api/models/tutor.models.js';
 import { DateTime } from 'luxon';
-import Departamento from '../../models/departamentos.models.js';
-import Usuario from '../../models/usuario.models.js';
+import Departamento from '../../domains/Inscribcordoba/api/models/departamentos.models.js';
+import Usuario from '../../domains/Inscribcordoba/api/models/usuario.models.js';
 
 
 // Middleware de validación para una ruta de creación/actualización de Curso/Evento

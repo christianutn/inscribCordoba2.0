@@ -1,4 +1,4 @@
-import {getPersonas,postPersona,putPersona, deletePersona} from "../controllers/persona.controllers.js";
+import {getPersonas,postPersona,putPersona, deletePersona} from "../domains/Inscribcordoba/api/controllers/persona.controllers.js";
 import {Router} from "express";
 import autorizar from "../utils/autorizar.js"
 import passport from "passport";

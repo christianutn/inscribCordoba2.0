@@ -1,4 +1,4 @@
-import {getTutoresXInstancia} from "../controllers/tutorXInstancia.controllers.js";
+import {getTutoresXInstancia} from "../domains/Inscribcordoba/api/controllers/tutorXInstancia.controllers.js";
 import { Router } from "express";
 import autorizar from "../utils/autorizar.js"
 import passport from "passport";

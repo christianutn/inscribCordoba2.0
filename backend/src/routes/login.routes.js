@@ -1,4 +1,4 @@
-import {postLogin} from "../controllers/login.controllers.js"
+import {postLogin} from "../domains/Inscribcordoba/api/controllers/login.controllers.js"
 import {Router} from "express"
 import passport from "passport";
 import loginLimiter from "../utils/limiter.js"

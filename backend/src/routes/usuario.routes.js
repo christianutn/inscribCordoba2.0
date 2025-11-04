@@ -1,5 +1,5 @@
 
-import { getUsuario, postUsuario, putUsuario, deleteUsuario, getMyUser, updateContrasenia, recuperoContrasenia } from "../controllers/usuario.controllers.js";
+import { getUsuario, postUsuario, putUsuario, deleteUsuario, getMyUser, updateContrasenia, recuperoContrasenia } from "../domains/Inscribcordoba/api/controllers/usuario.controllers.js";
 import { Router } from "express";
 import passport from "passport";
 import autorizar from "../utils/autorizar.js"

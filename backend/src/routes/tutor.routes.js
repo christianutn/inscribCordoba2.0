@@ -1,4 +1,4 @@
-import {getTutores, putTutores, postTutor, deleteTutor} from "../controllers/tutor.controllers.js";
+import {getTutores, putTutores, postTutor, deleteTutor} from "../domains/Inscribcordoba/api/controllers/tutor.controllers.js";
 import {Router} from "express";
 import passport from "passport";
 import autorizar from "../utils/autorizar.js"

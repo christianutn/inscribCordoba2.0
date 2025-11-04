@@ -1,4 +1,4 @@
-import {getAreaTematicaByCod, getAreasTematicas} from "../controllers/areaTematica.controllers.js";
+import {getAreaTematicaByCod, getAreasTematicas} from "../domains/Inscribcordoba/api/controllers/areaTematica.controllers.js";
 
 import {Router} from "express";
 

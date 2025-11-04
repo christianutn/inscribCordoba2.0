@@ -1,7 +1,7 @@
 import { Router } from "express"
 import passport from "passport";
 import autorizar from "../utils/autorizar.js";
-import {getFeriados} from "../controllers/api.controller.js"
+import {getFeriados} from "../domains/Inscribcordoba/api/controllers/api.controller.js"
 
 const apiArgentinaRouter = Router();
 

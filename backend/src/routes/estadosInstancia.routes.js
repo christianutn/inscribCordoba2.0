@@ -1,4 +1,4 @@
-import { getEstadosInstancias } from "../controllers/estadosInstancia.controllers.js"
+import { getEstadosInstancias } from "../domains/Inscribcordoba/api/controllers/estadosInstancia.controllers.js"
 import { Router } from 'express';
 import passport from 'passport';
 import autorizar from '../utils/autorizar.js';

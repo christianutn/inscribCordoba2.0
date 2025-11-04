@@ -1,10 +1,10 @@
 import passport from 'passport';
 import passportLocal from 'passport-local';
-import Usuario from "../models/usuario.models.js"
+import Usuario from "../domains/Inscribcordoba/api/models/usuario.models.js"
 import { createHash, validatePassword } from "../utils/bcrypt.js"
 import jwt from 'passport-jwt'
 import 'dotenv/config';
-import Persona from '../models/persona.models.js';
+import Persona from '../domains/Inscribcordoba/api/models/persona.models.js';
 import logger from '../utils/logger.js';
 
 const LocalStrategy = passportLocal.Strategy;

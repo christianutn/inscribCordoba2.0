@@ -17,7 +17,8 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  useTheme
 } from '@mui/material';
 import {
   CheckCircleOutline as CheckCircleOutlineIcon,
@@ -54,6 +55,7 @@ const paperStyles = {
 };
 
 const Home = ({ nombre, setOpcionSeleccionada }) => {
+  const theme = useTheme();
   const [avisos, setAvisos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -147,7 +149,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
     <>
       {loading && (
         <Backdrop
-          sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 2 }}
+          sx={{ color: '#c', zIndex: (theme) => theme.zIndex.drawer + 2 }}
           open={loading}
         >
           <CircularProgress color="inherit" />
@@ -191,13 +193,13 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
 
 
       <Box
-        sx={{
-          background: '#f8f9fa',
-          color: '#333',
+        sx={theme => ({
+          background: theme.palette.grey[100],
+          color: theme.palette.text.primary,
           py: { xs: 6, md: 10 },
           textAlign: 'center',
-          borderBottom: '1px solid #e0e0e0'
-        }}
+          borderBottom: `1px solid ${theme.palette.grey[300]}`
+        })}
       >
         <Container maxWidth="md">
           <Typography
@@ -207,7 +209,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
               fontFamily: 'Poppins, sans-serif',
               fontWeight: 700,
               mb: 2,
-              color: '#00519C',
+              color: 'primary.main',
               fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' }
             }}
           >
@@ -233,9 +235,9 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
               px: 4,
               py: 1.5,
               fontWeight: 600,
-              backgroundColor: '#00519C',
+              backgroundColor: 'primary.main',
               '&:hover': {
-                backgroundColor: '#003d7a',
+                backgroundColor: 'CBA_Blue_Darker',
                 transform: 'translateY(-2px)',
                 boxShadow: '0 6px 15px rgba(0, 81, 156, 0.3)'
               },
@@ -256,11 +258,11 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
               py: 1.5,
               fontWeight: 600,
               ml: 2,
-              borderColor: '#00519C',
-              color: '#00519C',
+              borderColor: 'primary.main',
+              color: 'primary.main',
               '&:hover': {
-                backgroundColor: '#00519C',
-                color: 'white',
+                backgroundColor: 'primary.main',
+                color: 'common.white',
                 transform: 'translateY(-2px)',
                 boxShadow: '0 6px 15px rgba(0, 81, 156, 0.3)'
               },
@@ -303,7 +305,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
               <Box display="flex" alignItems="center" sx={{ mt: 2 }}>
                 <ContactMailIcon color="action" sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
-                  Para consultas: <a href="mailto:soportecampuscordoba@cba.gov.ar" style={{ color: '#00519C', textDecoration: 'none', fontWeight: 500 }}>soportecampuscordoba@cba.gov.ar</a>
+                  Para consultas: <a href="mailto:soportecampuscordoba@cba.gov.ar" style={{ color: theme.palette.primary.main, textDecoration: 'none', fontWeight: 500 }}>soportecampuscordoba@cba.gov.ar</a>
                 </Typography>
               </Box>
             </Paper>
@@ -311,19 +313,19 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
 
           <Grid item xs={12} md={12} lg={12}>
             <Paper
-              sx={{
+              sx={theme => ({
                 p: 3,
                 borderRadius: 3,
                 minHeight: 300,
-                backgroundColor: '#f0f2f5',
+                backgroundColor: theme.palette.custom.CBA_Grey7,
                 borderLeft: '5px solid',
                 borderColor: 'primary.main',
                 boxShadow: '0 8px 24px rgba(0,0,0,0.07)',
                 overflowY: 'auto',
                 '&::-webkit-scrollbar': { width: '8px' },
-                '&::-webkit-scrollbar-track': { backgroundColor: '#f1f1f1', borderRadius: '10px' },
-                '&::-webkit-scrollbar-thumb': { backgroundColor: '#ccc', borderRadius: '10px', '&:hover': { backgroundColor: '#aaa' } }
-              }}
+                '&::-webkit-scrollbar-track': { backgroundColor: theme.palette.custom.CBA_Grey8, borderRadius: '10px' },
+                '&::-webkit-scrollbar-thumb': { backgroundColor: theme.palette.custom.CBA_Grey9, borderRadius: '10px', '&:hover': { backgroundColor: theme.palette.custom.CBA_Grey10 } }
+              })}
             >
               <Box display="flex" alignItems="center" mb={2}>
                 <NotificationsActiveIcon sx={{ mr: 1, color: 'primary.main' }} />
@@ -382,7 +384,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
               ) : (
                 avisos.map((aviso, index) => (
                   <React.Fragment key={aviso.id}>
-                    <Box sx={{ p: 2, mb: 2, background: '#fff', borderRadius: 2, boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
+                    <Box sx={{ p: 2, mb: 2, background: 'common.white', borderRadius: 2, boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
                       <Box display="flex" alignItems="center" mb={0.5}>
                         <Chip label={formatearFecha(aviso.created_at)} size="small" variant="outlined" sx={{ mr: 1.5 }} />
                         <Typography variant="subtitle1" sx={{ fontWeight: 600, flexGrow: 1 }}>
@@ -421,7 +423,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
         </Grid>
       </Container>
 
-      <Box sx={{ backgroundColor: '#f5f7fa', py: { xs: 4, md: 8 } }}>
+      <Box sx={{ backgroundColor: 'custom.CBA_Grey11', py: { xs: 4, md: 8 } }}>
         <Container>
           <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 600, textAlign: 'center', mb: 5 }}>
             Accesos Rápidos
@@ -439,7 +441,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
                     p: 2,
                     borderRadius: 3,
                     boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                    background: '#fff',
+                    background: 'common.white',
                     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                     '&:hover': {
                       transform: 'translateY(-6px)',
@@ -453,7 +455,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
         </Container>
       </Box>
 
-      <Box sx={{ background: '#00519C', color: '#e0e0e0', py: 4, textAlign: 'center' }}>
+      <Box sx={{ background: 'primary.main', color: 'grey.300', py: 4, textAlign: 'center' }}>
         <Container>
           <img src={LogoFooter} alt="Campus Córdoba Logo Footer" style={{ maxWidth: 180, marginBottom: '1rem' }} />
           <Typography variant="body2">
