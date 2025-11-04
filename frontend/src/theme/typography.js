@@ -1,5 +1,6 @@
 export const typography = {
-  fontFamily: "'Roboto Condensed', sans-serif",
+  fontFamilyPrimary: "'Geogrotesque Sharp', sans-serif",
+  fontFamilySecondary: "'Be Vietnam Pro', sans-serif",
   fontWeights: {
     regular: 400,
     bold: 700,

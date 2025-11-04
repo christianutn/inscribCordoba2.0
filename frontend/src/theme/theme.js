@@ -44,20 +44,31 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: typography.fontFamily,
+    fontFamily: typography.fontFamilySecondary, // Fuente por defecto para el cuerpo de texto
     h1: {
+      fontFamily: typography.fontFamilyPrimary,
       fontWeight: typography.fontWeights.bold,
       fontSize: typography.fontSizes.xlarge,
     },
     h2: {
+      fontFamily: typography.fontFamilyPrimary,
       fontWeight: typography.fontWeights.bold,
       fontSize: typography.fontSizes.large,
     },
+    h3: { fontFamily: typography.fontFamilyPrimary, fontWeight: typography.fontWeights.bold },
+    h4: { fontFamily: typography.fontFamilyPrimary, fontWeight: typography.fontWeights.bold },
+    h5: { fontFamily: typography.fontFamilyPrimary, fontWeight: typography.fontWeights.bold },
+    h6: { fontFamily: typography.fontFamilyPrimary, fontWeight: typography.fontWeights.bold },
+    subtitle1: { fontFamily: typography.fontFamilyPrimary },
+    subtitle2: { fontFamily: typography.fontFamilyPrimary },
     body1: {
+      fontFamily: typography.fontFamilySecondary,
       fontWeight: typography.fontWeights.regular,
       fontSize: typography.fontSizes.medium,
     },
+    body2: { fontFamily: typography.fontFamilySecondary },
     button: {
+      fontFamily: typography.fontFamilyPrimary,
       fontWeight: typography.fontWeights.bold,
       fontSize: typography.fontSizes.medium,
     },
