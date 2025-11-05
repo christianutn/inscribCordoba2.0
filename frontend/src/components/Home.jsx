@@ -149,7 +149,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
     <>
       {loading && (
         <Backdrop
-          sx={{ color: '#c', zIndex: (theme) => theme.zIndex.drawer + 2 }}
+          sx={{ color: 'primary.main', zIndex: (theme) => theme.zIndex.drawer + 2 }}
           open={loading}
         >
           <CircularProgress color="inherit" />
@@ -236,8 +236,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
               py: 1.5,
               fontWeight: 600,
               backgroundColor: 'primary.main',
-              '&:hover': {
-                backgroundColor: 'CBA_Blue_Darker',
+              '&:hover': {                backgroundColor: 'custom.CBA_Blue_Darker',
                 transform: 'translateY(-2px)',
                 boxShadow: '0 6px 15px rgba(0, 81, 156, 0.3)'
               },
@@ -452,18 +451,6 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
               </Grid>
             ))}
           </Grid>
-        </Container>
-      </Box>
-
-      <Box sx={{ background: 'primary.main', color: 'grey.300', py: 4, textAlign: 'center' }}>
-        <Container>
-          <img src={LogoFooter} alt="Campus Córdoba Logo Footer" style={{ maxWidth: 180, marginBottom: '1rem' }} />
-          <Typography variant="body2">
-            © {new Date().getFullYear()} Gobierno de la Provincia de Córdoba. Todos los derechos reservados.
-          </Typography>
-          <Typography variant="caption" display="block" sx={{ mt: 1, opacity: 0.7 }}>
-            Campus Córdoba - Plataforma InscribCórdoba
-          </Typography>
         </Container>
       </Box>
     </>

@@ -36,6 +36,7 @@ const theme = createTheme({
     },
     custom: {
       CBA_Blue_Darker: colors.CBA_Blue_Darker,
+      CBA_Blue_Dark: colors.CBA_Blue_Dark,
       CBA_Grey7: colors.CBA_Grey7,
       CBA_Grey8: colors.CBA_Grey8,
       CBA_Grey9: colors.CBA_Grey9,

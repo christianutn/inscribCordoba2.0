@@ -5,7 +5,7 @@ export default function Footer() {
     <Box
       component="footer"
       sx={{
-        backgroundColor: "rgb(43, 42, 42)",
+        backgroundColor: "primary.main",
         color: "#fff",
         paddingTop: "60px",
         paddingBottom: "20px",
@@ -55,16 +55,16 @@ export default function Footer() {
             alignItems: { xs: "center", md: "flex-start" },
           }}
         >
-          <Typography sx={{ mb: 0.5 }}>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
             Secretaría General de la Gobernación
           </Typography>
-          <Typography sx={{ mb: 0.5 }}>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
             Secretaría de Capital Humano
           </Typography>
-          <Typography sx={{ mb: 0.5 }}>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
             Subdirección de Capacitación y Formación
           </Typography>
-          <Typography sx={{ mb: 0 }}>
+          <Typography variant="body2" sx={{ mb: 0 }}>
             soportecampuscordoba@cba.gov.ar
           </Typography>
         </Grid>

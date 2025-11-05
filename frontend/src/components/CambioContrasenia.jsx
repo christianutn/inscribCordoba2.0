@@ -111,7 +111,7 @@ const CambioContrasenia = () => {
             }
             {
                 cargando && <Backdrop
-                    sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    sx={{ color: 'primary.main', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                     open={cargando}
                 >
                     <CircularProgress color="inherit" />

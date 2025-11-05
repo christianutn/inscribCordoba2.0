@@ -4,12 +4,9 @@ import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import AccountCircle from '@mui/icons-material/AccountCircle';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+
 import obtenerToken from '../services/obtenerToken.js';
-// Assume you have a service function for password recovery
-// import solicitarRecuperacionContrasenia from '../services/solicitarRecuperacion.js';
 import { useState, useEffect } from 'react';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
@@ -19,16 +16,32 @@ import { useNavigate } from 'react-router-dom';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Typography from '@mui/material/Typography';
-import { recuperoContrasenia } from '../services/usuarios.service.js'
+import { recuperoContrasenia } from '../services/usuarios.service.js';
+import Paper from '@mui/material/Paper';
+import Avatar from '@mui/material/Avatar';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
-const defaultTheme = createTheme();
+
 
 const Login = () => {
-    const [mensajeDeError, setMensajeDeError] = useState(null);
+    const [mensajeDeError, setMensajeDeError] = useState(null); 
     const [mensajeDeExito, setMensajeDeExito] = useState(null);
     const [open, setOpen] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const navigate = useNavigate();
+    const [cuil, setCuil] = useState('');
+    const [contrasenia, setContrasenia] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
+
+    useEffect(() => {
+        const rememberedCuil = localStorage.getItem('rememberedCuil');
+        const rememberedContrasenia = localStorage.getItem('rememberedContrasenia');
+        if (rememberedCuil && rememberedContrasenia) {
+            setCuil(rememberedCuil);
+            setContrasenia(rememberedContrasenia);
+            setRememberMe(true);
+        }
+    }, []);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -36,14 +49,19 @@ const Login = () => {
         setMensajeDeError(null);
         setMensajeDeExito(null);
 
-        const data = new FormData(event.currentTarget);
-
         try {
-            const token = await obtenerToken(data.get('cuil'), data.get('contrasenia'));
+            const token = await obtenerToken(cuil, contrasenia);
             localStorage.setItem('jwt', token);
+            if (rememberMe) {
+                localStorage.setItem('rememberedCuil', cuil);
+                localStorage.setItem('rememberedContrasenia', contrasenia);
+            } else {
+                localStorage.removeItem('rememberedCuil');
+                localStorage.removeItem('rememberedContrasenia');
+            }
             navigate("/principal");
         } catch (error) {
-            if(error.statusCode === 429){
+            if (error.statusCode === 429) {
                 setMensajeDeError(error.message);
             } else {
                 setMensajeDeError("Usuario o contraseña incorrectos");
@@ -64,7 +82,6 @@ const Login = () => {
 
         try {
             const resp = await recuperoContrasenia(cuil);
-            // Si el backend devuelve cuilRecovery (mail enmascarado), lo mostramos en el mensaje
             if (resp && resp.cuilRecovery) {
                 setMensajeDeExito(
                     `Si el CUIL está registrado, recibirás instrucciones para restablecer tu contraseña en el correo: ${resp.cuilRecovery}`
@@ -115,19 +132,16 @@ const Login = () => {
                 top: 0,
                 left: 0,
                 zIndex: 9999,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 0,
             }}
             spacing={0}
         >
             {mensajeDeError && (
-                <Alert variant="filled" severity="error" sx={{ width: '100%', borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }} >
+                <Alert variant="filled" severity="error">
                     {mensajeDeError}
                 </Alert>
             )}
             {mensajeDeExito && (
-                <Alert variant="filled" severity="success" sx={{ width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+                <Alert variant="filled" severity="success">
                     {mensajeDeExito}
                 </Alert>
             )}
@@ -142,34 +156,28 @@ const Login = () => {
                 fullWidth
                 id="cuil"
                 label="Nombre de usuario"
-                name="cuil"
                 autoComplete="username"
                 autoFocus
-                variant="standard"
+                variant="outlined"
+                value={cuil}
+                onChange={(e) => setCuil(e.target.value)}
             />
             <TextField
                 margin="normal"
                 required
                 fullWidth
-                name="contrasenia"
                 label="Contraseña"
                 type="password"
                 id="contrasenia"
                 autoComplete="current-password"
-                variant="standard"
+                variant="outlined"
+                value={contrasenia}
+                onChange={(e) => setContrasenia(e.target.value)}
             />
             <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Recordar mi usuario"
-                sx={{ display: 'flex', alignItems: 'center', mt: 1 }}
+                control={<Checkbox value="remember" color="primary" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}
+                label="Recordar mi usuario y contraseña"
             />
-            <Grid container sx={{ mt: 1 }}>
-                <Grid item xs style={{ textAlign: 'center' }}>
-                    <Link href="#" variant="body2" onClick={toggleFormView}>
-                        ¿Olvidaste tu contraseña?
-                    </Link>
-                </Grid>
-            </Grid>
             <Button
                 type="submit"
                 fullWidth
@@ -177,25 +185,27 @@ const Login = () => {
                 sx={{
                     mt: 3,
                     mb: 2,
-                    bgcolor: '#073256',
-                    color: '#fff',
                     borderRadius: '50px',
-                    '&:hover': {
-                        bgcolor: '#0A4B7F',
-                    }
+                    padding: '10px 0',
+                    fontWeight: 'bold',
                 }}
                 disabled={open}
             >
                 Iniciar Sesión
             </Button>
+            <Grid container>
+                <Grid item xs>
+                    <Link href="#" variant="body2" onClick={toggleFormView} sx={{ cursor: 'pointer' }}>
+                        ¿Olvidaste tu contraseña?
+                    </Link>
+                </Grid>
+            </Grid>
         </Box>
     );
 
     const renderForgotPasswordForm = () => (
         <Box component="form" onSubmit={handleForgotPasswordSubmit} noValidate sx={{ mt: 1 }}>
-            <Typography component="h2" variant="h6" align="center" sx={{ mb: 2, color: '#073256' }}>
-                Recuperar Contraseña
-            </Typography>
+           
             <Typography variant="body2" align="center" sx={{ mb: 2 }}>
                 Ingresa tu CUIL para recibir instrucciones de recuperación.
             </Typography>
@@ -208,7 +218,7 @@ const Login = () => {
                 name="cuilRecovery"
                 autoComplete="username"
                 autoFocus
-                variant="standard"
+                variant="outlined"
             />
             <Button
                 type="submit"
@@ -217,21 +227,17 @@ const Login = () => {
                 sx={{
                     mt: 3,
                     mb: 2,
-                    bgcolor: '#073256',
-                    color: '#fff',
                     borderRadius: '50px',
-                    '&:hover': {
-                        bgcolor: '#0A4B7F',
-                    }
+                    padding: '10px 0',
+                    fontWeight: 'bold',
                 }}
                 disabled={open}
-                
             >
                 Enviar Instrucciones
-            </Button>   
-            <Grid container>
-                <Grid item xs style={{ textAlign: 'center' }}>
-                    <Link href="#" variant="body2" onClick={toggleFormView}>
+            </Button>
+            <Grid container justifyContent="center">
+                <Grid item>
+                    <Link href="#" variant="body2" onClick={toggleFormView} sx={{ cursor: 'pointer' }}>
                         Volver a Iniciar Sesión
                     </Link>
                 </Grid>
@@ -242,38 +248,48 @@ const Login = () => {
     return (
         <>
             {renderAlerts()}
-
-            {open && (
-                <Backdrop
-                    sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                    open={open}
-                >
-                    <CircularProgress color="inherit" />
-                </Backdrop>
-            )}
-
-            <div className="body-login">
-                <ThemeProvider theme={defaultTheme}>
-                    <Container component="main" maxWidth="xs" className="login-container">
-                        <CssBaseline />
-                        <Box
-                            className="login-box"
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={open}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '100vh',
+                    background: '#f0f2f5',
+                }}
+            >
+                <Container component="main" maxWidth="xs">
+                    <CssBaseline />
+                    <Paper
+                        elevation={6}
+                        sx={{
+                            padding: '40px 30px',
+                            borderRadius: '15px',
+                            textAlign: 'center',
+                        }}
+                    >
+                        <Avatar
                             sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
+                                margin: '0 auto 15px auto',
+                                backgroundColor: 'primary.main',
+                                width: 60,
+                                height: 60,
                             }}
                         >
-                            <div className="login-avatar">
-                                <AccountCircle style={{ fontSize: 150, color: '#073256' }} />
-                            </div>
-
-                            {showForgotPassword ? renderForgotPasswordForm() : renderLoginForm()}
-
-                        </Box>
-                    </Container>
-                </ThemeProvider>
-            </div>
+                            <LockOutlinedIcon fontSize="large" />
+                        </Avatar>
+                        <Typography component="h1" variant="h5">
+                            {showForgotPassword ? 'Recuperar Contraseña' : 'Iniciar Sesión'}
+                        </Typography>
+                        {showForgotPassword ? renderForgotPasswordForm() : renderLoginForm()}
+                    </Paper>
+                </Container>
+            </Box>
         </>
     );
 }

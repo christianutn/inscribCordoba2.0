@@ -97,6 +97,8 @@ const AppBarStyled = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
 })(({ theme, open }) => ({
   boxShadow: theme.shadows[1],
+  backgroundColor: theme.palette.primary.main,
+
   // El color de fondo se tomará automáticamente de 'theme.palette.primary.main'
   transition: theme.transitions.create(['margin', 'width'], {
     easing: theme.transitions.easing.sharp,

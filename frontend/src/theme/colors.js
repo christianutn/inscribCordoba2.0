@@ -1,8 +1,8 @@
 export const colors = {
   // Primary Colors
   CBA_DarkBlue: '#073256',
-  CBA_Blue: '#00519C',
-  CBA_Blue_Dark: '#0A4B7F',
+  CBA_Blue: '#009ada',
+  CBA_Blue_Dark: '#004582',
   CBA_lightBlue: '#53AAE0',
   CBA_Green: '#5CB85C',
   CBA_Orange: '#F0AD4E',
@@ -17,9 +17,9 @@ export const colors = {
   CBA_Grey6: '#f7fbfd',
 
   // Secondary Colors
-  CBA_Error: '#d9534f',
+  CBA_Error: '#E2464C',
   CBA_Info: '#1c7cd5',
-  CBA_Correct: '#5cb85c',
+  CBA_Correct: '#32A430',
   CBA_Alert: '#ee9800',
 
   // Common Colors
