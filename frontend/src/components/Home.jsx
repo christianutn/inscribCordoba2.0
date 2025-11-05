@@ -99,7 +99,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
   }
 
   const linksInteresData = [
-    { img: Capacitacion4, title: 'Capacitación 4 Pasos', url: 'https://campusvirtual.cba.gov.ar/course/view.php?id=14629' },
+    { img: Capacitacion4, title: 'Capacitación 2 Pasos', url: 'https://drive.google.com/drive/folders/12HPXuMo59WUBNS26h-KahNQi8ivRDfDV' },
     { img: Victorius, title: 'Gestión Victorius', url: 'https://campuscordoba.cba.gov.ar/gestordeplataforma/public/' },
     { img: PortalCC, title: 'Portal Campus Córdoba', url: 'https://campuscordoba.cba.gov.ar/#page-event-list' },
     { img: CampusCba, title: 'Plataforma Campus Córdoba', url: 'https://campuscordoba.cba.gov.ar/plataforma/my/' },
@@ -246,7 +246,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
             Ver Capacitaciones
           </Button>
           
-          <Button
+          {/* <Button
             variant="outlined"
             size="large"
             onClick={() => setOpcionSeleccionada('AsistenciasMain')}
@@ -269,7 +269,7 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
             }}
           >
             Registro de Asistencias
-          </Button>
+          </Button> */}
         </Container>
       </Box>
 

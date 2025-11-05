@@ -443,14 +443,10 @@ const AltaBajaModificion = () => {
         renderCell: (params) => (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, width: '100%' }}>
                 <Tooltip title="Editar" placement="top">
-                    <IconButton onClick={() => handleOpenEditModal(params.row)} size="small">
-                        <BotonCircular icon="editar" height={30} width={30} isIconButton />
-                    </IconButton>
+                    <BotonCircular onClick={() => handleOpenEditModal(params.row)} icon="editar" height={30} width={30} />
                 </Tooltip>
                 <Tooltip title="Borrar" placement="top">
-                    <IconButton onClick={() => handleOpenConfirmDeleteModal(params.row)} size="small">
-                        <BotonCircular icon="borrar" height={30} width={30} isIconButton />
-                    </IconButton>
+                    <BotonCircular onClick={() => handleOpenConfirmDeleteModal(params.row)} icon="borrar" height={30} width={30} />
                 </Tooltip>
             </Box>
         ),
@@ -655,14 +651,12 @@ const AltaBajaModificion = () => {
                         {selectOption && (
                             <Box sx={{ display: 'flex', gap: 1 }}>
                                 <Tooltip title="Descargar Excel" placement="top">
-                                    <IconButton onClick={handleDescargarExcel} color="primary" size="large" disabled={filasFiltradas.length === 0}>
-                                        <BotonCircular icon="descargar" height={40} width={40} isIconButton />
-                                    </IconButton>
+                                    <span>
+                                        <BotonCircular onClick={handleDescargarExcel} icon="descargar" height={40} width={40} disabled={filasFiltradas.length === 0} />
+                                    </span>
                                 </Tooltip>
                                 <Tooltip title="Agregar Nuevo" placement="top">
-                                    <IconButton onClick={handleAgregar} color="primary" size="large">
-                                        <BotonCircular icon="agregar" height={40} width={40} isIconButton />
-                                    </IconButton>
+                                    <BotonCircular onClick={handleAgregar} icon="agregar" height={40} width={40} />
                                 </Tooltip>
                             </Box>
                         )}

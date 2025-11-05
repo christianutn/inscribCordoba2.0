@@ -40,7 +40,7 @@ const RestriccionesFechasInicioCursada = () => {
                 }
 
                 const rest = await getRestricciones();
-                console.log("Fetched restrictions:", rest);
+              
                 setSelectedMes(listaMeses[rest.mesBloqueado ?? 0]);
                 setMaximoCuposDiario(String(rest.maximoCuposXDia ?? ""));
                 setMaximoCuposMensual(String(rest.maximoCuposXMes ?? ""));
@@ -118,7 +118,7 @@ const RestriccionesFechasInicioCursada = () => {
                 maximoCuposXMes: maximoCuposMensual === "" ? null : Number(maximoCuposMensual),
                 maximoAcumulado: maximoAcumulado === "" ? null : Number(maximoAcumulado)
             };
-            console.log("Sending payload:", payload);
+            
 
             await putRestriccion(payload);
 

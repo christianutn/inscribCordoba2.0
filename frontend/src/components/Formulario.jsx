@@ -133,7 +133,7 @@ export default function Formulario() {
     setOpciones({ autogestionado: false, edad: false, departamento: false, publicaPCC: false, correlatividad: false });
     setAreas([]); setCursos([]);
     setResetCohortesKey(prevKey => prevKey + 1);
-    console.log("Formulario reseteado exitosamente.");
+   
   };
 
   const tiene_el_curso_evento_creado = (codCurso) => {

@@ -11,7 +11,7 @@ export const postSubaMasiva = async (archivo) => {
         });
 
         const data = await response.json();
-        console.log(data);
+      
         alert(data.message);
     } catch (error) {
         console.error("Error al enviar el archivo:", error);

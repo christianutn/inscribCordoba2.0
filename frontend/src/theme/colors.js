@@ -1,6 +1,6 @@
 export const colors = {
   // Primary Colors
-  CBA_DarkBlue: '#073256',
+  CBA_DarkBlue: '#004582',
   CBA_Blue: '#009ada',
   CBA_Blue_Dark: '#004582',
   CBA_lightBlue: '#53AAE0',

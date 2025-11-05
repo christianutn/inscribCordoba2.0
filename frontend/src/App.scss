@@ -2,8 +2,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
+// Fonts
+@import './style/fonts';
+
 // Variables
 @import './components/colors';
+
+body {
+  font-family: 'Geogrotesque Sharp', sans-serif;
+}
 
 //Componentes
 

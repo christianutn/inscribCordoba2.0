@@ -226,9 +226,6 @@ export default function AsistenciasMain() {
       return;
     }
     
-    // Aquí iría la lógica para guardar la sala
-    console.log('Sala seleccionada:', selectedSala);
-    
     // Cerrar modal y limpiar
     setShowSalaModal(false);
     setSelectedSala('');

@@ -22,7 +22,7 @@ export const postInstancias = async (newInstancia) => {
 
         return data
     } catch (error) {
-        console.log(error)
+      
         throw error
     }
 }
@@ -37,7 +37,7 @@ export const getInstancias = async () => {
             }
         })
         const data = await response.json();
-        console.log(data);
+       
         if (response.status !== 200) {
             throw new Error(data.message || "Error al buscar instancia")
         }

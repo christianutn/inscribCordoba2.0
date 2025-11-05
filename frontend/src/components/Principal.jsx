@@ -59,7 +59,7 @@ const menuItemsConfig = [
   { label: "Administrar Usuarios/Cursos", identifier: "AltaBajaModificion", icon: <SettingsSuggestIcon />, roles: ["ADM"] },
   { label: "Restricciones Fechas", identifier: "RestriccionesFechasInicioCursada", icon: <GavelIcon />, roles: ["ADM"] },
   { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon />, roles: ["ADM"] },
-  { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["ADM", "REF", "GA"] },
+  { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["NO VISIBLE"] },
   { label: "Version reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon />, roles: ['GA', 'ADM'] },
   { label: "Version reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
 ];
@@ -150,12 +150,11 @@ export default function Principal() {
         }
 
         const userRol = res.rol;
-        console.log('🔍 DEBUG - User role:', userRol);
-        console.log('🔍 DEBUG - Menu config:', menuItemsConfig);
+        
         const filteredOptions = menuItemsConfig.filter(item =>
           item.roles.includes(userRol)
         );
-        console.log('🔍 DEBUG - Filtered options:', filteredOptions);
+   
         setOpcionesAMostrar(filteredOptions);
 
         const currentOptionIsValid = filteredOptions.some(opt => opt.identifier === opcionSeleccionada);
@@ -283,7 +282,7 @@ export default function Principal() {
         </DrawerHeader>
         <Divider />
         <List sx={{ flexGrow: 1, py: 1 }}>
-          {console.log('🔍 DEBUG - Rendering menu items:', opcionesAMostrar)}
+      
           {opcionesAMostrar.map((item) => (
             <ListItem key={item.identifier} disablePadding sx={{ display: 'block' }}>
               <ListItemButton
