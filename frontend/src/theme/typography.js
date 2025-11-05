@@ -1,6 +1,6 @@
 export const typography = {
   fontFamilyPrimary: "'Geogrotesque Sharp', sans-serif",
-  fontFamilySecondary: "'Be Vietnam Pro', sans-serif",
+  fontFamilySecondary: "'Geogrotesque Sharp', sans-serif",
   fontWeights: {
     regular: 400,
     bold: 700,
