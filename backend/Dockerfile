@@ -13,6 +13,8 @@ COPY package*.json ./
 # Instalar dependencias (puede usar --production si no necesitás devDependencies)
 RUN npm install --production=false
 
+RUN npm cache clean --force
+
 # Copiar el resto del código fuente
 COPY . .
 
