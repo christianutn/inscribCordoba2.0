@@ -1,6 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 import { colors } from './colors';
 import { typography } from './typography';
+import { esES } from '@mui/x-data-grid/locales';
 
 const theme = createTheme({
   palette: {
@@ -74,6 +75,20 @@ const theme = createTheme({
       fontSize: typography.fontSizes.medium,
     },
   },
-});
+  components: {
+    // Sobrescribimos los estilos y props por defecto para MuiDataGrid
+    MuiDataGrid: {
+      defaultProps: {
+        localeText: esES.components.MuiDataGrid.defaultProps.localeText,
+      },
+      styleOverrides: {
+        // Quitamos la negrita de todas las cabeceras
+        columnHeaderTitle: {
+          fontWeight: 'normal',
+        },
+      },
+    },
+  },
+}, esES); // Pasamos esES también para los componentes core de MUI (ej. DatePicker)
 
 export default theme;

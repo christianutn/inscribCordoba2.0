@@ -258,7 +258,7 @@ const Cronograma = () => {
       
         <div style={{ gridArea: 'tabla-cronograma', overflowX: 'auto' }}>
             <Paper elevation={3} sx={{ height: 600, width: '100%' }}>
-                <DataGrid rows={filteredData} columns={columnsForGrid} localeText={esES.components.MuiDataGrid.defaultProps.localeText} onRowClick={handleRowClick} getRowId={r => r.id} loading={loading} density="compact" disableRowSelectionOnClick />
+                <DataGrid rows={filteredData} columns={columnsForGrid} onRowClick={handleRowClick} getRowId={r => r.id} loading={loading} density="compact" disableRowSelectionOnClick />
             </Paper>
         </div>
       </div>

@@ -682,8 +682,6 @@ const AltaBajaModificion = () => {
                                 initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
                                 density="compact"
                                 getRowId={(row) => row.id || row.cod || row.cuil}
-                                sx={{ '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 'bold' } }}
-                                localeText={{ noRowsLabel: 'No hay filas para mostrar', MuiTablePagination: { labelRowsPerPage: 'Filas por página:', labelDisplayedRows: ({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}` }, toolbarDensity: 'Densidad', toolbarFilters: 'Filtros', toolbarColumns: 'Columnas' }}
                             />
                         </Box>
                     )}

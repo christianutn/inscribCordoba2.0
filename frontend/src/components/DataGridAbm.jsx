@@ -92,7 +92,6 @@ const DataGridAbm = ({ datosAMostrar, titulo }) => {
                         columns={columns}
                         autoHeight
                         autowidth
-                        disableSelectionOnClick
                     />
                 </div>
             </div>

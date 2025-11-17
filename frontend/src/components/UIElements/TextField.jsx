@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
-
 const Input = ({ label, getValue, type, value, width }) => {
   return (
     <Box
@@ -22,6 +21,13 @@ const Input = ({ label, getValue, type, value, width }) => {
           }}
           onChange={(event) => getValue(event.target.value)}
           value={value}
+          autoComplete="off"
+          inputProps={{
+            autoComplete: 'off',
+            form: {
+              autoComplete: 'off'
+            }
+          }}
         />
       </div>
     </Box>
@@ -29,3 +35,4 @@ const Input = ({ label, getValue, type, value, width }) => {
 };
 
 export default Input;
+
