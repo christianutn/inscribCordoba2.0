@@ -25,6 +25,7 @@ import VersionReducidaGA from './components/VersionReducidaGA';
 import AsistenciasMain from './components/AsistenciasMain';
 import Layout from './components/layout/Layout';
 
+
 function App() {
 
   return (
@@ -54,6 +55,7 @@ function App() {
           <Route path='/cardAvisos' element={<CardAvisos />} />
           <Route path='/version-reducida-ga' element={<VersionReducidaGA />} />
           <Route path='/asistencias' element={<AsistenciasMain />} />
+         
 
 
         </Routes>

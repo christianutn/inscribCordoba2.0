@@ -33,6 +33,7 @@ import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
 import QrCodeIcon from '@mui/icons-material/QrCode';
+import TaskIcon from '@mui/icons-material/Task';
 
 import Formulario from './Formulario';
 import Cronograma from "./Cronograma.jsx";
@@ -45,6 +46,8 @@ import CrearAviso from './CrearAviso.jsx';
 import VersionReducidaGa from './VersionReducidaGA.jsx';
 import VersionReducidaAdministradores from './VersionReducidaAdministradores.jsx';
 import AsistenciasMain from './AsistenciasMain.jsx';
+import SubaNotaDeAutorizacion from './NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx';
+
 
 import { getMyUser } from "../services/usuarios.service.js";
 
@@ -62,6 +65,7 @@ const menuItemsConfig = [
   { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["NO VISIBLE"] },
   { label: "Version reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon />, roles: ['GA', 'ADM'] },
   { label: "Version reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
+  { label: "Suba Nota de Autorizacion", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
 ];
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -215,6 +219,7 @@ export default function Principal() {
       case "AsistenciasMain": return <AsistenciasMain />;
       case "VersionReducidaGa": return <VersionReducidaGa />;
       case "VersionReducidaAdministradores": return <VersionReducidaAdministradores />;
+      case "SubaNotaDeAutorizacion": return <SubaNotaDeAutorizacion />;
       case "Home":
       default: return <Home nombre={user?.nombre} setOpcionSeleccionada={setOpcionSeleccionada} />;
     }

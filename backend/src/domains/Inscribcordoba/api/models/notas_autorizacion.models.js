@@ -12,7 +12,7 @@ const NotaAutorizacion = sequelize.define('notas_autorizacion', {
   },
   autorizador_cuil: {
     type: DataTypes.STRING(11),
-    allowNull: false,
+    allowNull: true,
     validate: {
       len: [11, 11] // Validación extra para asegurar que sean 11 caracteres
     }
@@ -23,8 +23,16 @@ const NotaAutorizacion = sequelize.define('notas_autorizacion', {
   },
   ruta_archivo_local: {
     type: DataTypes.STRING(255),
-    allowNull: false,
+    allowNull: true,
     comment: "Ruta relativa en el servidor, ej: uploads/notas_autorizacion_pdf/archivo.pdf"
+  },
+  usuario_cuil: {
+    type: DataTypes.STRING(11),
+    allowNull: false,
+    references: {
+      model: 'usuarios',
+      key: 'cuil'
+    }
   }
 }, {
   tableName: 'notas_autorizacion',

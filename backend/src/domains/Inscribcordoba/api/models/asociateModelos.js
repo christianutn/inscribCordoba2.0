@@ -99,6 +99,8 @@ const associateInscribModels = () => {
 
     // Asociaciones NotasAutorización
     NotasAutorizacion.belongsTo(Autorizador, { foreignKey: 'autorizador_cuil', as: 'detalle_autorizador' });
+    NotasAutorizacion.belongsTo(Usuario, { foreignKey: 'usuario_cuil', as: 'detalle_usuario' });
+    
 
     // Asociaciones Coordinadores
     Coordinadores.belongsTo(Persona, { foreignKey: 'cuil', as: 'detalle_persona' });
