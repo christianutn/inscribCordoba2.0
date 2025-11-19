@@ -26,6 +26,7 @@ import ApiArgentinaFeriadosRouter from "./api.routes.js";
 import AreasAsignadasUsuario from "./areasAsignadasUsuario.routes.js";
 import EstadosInstanciaRouter from "./estadosInstancia.routes.js";
 import DepartamentoRouter from "./departamento.routes.js"
+import NotasAutorizacionRouter from "../domains/Inscribcordoba/api/routes/notas_autorizacion.routes.js"
 
 import CidiRouter from "./cidi.routes.js";
 
@@ -63,6 +64,8 @@ router.use("/estadosInstancia", EstadosInstanciaRouter)
 router.use("/departamentos", DepartamentoRouter)
 router.use("/cidi", CidiRouter)
 router.use("/asistencias", AsistenciaRouter)
+router.use("/notas-autorizacion", NotasAutorizacionRouter)
+
 
 
 export default router

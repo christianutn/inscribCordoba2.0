@@ -1,28 +1,35 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../../../../config/database.js";
+import { DataTypes } from 'sequelize';
+// Ajusta la cantidad de '../' según donde esté tu archivo de conexión db.js
+// Asumiendo que está en backend/src/config/db.js
+import sequelize from '../../../../config/database.js'; 
 
-const NotasAutorizacion = sequelize.define('notas_autorizacion', {
+const NotaAutorizacion = sequelize.define('notas_autorizacion', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
-    allowNull: false,
+    allowNull: false
   },
   autorizador_cuil: {
     type: DataTypes.STRING(11),
-    allowNull: true, // Según tu CREATE TABLE, es DEFAULT NULL
-    references: {
-      model: 'autorizadores', // Referencia a la tabla 'autorizadores'
-      key: 'cuil',
+    allowNull: false,
+    validate: {
+      len: [11, 11] // Validación extra para asegurar que sean 11 caracteres
     }
   },
   fecha_desde: {
-    type: DataTypes.DATEONLY, // Usar DATEONLY para `date` SQL
-    allowNull: true, // Según tu CREATE TABLE, es DEFAULT NULL
+    type: DataTypes.DATEONLY, // Mapea al tipo DATE de MySQL (sin hora)
+    allowNull: false
   },
+  ruta_archivo_local: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    comment: "Ruta relativa en el servidor, ej: uploads/notas_autorizacion_pdf/archivo.pdf"
+  }
 }, {
   tableName: 'notas_autorizacion',
-  timestamps: false, // Asumo que no tienes campos `createdAt` y `updatedAt`
+  timestamps: false, 
+  freezeTableName: true 
 });
 
-export default NotasAutorizacion;
+export default NotaAutorizacion;
