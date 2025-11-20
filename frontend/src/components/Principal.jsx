@@ -34,6 +34,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import TaskIcon from '@mui/icons-material/Task';
+import DifferenceIcon from '@mui/icons-material/Difference';
 
 import Formulario from './Formulario';
 import Cronograma from "./Cronograma.jsx";
@@ -47,7 +48,7 @@ import VersionReducidaGa from './VersionReducidaGA.jsx';
 import VersionReducidaAdministradores from './VersionReducidaAdministradores.jsx';
 import AsistenciasMain from './AsistenciasMain.jsx';
 import SubaNotaDeAutorizacion from './NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx';
-
+import Autorizaciones from './NotaDeAutorizacion/Autorizaciones.jsx';
 
 import { getMyUser } from "../services/usuarios.service.js";
 
@@ -58,7 +59,7 @@ const menuItemsConfig = [
   { label: "Nueva Cohorte", identifier: "Formulario", icon: <EditCalendarIcon />, roles: ["ADM", "REF", 'GA'] },
   { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon />, roles: ["ADM", "REF", 'GA'] },
   { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon />, roles: ["ADM", "REF", 'GA'] },
-  { label: "Reporte de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon />, roles: ["ADM",'GA', 'REF'] },
+  { label: "Reporte de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon />, roles: ["ADM", 'GA', 'REF'] },
   { label: "Administrar Usuarios/Cursos", identifier: "AltaBajaModificion", icon: <SettingsSuggestIcon />, roles: ["ADM"] },
   { label: "Restricciones Fechas", identifier: "RestriccionesFechasInicioCursada", icon: <GavelIcon />, roles: ["ADM"] },
   { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon />, roles: ["ADM"] },
@@ -66,6 +67,7 @@ const menuItemsConfig = [
   { label: "Version reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon />, roles: ['GA', 'ADM'] },
   { label: "Version reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
   { label: "Suba Nota de Autorizacion", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
+  { label: "Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon />, roles: ['ADM', 'GA', 'REF'] },
 ];
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -154,11 +156,11 @@ export default function Principal() {
         }
 
         const userRol = res.rol;
-        
+
         const filteredOptions = menuItemsConfig.filter(item =>
           item.roles.includes(userRol)
         );
-   
+
         setOpcionesAMostrar(filteredOptions);
 
         const currentOptionIsValid = filteredOptions.some(opt => opt.identifier === opcionSeleccionada);
@@ -220,6 +222,7 @@ export default function Principal() {
       case "VersionReducidaGa": return <VersionReducidaGa />;
       case "VersionReducidaAdministradores": return <VersionReducidaAdministradores />;
       case "SubaNotaDeAutorizacion": return <SubaNotaDeAutorizacion />;
+      case "Autorizaciones": return <Autorizaciones />;
       case "Home":
       default: return <Home nombre={user?.nombre} setOpcionSeleccionada={setOpcionSeleccionada} />;
     }
@@ -287,7 +290,7 @@ export default function Principal() {
         </DrawerHeader>
         <Divider />
         <List sx={{ flexGrow: 1, py: 1 }}>
-      
+
           {opcionesAMostrar.map((item) => (
             <ListItem key={item.identifier} disablePadding sx={{ display: 'block' }}>
               <ListItemButton

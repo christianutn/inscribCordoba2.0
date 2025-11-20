@@ -31,6 +31,7 @@ import NotasAutorizacionRouter from "../domains/Inscribcordoba/api/routes/notas_
 import CidiRouter from "./cidi.routes.js";
 
 import AsistenciaRouter from "./asistencia.routes.js";
+import CambiosEstadosNotasDeAutorizacionRouter from "../domains/Inscribcordoba/api/routes/cambios_estados_notas_de_autorizacion.routes.js";
 
 
 
@@ -65,6 +66,7 @@ router.use("/departamentos", DepartamentoRouter)
 router.use("/cidi", CidiRouter)
 router.use("/asistencias", AsistenciaRouter)
 router.use("/notas-autorizacion", NotasAutorizacionRouter)
+router.use("/cambios-estados-notas-autorizacion", CambiosEstadosNotasDeAutorizacionRouter)
 
 
 

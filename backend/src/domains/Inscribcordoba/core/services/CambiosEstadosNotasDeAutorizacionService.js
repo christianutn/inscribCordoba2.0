@@ -23,4 +23,13 @@ export default class CambiosEstadoNotaDeAutorizacionService {
         return await this.cambiosEstadoNotaDeAutorizacionRepository.cerrarCambioEstadoNotaDeAutorizacion(id, data, options);
     }
 
+
+    async getEstadoActualDeNotaDeAutorizacion(nota_autorizacion_id) {
+        return await this.cambiosEstadoNotaDeAutorizacionRepository.getEstadoActualDeNotaDeAutorizacion(nota_autorizacion_id);
+    }
+
+    async getTodosLosCambiosEstados() {
+        return await this.cambiosEstadoNotaDeAutorizacionRepository.getTodosLosCambiosEstados();
+    }
+
 }
