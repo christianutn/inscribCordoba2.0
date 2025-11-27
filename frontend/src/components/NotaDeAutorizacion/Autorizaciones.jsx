@@ -224,29 +224,35 @@ const Autorizaciones = () => {
                                                 </Button>
                                             </Box>
                                             <Stack direction="row" spacing={2}>
-                                                <Button
-                                                    variant="contained"
-                                                    color="error"
-                                                    fullWidth
-                                                    onClick={() => { }}
-                                                    sx={{ fontWeight: 'bold' }}
-                                                >
-                                                    Rechazar
-                                                </Button>
-                                                <Button
-                                                    variant="contained"
-                                                    fullWidth
-                                                    onClick={() => {
-                                                        navigate('/confirmaciones', { state: { datos: nota } });
-                                                    }}
-                                                    sx={{
-                                                        bgcolor: theme.palette.primary.main,
-                                                        '&:hover': { bgcolor: theme.palette.primary.dark },
-                                                        fontWeight: 'bold'
-                                                    }}
-                                                >
-                                                    Autorizar
-                                                </Button>
+                                                {
+                                                    isPendiente && (
+                                                        <>
+                                                            <Button
+                                                                variant="contained"
+                                                                color="error"
+                                                                fullWidth
+                                                                onClick={() => { }}
+                                                                sx={{ fontWeight: 'bold' }}
+                                                            >
+                                                                Rechazar
+                                                            </Button>
+                                                            <Button
+                                                                variant="contained"
+                                                                fullWidth
+                                                                onClick={() => {
+                                                                    navigate('/confirmaciones', { state: { datos: nota } });
+                                                                }}
+                                                                sx={{
+                                                                    bgcolor: theme.palette.primary.main,
+                                                                    '&:hover': { bgcolor: theme.palette.primary.dark },
+                                                                    fontWeight: 'bold'
+                                                                }}
+                                                            >
+                                                                Autorizar
+                                                            </Button>
+                                                        </>
+                                                    )
+                                                }
                                             </Stack>
                                         </Stack>
                                     </CardContent>

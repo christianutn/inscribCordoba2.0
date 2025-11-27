@@ -26,3 +26,24 @@ export const subirNotaDeAutorizacion = async (archivo) => {
   }
 }
 
+
+export const autorizar = async (data) => {
+  try {
+    const response = await fetch(`${URL}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("jwt")}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (response.status !== 201) {
+      throw new Error("Error al autorizar la nota de autorizacion");
+    }
+
+    return true;
+  } catch (error) {
+    throw error;
+  }
+}

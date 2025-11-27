@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-function MiComponenteConAlerta({setOpenAlertDialog, openAlertDialog, mensaje, titulo}) {
+function MiComponenteConAlerta({ setOpenAlertDialog, openAlertDialog, mensaje, titulo }) {
 
     // Función para cerrar el diálogo de alerta
     const handleCloseAlert = () => {
@@ -31,7 +31,7 @@ function MiComponenteConAlerta({setOpenAlertDialog, openAlertDialog, mensaje, ti
                 aria-describedby="alert-dialog-description"
                 disableEscapeKeyDown // Opcional: evita que la tecla Esc cierre el diálogo
             >
-                <DialogTitle id="alert-dialog-title">
+                <DialogTitle id="alert-dialog-title" backgroundColor="primary.success">
                     {titulo || "Cargar titulo por favor..."}
                 </DialogTitle>
                 <DialogContent>

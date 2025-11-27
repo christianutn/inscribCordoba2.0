@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize  from '../../../../config/database.js';
+import sequelize from '../../../../config/database.js';
 
 const Coordinadores = sequelize.define('coordinadores', {
     id: {
@@ -17,7 +17,7 @@ const Coordinadores = sequelize.define('coordinadores', {
     },
     nota_autorizacion_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
             model: 'notas_autorizacion',
             key: 'id'
