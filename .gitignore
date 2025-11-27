@@ -25,3 +25,4 @@ yarn-debug.log*
 # Archivos generados por el sistema operativo
 .DS_Store
 Thumbs.db
+AI_CONTEXT.md

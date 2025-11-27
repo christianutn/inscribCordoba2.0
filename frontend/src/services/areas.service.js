@@ -1,9 +1,9 @@
 
 const URL = process.env.REACT_APP_API_URL + "/areas";
 
-export const getAreas = async () => {
+export const getAreas = async (busqueda = "") => {
     try {
-        const response = await fetch(URL, {
+        const response = await fetch(`${URL}?busqueda=${busqueda}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -11,10 +11,10 @@ export const getAreas = async () => {
             }
         });
         const data = await response.json();
-        if(response.status !== 200) {
+        if (response.status !== 200) {
             throw new Error("No se encontraron las áreas");
         }
-        
+
         return data
     } catch (error) {
         throw error
@@ -23,7 +23,7 @@ export const getAreas = async () => {
 
 export const putArea = async (area) => {
     try {
-       
+
         const response = await fetch(URL, {
             method: "PUT",
             headers: {
@@ -35,11 +35,11 @@ export const putArea = async (area) => {
             })
         });
         const data = await response.json();
-        
-        if(response.status !== 200) {
+
+        if (response.status !== 200) {
             throw new Error(`${data.message}` || "No es posible actualizar el registro");
         }
-        
+
         return data
     } catch (error) {
         throw error
@@ -71,7 +71,7 @@ export const deleteArea = async (codArea) => {
 export const postArea = async (area) => {
     try {
         const response = await fetch(URL, {
-            method: "POST", 
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
@@ -81,7 +81,7 @@ export const postArea = async (area) => {
             })
         });
         const data = await response.json();
-        if(response.status !== 201) {   
+        if (response.status !== 201) {
             throw new Error(`${data.message}` || "No es posible registrar el registro");
         }
         return data

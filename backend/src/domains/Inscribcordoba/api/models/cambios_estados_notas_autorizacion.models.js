@@ -27,11 +27,11 @@ const Cambios_estados_notas_autorizacion = sequelize.define('cambios_estados_not
     },
   },
   fecha_desde: {
-    type: DataTypes.DATEONLY,
+    type: DataTypes.DATE,
     allowNull: false,
   },
   fecha_hasta: {
-    type: DataTypes.DATEONLY,
+    type: DataTypes.DATE,
     allowNull: true, // DEFAULT NULL en tu tabla
   },
 }, {

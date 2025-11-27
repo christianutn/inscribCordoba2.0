@@ -13,7 +13,7 @@ import AltaPersona from "./components/FormulariosAlta/AltaPersonas";
 import AltaTutores from "./components/FormulariosAlta/AltaTutores";
 import RegistrosTutores from "./components/RegistrosTutores";
 import CambioContrasenia from './components/CambioContrasenia';
-import PingTest from "./components/PingTest"; 
+import PingTest from "./components/PingTest";
 import AltaAsignacionesAreasUsuario from './components/FormulariosAlta/AltaAsignacionesAreasUsuario';
 import DetalleFechas from './components/DetalleFechas';
 import NuevoEvento from "./components/NuevoEvento"
@@ -24,7 +24,7 @@ import CardAvisos from "./components/Avisos";
 import VersionReducidaGA from './components/VersionReducidaGA';
 import AsistenciasMain from './components/AsistenciasMain';
 import Layout from './components/layout/Layout';
-
+import Confirmaciones from './components/NotaDeAutorizacion/Confirmacion';
 
 function App() {
 
@@ -35,27 +35,27 @@ function App() {
           <Route path="/login" element={<Layout><Login /></Layout>} />
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/principal" element={<Layout><Principal /></Layout>} />
-          <Route path="/cursos/alta" element={<AltaCurso />} />
-          <Route path="/ministerios/alta" element={<AltaMinisterio />} />
-          <Route path="/plataformasDictados/alta" element={<AltaPlataformaDictado />} />
-          <Route path="/tiposCapacitaciones/alta" element={<AltaTiposCapacitacion />} />
-          <Route path="/mediosInscripciones/alta" element={<AltaMediosInscripcion />} />
-          <Route path="/areas/alta" element={<AltaArea />} />
-          <Route path="/personas/alta" element={<AltaPersona />} />
-          <Route path="/tutores/alta" element={<AltaTutores />} />
-          <Route path="/usuarios/alta" element={<RegistrosTutores />} />
-          <Route path="/cambiarContrasenia" element={<CambioContrasenia />} />
-          <Route path='/PingTest' element={<PingTest />} />
-          <Route path='/areasAsignadasUsuario/alta' element={<AltaAsignacionesAreasUsuario />} />
-          <Route path='/detalleFechas' element={<DetalleFechas />} />
-          <Route path='/nuevoEvento' element={<NuevoEvento />} />
-          <Route path='/reportecursoscc' element={<ReporteCursosCC />} />
-          <Route path='/crearAvisos' element={<CrearAviso />} />
-          <Route path='/mostrarAvisos' element={<MostrarAvisos />} />
-          <Route path='/cardAvisos' element={<CardAvisos />} />
-          <Route path='/version-reducida-ga' element={<VersionReducidaGA />} />
-          <Route path='/asistencias' element={<AsistenciasMain />} />
-         
+          <Route path="/cursos/alta" element={<Layout><AltaCurso /></Layout>} />
+          <Route path="/ministerios/alta" element={<Layout><AltaMinisterio /></Layout>} />
+          <Route path="/plataformasDictados/alta" element={<Layout><AltaPlataformaDictado /></Layout>} />
+          <Route path="/tiposCapacitaciones/alta" element={<Layout><AltaTiposCapacitacion /></Layout>} />
+          <Route path="/mediosInscripciones/alta" element={<Layout><AltaMediosInscripcion /></Layout>} />
+          <Route path="/areas/alta" element={<Layout><AltaArea /></Layout>} />
+          <Route path="/personas/alta" element={<Layout><AltaPersona /></Layout>} />
+          <Route path="/tutores/alta" element={<Layout><AltaTutores /></Layout>} />
+          <Route path="/usuarios/alta" element={<Layout><RegistrosTutores /></Layout>} />
+          <Route path="/cambiarContrasenia" element={<Layout><CambioContrasenia /></Layout>} />
+          <Route path='/PingTest' element={<Layout><PingTest /></Layout>} />
+          <Route path='/areasAsignadasUsuario/alta' element={<Layout><AltaAsignacionesAreasUsuario /></Layout>} />
+          <Route path='/detalleFechas' element={<Layout><DetalleFechas /></Layout>} />
+          <Route path='/nuevoEvento' element={<Layout><NuevoEvento /></Layout>} />
+          <Route path='/reportecursoscc' element={<Layout><ReporteCursosCC /></Layout>} />
+          <Route path='/crearAvisos' element={<Layout><CrearAviso /></Layout>} />
+          <Route path='/mostrarAvisos' element={<Layout><MostrarAvisos /></Layout>} />
+          <Route path='/cardAvisos' element={<Layout><CardAvisos /></Layout>} />
+          <Route path='/version-reducida-ga' element={<Layout><VersionReducidaGA /></Layout>} />
+          <Route path='/asistencias' element={<Layout><AsistenciasMain /></Layout>} />
+          <Route path='/confirmaciones' element={<Layout><Confirmaciones /></Layout>} />
 
 
         </Routes>

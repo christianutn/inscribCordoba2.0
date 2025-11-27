@@ -4,9 +4,7 @@ import Autorizador from "../../api/models/autorizador.models.js";
 import Persona from "../../api/models/persona.models.js";
 
 export default class NotaDeAutorizacionRepository {
-  async createNotaDeAutorizacion(data) {
-    return await NotaDeAutorizacion.create(data);
-  }
+  
 
   async getNotasDeAutorizacion() {
     return await NotaDeAutorizacion.findAll({
@@ -35,19 +33,23 @@ export default class NotaDeAutorizacionRepository {
   }
 
   async crearNotaAutorizacion(usuario_cuil, fechaActual, transaction = null) {
-    
+
     return await NotaDeAutorizacion.create({
       usuario_cuil: usuario_cuil,
       fecha_desde: fechaActual
     }, { transaction });
   }
-  
-  async actualizarNotaAutorizacion(id, data, transaction = null) {
+
+  async actualizar(id, data, transaction = null) {
+
     return await NotaDeAutorizacion.update(data, {
       where: {
         id: id,
       },
       transaction
     });
+
   }
+
+
 }

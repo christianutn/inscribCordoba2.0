@@ -32,7 +32,7 @@ import CidiRouter from "./cidi.routes.js";
 
 import AsistenciaRouter from "./asistencia.routes.js";
 import CambiosEstadosNotasDeAutorizacionRouter from "../domains/Inscribcordoba/api/routes/cambios_estados_notas_de_autorizacion.routes.js";
-
+import CoordinadorRouter from "./coordinador.routes.js";
 
 
 const router = Router();
@@ -67,6 +67,7 @@ router.use("/cidi", CidiRouter)
 router.use("/asistencias", AsistenciaRouter)
 router.use("/notas-autorizacion", NotasAutorizacionRouter)
 router.use("/cambios-estados-notas-autorizacion", CambiosEstadosNotasDeAutorizacionRouter)
+router.use("/coordinadores", CoordinadorRouter)
 
 
 

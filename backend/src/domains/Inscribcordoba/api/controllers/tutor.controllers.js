@@ -6,93 +6,81 @@ import validarCuil from "../../../../utils/validarCuil.js"
 import validarEmail from "../../../../utils/validarMail.js";
 import tratarNombres from "../../../../utils/tratarNombres.js";
 
-import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
-import Usuario from "../models/usuario.models.js";
 import { Op } from 'sequelize'; // Importar el operador de Sequelize
 
 
 export const getTutores = async (req, res, next) => {
-
-    const { rol, area, cuil } = req.user.user
-
-    // validar que no sean inválidos rol o cuil
-    if (!cuil || !rol) {
-        const error = new Error("No se encontraron los datos del usuario (rol o cuil)");
-        error.statusCode = 404;
-        throw error;
-    }
-
-
-    let tutores = [];
     try {
-        if (rol === "ADM") {
-            tutores = await Tutor.findAll({
-                include: [
-                    {
-                        model: Persona, as: 'detalle_persona'
-                    },
-                    {
-                        model: Area, as: 'detalle_area'
-                    }
-                ]
-            });
-        } else {
 
-            //validamos si area es vacio debemos devolver error
-            if (!area) {
-                const error = new Error("No se encontraron los datos del area");
-                error.statusCode = 404;
-                throw error;
-            }
+        const usuario = req.user.user;
+        // 1. Capturamos los parámetros. 
+        // Como dices que no puedes diferenciar el input, asumimos que el valor 
+        // a buscar puede venir en cualquiera de estos campos o quieres unificarlo.
+        const { nombre, apellido, cuil, busqueda } = req.query;
 
-            // Obtenemos las AreasAsignadasUsuario por cuil
-            const areasAsignadas = await AreasAsignadasUsuario.findAll({
-                where: { usuario: cuil },
-                include: [
-                    {
-                        model: Usuario,
-                        as: 'detalle_usuario'
-                    },
-                    {
-                        model: Area,
-                        as: 'detalle_area'
-                    }
-                ]
-            });
+        // Definimos el término común. Si mandan ?nombre=Juan&apellido=Juan, tomamos "Juan".
+        // Priorizamos 'busqueda' si existiera, sino 'nombre', etc.
+        const terminoBusqueda = busqueda || nombre || apellido || cuil;
 
-            // creamos una nueva lista el primer elemento es el valor de area, los elementos restantes son los de areasAsignadas
-            const codigosArea = [area, ...areasAsignadas.map(a => a.area)];
+        // 2. Preparamos el filtro para la tabla PERSONA
+        const filtroPersona = {};
 
-            // Buscamos los tutores cuya area estén incluido en codigosArea
-            tutores = await Tutor.findAll({
-                where: {
-                    area: {
-                        [Op.in]: codigosArea
-                    }
-                },
-                include: [
-                    {
-                        model: Persona, as: 'detalle_persona'
-                    },
-                    {
-                        model: Area, as: 'detalle_area'
-                    }
-                ]
-            });
+        // Variable para controlar si forzamos el INNER JOIN
+        let hayFiltros = false;
 
-            
+        if (terminoBusqueda) {
+            hayFiltros = true;
+
+            // AQUI ESTÁ LA MAGIA: Op.or (La Unión)
+            // Le decimos a la BD: "Traeme el registro si coincide el nombre O el apellido O el cuil"
+            filtroPersona[Op.or] = [
+                { nombre: { [Op.like]: `%${terminoBusqueda}%` } },
+                { apellido: { [Op.like]: `%${terminoBusqueda}%` } },
+                { cuil: { [Op.like]: `%${terminoBusqueda}%` } }
+            ];
         }
+
+        const filtroArea = {}
+
+        if (usuario?.rol === 'REF') {
+            filtroArea.area = usuario.area;
+        }
+
+        const tutores = await Tutor.findAll({
+            include: [
+                {
+                    model: Persona,
+                    as: 'detalle_persona',
+                    // Aplicamos el filtro OR aquí
+                    where: filtroPersona,
+                    // Si hay término de búsqueda, forzamos que traiga solo las coincidencias (INNER JOIN)
+                    required: hayFiltros
+                },
+                {
+                    model: Area,
+                    as: 'detalle_area'
+                }
+            ],
+            where: filtroArea
+        });
+
+
         if (tutores.length === 0) {
-            const error = new Error("No existen tutores");
+            const mensaje = hayFiltros
+                ? `No se encontraron coincidencias para: '${terminoBusqueda}'`
+                : "No existen autorizadtutores  registrados.";
+
+            const error = new Error(mensaje);
             error.statusCode = 404;
             throw error;
         }
-        res.status(200).json(tutores)
-    } catch (error) {
-        next(error)
-    }
-};
 
+        res.status(200).json(tutores);
+
+    } catch (error) {
+        next(error);
+    }
+}
 
 export const putTutores = async (req, res, next) => {
     const t = await sequelize.transaction(); // Iniciamos la transacción

@@ -1,10 +1,7 @@
-import NotaDeAutorizacionRepository from "../repositories/NotaDeAutorizacionRepository.js"
-
-
 export default class NotaDeAutorizacionService {
 
-    constructor() {
-        this.notaDeAutorizacionRepository = new NotaDeAutorizacionRepository();
+    constructor({ notaDeAutorizacionRepository }) {
+        this.notaDeAutorizacionRepository = notaDeAutorizacionRepository;
     }
 
     async getNotasDeAutorizacion() {
@@ -15,9 +12,9 @@ export default class NotaDeAutorizacionService {
         return await this.notaDeAutorizacionRepository.crearNotaAutorizacion(usuario_cuil, fechaActual, transaction);
     }
 
-    async actualizarNotaAutorizacion(id, data, transaction) {
-        return await this.notaDeAutorizacionRepository.actualizarNotaAutorizacion(id, data, transaction);
+    async actualizar(id, data, transaction) {
+        return await this.notaDeAutorizacionRepository.actualizar(id, data, transaction);
     }
-    
+
 
 }

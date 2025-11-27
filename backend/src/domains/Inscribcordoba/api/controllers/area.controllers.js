@@ -2,24 +2,52 @@ import areaModel from "../models/area.models.js";
 import Ministerio from "../models/ministerio.models.js";
 import Curso from "../models/curso.models.js";
 import logger from '../../../../utils/logger.js';
+import { Op } from 'sequelize';
 
 export const getAreas = async (req, res, next) => {
     try {
-        const usuario = req.user.user;
 
-        const areas = await areaModel.findAll({
+        const { busqueda } = req.query;
+
+        const filtro = {};
+
+        if (busqueda) {
+
+            // AQUI ESTÁ LA MAGIA: Op.or (La Unión)
+            // Le decimos a la BD: "Traeme el registro si coincide el nombre de area"
+            filtro[Op.or] = [
+                { nombre: { [Op.like]: `%${busqueda}%` } },
+            ];
+        }
+
+        let areas = {}
+
+
+        areas = await areaModel.findAll({
             include: [
                 {
                     model: Ministerio,
                     as: 'detalle_ministerio',
                     attributes: ['cod', 'nombre']
-                },
-                {
-                    model: Curso,
-                    as: 'detalle_cursos'
                 }
-            ]
+            ],
+            where: filtro
         });
+
+        // areas = await areaModel.findAll({
+        //     include: [
+        //         {
+        //             model: Ministerio,
+        //             as: 'detalle_ministerio',
+        //             attributes: ['cod', 'nombre']
+        //         },
+        //         {
+        //             model: Curso,
+        //             as: 'detalle_cursos'
+        //         }
+        //     ],
+        //     where: filtro
+        // });
 
         if (areas.length === 0) {
             const error = new Error("No existen áreas");
@@ -36,40 +64,40 @@ export const getAreas = async (req, res, next) => {
 };
 
 export const putArea = async (req, res, next) => {
-  try {
-    const { cod, nombre, ministerio, newCod, esVigente } = req.body;
-    const usuario = req.user.user;
+    try {
+        const { cod, nombre, ministerio, newCod, esVigente } = req.body;
+        const usuario = req.user.user;
 
-    // Buscar el área actual antes de actualizar
-    const areaActual = await areaModel.findOne({ where: { cod } });
+        // Buscar el área actual antes de actualizar
+        const areaActual = await areaModel.findOne({ where: { cod } });
 
-    if (!areaActual) {
-      throw new Error("Área no encontrada.");
-    }
+        if (!areaActual) {
+            throw new Error("Área no encontrada.");
+        }
 
-    const nombreAnterior = areaActual.nombre;
-    const vigenciaAnterior = areaActual.esVigente;
+        const nombreAnterior = areaActual.nombre;
+        const vigenciaAnterior = areaActual.esVigente;
 
-    const area = await areaModel.update(
-      { cod: newCod || cod, nombre, ministerio, esVigente },
-      { where: { cod } }
-    );
+        const area = await areaModel.update(
+            { cod: newCod || cod, nombre, ministerio, esVigente },
+            { where: { cod } }
+        );
 
-    if (area == 0) {
-      throw new Error("No hubo cambios para actualizar.");
-    }
+        if (area == 0) {
+            throw new Error("No hubo cambios para actualizar.");
+        }
 
-    logger.info(`Área actualizada por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: 
+        logger.info(`Área actualizada por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: 
       Código: ${cod} → ${newCod || cod}, 
       Nombre: ${nombreAnterior} → ${nombre || nombreAnterior}, 
       Vigente: ${vigenciaAnterior} → ${esVigente ?? vigenciaAnterior}`);
 
-    res.status(200).json({ success: true, message: "Área actualizada correctamente.", area });
-  } catch (error) {
-    logger.error(`Error en putArea por ${req.user?.user.nombre
-         || 'N/A'} ${req.user?.user.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
-    next(error);
-  }
+        res.status(200).json({ success: true, message: "Área actualizada correctamente.", area });
+    } catch (error) {
+        logger.error(`Error en putArea por ${req.user?.user.nombre
+            || 'N/A'} ${req.user?.user.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
+        next(error);
+    }
 };
 export const postArea = async (req, res, next) => {
     try {

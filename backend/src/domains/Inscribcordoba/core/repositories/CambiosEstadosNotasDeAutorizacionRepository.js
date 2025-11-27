@@ -5,15 +5,15 @@ import Autorizador from "../../api/models/autorizador.models.js";
 import Persona from "../../api/models/persona.models.js";
 import Area from "../../api/models/area.models.js";
 import Ministerio from "../../api/models/ministerio.models.js";
+import CambioEstadosModel from "../../api/models/cambios_estados_notas_autorizacion.models.js"
 
 export default class CambiosEstadoNotaDeAutorizacionRepository {
 
-    constructor({ modeloCambioEstadoNotaDeAutorizacion }) {
-        this.cambiosEstadoNotaDeAutorizacion = modeloCambioEstadoNotaDeAutorizacion;
-
+    constructor() {
+        this.cambiosEstadoNotaDeAutorizacion = CambioEstadosModel;
     }
 
-    async crearCambioEstadoNotaDeAutorizacion(data, options = {}) {
+    async crear(data, options = {}) {
 
         return await this.cambiosEstadoNotaDeAutorizacion.create(data, options);
 
@@ -51,7 +51,7 @@ export default class CambiosEstadoNotaDeAutorizacionRepository {
                         {
                             model: Autorizador,
                             as: 'detalle_autorizador',
-                            include: [{ model: Persona }]
+                            include: [{ model: Persona, as: 'detalle_persona' }]
                         }
                     ]
                 }
@@ -60,10 +60,9 @@ export default class CambiosEstadoNotaDeAutorizacionRepository {
     }
 
 
-    async cerrarCambioEstadoNotaDeAutorizacion(id, fecha_hasta, transaction = null) {
-        return await this.cambiosEstadoNotaDeAutorizacion.update({
-            fecha_hasta: fecha_hasta
-        }, {
+    async cerrarCambioEstadoNotaDeAutorizacion(id, data, options = {}) {
+        const transaction = options.transaction;
+        return await this.cambiosEstadoNotaDeAutorizacion.update(data, {
             where: {
                 id: id
             },

@@ -1,20 +1,54 @@
 import Coordinadores from '../models/coordinadores.models.js';
 import AppError from '../../../../utils/appError.js';
+import Persona from '../models/persona.models.js';
+import NotaAutorizacion from '../models/notas_autorizacion.models.js';
+// 1. IMPORTANTE: Importar Op para usar operadores lógicos (OR, LIKE)
+import { Op } from 'sequelize';
 
 export const getCoordinadores = async (req, res, next) => {
     try {
-        const coordinadores = await Coordinadores.findAll();
-        res.status(200).json({
-            status: 'success',
-            data: {
-                coordinadores
-            }
+        const { busqueda } = req.query;
+
+        // 2. Preparamos el filtro
+        const filtroPersona = {};
+
+        if (busqueda) {
+            filtroPersona[Op.or] = [
+                // Usamos LIKE para coincidencias parciales
+                // Nota: Si usas PostgreSQL y quieres ignorar mayúsculas, usa Op.iLike
+                { nombre: { [Op.like]: `%${busqueda}%` } },
+                { apellido: { [Op.like]: `%${busqueda}%` } },
+                { cuil: { [Op.like]: `%${busqueda}%` } }
+            ];
+        }
+
+        const coordinadores = await Coordinadores.findAll({
+            include: [
+                {
+                    model: Persona,
+                    as: 'detalle_persona',
+                    // 3. Aplicamos el filtro en la relación
+                    where: filtroPersona,
+                    // 4. Optimización:
+                    // Si hay búsqueda, 'required: true' hace un INNER JOIN (solo trae coincidencias).
+                    // Si no hay búsqueda, trae todo normalmente.
+                    required: !!busqueda
+                },
+                {
+                    model: NotaAutorizacion,
+                    as: 'detalle_nota_autorizacion'
+                }
+            ]
         });
+
+        res.status(200).json(coordinadores);
+
     } catch (error) {
+        // Es buena práctica pasar el error original a la consola para depurar
+        console.error(error);
         next(new AppError('Error al obtener los coordinadores', 500));
     }
 };
-
 export const getCoordinadorById = async (req, res, next) => {
     try {
         const { id } = req.params;

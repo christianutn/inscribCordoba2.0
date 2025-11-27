@@ -25,7 +25,6 @@ import Autorizador from "./autorizador.models.js";
 import Coordinadores from "./coordinadores.models.js";
 import Estados_notas_autorizacion from './estado_nota_autorizacion.models.js';
 import Cambios_estados_notas_autorizacion from './cambios_estados_notas_autorizacion.models.js';
-import Detalles_tutor_en_nota_autorizacion from './detalles_tutor_en_nota_autorizacion.models.js';
 import RolTutor from './roles_tutor.models.js'
 import Historico_tutores_en_curso from './historico_tutores_en_curso.models.js';
 
@@ -58,7 +57,7 @@ const associateInscribModels = () => {
     TutoresXInstancia.belongsTo(Persona, { foreignKey: 'cuil', as: 'detalle_tutor' });
 
     // Relaciones para Autorizador
-    Autorizador.belongsTo(Persona, { foreignKey: 'cuil', targetKey: 'cuil' });
+    Autorizador.belongsTo(Persona, { foreignKey: 'cuil', targetKey: 'cuil', as: 'detalle_persona' });
     Autorizador.belongsTo(Area, { foreignKey: 'area', as: 'detalle_area' });
 
     //Usuarios
@@ -100,7 +99,7 @@ const associateInscribModels = () => {
     // Asociaciones NotasAutorización
     NotasAutorizacion.belongsTo(Autorizador, { foreignKey: 'autorizador_cuil', as: 'detalle_autorizador' });
     NotasAutorizacion.belongsTo(Usuario, { foreignKey: 'usuario_cuil', as: 'detalle_usuario' });
-    
+
 
     // Asociaciones Coordinadores
     Coordinadores.belongsTo(Persona, { foreignKey: 'cuil', as: 'detalle_persona' });
@@ -129,33 +128,7 @@ const associateInscribModels = () => {
         as: 'CambiosAsociados'
     });
 
-    // Un detalle de tutor pertenece a una Nota de Autorización
-    Detalles_tutor_en_nota_autorizacion.belongsTo(NotasAutorizacion, {
-        foreignKey: 'nota_autorizacion_id',
-        targetKey: 'id',
-        as: 'NotaAutorizacionDetalle' // Alias para evitar colisiones
-    });
 
-    // Un detalle de tutor pertenece a un Tutor
-    Detalles_tutor_en_nota_autorizacion.belongsTo(Tutor, {
-        foreignKey: 'tutor_cuil',
-        targetKey: 'cuil',
-        as: 'TutorAsignado' // Alias para evitar colisiones
-    });
-
-    // Un detalle de tutor pertenece a un Curso
-    Detalles_tutor_en_nota_autorizacion.belongsTo(Curso, {
-        foreignKey: 'curso_cod',
-        targetKey: 'cod',
-        as: 'CursoDelDetalle' // Alias para evitar colisiones
-    });
-
-    // Un detalle de tutor pertenece a un Rol de Tutor
-    Detalles_tutor_en_nota_autorizacion.belongsTo(RolTutor, {
-        foreignKey: 'rol_tutor_cod',
-        targetKey: 'cod',
-        as: 'RolTutorDetalle' // Alias para evitar colisiones
-    });
 
     // Un registro histórico pertenece a un Curso
     Historico_tutores_en_curso.belongsTo(Curso, {
@@ -176,6 +149,14 @@ const associateInscribModels = () => {
         foreignKey: 'rol_tutor_cod',
         targetKey: 'cod',
         as: 'RolTutorHistorico'
+    });
+
+    // Un registro historico puede tener o no una nota de autorizacion asignada
+
+    Historico_tutores_en_curso.belongsTo(NotasAutorizacion, {
+        foreignKey: 'nota_de_autorizacion_id',
+        targetKey: 'id',
+        as: 'NotaAutorizacionHistorico'
     });
 
 };

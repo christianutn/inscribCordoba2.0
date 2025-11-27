@@ -1,9 +1,9 @@
 
 const URL = process.env.REACT_APP_API_URL + "/tutores";
 
-export const getTutores = async () => {
+export const getTutores = async (busqueda = "") => {
     try {
-        const response = await fetch(URL, {
+        const response = await fetch(`${URL}?busqueda=${busqueda}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -11,14 +11,14 @@ export const getTutores = async () => {
             }
         });
         const data = await response.json();
-        if(response.status !== 200) {
+        if (response.status !== 200) {
             const error = await response.json();
             throw new Error(error.message || "Error al obtener los tutores");
         }
 
-        
-        
-        
+
+
+
         return data
     } catch (error) {
         throw error
@@ -27,7 +27,7 @@ export const getTutores = async () => {
 
 
 export const putTutores = async (tutor) => {
-    
+
     try {
         const response = await fetch(URL, {
             method: "PUT",
@@ -54,7 +54,7 @@ export const putTutores = async (tutor) => {
 }
 
 
-export const deleteTutor = async (cuil) =>{
+export const deleteTutor = async (cuil) => {
     try {
         const response = await fetch(`${URL}/${cuil}`, {
             method: "DELETE",
@@ -75,7 +75,7 @@ export const deleteTutor = async (cuil) =>{
 
 export const postTutores = async (tutor) => {
     try {
-       
+
         const response = await fetch(URL, {
             method: "POST",
             headers: {

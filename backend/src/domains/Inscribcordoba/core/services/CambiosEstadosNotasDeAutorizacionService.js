@@ -5,7 +5,7 @@ export default class CambiosEstadoNotaDeAutorizacionService {
         this.cambiosEstadoNotaDeAutorizacionRepository = repositorioCambioEstadoNotaDeAutorizacion;
     }
 
-    async crearCambioEstadoNotaDeAutorizacion(data, options = {}) {
+    async crear(data, options = {}) {
         // Validar que data no esté vacío
         if (!data || Object.keys(data).length === 0) {
             throw new Error('Los datos del cambio de estado son requeridos');
@@ -13,7 +13,7 @@ export default class CambiosEstadoNotaDeAutorizacionService {
 
         const transaction = options.transaction;
 
-        return await this.cambiosEstadoNotaDeAutorizacionRepository.crearCambioEstadoNotaDeAutorizacion(
+        return await this.cambiosEstadoNotaDeAutorizacionRepository.crear(
             data,
             { ...options, transaction }
         );

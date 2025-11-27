@@ -2,9 +2,6 @@ import GoogleDrive from "../../../services/GoogleDriveService.js"
 import sequelize from "../../../config/database.js";
 import { DateTime } from "luxon";
 
-
-
-
 class RegistrarNotaDeAutorizacion {
 
     constructor(archivo_nota_autorizacion, cuil_usuario, apellido_coordinador, cod_area,
@@ -12,7 +9,7 @@ class RegistrarNotaDeAutorizacion {
             googleDriveService,
             notaDeAutorizacionService,
             manejadorArchivos,
-            cambiosEstadoNotaDeAutorizacionService
+            cambiosEstadoNotaDeAutorizacionService,
 
         }) {
         this.archivo_nota_autorizacion = archivo_nota_autorizacion;
@@ -25,6 +22,7 @@ class RegistrarNotaDeAutorizacion {
         this.notaDeAutorizacionService = notaDeAutorizacionService;
         this.manejadorArchivos = manejadorArchivos;
         this.cambiosEstadoNotaDeAutorizacionService = cambiosEstadoNotaDeAutorizacionService;
+
     }
 
     async ejecutar() {
@@ -47,7 +45,7 @@ class RegistrarNotaDeAutorizacion {
             const respuestaGuardadoArchivo = await this.manejadorArchivos.guardarNotaDeAutorizacionLocalmente(nuevaNotaAutorizacion.id, this.archivo_nota_autorizacion);
 
             // 5. Actualizamos la nota con la ruta local, dentro de la misma transacción.
-            await this.notaDeAutorizacionService.actualizarNotaAutorizacion(
+            await this.notaDeAutorizacionService.actualizar(
                 nuevaNotaAutorizacion.id,
                 { ruta_archivo_local: respuestaGuardadoArchivo.rutaRelativa },
                 t
@@ -55,16 +53,17 @@ class RegistrarNotaDeAutorizacion {
 
             // 6. Debo además crear el cambio de estado de nota de autorización
 
-            await this.cambiosEstadoNotaDeAutorizacionService.crearCambioEstadoNotaDeAutorizacion({
+            await this.cambiosEstadoNotaDeAutorizacionService.crear({
                 nota_autorizacion_id: nuevaNotaAutorizacion.id,
                 fecha_desde: fechaActual,
                 estado_nota_autorizacion_cod: "PEND"
 
             },
-            {
-                transaction: t
-            }
-        )
+                {
+                    transaction: t
+                }
+            )
+
 
             // 7. Si todo fue exitoso, confirmamos la transacción.
             await t.commit();

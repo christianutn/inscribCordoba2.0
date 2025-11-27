@@ -35,12 +35,20 @@ const historico_tutores_en_curso = sequelize.define('historico_tutores_en_curso'
     },
   },
   fecha_desde: {
-    type: DataTypes.DATEONLY,
+    type: DataTypes.DATE,
     allowNull: false,
   },
   fecha_hasta: {
-    type: DataTypes.DATEONLY,
+    type: DataTypes.DATE,
     allowNull: true, // DEFAULT NULL en tu tabla
+  },
+  nota_de_autorizacion_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'notas_autorizacion', // Referencia a la tabla `notas_autorizacion`
+      key: 'id',
+    },
   },
 }, {
   tableName: 'historico_tutores_en_curso',

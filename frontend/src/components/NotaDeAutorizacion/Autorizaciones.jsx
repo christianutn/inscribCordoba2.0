@@ -21,8 +21,10 @@ import {
 } from '@mui/material';
 import dayjs from 'dayjs';
 import { getUltimosEstadoDeAutorizaciones } from "../../services/cambiosEstadoAutorizacion.service.js";
+import { useNavigate } from 'react-router-dom';
 
 const Autorizaciones = () => {
+    const navigate = useNavigate();
     const theme = useTheme();
     const [autorizaciones, setAutorizaciones] = useState([]);
     const [filtros, setFiltros] = useState({
@@ -234,7 +236,9 @@ const Autorizaciones = () => {
                                                 <Button
                                                     variant="contained"
                                                     fullWidth
-                                                    onClick={() => { }}
+                                                    onClick={() => {
+                                                        navigate('/confirmaciones', { state: { datos: nota } });
+                                                    }}
                                                     sx={{
                                                         bgcolor: theme.palette.primary.main,
                                                         '&:hover': { bgcolor: theme.palette.primary.dark },

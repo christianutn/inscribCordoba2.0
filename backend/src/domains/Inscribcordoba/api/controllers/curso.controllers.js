@@ -15,6 +15,20 @@ export const getCursos = async (req, res, next) => {
     try {
         // Obtener los valores del token
         const { rol, area, cuil } = req.user.user;
+
+        // Filtro
+
+        const { busqueda } = req.query;
+
+        let where = {};
+
+        if (busqueda) {
+            where = {
+                nombre: {
+                    [Op.like]: `%${busqueda}%`
+                }
+            };
+        }
         // Validar datos del usuario
         if (!cuil || !rol) {
             const error = new Error("No se encontraron los datos del usuario (rol o cuil)");
@@ -48,7 +62,8 @@ export const getCursos = async (req, res, next) => {
                             { model: ministerio, as: 'detalle_ministerio' }
                         ]
                     }
-                ]
+                ],
+                where: where
             });
         } else {
             // Validar área para roles no administradores
