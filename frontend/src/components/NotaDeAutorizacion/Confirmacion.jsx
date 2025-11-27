@@ -9,8 +9,6 @@ import {
     Autocomplete,
     Button,
     Grid,
-    Card,
-    CardContent,
     IconButton,
     Checkbox,
     List,
@@ -20,7 +18,6 @@ import {
     Stack,
     Alert,
     Snackbar,
-    InputAdornment,
     Paper
 } from "@mui/material";
 import {
@@ -37,6 +34,11 @@ import { getCursos } from "../../services/cursos.service.js";
 import { getCoordinadores } from "../../services/coordinadores.service.js";
 import { autorizar } from "../../services/notasDeAutorizacion.service.js";
 import MiComponenteConAlerta from "../UIElements/Dialog";
+import ModalCrearTutor from "./Modals/ModalCrearTutor";
+import ModalCrearArea from "./Modals/ModalCrearArea";
+import ModalCrearAutorizador from "./Modals/ModalCrearAutorizador";
+import ModalCrearCurso from "./Modals/ModalCrearCurso";
+import ModalCrearCoordinador from "./Modals/ModalCrearCoordinador";
 
 // Custom styles to match the design
 const styles = {
@@ -213,14 +215,26 @@ const Confirmacion = () => {
     const [success, setSuccess] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
 
+    // Modals State
+    const [openModalTutor, setOpenModalTutor] = useState(false);
+    const [openModalArea, setOpenModalArea] = useState(false);
+    const [openModalDirector, setOpenModalDirector] = useState(false);
+    const [openModalCurso, setOpenModalCurso] = useState(false);
+    const [openModalCoordinador, setOpenModalCoordinador] = useState(false);
+
     useEffect(() => {
-        setCargando(true);
-        fetchAreas();
-        fetchDirectores();
-        fetchCoordinadores();
-        fetchCursos();
-        fetchTutores();
-        setCargando(false);
+        const initData = async () => {
+            setCargando(true);
+            await Promise.all([
+                fetchAreas(),
+                fetchDirectores(),
+                fetchCoordinadores(),
+                fetchCursos(),
+                fetchTutores()
+            ]);
+            setCargando(false);
+        };
+        initData();
     }, []);
 
     const fetchAreas = async (search = "") => {
@@ -261,11 +275,53 @@ const Confirmacion = () => {
     };
 
     const handleCreate = (type) => {
-        console.log(`Crear ${type}`);
+        switch (type) {
+            case "Área":
+                setOpenModalArea(true);
+                break;
+            case "Director":
+                setOpenModalDirector(true);
+                break;
+            case "Coordinador":
+                setOpenModalCoordinador(true);
+                break;
+            case "Curso":
+                setOpenModalCurso(true);
+                break;
+            case "Profesor/a":
+                setOpenModalTutor(true);
+                break;
+            default:
+                break;
+        }
+    };
+
+    const handleSuccessTutor = (msg) => {
+        setSuccess(msg);
+        fetchTutores();
+    };
+
+    const handleSuccessArea = (msg) => {
+        setSuccess(msg);
+        fetchAreas();
+    };
+
+    const handleSuccessDirector = (msg) => {
+        setSuccess(msg);
+        fetchDirectores();
+    };
+
+    const handleSuccessCoordinador = (msg) => {
+        setSuccess(msg);
+        fetchCoordinadores();
+    };
+
+    const handleSuccessCurso = (msg) => {
+        setSuccess(msg);
+        fetchCursos();
     };
 
     const handleCursoToggle = (curso) => {
-
         const isSelected = selectedCursos.some((c) => c.cod === curso.cod);
         if (isSelected) {
             setSelectedCursos(selectedCursos.filter((c) => c.cod !== curso.cod));
@@ -275,7 +331,6 @@ const Confirmacion = () => {
         } else {
             setSelectedCursos([...selectedCursos, curso]);
         }
-
     };
 
     const handleAddTutor = (cursoCod, tutor, rol) => {
@@ -295,7 +350,6 @@ const Confirmacion = () => {
     };
 
     const handleConfirm = async () => {
-
         if (!selectedArea) return setError("Debe seleccionar un Área.");
         if (!selectedDirector) return setError("Debe seleccionar un Director/a.");
         if (!selectedCoordinador) return setError("Debe seleccionar un Coordinador/a.");
@@ -615,15 +669,39 @@ const Confirmacion = () => {
                 />
             </Box>
             {
-
                 cargando && <Backdrop
                     sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                     open={cargando}
                 >
                     <CircularProgress color="inherit" />
                 </Backdrop>
-
             }
+
+            <ModalCrearTutor
+                open={openModalTutor}
+                onClose={() => setOpenModalTutor(false)}
+                onSuccess={handleSuccessTutor}
+            />
+            <ModalCrearArea
+                open={openModalArea}
+                onClose={() => setOpenModalArea(false)}
+                onSuccess={handleSuccessArea}
+            />
+            <ModalCrearAutorizador
+                open={openModalDirector}
+                onClose={() => setOpenModalDirector(false)}
+                onSuccess={handleSuccessDirector}
+            />
+            <ModalCrearCurso
+                open={openModalCurso}
+                onClose={() => setOpenModalCurso(false)}
+                onSuccess={handleSuccessCurso}
+            />
+            <ModalCrearCoordinador
+                open={openModalCoordinador}
+                onClose={() => setOpenModalCoordinador(false)}
+                onSuccess={handleSuccessCoordinador}
+            />
         </>
     );
 };

@@ -157,8 +157,7 @@ export const postTutor = async (req, res, next) => {
 
     try {
 
-        let { cuil, area, esReferente } = req.body;
-
+        let { cuil, area, esReferente, nombre, apellido, mail, celular } = req.body;
 
 
         if (!cuil) {
@@ -197,6 +196,16 @@ export const postTutor = async (req, res, next) => {
             throw error;
         }
 
+        // Sanatizamos los datos para personas
+        const dataPersona = {}
+
+        dataPersona.cuil = cuil;
+        dataPersona.nombre = nombre;
+        dataPersona.apellido = apellido;
+
+        if (mail) dataPersona.mail = mail;
+        if (celular) dataPersona.celular = celular;
+
 
 
         esReferente = esReferente === "Si" ? 1 : esReferente === "No" ? 0 : null;
@@ -204,9 +213,7 @@ export const postTutor = async (req, res, next) => {
         //Verificamos si la persona no existe
         const persona = await Persona.findOne({ where: { cuil: cuil } });
         if (!persona) {
-            const error = new Error(`La persona con el cuil ${cuil} no existe. Debe crear primero a la persona`);
-            error.statusCode = 404;
-            throw error;
+            await Persona.create(dataPersona);
         }
 
         //Verificamos si el tutor ya existe

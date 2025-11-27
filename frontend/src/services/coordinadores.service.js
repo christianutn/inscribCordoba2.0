@@ -19,3 +19,25 @@ export const getCoordinadores = async () => {
         throw error
     }
 }
+
+
+export const postCoordinador = async (coordinador) => {
+    try {
+        const response = await fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify(coordinador)
+        });
+        const data = await response.json();
+        if (response.status !== 201) {
+            const error = await response.json();
+            throw new Error(error.message || "Error al crear el coordinador");
+        }
+        return data
+    } catch (error) {
+        throw error
+    }
+}

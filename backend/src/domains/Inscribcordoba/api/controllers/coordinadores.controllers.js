@@ -56,30 +56,40 @@ export const getCoordinadorById = async (req, res, next) => {
         if (!coordinador) {
             return next(new AppError('No se encontró un coordinador con ese ID', 404));
         }
-        res.status(200).json({
-            status: 'success',
-            data: {
-                coordinador
-            }
-        });
+        res.status(200).json(coordinador);
     } catch (error) {
         next(new AppError('Error al obtener el coordinador', 500));
     }
 };
 
-export const createCoordinador = async (req, res, next) => {
+export const postCoordinador = async (req, res, next) => {
     try {
-        const { cuil, nota_autorizacion_id } = req.body;
-        const newCoordinador = await Coordinadores.create({
-            cuil,
-            nota_autorizacion_id
+        const { cuil, nombre, apellido, mail, celular } = req.body;
+
+        const dataPersona = {}
+
+        dataPersona.nombre = nombre;
+        dataPersona.apellido = apellido;
+        if (mail) dataPersona.mail = mail;
+        if (celular) dataPersona.celular = celular;
+
+        // Revisamos si la persona ya existe
+        const persona = await Persona.findOne({ where: { cuil } });
+        if (persona) {
+            // actualizamos persona
+            await persona.update(dataPersona);
+        } else {
+            // creamos persona
+            await Persona.create(dataPersona);
+        }
+
+        const coordinador = await Coordinadores.create({
+            cuil: cuil
+
         });
-        res.status(201).json({
-            status: 'success',
-            data: {
-                coordinador: newCoordinador
-            }
-        });
+
+        return res.status(201).json(coordinador);
+
     } catch (error) {
         next(new AppError('Error al crear el coordinador', 500));
     }
@@ -97,12 +107,8 @@ export const updateCoordinador = async (req, res, next) => {
             cuil,
             nota_autorizacion_id
         });
-        res.status(200).json({
-            status: 'success',
-            data: {
-                coordinador
-            }
-        });
+
+        res.status(200).json(coordinador);
     } catch (error) {
         next(new AppError('Error al actualizar el coordinador', 500));
     }

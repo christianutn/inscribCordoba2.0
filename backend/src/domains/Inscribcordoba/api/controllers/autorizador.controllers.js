@@ -2,6 +2,8 @@ import autorizadorModel from "../models/autorizador.models.js";
 import Persona from "../models/persona.models.js";
 import Area from "../models/area.models.js";
 import { Op } from 'sequelize';
+// importamos luxon
+import { DateTime } from 'luxon';
 
 export const getAutorizadores = async (req, res, next) => {
     try {
@@ -60,6 +62,47 @@ export const getAutorizadores = async (req, res, next) => {
         }
 
         res.status(200).json(autorizadores);
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const postAutorizador = async (req, res, next) => {
+    try {
+
+        const { cuil, nombre, apellido, mail, celular, area, descripcion_cargo } = req.body;
+
+        const dataPersona = {}
+
+        dataPersona.cuil = cuil;
+        dataPersona.nombre = nombre;
+        dataPersona.apellido = apellido;
+        if (mail) dataPersona.mail = mail;
+        if (celular) dataPersona.celular = celular;
+
+        // buscamos si existe la persona
+        const persona = await Persona.findOne({ where: { cuil } });
+
+        if (persona) {
+            // actualizamos la persona
+            await persona.update(dataPersona);
+        } else {
+            // creamos la persona
+            await Persona.create(dataPersona);
+        }
+
+        // fecha actual
+        const fechaActual = DateTime.now().toFormat('yyyy-MM-dd')
+
+        const nuevoAutorizador = await autorizadorModel.create({
+            cuil: cuil,
+            area: area,
+            descripcion_cargo: descripcion_cargo,
+            fecha_desde: fechaActual
+        })
+
+        res.status(201).json(nuevoAutorizador);
 
     } catch (error) {
         next(error);
