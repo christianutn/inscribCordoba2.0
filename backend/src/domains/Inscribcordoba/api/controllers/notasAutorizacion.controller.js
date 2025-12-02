@@ -15,6 +15,9 @@ import HistoricoTutoresEnCursoRepository from "../../core/repositories/Historico
 import CoordinadorService from "../../core/services/CoordinadorService.js";
 import CoordinadorRepository from "../../core/repositories/CoordinadorRespository.js";
 
+import enviarCorreo from "../../../../utils/enviarCorreo.js";
+import { generarHtmlAutorizacion } from "../../../../utils/mensajesHtml.js";
+
 export const getNotasDeAutorizacion = async (req, res, next) => {
     try {
         const notaDeAutorizacionService = new NotaDeAutorizacionService({ notaDeAutorizacionRepository: new NotaDeAutorizacionRepository() });
@@ -96,7 +99,9 @@ export const autorizarNotaDeAutorizacion = async (req, res, next) => {
                 CambiosEstadoNotaDeAutorizacionService: cambioEstadoNotaDeAutorizacionService,
                 NotaDeAutorizacionService: notaDeAutorizacionService,
                 HistoricoTutoresEnCursoService: historicoTutoresEnCursoService,
-                CoordinadorService: coordinadorService
+                CoordinadorService: coordinadorService,
+                generarHtmlAutorizacion,
+                enviarCorreo
             },
             {
                 tutores,
@@ -108,6 +113,7 @@ export const autorizarNotaDeAutorizacion = async (req, res, next) => {
         );
 
         const resultado = await registrarAutorizacionNotaDeAutorizacion.ejecutar();
+
         res.status(201).json(resultado);
 
     } catch (error) {

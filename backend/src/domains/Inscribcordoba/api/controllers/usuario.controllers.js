@@ -11,6 +11,7 @@ import { createHash } from "../../../../utils/bcrypt.js"
 import generarToken from "../../../../utils/jwt.js";
 import enviarCorreo from "../../../../utils/enviarCorreo.js";
 import parseEsExcepcionParaFechas from "../../../../utils/parseEsExcepcionParaFechas.js"
+import { obtenerURLporEntornoFrontend } from "../../../../utils/obtenerURLporEntorno.js"
 
 
 export const getUsuario = async (req, res, next) => {
@@ -322,8 +323,8 @@ export const recuperoContrasenia = async (req, res, next) => {
     try {
         const { cuil } = req.body;
         // Quiero recuperar la URL que hace la petición
-        //const url = req.protocol + '://' + req.get('host') + req.originalUrl;
-        const url = "https://inscribcordoba.cunix.net"
+        const url = obtenerURLporEntornoFrontend();
+
 
 
         if (!validarCuil(cuil)) {

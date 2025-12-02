@@ -4,7 +4,7 @@ import Autorizador from "../../api/models/autorizador.models.js";
 import Persona from "../../api/models/persona.models.js";
 
 export default class NotaDeAutorizacionRepository {
-  
+
 
   async getNotasDeAutorizacion() {
     return await NotaDeAutorizacion.findAll({
@@ -51,5 +51,27 @@ export default class NotaDeAutorizacionRepository {
 
   }
 
+  async getNotaAutorizacionPorId(id) {
+    return await NotaDeAutorizacion.findOne({
+      where: {
+        id: id
+      },
+      include: [
+        {
+          model: Usuario,
+          as: 'detalle_usuario',
+          include: [
+            {
+              model: Persona,
+              as: 'detalle_persona'
+            }
+          ]
+        }
+      ]
+    });
+  }
+
 
 }
+
+

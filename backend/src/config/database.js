@@ -20,8 +20,8 @@ if (process.env.ES_RED_GOBIERNO == "si") {
   DB_PASSWORD = process.env.DB_PASSWORD_DESARROLLO;
   DB_HOST = process.env.DB_HOST_DESARROLLO;
   DB_PORT = process.env.DB_PORT_DESARROLLO;
-  
-} 
+
+}
 
 
 

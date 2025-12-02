@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogTitle,
@@ -9,9 +9,11 @@ import {
     MenuItem,
     Grid,
     Alert,
-    CircularProgress
+    CircularProgress,
+    Autocomplete
 } from "@mui/material";
 import { postTutores } from "../../../services/tutores.service";
+import { getAreas } from "../../../services/areas.service";
 
 const ModalCrearTutor = ({ open, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
@@ -20,10 +22,27 @@ const ModalCrearTutor = ({ open, onClose, onSuccess }) => {
         nombre: "",
         apellido: "",
         mail: "",
-        celular: ""
+        celular: "",
+        area: ""
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [areas, setAreas] = useState([]);
+
+    const fetchData = async () => {
+        try {
+            const res = await getAreas();
+            setAreas(res);
+        } catch (err) {
+            console.error("Error fetching data for modal:", err);
+            setError("Error al cargar los datos necesarios.");
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -35,6 +54,7 @@ const ModalCrearTutor = ({ open, onClose, onSuccess }) => {
         if (!formData.nombre.trim()) return "El nombre es obligatorio.";
         if (!formData.apellido.trim()) return "El apellido es obligatorio.";
         if (formData.mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.mail)) return "El email no es válido.";
+        if (!formData.area) return "Debe seleccionar una área.";
         return null;
     };
 
@@ -57,7 +77,8 @@ const ModalCrearTutor = ({ open, onClose, onSuccess }) => {
                 nombre: "",
                 apellido: "",
                 mail: "",
-                celular: ""
+                celular: "",
+                area: ""
             });
         } catch (err) {
             setError(err.message || "Error al crear el tutor");
@@ -137,6 +158,24 @@ const ModalCrearTutor = ({ open, onClose, onSuccess }) => {
                             onChange={handleChange}
                         />
                     </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            select
+                            fullWidth
+                            label="Área"
+                            name="area"
+                            value={formData.area}
+                            onChange={handleChange}
+                            required
+                        >
+                            {areas.map((area) => (
+                                <MenuItem key={area.cod} value={area.cod}>
+                                    {area.nombre}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>
+
                 </Grid>
             </DialogContent>
             <DialogActions>

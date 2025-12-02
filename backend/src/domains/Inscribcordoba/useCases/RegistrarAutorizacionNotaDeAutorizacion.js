@@ -3,7 +3,14 @@ import sequelize from "../../../config/database.js";
 import { DateTime } from "luxon";
 
 export default class RegistrarAutorizacionNotaDeAutorizacion {
-    constructor({ NotaDeAutorizacionService, CambiosEstadoNotaDeAutorizacionService, HistoricoTutoresEnCursoService, CoordinadorService }, {
+    constructor({
+        NotaDeAutorizacionService,
+        CambiosEstadoNotaDeAutorizacionService,
+        HistoricoTutoresEnCursoService,
+        CoordinadorService,
+        generarHtmlAutorizacion,
+        enviarCorreo
+    }, {
         tutores,
         coordinadores,
         autorizador,
@@ -19,7 +26,8 @@ export default class RegistrarAutorizacionNotaDeAutorizacion {
         this.cursos = cursos;
         this.nota_autorizacion = nota_autorizacion;
         this.CoordinadorService = CoordinadorService;
-
+        this.generarHtmlAutorizacion = generarHtmlAutorizacion;
+        this.enviarCorreo = enviarCorreo;
     }
 
     async ejecutar() {
@@ -77,6 +85,14 @@ export default class RegistrarAutorizacionNotaDeAutorizacion {
                 }, t)
             }
 
+            // Obtenemos los datos de la nota de autorización
+            const notaDeAutorizacion = await this.NotaDeAutorizacionService.getNotaAutorizacionPorId(this.nota_autorizacion.id);
+
+            // Enviamos correo
+            await this.enviarCorreo(this.generarHtmlAutorizacion(notaDeAutorizacion.detalle_usuario.detalle_persona.nombre, notaDeAutorizacion.detalle_usuario.detalle_persona.apellido),
+                "Nota de autorización autorizada",
+                notaDeAutorizacion.detalle_usuario.detalle_persona.mail
+            );
             // confirmamos cambios
             await t.commit();
 
@@ -89,3 +105,5 @@ export default class RegistrarAutorizacionNotaDeAutorizacion {
         }
     }
 }
+
+

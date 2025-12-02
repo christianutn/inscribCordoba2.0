@@ -25,12 +25,12 @@ async function enviarCorreo(htmlMensaje, asunto, correoDestino) {
 
     // 3. Enviar el Correo
     try {
-        
+
         let info = await transporter.sendMail(mailOptions);
         console.log("Correo enviado con éxito!");
         console.log("Message ID:", info.messageId);
     } catch (error) {
-        console.error("Error al enviar correo:", error);
+        throw error;
     }
 }
 

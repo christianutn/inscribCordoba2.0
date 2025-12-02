@@ -25,7 +25,11 @@ router.post('/subir-nota-de-autorizacion',
     passport.authenticate('jwt', { session: false }),
     autorizar(['ADM', 'REF', 'GA']),
     manejadorArchivos.middleware(),
-    registrarNotaDeAutorizacion)
+    registrarNotaDeAutorizacion,
+    () => {
+        console.log("Nota de autorización subida exitosamente");
+    }
+)
 
 
 

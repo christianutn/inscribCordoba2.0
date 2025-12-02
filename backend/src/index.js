@@ -26,7 +26,7 @@ export const initDb = async () => {
     try {
         await sequelize.authenticate();
         console.log('Connection to the database has been established successfully.');
-        if(process.env.NODE_ENV === 'desarrollo') {
+        if (process.env.NODE_ENV === 'desarrollo') {
             //await syncModels();
             console.log('All models were synchronized successfully.');
         }
@@ -91,11 +91,11 @@ enviarCorreoDiarioContolDeCursos(); // Llamada a la función para enviar el corr
 
 // --- Fin Programación de la Tarea Cron ---
 
-export {app}
+export { app }
 
 const startServer = async () => {
     try {
-        
+
         if (process.env.NODE_ENV !== 'test') {
             await initDb();
             app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

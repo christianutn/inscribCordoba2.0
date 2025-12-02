@@ -8,6 +8,10 @@ export default class NotaDeAutorizacionService {
         return await this.notaDeAutorizacionRepository.getNotasDeAutorizacion();
     }
 
+    async getNotaAutorizacionPorId(id) {
+        return await this.notaDeAutorizacionRepository.getNotaAutorizacionPorId(id);
+    }
+
     async crearNotaAutorizacion(usuario_cuil, fechaActual, transaction) {
         return await this.notaDeAutorizacionRepository.crearNotaAutorizacion(usuario_cuil, fechaActual, transaction);
     }
