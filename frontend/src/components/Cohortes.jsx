@@ -1,6 +1,6 @@
 // --- Archivo: Cohortes.jsx (COMPLETO Y CORREGIDO) ---
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Fecha from './Fecha';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal';
 import Button from '../components/UIElements/FabAlargado';

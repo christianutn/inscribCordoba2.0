@@ -15,7 +15,8 @@ export default class RegistrarAutorizacionNotaDeAutorizacion {
         coordinadores,
         autorizador,
         cursos,
-        nota_autorizacion
+        nota_autorizacion,
+        usuario_cuil
     }) {
         this.NotaDeAutorizacionService = NotaDeAutorizacionService;
         this.CambiosEstadoNotaDeAutorizacionService = CambiosEstadoNotaDeAutorizacionService;
@@ -28,6 +29,7 @@ export default class RegistrarAutorizacionNotaDeAutorizacion {
         this.CoordinadorService = CoordinadorService;
         this.generarHtmlAutorizacion = generarHtmlAutorizacion;
         this.enviarCorreo = enviarCorreo;
+        this.usuario_cuil = usuario_cuil;
     }
 
     async ejecutar() {
@@ -81,7 +83,8 @@ export default class RegistrarAutorizacionNotaDeAutorizacion {
                     tutor_cuil: tutor.cuil,
                     rol_tutor_cod: tutor.rol_tutor_cod,
                     fecha_desde: fechaActual,
-                    nota_de_autorizacion_id: this.nota_autorizacion.id
+                    nota_de_autorizacion_id: this.nota_autorizacion.id,
+                    usuario_cuil: this.usuario_cuil
                 }, t)
             }
 

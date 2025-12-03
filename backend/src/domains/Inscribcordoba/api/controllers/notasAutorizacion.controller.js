@@ -78,6 +78,7 @@ export const autorizarNotaDeAutorizacion = async (req, res, next) => {
         const autorizador = req.body.autorizador;
         const cursos = req.body.cursos;
         const nota_autorizacion = req.body.nota_autorizacion;
+        const usuario_cuil = req.user.user.cuil;
 
         const cambioEstadoNotaDeAutorizacionRepository = new CambiosEstadoNotaDeAutorizacionRepository();
         const cambioEstadoNotaDeAutorizacionService = new CambiosEstadoNotaDeAutorizacionService({
@@ -108,7 +109,8 @@ export const autorizarNotaDeAutorizacion = async (req, res, next) => {
                 coordinadores,
                 autorizador,
                 cursos,
-                nota_autorizacion
+                nota_autorizacion,
+                usuario_cuil
             }
         );
 

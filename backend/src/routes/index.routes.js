@@ -33,7 +33,7 @@ import CidiRouter from "./cidi.routes.js";
 import AsistenciaRouter from "./asistencia.routes.js";
 import CambiosEstadosNotasDeAutorizacionRouter from "../domains/Inscribcordoba/api/routes/cambios_estados_notas_de_autorizacion.routes.js";
 import CoordinadorRouter from "./coordinador.routes.js";
-
+import HistoricoTutoresEnCursoRouter from "../domains/Inscribcordoba/api/routes/historico_tutores_en_cursos.routes.js";
 
 const router = Router();
 
@@ -68,6 +68,7 @@ router.use("/asistencias", AsistenciaRouter)
 router.use("/notas-autorizacion", NotasAutorizacionRouter)
 router.use("/cambios-estados-notas-autorizacion", CambiosEstadosNotasDeAutorizacionRouter)
 router.use("/coordinadores", CoordinadorRouter)
+router.use("/historico-tutores-en-cursos", HistoricoTutoresEnCursoRouter)
 
 
 

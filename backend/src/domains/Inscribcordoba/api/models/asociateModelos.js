@@ -134,7 +134,7 @@ const associateInscribModels = () => {
     Historico_tutores_en_curso.belongsTo(Curso, {
         foreignKey: 'curso_cod',
         targetKey: 'cod',
-        as: 'CursoHistorico'
+        as: 'detalle_curso'
     });
 
     // Un registro histórico pertenece a un Tutor
@@ -148,7 +148,7 @@ const associateInscribModels = () => {
     Historico_tutores_en_curso.belongsTo(RolTutor, {
         foreignKey: 'rol_tutor_cod',
         targetKey: 'cod',
-        as: 'RolTutorHistorico'
+        as: 'detalle_rol_tutor'
     });
 
     // Un registro historico puede tener o no una nota de autorizacion asignada
@@ -156,9 +156,20 @@ const associateInscribModels = () => {
     Historico_tutores_en_curso.belongsTo(NotasAutorizacion, {
         foreignKey: 'nota_de_autorizacion_id',
         targetKey: 'id',
-        as: 'NotaAutorizacionHistorico'
+        as: 'detalle_nota_de_autorizacion'
     });
 
+    Historico_tutores_en_curso.belongsTo(Persona, {
+        foreignKey: 'tutor_cuil',
+        targetKey: 'cuil',
+        as: 'detalle_persona'
+    });
+
+    Historico_tutores_en_curso.belongsTo(Usuario, {
+        foreignKey: 'usuario_cuil',
+        targetKey: 'cuil',
+        as: 'detalle_usuario'
+    });
 };
 
 export default associateInscribModels;

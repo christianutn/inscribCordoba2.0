@@ -50,6 +50,14 @@ const historico_tutores_en_curso = sequelize.define('historico_tutores_en_curso'
       key: 'id',
     },
   },
+  usuario_cuil: {
+    type: DataTypes.STRING(11),
+    allowNull: false,
+    references: {
+      model: 'usuarios', // Referencia a la tabla `usuarios`
+      key: 'cuil',
+    },
+  },
 }, {
   tableName: 'historico_tutores_en_curso',
   timestamps: false, // Asumo que no tienes campos `createdAt` y `updatedAt`
