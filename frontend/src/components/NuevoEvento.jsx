@@ -29,7 +29,7 @@ import Alert from '@mui/material/Alert';
 
 
 
-function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, setMensajeAlerta, selectCurso }) {
+function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, setMensajeAlerta, selectCurso, onEventoCreado }) {
   // State for form fields
   const [perfil, setPerfil] = useState(""); // Start empty or with 'Perfil/s' if Autocomplete handles it
   const [perfiles, setPerfiles] = useState([]); // State to hold fetched perfiles
@@ -110,6 +110,8 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
 
       };
       await postEvento(formData); // Call the service to post the dat
+
+      onEventoCreado(cursoSeleccionado.cod);
 
       setSuccess(true);
       setError(null);

@@ -93,7 +93,7 @@ const validarDatosCursoConCohortes = [
     body('es_autogestionado')
         .exists().withMessage("El campo 'es_autogestionado' es requerido.")
         .isIn([0, 1]).withMessage("El campo 'es_autogestionado' debe ser 0 o 1."),
-    
+
     body('es_publicada_portal_cc')
         .exists().withMessage("El campo 'es_publicada_portal_cc' es requerido.")
         .isIn([0, 1]).withMessage("El campo 'es_publicada_portal_cc' debe ser 0 o 1."),
@@ -233,19 +233,6 @@ const validarDatosCursoConCohortes = [
     }),
 
 
-    check('tutores')
-        .exists().withMessage("El campo 'tutores' es requerido.")
-        .isArray({ min: 1 }).withMessage("El campo 'tutores' debe ser un array con al menos un tutor.")
-        .custom(async (tutores, { req }) => {
-            for (const tutor of tutores) {
-                const { cuil } = tutor;
-                const existeTutor = await Tutor.findOne({ where: { cuil } });
-                if (!existeTutor) {
-                    throw new AppError(`El tutor con cuil ${cuil} no existe.`, 400);
-                }
-            }
-            return true;
-        }),
 
     // Validamos restricciones_por_departamento
 
@@ -260,7 +247,7 @@ const validarDatosCursoConCohortes = [
             }
             return true;
         }),
-    
+
     // Validamos restricciones_por_correlatividades
     body('cursos_correlativos')
         .exists().isArray().withMessage("El campo 'cursos_correlativos' es requerido.")

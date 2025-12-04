@@ -5,7 +5,8 @@ import sequelize from "../../../../config/database.js";
 import validarCuil from "../../../../utils/validarCuil.js"
 import validarEmail from "../../../../utils/validarMail.js";
 import tratarNombres from "../../../../utils/tratarNombres.js";
-
+import HistoricoTutoresEnCursoRepository from "../../core/repositories/HistoricoTutoresEnCursoRepository.js";
+import HistoricoTutoresEnCursoService from "../../core/services/HistoricoTutoresEnCursoService.js";
 import { Op } from 'sequelize'; // Importar el operador de Sequelize
 
 
@@ -155,7 +156,9 @@ export const putTutores = async (req, res, next) => {
 
 export const postTutor = async (req, res, next) => {
 
+    const t = await sequelize.transaction();
     try {
+
 
         let { cuil, area, esReferente, nombre, apellido, mail, celular } = req.body;
 
@@ -212,32 +215,37 @@ export const postTutor = async (req, res, next) => {
 
         //Verificamos si la persona no existe
         const persona = await Persona.findOne({ where: { cuil: cuil } });
+
         if (!persona) {
-            await Persona.create(dataPersona);
+            await Persona.create(dataPersona, { transaction: t });
+        } else {
+            await Persona.update(dataPersona, { where: { cuil: cuil }, transaction: t });
         }
 
-        //Verificamos si el tutor ya existe
-        const tutor = await Tutor.findOne({ where: { cuil: cuil } });
-        if (tutor) {
-            const error = new Error(`El tutor con el cuil ${cuil} ya existe`);
-            error.statusCode = 404;
-            throw error;
+
+        // Consultamos si el tutor existe
+        let tutor = await Tutor.findOne({ where: { cuil: cuil } });
+
+        if (!tutor) {
+            await Tutor.create(
+                { cuil: cuil, area: area, esReferente: esReferente },
+                { transaction: t }
+            );
+        } else {
+            await Tutor.update(
+                { area: area, esReferente: esReferente },
+                { where: { cuil: cuil }, transaction: t }
+            );
         }
 
-        // Actualización de Tutor
-        const altaTutor = await Tutor.create(
-            { cuil: cuil, area: area, esReferente: esReferente }
-        );
 
-        if (!altaTutor) {
-            const error = new Error("No se encontraron datos para actualizar");
-            error.statusCode = 404;
-            throw error;
-        }
+        await t.commit();
+
         res.status(201).json({ message: "Tutor creado correctamente" });
 
     } catch (error) {
 
+        await t.rollback();
         next(error);
     }
 }

@@ -1,5 +1,3 @@
-// --- Archivo: Formulario.jsx (COMPLETO Y CON RECOLECCIÓN DE DATOS CORREGIDA) ---
-
 import Titulo from './fonts/TituloPrincipal';
 import Autocomplete from './UIElements/Autocomplete';
 import TextField from './UIElements/TextField';
@@ -9,12 +7,8 @@ import { getMinisterios } from "../services/ministerios.service.js";
 import { getMediosInscripcion } from "../services/mediosInscripcion.service.js";
 import { getPlataformasDictado } from "../services/plataformasDictado.service.js";
 import { getTiposCapacitacion } from "../services/tiposCapacitacion.service.js";
-import { getTutores } from "../services/tutores.service.js";
 import { getMyUser } from "../services/usuarios.service.js";
 import Alert from '@mui/material/Alert';
-import Select from '@mui/material/Select';
-import { DataGrid, useGridApiContext } from '@mui/x-data-grid';
-import TutoresSeleccionados from './TutoresSeleccionados.jsx';
 import Cohortes from "./Cohortes.jsx";
 import validarFecha from '../services/validarFechas.js';
 import { postInstancias } from "../services/instancias.service.js";
@@ -25,11 +19,11 @@ import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
 import { validarOrdenFechas } from "../services/validarOrdenFechas.js";
 import { useNavigate } from 'react-router-dom';
 import OpcionesEvento from './OpcionesEvento.jsx';
-import CustomInput from '@mui/material/TextField';
 import NuevoEvento from './NuevoEvento.jsx';
 import Alerta from "./UIElements/Dialog.jsx";
 import { getDepartamentos } from "../services/departamentos.service.js";
-import { Autocomplete as MuiAutocomplete, TextField as MuiTextField, MenuItem } from '@mui/material';
+import { Autocomplete as MuiAutocomplete, TextField as MuiTextField, MenuItem, Card, Avatar, Typography, Box } from '@mui/material';
+import { getHistoricoTutoresVigentesPorCurso } from "../services/historicoTutoresEnCurso.service.js";
 
 export default function Formulario() {
 
@@ -74,8 +68,7 @@ export default function Formulario() {
   const [mensajeAlerta, setMensajeAlerta] = useState('');
 
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
-  const [tutoresSeleccionados, setTutoresSeleccionados] = useState([]);
-  
+
   const [resetCohortesKey, setResetCohortesKey] = useState(0);
   const [nuevoEvento, setNuevoEvento] = useState(false);
 
@@ -86,30 +79,6 @@ export default function Formulario() {
     if (!nuevaOpciones.correlatividad) { setCursosCorrelativosSeleccionados([]); }
   };
 
-  const isRowSelected = (id) => rowSelectionModel.includes(id);
-
-  function SelectEditInputCell(props) {
-    const { id, value, field } = props;
-    const apiRef = useGridApiContext();
-    const handleChangeSelect = async (event) => {
-      const newValue = event.target.value;
-      await apiRef.current.setEditCellValue({ id, field, value: newValue });
-      apiRef.current.stopCellEditMode({ id, field });
-      setTutores((prevTutores) => prevTutores.map((tutor) => tutor.cuil === id ? { ...tutor, rol: newValue } : tutor));
-    };
-    return (
-      <Select value={value} onChange={handleChangeSelect} size="small" sx={{ height: 1 }} native autoFocus disabled={isRowSelected(id)}>
-        <option>Profesor con permiso de edición</option>
-        <option>Profesor sin permiso de edición</option>
-      </Select>
-    );
-  }
-
-  const renderSelectEditInputCell = (params) => <SelectEditInputCell {...params} />;
-  const generarDatosTutores = () => tutores.map((tutor) => ({ id: tutor.cuil, cuil: tutor.cuil, nombre: tutor.detalle_persona.nombre, apellido: tutor.detalle_persona.apellido, mail: tutor.detalle_persona.mail, rol: tutor.rol || 'Profesor sin permiso de edición' }));
-  const rows = generarDatosTutores();
-  const columns = [ { field: 'cuil', headerName: 'Cuil', flex: 1 }, { field: 'nombre', headerName: 'Nombre', flex: 1 }, { field: 'apellido', headerName: 'Apellido', flex: 1 }, { field: 'mail', headerName: 'Mail', flex: 1 }, { field: 'rol', headerName: 'Rol del tutor', renderEditCell: renderSelectEditInputCell, editable: true, flex: 1 } ];
-
   useEffect(() => {
     (async () => {
       try {
@@ -119,26 +88,35 @@ export default function Formulario() {
         const listaMediosInscripciones = await getMediosInscripcion(); setMediosInscripciones(listaMediosInscripciones);
         const listaPlataformasDictados = await getPlataformasDictado(); setPlataformasDictado(listaPlataformasDictados);
         const listaTiposCapacitacion = await getTiposCapacitacion(); setTiposCapacitaciones(listaTiposCapacitacion);
-        const listaTutores = await getTutores(); setTutores(listaTutores);
         const listaDepartamentos = await getDepartamentos(); setDepartamentos(listaDepartamentos);
       } catch (error) { setError(error.message || "Error al cargar los datos"); }
     })();
   }, [nuevoEvento, navigate]);
-  
+
   const limpiarFormularioCompleto = () => {
     setSelectMinisterio(""); setSelectArea(""); setSelectCurso(""); setSelectMedioInscripcion("");
     setSelectPlataformaDictado(""); setSelectTipoCapacitacion(""); setCupo(""); setHoras("");
     setCohortes([]); setEdadDesde(16); setEdadHasta("Sin Restricción"); setDepartamentosSeleccionados([]);
-    setCursosCorrelativosSeleccionados([]); setRowSelectionModel([]); setTutoresSeleccionados([]);
+    setCursosCorrelativosSeleccionados([]); setRowSelectionModel([]); setTutores([]);
     setOpciones({ autogestionado: false, edad: false, departamento: false, publicaPCC: false, correlatividad: false });
     setAreas([]); setCursos([]);
     setResetCohortesKey(prevKey => prevKey + 1);
-   
+
   };
 
   const tiene_el_curso_evento_creado = (codCurso) => {
     const curso = cursos.find((curso) => curso.cod === codCurso);
     return curso ? Boolean(curso.tiene_evento_creado) : false;
+  };
+
+  const handleEventoCreado = (codCurso) => {
+    // Actualizar el estado de los cursos para reflejar que el curso ahora tiene un evento creado
+    setCursos(prevCursos => prevCursos.map(curso =>
+      curso.cod === codCurso ? { ...curso, tiene_evento_creado: 1 } : curso
+    ));
+    setNuevoEvento(false);
+    // Opcional: Cerrar la alerta si se desea, o dejarla para que el usuario vea el éxito
+    // setOpenAlertDialog(false); 
   };
 
   const handleCohortes = (cohortes) => { setCohortes(cohortes); };
@@ -154,7 +132,6 @@ export default function Formulario() {
       if (!selectMedioInscripcion) throw new Error("Debe seleccionar un medio de inscripción");
       if (!cupo || cupo <= 0) throw new Error("Debe ingresar un cupo válido");
       if (!horas || horas <= 0) throw new Error("Debe ingresar una cantidad de horas válida");
-      if (tutoresSeleccionados.length === 0) throw new Error("Debe seleccionar al menos un tutor");
       if (cohortes.length === 0) throw new Error("Debe agregar al menos una cohorte");
 
       cohortes.forEach((cohorte) => {
@@ -183,7 +160,7 @@ export default function Formulario() {
         medio_inscripcion: mediosInscripcion.find(medio => medio.nombre === selectMedioInscripcion)?.cod,
         cupo: parseInt(cupo),
         cantidad_horas: parseInt(horas),
-        tutores: tutoresSeleccionados.map(tutor => ({ cuil: tutor.cuil })),
+        tutores: tutores,
         cohortes: cohortes,
         es_autogestionado: opciones.autogestionado ? 1 : 0,
         es_publicada_portal_cc: opciones.publicaPCC ? 1 : 0,
@@ -194,18 +171,18 @@ export default function Formulario() {
       };
 
       await postInstancias(datosParaEnviar); // Enviamos el objeto construido correctamente
-      
+
       limpiarFormularioCompleto();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      setError(null); 
+      setError(null);
       setSuccess(true);
-      
+
     } catch (error) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      setSuccess(false); 
+      setSuccess(false);
       setError(error.message);
-    } finally { 
-      setCargando(false); 
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -214,8 +191,8 @@ export default function Formulario() {
       {error && <Alert className='alert' variant="filled" severity="error">{error}</Alert>}
       {success && <Alert className='alert' variant="filled" severity="success">Formulario enviado exitosamente</Alert>}
       {cargando && <Backdrop sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={cargando}><CircularProgress color="inherit" /></Backdrop>}
-      
-      {nuevoEvento ? <NuevoEvento setNuevoEvento={setNuevoEvento} setOpenAlertDialog={setOpenAlertDialog} setTituloAlerta={setTituloAlerta} setMensajeAlerta={setMensajeAlerta} selectCurso={selectCurso} /> :
+
+      {nuevoEvento ? <NuevoEvento setNuevoEvento={setNuevoEvento} setOpenAlertDialog={setOpenAlertDialog} setTituloAlerta={setTituloAlerta} setMensajeAlerta={setMensajeAlerta} selectCurso={selectCurso} onEventoCreado={handleEventoCreado} /> :
         <form id="form-crear-instancia"> {/* Añadido el ID para consistencia */}
           <div className='grid-container-formulario'>
             <div className='titulo'><Titulo texto='Formulario: Nuevas cohortes' /></div>
@@ -223,7 +200,7 @@ export default function Formulario() {
             <div className='info-curso'>
               <div className='select-ministerio'><Autocomplete options={ministerios.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio} getValue={(value) => { setSelectMinisterio(value); setSelectArea(""); setSelectCurso(""); const ministerioSeleccionado = ministerios.find(m => m.nombre === value); if (ministerioSeleccionado) { setAreas(ministerioSeleccionado.detalle_areas); setCursos([]); } else { setAreas([]); setCursos([]); } }} /></div>
               <div className='select-area'><Autocomplete options={areas.filter(a => a.esVigente === 1).map(a => a.nombre)} label={"Seleccione un área"} value={selectArea} getValue={(value) => { setSelectArea(value); setSelectCurso(""); const areaSeleccionada = areas.find(a => a.nombre === value); if (areaSeleccionada) { setCursos(areaSeleccionada.detalle_cursos); } else { setCursos([]); } }} /></div>
-              <div className='select-curso'><Autocomplete options={cursos.filter(c => c.esVigente === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso} getValue={(value) => { setSelectCurso(value); const codCurso = cursos.find(c => c.nombre === value)?.cod; if (!tiene_el_curso_evento_creado(codCurso)) { setTituloAlerta("El curso no tiene un evento creado"); setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${value}'. Por favor, complete este formulario.`); setOpenAlertDialog(true); setNuevoEvento(true); } }} /></div>
+              <div className='select-curso'><Autocomplete options={cursos.filter(c => c.esVigente === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso} getValue={async (value) => { setSelectCurso(value); const codCurso = cursos.find(c => c.nombre === value)?.cod; if (codCurso) { try { const tutoresData = await getHistoricoTutoresVigentesPorCurso(codCurso); setTutores(tutoresData); } catch (e) { console.error(e); setTutores([]); } if (!tiene_el_curso_evento_creado(codCurso)) { setTituloAlerta("El curso no tiene un evento creado"); setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${value}'. Por favor, complete este formulario.`); setOpenAlertDialog(true); setNuevoEvento(true); } } else { setTutores([]); } }} /></div>
               <div className='select-medio-inscripcion'><Autocomplete options={mediosInscripcion.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion} getValue={(value) => setSelectMedioInscripcion(value)} /></div>
               <div className='select-plataforma-dictado'><Autocomplete options={plataformasDictado.filter(p => p.esVigente === 1).map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado} getValue={(value) => setSelectPlataformaDictado(value)} /></div>
               <div className='select-tipo-capacitacion'><Autocomplete options={tiposCapacitaciones.filter(t => t.esVigente === 1).map(t => t.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion} getValue={(value) => setSelectTipoCapacitacion(value)} /></div>
@@ -239,18 +216,56 @@ export default function Formulario() {
               {opciones.correlatividad && (<div className='restriccion-correlatividad'><MuiAutocomplete multiple options={cursos} getOptionLabel={(option) => option.nombre} value={cursosCorrelativosSeleccionados} onChange={(event, newValue) => setCursosCorrelativosSeleccionados(newValue)} renderInput={(params) => (<MuiTextField {...params} variant="standard" label="Seleccione cursos correlativos" placeholder="Cursos" />)} /></div>)}
             </div>
             <div className='tutores'>
-              <SubtituloPrincipal texto='Selección de tutores' />
-              <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />
-              <DataGrid rows={rows} columns={columns} autoHeight checkboxSelection disableRowSelectionOnClick loading={rows.length === 0}
-                onRowSelectionModelChange={(newRowSelectionModel) => {
-                  setRowSelectionModel(newRowSelectionModel);
-                  const listaTutores = newRowSelectionModel.map((id) => rows.find((row) => row.id === id));
-                  const tutores = listaTutores.map((tutor) => ({ name: `${tutor.nombre} ${tutor.apellido}`, rol: tutor.rol, initials: `${tutor.nombre[0]}${tutor.apellido[0]}`, cuil: tutor.cuil, }));
-                  setTutoresSeleccionados(tutores);
-                }}
-                rowSelectionModel={rowSelectionModel}
-              />
-              <TutoresSeleccionados tutors={tutoresSeleccionados} />
+              <SubtituloPrincipal texto='Tutores' />
+              <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
+                {/* Profesores con permiso de edición */}
+                {tutores.some(t => t.rol_tutor_cod === 'CPE') && (
+                  <Box>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: '#004582' }}>
+                      Profesores con permiso de edición
+                    </Typography>
+                    {tutores.filter(t => t.rol_tutor_cod === 'CPE').map((tutor) => (
+                      <Card key={tutor.id} sx={{ display: 'flex', alignItems: 'center', p: 1, mb: 1, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
+                        <Avatar sx={{ bgcolor: '#009ada', mr: 2 }}>
+                          {tutor.detalle_persona.nombre.charAt(0)}{tutor.detalle_persona.apellido.charAt(0)}
+                        </Avatar>
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography variant="body1">
+                            {tutor.detalle_persona.nombre} {tutor.detalle_persona.apellido}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {tutor.detalle_rol_tutor.nombre}
+                          </Typography>
+                        </Box>
+                      </Card>
+                    ))}
+                  </Box>
+                )}
+
+                {/* Profesores sin permiso de edición */}
+                {tutores.some(t => t.rol_tutor_cod === 'SPE') && (
+                  <Box>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: '#004582' }}>
+                      Profesores sin permiso de edición
+                    </Typography>
+                    {tutores.filter(t => t.rol_tutor_cod === 'SPE').map((tutor) => (
+                      <Card key={tutor.id} sx={{ display: 'flex', alignItems: 'center', p: 1, mb: 1, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
+                        <Avatar sx={{ bgcolor: '#899dac', mr: 2 }}>
+                          {tutor.detalle_persona.nombre.charAt(0)}{tutor.detalle_persona.apellido.charAt(0)}
+                        </Avatar>
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography variant="body1">
+                            {tutor.detalle_persona.nombre} {tutor.detalle_persona.apellido}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {tutor.detalle_rol_tutor.nombre}
+                          </Typography>
+                        </Box>
+                      </Card>
+                    ))}
+                  </Box>
+                )}
+              </div>
             </div>
             <div className='cohortes'>
               <Cohortes getCohortes={handleCohortes} key={resetCohortesKey} />

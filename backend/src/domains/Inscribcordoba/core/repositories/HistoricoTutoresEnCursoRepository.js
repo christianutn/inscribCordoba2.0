@@ -16,6 +16,10 @@ export default class HistoricoTutoresEnCursoRepository {
         return await this.historicoTutoresEnCursoModel.create(data, { transaction });
     }
 
+    async actualizar(data, transaction) {
+        return await this.historicoTutoresEnCursoModel.update(data, { where: { id: data.id }, transaction });
+    }
+
     async getHistoricoTutoresPorCurso(curso_cod) {
         return await this.historicoTutoresEnCursoModel.findAll({ where: { curso_cod } });
     }

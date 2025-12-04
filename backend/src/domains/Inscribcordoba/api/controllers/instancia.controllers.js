@@ -185,7 +185,6 @@ export const postInstancia = async (req, res, next) => {
             tipo_capacitacion,
             cupo,
             cantidad_horas,
-            tutores,
             cohortes,
             es_autogestionado,
             es_publicada_portal_cc,
@@ -267,25 +266,12 @@ export const postInstancia = async (req, res, next) => {
                     }, { transaction: t });
                 }
             }
-
-            for (const tutor of tutores) {
-                const existeTutor = await Persona.findByPk(tutor.cuil);
-                if (!existeTutor) {
-                    throw new AppError(`El tutor con CUIL ${tutor.cuil} no existe`, 404);
-                }
-
-                await TutoresXInstancia.create({
-                    cuil: tutor.cuil,
-                    curso: curso,
-                    fecha_inicio_curso: fechaCursadaDesde
-                }, { transaction: t });
-            }
         }
 
         await t.commit();
 
         logger.info(`Instancia(s) creada(s) por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Curso=${curso}, Cantidad de Cohortes=${cohortes.length}`);
-        res.status(201).json({ message: "Instancias y tutores creados exitosamente" });
+        res.status(201).json({ message: "Instancias creado exitosamente" });
 
     } catch (error) {
         await t.rollback();
