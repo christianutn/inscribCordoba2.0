@@ -1,4 +1,4 @@
-import {getEventos, getEventoByCod, postEvento, deleteEvento } from '../domains/Inscribcordoba/api/controllers/evento.controllers.js';
+import { getEventos, getEventoByCod, postEvento, deleteEvento, putEvento } from '../domains/Inscribcordoba/api/controllers/evento.controllers.js';
 import { Router } from 'express';
 import passport from 'passport';
 import autorizar from '../utils/autorizar.js';
@@ -11,15 +11,15 @@ import TipoCertificación from "../domains/Inscribcordoba/api/models/tipoCertifi
 
 const eventoRouter = Router();
 
-eventoRouter.get("/", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getEventos);
-eventoRouter.get("/:cod", passport.authenticate('jwt', {session: false}), autorizar(['ADM', 'REF', 'GA']), getEventoByCod);
-eventoRouter.post("/", 
-    passport.authenticate('jwt', {session: false}), 
-    autorizar(['ADM', 'REF', 'GA']), 
+eventoRouter.get("/", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), getEventos);
+eventoRouter.get("/:cod", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), getEventoByCod);
+eventoRouter.post("/",
+    passport.authenticate('jwt', { session: false }),
+    autorizar(['ADM', 'REF', 'GA']),
     [
         body("curso")
-        .exists().withMessage("El curso debe existir")
-        .isString().isLength({ min: 1}).withMessage("El curso debe ser un string")
+            .exists().withMessage("El curso debe existir")
+            .isString().isLength({ min: 1 }).withMessage("El curso debe ser un string")
             .custom(async (value) => {
                 const curso = await Curso.findOne({ where: { cod: value } });
                 if (!curso) {
@@ -27,8 +27,8 @@ eventoRouter.post("/",
                 }
             }),
         body("perfil")
-        .exists().withMessage("El curso debe existir")
-        .isString().isLength({ min: 1}).withMessage("El curso debe ser un string")
+            .exists().withMessage("El curso debe existir")
+            .isString().isLength({ min: 1 }).withMessage("El curso debe ser un string")
             .custom(async (value) => {
                 const perfil = await Perfil.findOne({ where: { cod: value } });
                 if (!perfil) {
@@ -36,8 +36,8 @@ eventoRouter.post("/",
                 }
             }),
         body("tipo_certificacion")
-        .exists().withMessage("El tipo de certificación debe existir")
-        .isString().isLength({ min: 1}).withMessage("El tipo de certificación debe ser un string")
+            .exists().withMessage("El tipo de certificación debe existir")
+            .isString().isLength({ min: 1 }).withMessage("El tipo de certificación debe ser un string")
             .custom(async (value) => {
                 const perfil = await TipoCertificación.findOne({ where: { cod: value } });
                 if (!perfil) {
@@ -45,25 +45,28 @@ eventoRouter.post("/",
                 }
             }),
         body("presentación")
-        .exists().withMessage("El campo de presentación debe existir")
-        .isString().isLength({min: 1}).withMessage("El campo de presentación debe ser un string"),
+            .exists().withMessage("El campo de presentación debe existir")
+            .isString().isLength({ min: 1 }).withMessage("El campo de presentación debe ser un string"),
         body("objetivos")
-        .exists().withMessage("El campo de objetivos debe existir")
-        .isString().isLength({min: 1}).withMessage("El campo de objetivos debe ser un string"),
+            .exists().withMessage("El campo de objetivos debe existir")
+            .isString().isLength({ min: 1 }).withMessage("El campo de objetivos debe ser un string"),
         body("requisitos_aprobacion")
-        .exists().withMessage("El campo de requisitos_aprobacion debe existir")
-        .isString().isLength({min: 1}).withMessage("El campo de requisitos_aprobacion debe ser un string"),
+            .exists().withMessage("El campo de requisitos_aprobacion debe existir")
+            .isString().isLength({ min: 1 }).withMessage("El campo de requisitos_aprobacion debe ser un string"),
         body("ejes_tematicos")
-        .exists().withMessage("El campo de ejes_tematicos debe existir")
-        .isString().isLength({min: 1}).withMessage("El campo de ejes_tematicos debe ser un string"),
+            .exists().withMessage("El campo de ejes_tematicos debe existir")
+            .isString().isLength({ min: 1 }).withMessage("El campo de ejes_tematicos debe ser un string"),
         body("certifica_en_cc")
-        .exists().withMessage("El campo de certifica_en_cc debe existir")
-        .isIn([1, 0]).withMessage("El campo de certifica_en_cc debe existir y ser 1 o 0"),
+            .exists().withMessage("El campo de certifica_en_cc debe existir")
+            .isIn([1, 0]).withMessage("El campo de certifica_en_cc debe existir y ser 1 o 0"),
         body("disenio_a_cargo_cc")
-        .exists().withMessage("El campo de disenio_a_cargo_cc debe existir")
-        .isIn([1, 0]).withMessage("El campo de disenio_a_cargo_cc debe existir y ser 1 o 0")
+            .exists().withMessage("El campo de disenio_a_cargo_cc debe existir")
+            .isIn([1, 0]).withMessage("El campo de disenio_a_cargo_cc debe existir y ser 1 o 0")
     ],
     postEvento);
 
-eventoRouter.delete("/:curso",passport.authenticate('jwt', {session: false}), autorizar(['ADM']), deleteEvento)
+eventoRouter.delete("/:curso", passport.authenticate('jwt', { session: false }), autorizar(['ADM']), deleteEvento)
+
+eventoRouter.put("/:curso", passport.authenticate('jwt', { session: false }), autorizar(['ADM']), putEvento)
+
 export default eventoRouter;

@@ -224,12 +224,12 @@ export const deleteEvento = async (req, res, next) => {
 
 export const putEvento = async (req, res, next) => {
     try {
-        const transacción = await sequelize.transaction();
         const { curso } = req.params;
+        const { perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc } = req.body;
 
-        const evento = await Evento.findOne({ where: { curso } }, { transaction: transacción });
+        const evento = await Evento.findOne({ where: { curso } });
 
-        await evento.update(req.body, { transaction: transacción });
+        await evento.update({ perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc });
 
         res.status(200).json(evento);
     } catch (error) {
