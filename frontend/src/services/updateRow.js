@@ -10,7 +10,7 @@ import { putTiposCapacitacion } from "./tiposCapacitacion.service.js"
 
 
 export const updateRow = async (row, option) => {
-   
+
     try {
         switch (option) {
             case 'Cursos':
@@ -37,7 +37,7 @@ export const updateRow = async (row, option) => {
                     nombre: row.nombre,
                     newCod: row.cod,
                     esVigente: row.esVigente
-                    
+
                 })
                 break;
             case "Áreas":
@@ -74,7 +74,7 @@ export const updateRow = async (row, option) => {
 
                 break
             case "Medios de Inscripción":
-                
+
                 await putMedioInscripcion({
                     cod: row.id,
                     nombre: row.nombre,
@@ -94,20 +94,20 @@ export const updateRow = async (row, option) => {
                 break
             case "Usuarios":
                 await putUsuarios({
-                    cuil: row.id,
+                    cuil: row.cuil,
                     nombre: row.nombre,
                     apellido: row.apellido,
                     mail: row.mail || "",
                     celular: row.celular,
-                    newCuil: row.cuil,
-                    area: row.codArea,
-                    rol: row.codRol,
-                    esExcepcionParaFechas: row.esExcepcionParaFechas
+                    area: row.area,
+                    rol: row.rol,
+                    esExcepcionParaFechas: row.esExcepcionParaFechas,
+                    activo: row.activo
 
                 })
                 break
             case "Tipos de Capacitación":
-            
+
 
                 await putTiposCapacitacion({
                     cod: row.id,
@@ -123,7 +123,7 @@ export const updateRow = async (row, option) => {
         }
 
     } catch (error) {
-      
+
         throw error
     }
 }

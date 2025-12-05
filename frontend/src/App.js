@@ -25,7 +25,7 @@ import VersionReducidaGA from './components/VersionReducidaGA';
 import AsistenciasMain from './components/AsistenciasMain';
 import Layout from './components/layout/Layout';
 import Confirmaciones from './components/NotaDeAutorizacion/Confirmacion';
-
+import MainGestion from './components/Gestion/MainGestion';
 function App() {
 
   return (
@@ -56,6 +56,7 @@ function App() {
           <Route path='/version-reducida-ga' element={<Layout><VersionReducidaGA /></Layout>} />
           <Route path='/asistencias' element={<Layout><AsistenciasMain /></Layout>} />
           <Route path='/confirmaciones' element={<Layout><Confirmaciones /></Layout>} />
+          <Route path='/gestion' element={<Layout><MainGestion /></Layout>} />
 
 
         </Routes>

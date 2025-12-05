@@ -90,6 +90,8 @@ const associateInscribModels = () => {
     Evento.belongsTo(AreaTematica, { foreignKey: 'area_tematica', as: 'detalle_areaTematica' });
     Evento.belongsTo(TipoCertificacion, { foreignKey: 'tipo_certificacion', as: 'detalle_tipoCertificacion' });
     Evento.belongsTo(Perfil, { foreignKey: 'perfil', as: 'detalle_perfil' });
+    Evento.belongsTo(Usuario, { foreignKey: 'usuario', as: 'detalle_usuario' });
+    Evento.belongsTo(Curso, { foreignKey: 'curso', as: 'detalle_curso' });
 
     RestriccionesPorCorrelatividad.belongsTo(Curso, { foreignKey: 'curso', as: 'detalle_curso' });
     RestriccionesPorCorrelatividad.belongsTo(Curso, { foreignKey: 'curso_correlativo', as: 'detalle_curso_correlativo' });

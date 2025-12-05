@@ -1,22 +1,18 @@
-import usuarioModel from "../models/usuario.models.js";
 import Persona from "../models/persona.models.js";
 import Rol from "../models/rol.models.js";
 import Area from "../models/area.models.js";
-import sequelize from "../../../../config/database.js";
 import validarCuil from "../../../../utils/validarCuil.js"
-import validarEmail from "../../../../utils/validarMail.js";
-import tratarNombres from "../../../../utils/tratarNombres.js";
 import Usuario from "../models/usuario.models.js";
+import sequelize from "../../../../config/database.js";
 import { createHash } from "../../../../utils/bcrypt.js"
 import generarToken from "../../../../utils/jwt.js";
 import enviarCorreo from "../../../../utils/enviarCorreo.js";
 import parseEsExcepcionParaFechas from "../../../../utils/parseEsExcepcionParaFechas.js"
 import { obtenerURLporEntornoFrontend } from "../../../../utils/obtenerURLporEntorno.js"
 
-
 export const getUsuario = async (req, res, next) => {
     try {
-        const usuarios = await usuarioModel.findAll({
+        const usuarios = await Usuario.findAll({
             include: [
                 {
                     model: Persona, as: 'detalle_persona'
@@ -47,33 +43,50 @@ export const getUsuario = async (req, res, next) => {
 export const postUsuario = async (req, res, next) => {
     try {
 
-        let { cuil, contrasenia, rol, area } = req.body;
-        const usuario = await Usuario.findOne({ where: { cuil: cuil } });
+        let {
+            cuil,
+            nombre,
+            apellido,
+            celular,
+            mail,
+            rol,
+            area
+        } = req.body;
 
-        //Validar que el cuil no exista
-        const existePersona = await Persona.findOne({ where: { cuil: cuil } })
-        if (!existePersona) {
-            const error = new Error(`La persona con el cuil ${cuil} no existe.`);
-            error.statusCode = 400;
-            throw error;
+        const dataPersona = {
+            cuil,
+            nombre,
+            apellido,
+            celular,
+            mail
         }
 
-        if (usuario) {
-            const error = new Error("El usuario ya existe");
-            error.statusCode = 400;
-            throw error;
+
+
+        const persona = await Persona.findByPk(cuil)
+
+        if (persona) {
+            await Persona.update(dataPersona, { where: { cuil } })
+        } else {
+            await Persona.create(dataPersona)
         }
 
-        //Asegurar que contrasenia sea uan cadena si no es una cadena convertirla a string
-        contrasenia = String(contrasenia)
-        const contraseniaHash = createHash(contrasenia)
-        const nuevoUsuario = await Usuario.create({ cuil: cuil, contrasenia: contraseniaHash, rol: rol, area: area, necesitaCbioContrasenia: "1" });
+        // Creamos usuario
 
-        if (!nuevoUsuario) {
-            const error = new Error("No se pudo crear el usuario");
-            error.statusCode = 400;
-            throw error;
-        }
+        const dataUsuario = { cuil, rol }
+
+        // generamos contraseña
+        const contrasenia = createHash(cuil)
+
+        dataUsuario.contrasenia = contrasenia
+
+        if (area) dataUsuario.area = area
+
+        // Marcamos al usuario para cuando ingrese cambie su contraseña
+        dataUsuario.necesitaCbioContrasenia = 1
+
+        const nuevoUsuario = await Usuario.create(dataUsuario)
+
 
         res.status(201).json(nuevoUsuario)
 
@@ -89,62 +102,30 @@ export const putUsuario = async (req, res, next) => {
     try {
 
 
-        let { cuil, nombre, apellido, mail, celular, newCuil, area, rol, esExcepcionParaFechas } = req.body;
+        let { cuil, nombre, apellido, mail, celular, area, rol, esExcepcionParaFechas, activo } = req.body;
 
-        // Normalizar valores de entrada
-        if (celular === "Sin celular" || celular === "") {
-            celular = null;
+        const dataPersona = {
+            cuil,
+            nombre,
+            apellido,
+
         }
 
-        if (!cuil || cuil.length !== 11 || !nombre || !apellido || !mail) {
-            const error = new Error("Datos inválidos: no cumplen con los requisitos");
-            error.statusCode = 400;
-            throw error;
+        if (mail) dataPersona.mail = mail
+        if (celular) dataPersona.celular = celular
+        if (area) dataPersona.area = area
+
+        await Persona.update(dataPersona, { where: { cuil } })
+
+        const dataUsuario = {
+            cuil,
+            rol,
+            area,
+            esExcepcionParaFechas: parseEsExcepcionParaFechas(esExcepcionParaFechas),
+            activo
         }
 
-        if (!validarCuil(cuil)) {
-            const error = new Error("El CUIL no es válido");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        if (!validarEmail(mail)) {
-            const error = new Error("El mail no es válido");
-            error.statusCode = 400;
-            throw error;
-        }
-
-
-
-
-
-
-        // Limpieza de datos
-        cuil = cuil.trim();
-        newCuil = newCuil ? newCuil.trim() : null;
-        nombre = tratarNombres(nombre.trim());
-        apellido = tratarNombres(apellido.trim());
-        mail = mail.trim();
-
-        celular = celular ? celular.trim() : null;
-
-        // Actualización de Persona
-        const updatePersona = await Persona.update(
-            { nombre, apellido, mail, celular, cuil: newCuil || cuil },
-            { where: { cuil: cuil }, transaction: t } // Aseguramos que se incluya la transacción
-        );
-
-        // Actualización de Tutor
-        const updateUsuario = await Usuario.update(
-            { cuil: newCuil || cuil, area: area, rol: rol, esExcepcionParaFechas: parseEsExcepcionParaFechas(esExcepcionParaFechas) },
-            { where: { cuil: cuil }, transaction: t } // Aseguramos que se incluya la transacción
-        );
-
-        if (updatePersona[0] === 0 && updateUsuario[0] === 0) {
-            const error = new Error("No se encontraron datos para actualizar");
-            error.statusCode = 404;
-            throw error;
-        }
+        await Usuario.update(dataUsuario, { where: { cuil } })
 
         // Confirmamos la transacción
         await t.commit();
@@ -158,16 +139,14 @@ export const putUsuario = async (req, res, next) => {
 }
 
 
+
+
 export const deleteUsuario = async (req, res, next) => {
     try {
         const { cuil } = req.params;
-        const deleteUsuario = await Usuario.destroy({ where: { cuil } });
 
-        if (deleteUsuario === 0) {
-            const error = new Error("No se encontraron datos para eliminar");
-            error.statusCode = 404;
-            throw error;
-        }
+        await Usuario.update({ activo: 0 }, { where: { cuil } })
+
         res.status(200).json({ message: "Usuario eliminado correctamente" });
     } catch (error) {
         next(error);

@@ -1,0 +1,127 @@
+import React, { useState, useMemo } from 'react';
+import { Box, Button, Alert, CircularProgress, Snackbar, TextField, InputAdornment } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import useCursos from './hooks/useCursos';
+import CursosTable from './components/CursosTable';
+import CursoModal from './components/CursoModal';
+
+const GestionCursos = () => {
+    const {
+        data, loading, error,
+        createItem, updateItem, deleteItem,
+        auxiliaryData
+    } = useCursos();
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const [currentRecord, setCurrentRecord] = useState(null);
+    const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredData = useMemo(() => {
+        if (!searchTerm) return data;
+        const lowerSearch = searchTerm.toLowerCase();
+        return data.filter(item =>
+            (item.nombre && item.nombre.toLowerCase().includes(lowerSearch)) ||
+            (item.cod && item.cod.toLowerCase().includes(lowerSearch))
+        );
+    }, [data, searchTerm]);
+
+    const handleCreate = () => {
+        setCurrentRecord(null);
+        setModalOpen(true);
+    };
+
+    const handleEdit = (record) => {
+        setCurrentRecord(record);
+        setModalOpen(true);
+    };
+
+
+
+    const handleSave = async (formData) => {
+        let result;
+        if (currentRecord) {
+
+            result = await updateItem(formData);
+        } else {
+            result = await createItem(formData);
+        }
+
+        if (result.success) {
+            setNotification({
+                open: true,
+                message: `Curso ${currentRecord ? 'actualizado' : 'creado'} correctamente`,
+                severity: 'success'
+            });
+            setModalOpen(false);
+        } else {
+            setNotification({ open: true, message: result.error, severity: 'error' });
+        }
+    };
+
+    const handleCloseNotification = () => {
+        setNotification({ ...notification, open: false });
+    };
+
+    if (loading && data.length === 0) {
+        return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
+    }
+
+    return (
+        <Box sx={{ mt: 2 }}>
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
+                <TextField
+                    placeholder="Buscar por nombre o código..."
+                    variant="outlined"
+                    size="small"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    sx={{ width: 300 }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={handleCreate}
+                >
+                    Nuevo Curso
+                </Button>
+            </Box>
+
+            <CursosTable
+                data={filteredData}
+                onEdit={handleEdit}
+            />
+
+            <CursoModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onSave={handleSave}
+                record={currentRecord}
+                auxiliaryData={auxiliaryData}
+            />
+
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={6000}
+                onClose={handleCloseNotification}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseNotification} severity={notification.severity} sx={{ width: '100%' }}>
+                    {notification.message}
+                </Alert>
+            </Snackbar>
+        </Box>
+    );
+};
+
+export default GestionCursos;

@@ -1,6 +1,7 @@
 import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
 import Usuario from "../models/usuario.models.js";
 import Area from "../models/area.models.js";
+import Persona from "../models/persona.models.js";
 import AppError from "../../../../utils/appError.js";
 import logger from '../../../../utils/logger.js';
 
@@ -11,7 +12,13 @@ export const getAreasAsignadas = async (req, res, next) => {
             include: [
                 {
                     model: Usuario,
-                    as: 'detalle_usuario'
+                    as: 'detalle_usuario',
+                    include: [
+                        {
+                            model: Persona,
+                            as: 'detalle_persona'
+                        }
+                    ]
                 },
                 {
                     model: Area,
@@ -32,13 +39,13 @@ export const getAreasAsignadas = async (req, res, next) => {
 
 // Crear una nueva asignación
 export const postAreaAsignada = async (req, res, next) => {
-    
+
     try {
-        const { cuil_usuario, cod_area, comentario } = req.body; 
+        const { cuil_usuario, cod_area, comentario } = req.body;
         // crear nueva asignacion de area
         const nuevaAsignacion = await AreasAsignadasUsuario.create(
             { usuario: cuil_usuario.trim(), area: cod_area.trim(), comentario: comentario || "Sin comentarios" },
-            
+
         )
 
         if (!nuevaAsignacion) {

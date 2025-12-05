@@ -6,6 +6,8 @@ import AppError from "../../../../utils/appError.js"
 import Curso from '../models/curso.models.js';
 import enviarCorreo from '../../../../utils/enviarCorreo.js';
 import sequelize from '../../../../config/database.js';
+import Persona from '../models/persona.models.js';
+import Usuario from '../models/usuario.models.js';
 export const getEventos = async (req, res, next) => {
     try {
         const eventos = await Evento.findAll({
@@ -24,12 +26,28 @@ export const getEventos = async (req, res, next) => {
                 {
                     model: TipoCertificacion,
                     as: 'detalle_tipoCertificacion'
+                },
+                {
+                    model: Curso,
+                    as: 'detalle_curso'
+                },
+                {
+                    model: Usuario,
+                    as: 'detalle_usuario',
+                    // 💡 CORRECCIÓN PRINCIPAL: Excluir el campo 'contrasenia' en el modelo Usuario
+                    attributes: { exclude: ['contrasenia'] },
+                    include: [
+                        {
+                            model: Persona,
+                            as: 'detalle_persona'
+                        }
+                    ]
                 }
             ]
         });
 
 
-        res.status(200).json(eventos);
+        res.status(200).json(eventos); // Se envía directamente la variable 'eventos'
     } catch (error) {
         next(error);
     }
@@ -202,3 +220,19 @@ export const deleteEvento = async (req, res, next) => {
         next(error); // Pasa el error al siguiente middleware de manejo de errores
     }
 };
+
+
+export const putEvento = async (req, res, next) => {
+    try {
+        const transacción = await sequelize.transaction();
+        const { curso } = req.params;
+
+        const evento = await Evento.findOne({ where: { curso } }, { transaction: transacción });
+
+        await evento.update(req.body, { transaction: transacción });
+
+        res.status(200).json(evento);
+    } catch (error) {
+        next(error);
+    }
+}

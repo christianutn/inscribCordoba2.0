@@ -7,6 +7,7 @@ import manejarValidacionErrores from "../utils/manejarValidacionErrores.js";
 import { check, param, body } from "express-validator";
 import AreaModel from "../domains/Inscribcordoba/api/models/area.models.js";
 import MinisterioModel from "../domains/Inscribcordoba/api/models/ministerio.models.js";
+import { areaUpdateValidation } from "../middlewares/validations/area.validations.js";
 
 const areaRouter = Router();
 
@@ -18,24 +19,7 @@ areaRouter.get("/",
 areaRouter.put("/",
     passport.authenticate('jwt', { session: false }),
     autorizar(['ADM']),
-    [
-        body("cod").exists().isString().isLength({ min: 1, max: 15 }).withMessage("El código debe contener entre 1 a 15 caracteres")
-            .custom(async (value) => {
-                const area = await AreaModel.findOne({ where: { cod: value } });
-                if (!area) {
-                    throw new AppError(`El area no existe`, 400);
-                }
-            }),
-        body("nombre").optional().isString().isLength({ min: 1, max: 250 }).withMessage("El nombre es requerido"),
-        body("ministerio").optional().isString().isLength({ max: 15, min: 1 }).withMessage("El ministerio es requerido")
-            .custom(async (value) => {
-                const minist = await MinisterioModel.findByPk(value)
-                if (!minist) throw new AppError("El ministerio no existe")
-            }),
-        body("esVigente").optional().isBoolean().withMessage("El estado es requerido"),
-        body("newCod").optional().isString().isLength({ min: 1, max: 15 }).withMessage("El nuevo codigo es requerido"),
-
-    ],
+    areaUpdateValidation,
     manejarValidacionErrores,
     putArea)
 
@@ -45,13 +29,13 @@ areaRouter.post("/",
     [
         passport.authenticate('jwt', { session: false }),
         autorizar(['ADM']),
-        check("cod").exists().isString().isLength({min: 1, max:15}).withMessage("El código debe contener entre 1 a 15 caracteres").custom(async (value) => {
+        check("cod").exists().isString().isLength({ min: 1, max: 15 }).withMessage("El código debe contener entre 1 a 15 caracteres").custom(async (value) => {
             const area = await AreaModel.findOne({ where: { cod: value } });
             if (area) {
                 throw new AppError(`Ya existe un área con el código ${value}`, 400);
             }
         }),
-        check("nombre").exists().isString().isLength({min: 1, max: 250}).withMessage("El nombre de área debe contenener un máximo de 250 caracteres"),
+        check("nombre").exists().isString().isLength({ min: 1, max: 250 }).withMessage("El nombre de área debe contenener un máximo de 250 caracteres"),
         check("ministerio").exists().isString().isLength({ max: 15, min: 1 }).withMessage("El ministerio es requerido").custom(async (value) => {
             const ministerio = await MinisterioModel.findOne({ where: { cod: value } });
             if (!ministerio) {

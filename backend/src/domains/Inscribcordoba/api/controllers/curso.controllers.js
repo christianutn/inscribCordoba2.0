@@ -118,7 +118,15 @@ export const getCursos = async (req, res, next) => {
 export const postCurso = async (req, res, next) => {
     try {
 
-        const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area, tiene_evento_creado } = req.body;
+        const { cod,
+            nombre,
+            cupo,
+            cantidad_horas,
+            medio_inscripcion,
+            plataforma_dictado,
+            tipo_capacitacion,
+            area,
+        } = req.body;
 
 
         const existe = await cursoModel.findOne({ where: { cod: cod } });
@@ -132,7 +140,6 @@ export const postCurso = async (req, res, next) => {
         if (area.length > 15) throw new AppError("El area no es valido debe ser menor a 15 caracteres", 400);
         if (nombre.length > 250) throw new AppError("El nombre no es valido debe ser menor a 250 caracteres", 400);
         if (nombre.length === 0) throw new AppError("El nombre no puede ser vacío", 400);
-
 
         const response = await cursoModel.create(req.body);
 
@@ -149,7 +156,23 @@ export const updateCurso = async (req, res, next) => {
     let t;
 
     try {
-        const { cod, nombre, cupo, cantidad_horas, medio_inscripcion, plataforma_dictado, tipo_capacitacion, area, esVigente, tiene_evento_creado } = req.body;
+        const {
+            cod,
+            nombre,
+            cupo,
+            cantidad_horas,
+            medio_inscripcion,
+            plataforma_dictado,
+            tipo_capacitacion,
+            area,
+            esVigente,
+            tiene_evento_creado,
+            numero_evento,
+            esta_maquetado,
+            esta_configurado,
+            aplica_sincronizacion_certificados,
+            url_curso
+        } = req.body;
 
         // --- Validaciones de entrada (Sin cambios en lógica, solo se eliminan logs) ---
         // Lanzamos el error directamente, confiando en que el catch lo capture y pase a next(error)
@@ -187,6 +210,11 @@ export const updateCurso = async (req, res, next) => {
             throw new AppError(`No se encontró un curso con el código ${cod}`, 400);
         }
 
+        if (numero_evento.length > 0) throw new AppError("El numero de evento no es valido debe ser mayor a cero ", 400);
+        if (esta_maquetado != "1" && esta_maquetado != "0") throw new AppError("El estado de maquetado debe ser 1 o 0", 400);
+        if (esta_configurado != "1" && esta_configurado != "0") throw new AppError("El estado de configurado debe ser 1 o 0", 400);
+        if (aplica_sincronizacion_certificados != "1" && aplica_sincronizacion_certificados != "0") throw new AppError("El estado de sincronizacion de certificados debe ser 1 o 0", 400);
+
         // --- Actualización en base de datos (Sin cambios en lógica, AÑADIDA transacción) ---
         const result = await cursoModel.update(
             {
@@ -199,7 +227,12 @@ export const updateCurso = async (req, res, next) => {
                 tipo_capacitacion,
                 area,
                 esVigente: parseEsVigente(esVigente),
-                tiene_evento_creado: tiene_evento_creado === "Si" ? 1 : 0
+                tiene_evento_creado: tiene_evento_creado === "Si" ? 1 : 0,
+                numero_evento,
+                esta_maquetado,
+                esta_configurado,
+                aplica_sincronizacion_certificados,
+                url_curso
             },
             {
                 where: {
