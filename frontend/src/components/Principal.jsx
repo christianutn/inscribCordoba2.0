@@ -38,7 +38,6 @@ import DifferenceIcon from '@mui/icons-material/Difference';
 
 import Formulario from './Formulario';
 import Cronograma from "./Cronograma.jsx";
-import AltaBajaModificion from './AltaBajaModificion.jsx';
 import RestriccionesFechasInicioCursada from "../components/RestriccionesFechasInicioCursada.jsx";
 import Home from "./Home.jsx";
 import NuevoEvento from './NuevoEvento.jsx';
@@ -49,6 +48,7 @@ import VersionReducidaAdministradores from './VersionReducidaAdministradores.jsx
 import AsistenciasMain from './AsistenciasMain.jsx';
 import SubaNotaDeAutorizacion from './NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx';
 import Autorizaciones from './NotaDeAutorizacion/Autorizaciones.jsx';
+import MainGestion from './Gestion/MainGestion.jsx';
 
 import { getMyUser } from "../services/usuarios.service.js";
 
@@ -60,7 +60,7 @@ const menuItemsConfig = [
   { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon />, roles: ["ADM", "REF", 'GA'] },
   { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon />, roles: ["ADM", "REF", 'GA'] },
   { label: "Reporte de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon />, roles: ["ADM", 'GA', 'REF'] },
-  { label: "Administrar Usuarios/Cursos", identifier: "AltaBajaModificion", icon: <SettingsSuggestIcon />, roles: ["ADM"] },
+  { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon />, roles: ["ADM", "GA"] },
   { label: "Restricciones Fechas", identifier: "RestriccionesFechasInicioCursada", icon: <GavelIcon />, roles: ["ADM"] },
   { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon />, roles: ["ADM"] },
   { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["NO VISIBLE"] },
@@ -213,7 +213,7 @@ export default function Principal() {
     switch (opcionSeleccionada) {
       case "Formulario": return <Formulario />;
       case "Calendario": return <Cronograma />;
-      case "AltaBajaModificion": return <AltaBajaModificion />;
+      case "Gestion": return <MainGestion />;
       case "RestriccionesFechasInicioCursada": return <RestriccionesFechasInicioCursada />;
       case "Eventos": return <NuevoEvento />;
       case "ReporteCursosIdentifier": return <ReporteCursos />;

@@ -7,5 +7,6 @@ const router = Router();
 const historicoTutoresEnCursoController = new HistoricoTutoresEnCursoController();
 
 router.get('/:curso_cod', passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), historicoTutoresEnCursoController.getHistoricoTutoresVigentesPorCurso.bind(historicoTutoresEnCursoController));
+router.post('/', passport.authenticate('jwt', { session: false }), autorizar(['ADM']), historicoTutoresEnCursoController.asignarNuevoRol.bind(historicoTutoresEnCursoController));
 
 export default router;

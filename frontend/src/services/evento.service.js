@@ -61,5 +61,25 @@ export const deleteEvento = async (curso) => {
     }
 }
 
+export const putEvento = async (evento) => {
+    try {
+        const response = await fetch(URL + "/" + evento.curso, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({ ...evento })
+        });
+        const data = await response.json();
+        if (response.status !== 200) {
+            throw new Error(data.message || "Error al actualizar evento");
+        }
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 
 

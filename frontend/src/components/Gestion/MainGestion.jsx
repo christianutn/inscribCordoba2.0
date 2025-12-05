@@ -10,6 +10,8 @@ import GestionMinisterios from '../../features/Ministerios/GestionMinisterios';
 import GestionMediosInscripcion from '../../features/MediosDeInscripcion/GestionMediosInscripcion';
 import GestionPlataformasDictado from '../../features/PlataformasDeDictado/GestionPlataformasDictado';
 import GestionTiposCapacitacion from '../../features/TiposDeCapacitacion/GestionTiposCapacitacion';
+import GestionEventos from '../../features/Eventos/GestionEventos';
+
 const MainGestion = () => {
     const [selectedOption, setSelectedOption] = useState(null);
 
@@ -22,6 +24,7 @@ const MainGestion = () => {
         "Medios de Inscripción",
         "Plataformas de Dictado",
         "Tipos de Capacitación",
+        "Eventos",
         // Add other options as features are implemented
         // "Ministerios", "Áreas", "Personas", "Tutores", "Medios de Inscripción", 
         // "Plataformas de Dictado", "Tipos de Capacitación", "Asignar areas a usuarios"
@@ -49,6 +52,8 @@ const MainGestion = () => {
                 return <GestionPlataformasDictado />;
             case 'Tipos de Capacitación':
                 return <GestionTiposCapacitacion />;
+            case 'Eventos':
+                return <GestionEventos />;
             default:
                 return (
                     <Box sx={{ mt: 4, textAlign: 'center' }}>

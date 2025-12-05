@@ -5,8 +5,7 @@ import sequelize from "../../../../config/database.js";
 import validarCuil from "../../../../utils/validarCuil.js"
 import validarEmail from "../../../../utils/validarMail.js";
 import tratarNombres from "../../../../utils/tratarNombres.js";
-import HistoricoTutoresEnCursoRepository from "../../core/repositories/HistoricoTutoresEnCursoRepository.js";
-import HistoricoTutoresEnCursoService from "../../core/services/HistoricoTutoresEnCursoService.js";
+
 import { Op } from 'sequelize'; // Importar el operador de Sequelize
 
 
