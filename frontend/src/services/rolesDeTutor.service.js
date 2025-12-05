@@ -1,6 +1,8 @@
-const URL = process.env.REACT_APP_API_URL + "/tiposRolTutor"
+const URL = process.env.REACT_APP_API_URL + "/rolesTutor";
 
-export const getTiposRolTutor = async () => {
+
+export const getRolesDeTutor = async () => {
+
     try {
         const response = await fetch(URL, {
             method: "GET",
@@ -11,7 +13,7 @@ export const getTiposRolTutor = async () => {
         });
         const data = await response.json();
         if (response.status !== 200) {
-            throw new Error(data.message || "Error al obtener los tipos de rol de tutor");
+            throw new Error(data.message || "Error al obtener los roles de tutor");
         }
 
         return data
@@ -19,4 +21,3 @@ export const getTiposRolTutor = async () => {
         throw error
     }
 }
-

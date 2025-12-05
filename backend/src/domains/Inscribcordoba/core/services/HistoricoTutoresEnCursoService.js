@@ -16,4 +16,15 @@ export default class HistoricoTutoresEnCursoService {
    async getHistoricoTutoresVigentesPorCurso(curso_cod) {
       return await this.repositorioHistoricoTutoresEnCurso.getHistoricoTutoresVigentesPorCurso(curso_cod);
    }
+
+   async asignarNuevoRol(tutor_cuil, curso_cod, rol_tutor_cod, usuario_cuil, fecha_desde) {
+      const data = {
+         tutor_cuil,
+         curso_cod,
+         rol_tutor_cod,
+         usuario_cuil,
+         fecha_desde
+      };
+      return await this.repositorioHistoricoTutoresEnCurso.crear(data);
+   }
 }

@@ -19,3 +19,23 @@ export const getHistoricoTutoresVigentesPorCurso = async (curso_cod) => {
         throw error
     }
 }
+
+export const asignarNuevoRol = async (data) => {
+    try {
+        const response = await fetch(`${URL}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify(data)
+        })
+        const result = await response.json();
+        if (response.status !== 201) {
+            throw new Error(result.message || "Error al asignar rol")
+        }
+        return result
+    } catch (error) {
+        throw error
+    }
+}

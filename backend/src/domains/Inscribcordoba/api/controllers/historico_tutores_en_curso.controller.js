@@ -30,7 +30,7 @@ export default class HistoricoTutoresEnCursoController {
 
             const historicoTutoresEnCursoVigentes = await this.historicoTutoresEnCursoService.asignarNuevoRol(tutor_cuil, curso_cod, rol_tutor_cod, usuario_cuil, fecha_desde);
 
-            res.status(200).json(historicoTutoresEnCursoVigentes);
+            res.status(201).json(historicoTutoresEnCursoVigentes);
         } catch (error) {
             next(error);
         }

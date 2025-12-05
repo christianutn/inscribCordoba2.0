@@ -13,7 +13,7 @@ import instanciaRouter from "./instancia.routes.js";
 import tutorXInstanciaRouter from "./tutorXInstancia.routes.js";
 import loginRouter from "./login.routes.js";
 import tutorRouter from "./tutor.routes.js";
-import tipoRolTutor from "./tipoRolTutor.routes.js";
+import rolesTutorRouter from "./rolesTutor.routes.js";
 
 import restriccionesFechasInicioCursada from "./restriccionesFechasInicioCursada.routes.js";
 import perfilRouter from "./perfil.routes.js";
@@ -52,7 +52,7 @@ router.use("/instancias", instanciaRouter)
 router.use("/tutoresXInstancias", tutorXInstanciaRouter)
 router.use("/login", loginRouter)
 router.use("/tutores", tutorRouter)
-router.use("/tiposRolTutor", tipoRolTutor)
+router.use("/rolesTutor", rolesTutorRouter)
 router.use("/restricciones", restriccionesFechasInicioCursada)
 router.use("/perfiles", perfilRouter)
 router.use("/areasTematicas", AreaTematica)

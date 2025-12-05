@@ -1,9 +1,9 @@
-import TipoRolTutor from "../models/tipoRolTutor.models.js";
+import RolTutor from "../models/roles_tutor.models.js";
 
 
-export const getTipoRolTutor = async (req, res, next) => {
+export const getRolesTutor = async (req, res, next) => {
     try {
-        const tipoRolTutor = await TipoRolTutor.findAll();
+        const tipoRolTutor = await RolTutor.findAll();
         if (tipoRolTutor.length === 0) {
             const error = new Error("No existen tipoRolTutor");
             error.statusCode = 404;

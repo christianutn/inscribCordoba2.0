@@ -11,7 +11,6 @@ import EstadoInstancia from "./estado_instancia.models.js";
 import Rol from "./rol.models.js";
 import Usuario from "./usuario.models.js";
 import Tutor from "./tutor.models.js";
-import TipoRolTutor from "./tipoRolTutor.models.js";
 import AreasAsignadasUsuario from "./areasAsignadasUsuario.models.js";
 import TipoCertificacion from "./tipoCertificacion.models.js";
 import AreaTematica from "./areaTematica.models.js";

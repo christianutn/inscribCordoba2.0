@@ -1,5 +1,5 @@
 import sequelize from "../../../config/database";
-import AppError from "../../../utils/AppError";
+import AppError from "../../../utils/appError.js";
 
 export default class AsignarNuevoRol {
     constructor({
