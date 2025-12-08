@@ -12,6 +12,7 @@ import GestionPlataformasDictado from '../../features/PlataformasDeDictado/Gesti
 import GestionTiposCapacitacion from '../../features/TiposDeCapacitacion/GestionTiposCapacitacion';
 import GestionEventos from '../../features/Eventos/GestionEventos';
 import GestionRolesTutores from '../../features/RolTutores/GestionRolTutores';
+import GestionTutores from '../../features/Tutores/GestionTutores';
 
 const MainGestion = () => {
     const [selectedOption, setSelectedOption] = useState(null);
@@ -27,6 +28,7 @@ const MainGestion = () => {
         "Tipos de Capacitación",
         "Eventos",
         "Roles Tutores",
+        "Tutores",
         // Add other options as features are implemented
         // "Ministerios", "Áreas", "Personas", "Tutores", "Medios de Inscripción", 
         // "Plataformas de Dictado", "Tipos de Capacitación", "Asignar areas a usuarios"
@@ -58,6 +60,8 @@ const MainGestion = () => {
                 return <GestionEventos />;
             case 'Roles Tutores':
                 return <GestionRolesTutores />;
+            case 'Tutores':
+                return <GestionTutores />;
             default:
                 return (
                     <Box sx={{ mt: 4, textAlign: 'center' }}>

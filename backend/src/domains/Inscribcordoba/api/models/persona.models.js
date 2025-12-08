@@ -26,18 +26,13 @@ const Personas = sequelize.define("personas", {
     },
     mail: {
         type: DataTypes.STRING(100),
-        validate: {
-            isEmail: true,  // Validación de formato de correo electrónico
-            len: [1, 100]
-        }
+        allowNull: true,
     },
     celular: {
-        type: DataTypes.STRING(10),  // Asumiendo una longitud máxima de 15 caracteres para el celular
-        allowNull: true,
-        validate: {
-            len: [10, 10]  // Validación de longitud
-        }
-    }
+        type: DataTypes.STRING(10),  // Asumiendo una longitud máxima de 10 caracteres para el celular
+        allowNull: true, // El número de celular es opcional
+    },
+    // Remueve la validación de longitud para campos opcionales, ya que un valor nulo no la cumpliría
 }, {
     tableName: "personas",  // Nombre explícito de la tabla
     timestamps: false

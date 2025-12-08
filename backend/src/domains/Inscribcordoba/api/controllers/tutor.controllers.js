@@ -87,60 +87,33 @@ export const putTutores = async (req, res, next) => {
     try {
 
 
-        let { cuil, nombre, apellido, mail, celular, newCuil, area, esReferente } = req.body;
+        let { cuil, nombre, apellido, mail, celular, area, esReferente } = req.body;
 
-        // Normalizar valores de entrada
-        if (celular === "Sin celular" || celular === "") {
-            celular = null;
+        const dataPersona = {
+            cuil,
+            nombre,
+            apellido
         }
 
-        if (!cuil || cuil.length !== 11 || !nombre || !apellido || !mail) {
-            const error = new Error("Datos inválidos: no cumplen con los requisitos");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        if (!validarCuil(cuil)) {
-            const error = new Error("El CUIL no es válido");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        if (!validarEmail(mail)) {
-            const error = new Error("El mail no es válido");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        esReferente = esReferente === "Si" ? 1 : esReferente === "No" ? 0 : null;
-
-        // Limpieza de datos
-        cuil = cuil.trim();
-        newCuil = newCuil ? newCuil.trim() : null;
-        nombre = tratarNombres(nombre.trim());
-        apellido = tratarNombres(apellido.trim());
-        mail = mail.trim();
-        area = area.trim();
-        celular = celular ? celular.trim() : null;
+        if (mail) dataPersona.mail = mail;
+        if (celular) dataPersona.celular = celular;
 
         // Actualización de Persona
-        const updatePersona = await Persona.update(
-            { nombre, apellido, mail, celular, cuil: newCuil || cuil },
+        await Persona.update(
+            dataPersona,
             { where: { cuil: cuil }, transaction: t } // Aseguramos que se incluya la transacción
         );
+
+        const dataTutor = {
+            area,
+            esReferente
+        }
 
         // Actualización de Tutor
         const updateTutor = await Tutor.update(
-            { area, esReferente },
+            dataTutor,
             { where: { cuil: cuil }, transaction: t } // Aseguramos que se incluya la transacción
         );
-
-        if (updatePersona[0] === 0 && updateTutor[0] === 0) {
-            const error = new Error("No se encontraron datos para actualizar");
-            error.statusCode = 404;
-            throw error;
-        }
-
         // Confirmamos la transacción
         await t.commit();
         res.status(200).json({ message: "Tutor actualizado correctamente" });
@@ -160,43 +133,6 @@ export const postTutor = async (req, res, next) => {
 
 
         let { cuil, area, esReferente, nombre, apellido, mail, celular } = req.body;
-
-
-        if (!cuil) {
-            const error = new Error("EL cuil es requerido");
-            error.statusCode = 400;
-            throw error;
-        } else if (cuil.length !== 11) {
-            const error = new Error("El CUIL debe ser de 11 caracteres sin guíones");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        if (!area) {
-            const error = new Error("EL área es requerida");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        if (!esReferente) {
-            const error = new Error("El referente es requerido");
-            error.statusCode = 400;
-            throw error;
-        } else if (esReferente !== "Si" && esReferente !== "No") {
-            const error = new Error("El referente debe ser Si o No");
-            error.statusCode = 400;
-            throw error;
-        }
-        // Limpieza de datos
-        cuil = cuil.trim();
-        area = area.trim();
-        esReferente = esReferente.trim();
-
-        if (!validarCuil(cuil)) {
-            const error = new Error("El CUIL no es válido");
-            error.statusCode = 400;
-            throw error;
-        }
 
         // Sanatizamos los datos para personas
         const dataPersona = {}
@@ -221,21 +157,10 @@ export const postTutor = async (req, res, next) => {
             await Persona.update(dataPersona, { where: { cuil: cuil }, transaction: t });
         }
 
-
-        // Consultamos si el tutor existe
-        let tutor = await Tutor.findOne({ where: { cuil: cuil } });
-
-        if (!tutor) {
-            await Tutor.create(
-                { cuil: cuil, area: area, esReferente: esReferente },
-                { transaction: t }
-            );
-        } else {
-            await Tutor.update(
-                { area: area, esReferente: esReferente },
-                { where: { cuil: cuil }, transaction: t }
-            );
-        }
+        await Tutor.create(
+            { cuil: cuil, area: area, esReferente: esReferente },
+            { transaction: t }
+        );
 
 
         await t.commit();

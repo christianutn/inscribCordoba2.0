@@ -18,7 +18,7 @@ import { getAreas } from "../../../services/areas.service";
 const ModalCrearTutor = ({ open, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
         cuil: "",
-        esReferente: "No",
+        esReferente: 0,
         nombre: "",
         apellido: "",
         mail: "",
@@ -73,7 +73,7 @@ const ModalCrearTutor = ({ open, onClose, onSuccess }) => {
             onClose();
             setFormData({
                 cuil: "",
-                esReferente: "No",
+                esReferente: 0,
                 nombre: "",
                 apellido: "",
                 mail: "",
@@ -115,8 +115,8 @@ const ModalCrearTutor = ({ open, onClose, onSuccess }) => {
                             onChange={handleChange}
                             required
                         >
-                            <MenuItem value="Si">Si</MenuItem>
-                            <MenuItem value="No">No</MenuItem>
+                            <MenuItem value={1}>Si</MenuItem>
+                            <MenuItem value={0}>No</MenuItem>
                         </TextField>
                     </Grid>
                     <Grid item xs={6}>

@@ -152,8 +152,9 @@ export const postCurso = async (req, res, next) => {
 
 
 export const updateCurso = async (req, res, next) => {
-    // Declaramos la variable de transacción para usarla en el catch si es necesario
-    let t;
+
+    // Inicia la transacción de Sequelize DESPUÉS de las validaciones iniciales
+    const t = await sequelize.transaction();
 
     try {
         const {
@@ -174,66 +175,30 @@ export const updateCurso = async (req, res, next) => {
             url_curso
         } = req.body;
 
-        // --- Validaciones de entrada (Sin cambios en lógica, solo se eliminan logs) ---
-        // Lanzamos el error directamente, confiando en que el catch lo capture y pase a next(error)
-        if (!cod || !nombre || !cupo || !cantidad_horas || !medio_inscripcion || !plataforma_dictado || !tipo_capacitacion || !area) {
-            throw new AppError("Hay campos vacios", 400);
+        const cursoData = {
+            cod,
+            nombre,
+            cupo,
+            cantidad_horas,
+            medio_inscripcion,
+            plataforma_dictado,
+            tipo_capacitacion,
+            area
         }
 
-        // Convertimos a número y validamos que sean enteros positivos
-        const parsedCupo = Number(cupo);
-        const parsedCantidadHoras = Number(cantidad_horas);
+        if (esVigente) cursoData.esVigente = esVigente;
+        if (tiene_evento_creado) cursoData.tiene_evento_creado = tiene_evento_creado;
+        if (numero_evento) cursoData.numero_evento = numero_evento;
+        if (esta_maquetado) cursoData.esta_maquetado = esta_maquetado;
+        if (esta_configurado) cursoData.esta_configurado = esta_configurado;
+        if (aplica_sincronizacion_certificados) cursoData.aplica_sincronizacion_certificados = aplica_sincronizacion_certificados;
+        if (url_curso) cursoData.url_curso = url_curso;
 
 
-
-        if (parsedCupo < 1 || isNaN(parsedCupo) || !Number.isInteger(parsedCupo)) {
-            throw new AppError("El cupo debe ser un entero mayor a 0", 400);
-        }
-        if (parsedCantidadHoras < 1 || isNaN(parsedCantidadHoras) || !Number.isInteger(parsedCantidadHoras)) {
-            throw new AppError("La cantidad de horas debe ser un entero mayor a 0", 400);
-        }
-        // --- Fin Validaciones de entrada ---
-
-
-        // Inicia la transacción de Sequelize DESPUÉS de las validaciones iniciales
-        t = await sequelize.transaction();
-
-
-        // --- Búsqueda del curso (Sin cambios en lógica, AÑADIDA transacción) ---
-        const cursoAntes = await cursoModel.findOne({
-            where: { cod: cod },
-            transaction: t // <-- Pasa la transacción
-        });
-
-        if (!cursoAntes) {
-            // Lanzamos el error. El catch lo capturará y hará rollback.
-            throw new AppError(`No se encontró un curso con el código ${cod}`, 400);
-        }
-
-        if (numero_evento.length > 0) throw new AppError("El numero de evento no es valido debe ser mayor a cero ", 400);
-        if (esta_maquetado != "1" && esta_maquetado != "0") throw new AppError("El estado de maquetado debe ser 1 o 0", 400);
-        if (esta_configurado != "1" && esta_configurado != "0") throw new AppError("El estado de configurado debe ser 1 o 0", 400);
-        if (aplica_sincronizacion_certificados != "1" && aplica_sincronizacion_certificados != "0") throw new AppError("El estado de sincronizacion de certificados debe ser 1 o 0", 400);
 
         // --- Actualización en base de datos (Sin cambios en lógica, AÑADIDA transacción) ---
         const result = await cursoModel.update(
-            {
-                cod,
-                nombre,
-                cupo: parsedCupo, // Usar valores parseados y validados
-                cantidad_horas: parsedCantidadHoras, // Usar valores parseados y validados
-                medio_inscripcion,
-                plataforma_dictado,
-                tipo_capacitacion,
-                area,
-                esVigente: parseEsVigente(esVigente),
-                tiene_evento_creado: tiene_evento_creado === "Si" ? 1 : 0,
-                numero_evento,
-                esta_maquetado,
-                esta_configurado,
-                aplica_sincronizacion_certificados,
-                url_curso
-            },
+            cursoData,
             {
                 where: {
                     cod: cod,

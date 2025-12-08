@@ -17,8 +17,13 @@ const CursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
         codTipoCapacitacion: '',
         cantidad_horas: '',
         codArea: '',
-        esVigente: true,
-        tiene_evento_creado: false
+        esVigente: 0,
+        tiene_evento_creado: 0,
+        numero_evento: '',
+        esta_maquetado: 0,
+        esta_configurado: 0,
+        aplica_sincronizacion_certificados: 0,
+        url_curso: '',
     });
 
     const [errors, setErrors] = useState({});
@@ -34,12 +39,12 @@ const CursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
                 codTipoCapacitacion: record.detalle_tipoCapacitacion?.cod || '',
                 cantidad_horas: record.cantidad_horas || '',
                 codArea: record.detalle_area?.cod || '',
-                esVigente: !!record.esVigente,
-                tiene_evento_creado: !!record.tiene_evento_creado,
+                esVigente: (!!record.esVigente) ? 1 : 0,
+                tiene_evento_creado: (!!record.tiene_evento_creado) ? 1 : 0,
                 numero_evento: record.numero_evento || '',
-                esta_maquetado: record.esta_maquetado || '',
-                esta_configurado: record.esta_configurado || '',
-                aplica_sincronizacion_certificados: record.aplica_sincronizacion_certificados || '',
+                esta_maquetado: (!!record.esta_maquetado) ? 1 : 0,
+                esta_configurado: (!!record.esta_configurado) ? 1 : 0,
+                aplica_sincronizacion_certificados: (!!record.aplica_sincronizacion_certificados) ? 1 : 0,
                 url_curso: record.url_curso || '',
             });
         } else {
@@ -52,12 +57,12 @@ const CursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
                 codTipoCapacitacion: '',
                 cantidad_horas: '',
                 codArea: '',
-                esVigente: true,
-                tiene_evento_creado: false,
+                esVigente: 0,
+                tiene_evento_creado: 0,
                 numero_evento: '',
-                esta_maquetado: '',
-                esta_configurado: '',
-                aplica_sincronizacion_certificados: '',
+                esta_maquetado: 0,
+                esta_configurado: 0,
+                aplica_sincronizacion_certificados: 0,
                 url_curso: '',
             });
         }
@@ -253,8 +258,8 @@ const CursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
                                 label="¿Está vigente?"
                                 onChange={handleChange}
                             >
-                                <MenuItem value={true}>Si</MenuItem>
-                                <MenuItem value={false}>No</MenuItem>
+                                <MenuItem value={1}>Si</MenuItem>
+                                <MenuItem value={0}>No</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>
@@ -267,8 +272,8 @@ const CursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
                                 label="¿Tiene evento creado?"
                                 onChange={handleChange}
                             >
-                                <MenuItem value={true}>Si</MenuItem>
-                                <MenuItem value={false}>No</MenuItem>
+                                <MenuItem value={1}>Si</MenuItem>
+                                <MenuItem value={0}>No</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>

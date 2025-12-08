@@ -40,7 +40,8 @@ const Curso = sequelize.define("cursos", {
         allowNull: false
     },
     area: {
-        type: DataTypes.STRING(15)
+        type: DataTypes.STRING(15),
+        allowNull: false
     },
     esVigente: {
         type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
@@ -74,7 +75,7 @@ const Curso = sequelize.define("cursos", {
         type: DataTypes.INTEGER,
         allowNull: true
     },
-    esta_maquetado:{
+    esta_maquetado: {
         type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
         allowNull: true
     },
@@ -82,15 +83,15 @@ const Curso = sequelize.define("cursos", {
         type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
         allowNull: true
     },
-    esta_configurado:{
+    esta_configurado: {
         type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
         allowNull: true
     },
-    aplica_sincronizacion_certificados:{
+    aplica_sincronizacion_certificados: {
         type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
         allowNull: true
     },
-    url_curso:{
+    url_curso: {
         type: DataTypes.STRING(500),
         allowNull: true
     }
