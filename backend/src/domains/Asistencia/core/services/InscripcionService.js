@@ -6,6 +6,11 @@ export default class InscripcionService {
         this.inscripcionRepository = inscripcionRepository;
     }
 
+
+    async obtenerCantidadInscriptos(idEvento) {
+        return await this.inscripcionRepository.obtenerCantidadInscriptos(idEvento);
+    }
+
     async crear(inscripcionData, transaction = null) {
         try {
 

@@ -3,7 +3,7 @@ import CursoAsistencia from './curso.model.js';
 import DiasEvento from './diaEvento.model.js';
 import Inscripto from './inscripcion.model.js';
 import Asistencia from './asistencia.model.js';
-import Nota from './nota.model.js'; 
+import Nota from './nota.model.js';
 import Evento from './eventoAsistencia.model.js';
 
 
@@ -16,6 +16,7 @@ const associateAsistenciaModels = () => {
     // Evento <-> DiasEvento (Un evento tiene muchos días)
     Evento.hasMany(DiasEvento, { foreignKey: 'id_evento', as: 'dias' });
     DiasEvento.belongsTo(Evento, { foreignKey: 'id_evento', as: 'evento' });
+
 
     // Evento <-> Inscripto (Un evento tiene muchos inscriptos)
     Evento.hasMany(Inscripto, { foreignKey: 'id_evento', as: 'inscriptos' });
@@ -42,8 +43,8 @@ const associateAsistenciaModels = () => {
 
     // Relación Inscripto <--> Nota (Uno a Uno)
     // Un Inscripto tiene una Nota. La clave foránea está en la tabla de Notas.
-    Inscripto.hasOne(Nota, { 
-        foreignKey: 'id_evento', 
+    Inscripto.hasOne(Nota, {
+        foreignKey: 'id_evento',
         sourceKey: 'id_evento',
         as: 'nota_final' // O simplemente 'nota'
     });

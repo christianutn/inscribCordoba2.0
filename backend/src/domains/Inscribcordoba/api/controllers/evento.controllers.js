@@ -8,6 +8,9 @@ import enviarCorreo from '../../../../utils/enviarCorreo.js';
 import sequelize from '../../../../config/database.js';
 import Persona from '../models/persona.models.js';
 import Usuario from '../models/usuario.models.js';
+import { DateTime } from "luxon"
+
+
 export const getEventos = async (req, res, next) => {
     try {
         const eventos = await Evento.findAll({
@@ -90,6 +93,12 @@ export const postEvento = async (req, res, next) => {
         if (existeEvento) {
             throw new AppError("Ya eviste el evento", 400);;
         }
+
+
+        const fecha_desde = DateTime.now().setZone('America/Argentina/Buenos_Aires').toFormat("yyyy-MM-dd HH:mm:ss")
+
+        const usuario = req.user.user.cuil;
+
         const evento = await Evento.create({
             curso,
             perfil,
@@ -100,7 +109,9 @@ export const postEvento = async (req, res, next) => {
             requisitos_aprobacion,
             ejes_tematicos,
             certifica_en_cc,
-            disenio_a_cargo_cc
+            disenio_a_cargo_cc,
+            fecha_desde,
+            usuario
         });
 
         //  Modificar el atributo tiene_evento_Creado de cursoEvento a 1

@@ -28,7 +28,7 @@ export default class CursoService {
         if (!CursoData || !CursoData.nombreCurso) {
             throw new Error("El nombre del curso es obligatorio.");
         }
-        
+
         const { nombreCurso } = CursoData;
 
         // 2. **Verificación de Lógica de Negocio** (usando el método existe del Repository)
@@ -60,7 +60,7 @@ export default class CursoService {
      * @returns {Promise<[number, Curso[]]>} El resultado de la actualización de Sequelize.
      * @throws {Error} Si no se encuentra el curso o si hay un error de validación.
      */
-    
+
     /**
      * Obtiene un curso por su nombre.
      * @param {string} nombreCurso - El nombre del curso.
@@ -72,6 +72,10 @@ export default class CursoService {
         }
         // Llamamos directamente a 'existe' ya que ya retorna el objeto o null.
         return await this.cursoRepository.existe(nombreCurso);
+    }
+
+    async getCursos() {
+        return await this.cursoRepository.getCursos();
     }
 
 }

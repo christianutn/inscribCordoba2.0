@@ -56,23 +56,12 @@ export default class RegistrarAutorizacionNotaDeAutorizacion {
 
             const fechaActual = DateTime.now().setZone('America/Argentina/Buenos_Aires').toJSDate();
 
-            // Buscamos último estado de nota de autorizacion
-
-            const ultimoCambioEstado = await this.CambiosEstadoNotaDeAutorizacionService.getEstadoActualDeNotaDeAutorizacion(this.nota_autorizacion.id);
-
-            // actualizamos con fecha_hasta == actual
-
-            if (ultimoCambioEstado) {
-                await this.CambiosEstadoNotaDeAutorizacionService.cerrarCambioEstadoNotaDeAutorizacion(ultimoCambioEstado.id, { fecha_hasta: fechaActual }, { transaction: t })
-            }
-
             // Creamos nuevo cambio de estado de nota de autorización
 
-            await this.CambiosEstadoNotaDeAutorizacionService.crear({
+            await this.CambiosEstadoNotaDeAutorizacionService.autorizar({
                 nota_autorizacion_id: this.nota_autorizacion.id,
                 fecha_desde: fechaActual,
-                fecha_hasta: null,
-                estado_nota_autorizacion_cod: "AUT"
+                fecha_hasta: null
             }, { transaction: t })
 
             // Creamos HistoricoTutoresEnCursoService para la nota de autorización

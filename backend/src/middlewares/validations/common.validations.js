@@ -1,5 +1,8 @@
-import { check } from "express-validator";
+import { check, body } from "express-validator";
 import tratarNombres from "../../utils/tratarNombres.js";
+import { Op } from "sequelize";
+import Persona from "../../domains/Inscribcordoba/api/models/persona.models.js";
+
 // --- 1. Validaciones Específicas (Campos con nombre fijo) ---
 
 // Validador para CUIL (Usado en Personas, Usuarios, Tutores, etc.)
@@ -9,13 +12,30 @@ export const commonCuil = check('cuil')
     .isNumeric().withMessage('El CUIL debe contener solo números.')
     .isLength({ min: 11, max: 11 }).withMessage('El CUIL debe tener exactamente 11 caracteres.');
 
-// Validador para Email (Sanitizado y validado)
-// Nota: No le ponemos .notEmpty() aquí para poder usarlo como opcional luego.
-export const commonEmail = check('mail')
+// para mail y cuil
+
+export const commonEmail = body('mail')
     .trim()
-    .normalizeEmail()
-    .isEmail().withMessage('El formato del correo electrónico es inválido.')
-    .isLength({ max: 100 }).withMessage('El correo no debe exceder los 100 caracteres.');
+    .notEmpty().withMessage('El correo electrónico es obligatorio.')
+    .isEmail().withMessage('El correo electrónico debe ser válido.')
+    .custom(async (objBody, { req }) => {
+        const { mail, cuil } = objBody;
+
+        // 1. Validamos que el mail no lo tenga una persona distinta al cuil que se pasa por parametro
+        const persona = await Persona.findOne({
+            where: {
+                mail: mail,
+                cuil: { [Op.ne]: cuil }
+            }
+        });
+        if (persona) {
+            throw new Error('El correo electrónico ya está registrado por otro usuario.');
+        }
+
+
+    })
+
+
 
 // Validador para Celular (Sanitiza dejando solo números)
 export const commonCelular = check('celular')

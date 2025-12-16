@@ -11,8 +11,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Autocomplete from "../components/UIElements/Autocomplete.jsx";
 import { getRestricciones, putRestriccion } from "../services/restricciones.service.js";
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import EventBusyIcon from '@mui/icons-material/EventBusy';
 import DetalleFechasPorDia from "./DetalleFechas.jsx";
+
 import DetalleMes from "./DetalleMes.jsx";
+import ModalInhabilitarFechas from "./ModalInhabilitarFechas.jsx";
 
 const RestriccionesFechasInicioCursada = () => {
     const navigate = useNavigate();
@@ -26,6 +31,7 @@ const RestriccionesFechasInicioCursada = () => {
     const [maximoCursosMensual, setMaximoCursosMensual] = useState("");
     const [maximoCursosDiario, setMaximoCursosDiario] = useState("");
     const [maximoAcumulado, setMaximoAcumulado] = useState("");
+    const [openModalInhabilitar, setOpenModalInhabilitar] = useState(false);
     const listaMeses = ["Sin Bloqueo", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
     useEffect(() => {
@@ -40,13 +46,15 @@ const RestriccionesFechasInicioCursada = () => {
                 }
 
                 const rest = await getRestricciones();
-              
-                setSelectedMes(listaMeses[rest.mesBloqueado ?? 0]);
-                setMaximoCuposDiario(String(rest.maximoCuposXDia ?? ""));
-                setMaximoCuposMensual(String(rest.maximoCuposXMes ?? ""));
-                setMaximoCursosDiario(String(rest.maximoCursosXDia ?? ""));
-                setMaximoCursosMensual(String(rest.maximoCursosXMes ?? ""));
-                setMaximoAcumulado(String(rest.maximoAcumulado ?? ""));
+
+                console.log(rest);
+
+                setSelectedMes(listaMeses[rest.restriccion.mesBloqueado ?? 0]);
+                setMaximoCuposDiario(String(rest.restriccion.maximoCuposXDia ?? ""));
+                setMaximoCuposMensual(String(rest.restriccion.maximoCuposXMes ?? ""));
+                setMaximoCursosDiario(String(rest.restriccion.maximoCursosXDia ?? ""));
+                setMaximoCursosMensual(String(rest.restriccion.maximoCursosXMes ?? ""));
+                setMaximoAcumulado(String(rest.restriccion.maximoAcumulado ?? ""));
 
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -118,7 +126,7 @@ const RestriccionesFechasInicioCursada = () => {
                 maximoCuposXMes: maximoCuposMensual === "" ? null : Number(maximoCuposMensual),
                 maximoAcumulado: maximoAcumulado === "" ? null : Number(maximoAcumulado)
             };
-            
+
 
             await putRestriccion(payload);
 
@@ -195,8 +203,13 @@ const RestriccionesFechasInicioCursada = () => {
                         </Grid>
                     </Grid>
 
-                    <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 3 }}>
+                    <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 3, gap: 2, alignItems: 'center' }}>
                         <Button type="button" mensaje={"Guardar Cambios"} hanldeOnClick={handleEnviar} disabled={cargando} />
+                        <Tooltip title="Inhabilitar Fechas">
+                            <IconButton onClick={() => setOpenModalInhabilitar(true)} disabled={cargando} color="primary" size="small">
+                                <EventBusyIcon />
+                            </IconButton>
+                        </Tooltip>
                     </Grid>
 
                     <Grid item xs={12}>
@@ -230,6 +243,10 @@ const RestriccionesFechasInicioCursada = () => {
 
                 </Grid>
             </Box>
+            <ModalInhabilitarFechas
+                open={openModalInhabilitar}
+                onClose={() => setOpenModalInhabilitar(false)}
+            />
         </>
     );
 }

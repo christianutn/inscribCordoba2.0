@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -33,4 +32,13 @@
 @import "./style/cambioContrasenia";
 @import "./style/RestriccionesFechasInicioCursada";
 @import "./style/linkIntereses";
-@import "./style/home"
+@import "./style/home";
+
+// Hide MUI X License Watermark
+.MuiLicenseInfo-root {
+    display: none !important;
+}
+
+.MuiWatermark-root {
+    display: none !important;
+}

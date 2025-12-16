@@ -21,3 +21,24 @@ export const getUltimosEstadoDeAutorizaciones = async () => {
         throw error;
     }
 }
+
+export const rechazarNotaDeAutorizacion = async (data) => {
+    try {
+        const response = await fetch(`${URL}/rechazar-nota-de-autorizacion`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.status !== 201) {
+            throw new Error("Error al rechazar la nota de autorizacion");
+        }
+
+        return true;
+    } catch (error) {
+        throw error;
+    }
+}

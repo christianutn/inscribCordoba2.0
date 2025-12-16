@@ -1,6 +1,7 @@
 // core/repositories/EventoRepository.js
 import Evento from '../../api/models/eventoAsistencia.model.js';
 import sequelize from '../../../../config/database.js';
+import CursoAsistencia from '../../api/models/curso.model.js';
 
 export default class EventoRepository {
 
@@ -15,4 +16,15 @@ export default class EventoRepository {
     async existe(eventoData) {
         return await Evento.findOne({ where: { id: eventoData.id } });
     }
+
+    async obtenerTodos() {
+        return await Evento.findAll({
+            include: [{
+                model: CursoAsistencia,
+                as: 'curso'
+            }]
+        });
+    }
+
+
 }

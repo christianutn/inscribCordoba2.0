@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Card,
@@ -31,7 +31,7 @@ import {
   School as SchoolIcon
 } from '@mui/icons-material';
 import QRCode from 'qrcode';
-import {postSubaMasiva} from '../services/asistencias.service.js'
+import { postSubaMasiva, getlistadoEventos } from '../services/asistencias.service.js'
 
 export default function AsistenciasMain() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -39,12 +39,12 @@ export default function AsistenciasMain() {
   const [selectedCourse, setSelectedCourse] = useState('');
   const [qrCode, setQrCode] = useState('');
   const [isGeneratingQR, setIsGeneratingQR] = useState(false);
-  
+
   // Estados para registro manual de asistencia
   const [cuilAsistente, setCuilAsistente] = useState('');
   const [isMarkingAttendance, setIsMarkingAttendance] = useState(false);
   const [attendanceMessage, setAttendanceMessage] = useState('');
-  
+
   // Estados para importar planilla
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -52,21 +52,24 @@ export default function AsistenciasMain() {
   const [uploadMessage, setUploadMessage] = useState('');
   const [showSalaModal, setShowSalaModal] = useState(false);
   const [selectedSala, setSelectedSala] = useState('');
-  
+
   // Estados para detalle del curso
   const [showCourseDetail, setShowCourseDetail] = useState(false);
   const [selectedCourseDetail, setSelectedCourseDetail] = useState(null);
+  const [eventos, setEventos] = useState([]);
 
-  // Datos de ejemplo - estos vendrían del backend
-  const courses = [
-    { id: 1, name: 'Curso de React Avanzado', date: '2025-01-15', inscriptos: 25, estado: 'Activo' },
-    { id: 2, name: 'Introducción a JavaScript', date: '2025-01-20', inscriptos: 30, estado: 'Activo' },
-    { id: 3, name: 'Python para Principiantes', date: '2025-02-01', inscriptos: 20, estado: 'Programado' },
-    { id: 4, name: 'Gestión de Proyectos Ágiles', date: '2025-02-10', inscriptos: 18, estado: 'Activo' },
-    { id: 5, name: 'Diseño UX/UI', date: '2025-02-15', inscriptos: 22, estado: 'Programado' },
-    { id: 6, name: 'Base de Datos SQL', date: '2025-03-01', inscriptos: 28, estado: 'Programado' },
-    { id: 7, name: 'Marketing Digital', date: '2025-03-05', inscriptos: 35, estado: 'Activo' },
-  ];
+  useEffect(() => {
+    const fetchEventos = async () => {
+      try {
+        const response = await getlistadoEventos();
+        setEventos(response);
+      } catch (error) {
+        console.error('Error al cargar eventos:', error);
+      }
+    };
+    fetchEventos();
+  }, []);
+
 
   // Opciones de salas
   const salas = [
@@ -86,17 +89,17 @@ export default function AsistenciasMain() {
     setStatusMessage('Generando código QR...');
 
     try {
-      const course = courses.find(c => c.id === parseInt(selectedCourse));
+      const course = eventos.find(c => c.id === parseInt(selectedCourse));
       const qrData = {
         courseId: course.id,
-        courseName: course.name,
-        date: course.date,
+        courseName: course.curso.nombre,
+        date: course.fecha_desde,
         timestamp: new Date().toISOString(),
         action: 'mark_attendance'
       };
 
       const qrString = JSON.stringify(qrData);
-      
+
       const qrDataURL = await QRCode.toDataURL(qrString, {
         width: 300,
         margin: 2,
@@ -132,15 +135,15 @@ export default function AsistenciasMain() {
 
     try {
       // Aquí iría la llamada al backend para marcar la asistencia
-      const course = courses.find(c => c.id === parseInt(selectedCourse));
-      
+      const course = eventos.find(c => c.id === parseInt(selectedCourse));
+
       // Simulación de llamada API
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       // Simulación de respuesta exitosa
       setAttendanceMessage(`✅ Asistencia registrada exitosamente para CUIL ${cuilAsistente} en el curso "${course.name}"`);
       setCuilAsistente(''); // Limpiar el campo después del registro exitoso
-      
+
     } catch (error) {
       console.error('Error marcando asistencia:', error);
       setAttendanceMessage('❌ Error al registrar la asistencia. Verifica el CUIL e intenta nuevamente.');
@@ -160,14 +163,14 @@ export default function AsistenciasMain() {
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
-    
+
     if (file) {
       // Validar que sea un archivo Excel
       const validTypes = [
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/vnd.ms-excel'
       ];
-      
+
       if (validTypes.includes(file.type)) {
         setSelectedFile(file);
         setUploadMessage('');
@@ -192,9 +195,9 @@ export default function AsistenciasMain() {
       // Aquí iría la lógica para procesar el archivo Excel
       // Por ahora simulamos el proceso
       await postSubaMasiva(selectedFile)
-      
+
       setUploadMessage('✅ Archivo procesado exitosamente.');
-      
+
       // Cerrar modal de importación y mostrar modal de sala
       setTimeout(() => {
         setShowImportModal(false);
@@ -202,7 +205,7 @@ export default function AsistenciasMain() {
         setSelectedFile(null);
         setUploadMessage('');
       }, 1500);
-      
+
     } catch (error) {
       console.error('Error procesando archivo:', error);
       setUploadMessage('❌ Error al procesar el archivo. Verifica el formato e intenta nuevamente.');
@@ -225,11 +228,11 @@ export default function AsistenciasMain() {
       alert('Por favor, ingresa la sala donde se dictará el curso');
       return;
     }
-    
+
     // Cerrar modal y limpiar
     setShowSalaModal(false);
     setSelectedSala('');
-    
+
     // Mostrar mensaje de éxito
     alert('Curso creado exitosamente con la sala: ' + selectedSala);
   };
@@ -255,7 +258,7 @@ export default function AsistenciasMain() {
 
     const link = document.createElement('a');
     link.href = qrCode;
-    const course = courses.find(c => c.id === parseInt(selectedCourse));
+    const course = eventos.find(c => c.id === parseInt(selectedCourse));
     link.download = `QR_${course.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.png`;
     link.click();
   };
@@ -264,8 +267,8 @@ export default function AsistenciasMain() {
     if (!qrCode) return;
 
     const printWindow = window.open('', '_blank');
-    const course = courses.find(c => c.id === parseInt(selectedCourse));
-    
+    const course = eventos.find(c => c.id === parseInt(selectedCourse));
+
     printWindow.document.write(`
       <html>
         <head>
@@ -306,7 +309,7 @@ export default function AsistenciasMain() {
         </body>
       </html>
     `);
-    
+
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
@@ -346,12 +349,12 @@ export default function AsistenciasMain() {
     </Card>
   );
 
-  const renderCourses = () => (
+  const rendereventos = () => (
     <Box sx={{ width: '100%' }}>
       {/* Header con título y botones */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
         alignItems: 'center',
         mb: 3,
         backgroundColor: '#f8f9fa',
@@ -362,7 +365,7 @@ export default function AsistenciasMain() {
           Gestión de Cursos
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button 
+          <Button
             variant="outlined"
             startIcon={<DownloadIcon />}
             onClick={handleImportClick}
@@ -377,7 +380,7 @@ export default function AsistenciasMain() {
           >
             📊 Importar Planilla
           </Button>
-          <Button 
+          <Button
             variant="contained"
             startIcon={<QrCodeIcon />}
             sx={{
@@ -395,19 +398,19 @@ export default function AsistenciasMain() {
       {/* Tabla de cursos */}
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <Box sx={{ overflowX: 'auto' }}>
-          <table style={{ 
-            width: '100%', 
+          <table style={{
+            width: '100%',
             borderCollapse: 'separate',
             borderSpacing: 0
           }}>
             <thead>
-              <tr style={{ 
+              <tr style={{
                 backgroundColor: '#f8f9fa',
                 borderBottom: '2px solid #dee2e6'
               }}>
-                <th style={{ 
-                  padding: '16px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px',
+                  textAlign: 'left',
                   fontWeight: 600,
                   fontSize: '14px',
                   color: '#6c757d',
@@ -415,9 +418,9 @@ export default function AsistenciasMain() {
                 }}>
                   Nombre del Curso
                 </th>
-                <th style={{ 
-                  padding: '16px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px',
+                  textAlign: 'left',
                   fontWeight: 600,
                   fontSize: '14px',
                   color: '#6c757d',
@@ -425,9 +428,9 @@ export default function AsistenciasMain() {
                 }}>
                   Fecha de Inicio
                 </th>
-                <th style={{ 
-                  padding: '16px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px',
+                  textAlign: 'left',
                   fontWeight: 600,
                   fontSize: '14px',
                   color: '#6c757d',
@@ -435,19 +438,19 @@ export default function AsistenciasMain() {
                 }}>
                   Inscriptos
                 </th>
-                <th style={{ 
-                  padding: '16px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px',
+                  textAlign: 'left',
                   fontWeight: 600,
                   fontSize: '14px',
                   color: '#6c757d',
                   borderBottom: '2px solid #dee2e6'
                 }}>
-                  Estado
+                  Asistidos
                 </th>
-                <th style={{ 
-                  padding: '16px', 
-                  textAlign: 'center', 
+                <th style={{
+                  padding: '16px',
+                  textAlign: 'center',
                   fontWeight: 600,
                   fontSize: '14px',
                   color: '#6c757d',
@@ -458,10 +461,10 @@ export default function AsistenciasMain() {
               </tr>
             </thead>
             <tbody>
-              {courses.length === 0 ? (
+              {eventos.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ 
-                    padding: '40px', 
+                  <td colSpan={5} style={{
+                    padding: '40px',
                     textAlign: 'center',
                     color: '#6c757d',
                     fontSize: '16px'
@@ -470,10 +473,10 @@ export default function AsistenciasMain() {
                   </td>
                 </tr>
               ) : (
-                courses.map((course, index) => (
-                  <tr 
-                    key={course.id} 
-                    style={{ 
+                eventos.map((course, index) => (
+                  <tr
+                    key={course.id}
+                    style={{
                       borderBottom: '1px solid #f1f3f5',
                       backgroundColor: index % 2 === 0 ? '#ffffff' : '#fafbfc',
                       '&:hover': {
@@ -481,63 +484,58 @@ export default function AsistenciasMain() {
                       }
                     }}
                   >
-                    <td style={{ 
+                    <td style={{
                       padding: '16px',
                       fontSize: '14px',
                       color: '#212529'
                     }}>
-                      {course.name}
+                      {course.curso.nombre}
                     </td>
-                    <td style={{ 
+                    <td style={{
                       padding: '16px',
                       fontSize: '14px',
                       color: '#6c757d'
                     }}>
-                      {course.date}
+                      {course.fecha_desde}
                     </td>
-                    <td style={{ 
+                    <td style={{
                       padding: '16px',
                       fontSize: '14px',
                       color: '#6c757d'
                     }}>
-                      {course.inscriptos}
+                      {course.cantidad_inscriptos}
                     </td>
-                    <td style={{ padding: '16px' }}>
-                      <Chip
-                        label={course.estado}
-                        size="small"
-                        sx={{
-                          backgroundColor: course.estado === 'Activo' ? '#d4edda' : '#fff3cd',
-                          color: course.estado === 'Activo' ? '#155724' : '#856404',
-                          fontWeight: 500,
-                          fontSize: '12px'
-                        }}
-                      />
+                    <td style={{
+                      padding: '16px',
+                      fontSize: '14px',
+                      color: '#6c757d'
+                    }}>
+                      {course.cantidad_asistidos}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                        <IconButton 
+                        <IconButton
                           size="small"
                           onClick={() => handleViewCourse(course)}
-                          sx={{ 
+                          sx={{
                             color: '#007bff',
                             '&:hover': { backgroundColor: 'rgba(0, 123, 255, 0.04)' }
                           }}
                         >
                           👁️
                         </IconButton>
-                        <IconButton 
+                        <IconButton
                           size="small"
-                          sx={{ 
+                          sx={{
                             color: '#6c757d',
                             '&:hover': { backgroundColor: 'rgba(108, 117, 125, 0.04)' }
                           }}
                         >
                           ✏️
                         </IconButton>
-                        <IconButton 
+                        <IconButton
                           size="small"
-                          sx={{ 
+                          sx={{
                             color: '#dc3545',
                             '&:hover': { backgroundColor: 'rgba(220, 53, 69, 0.04)' }
                           }}
@@ -583,7 +581,7 @@ export default function AsistenciasMain() {
                 <MenuItem value="" disabled>
                   <em>-- Por favor, elija un curso --</em>
                 </MenuItem>
-                {courses.map((course) => (
+                {eventos.map((course) => (
                   <MenuItem key={course.id} value={course.id}>
                     {course.name} - {course.date}
                   </MenuItem>
@@ -613,8 +611,8 @@ export default function AsistenciasMain() {
             />
 
             {attendanceMessage && (
-              <Alert 
-                severity={attendanceMessage.includes('✅') ? 'success' : attendanceMessage.includes('❌') ? 'error' : 'info'} 
+              <Alert
+                severity={attendanceMessage.includes('✅') ? 'success' : attendanceMessage.includes('❌') ? 'error' : 'info'}
                 sx={{ mb: 3 }}
               >
                 {attendanceMessage}
@@ -640,11 +638,11 @@ export default function AsistenciasMain() {
             >
               {isMarkingAttendance ? 'Buscando Asistente...' : '🔍 Buscar Asistente'}
             </Button>
-            
+
             <Button
               variant="outlined"
               fullWidth
-              sx={{ 
+              sx={{
                 py: 1.5,
                 color: '#6c757d',
                 borderColor: '#6c757d',
@@ -671,14 +669,14 @@ export default function AsistenciasMain() {
         <Stack direction="row" spacing={0}>
           {[
             { id: 'dashboard', label: 'Inicio', icon: '🏠' },
-            { id: 'courses', label: 'Cursos', icon: '📊' },
+            { id: 'eventos', label: 'Cursos', icon: '📊' },
             { id: 'attendance', label: 'Asistencia', icon: '✓' },
           ].map((tab) => (
             <Button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               variant={activeTab === tab.id ? 'contained' : 'text'}
-              sx={{ 
+              sx={{
                 mr: 1,
                 textTransform: 'none',
                 color: activeTab === tab.id ? 'white' : 'primary.main'
@@ -692,12 +690,12 @@ export default function AsistenciasMain() {
 
       {/* Contenido */}
       {activeTab === 'dashboard' && renderDashboard()}
-      {activeTab === 'courses' && renderCourses()}
+      {activeTab === 'eventos' && rendereventos()}
       {activeTab === 'attendance' && renderAttendance()}
 
       {/* Modal de Importar Planilla */}
-      <Dialog 
-        open={showImportModal} 
+      <Dialog
+        open={showImportModal}
         onClose={handleCloseModal}
         maxWidth="sm"
         fullWidth
@@ -712,11 +710,11 @@ export default function AsistenciasMain() {
           <Typography variant="body2" sx={{ mb: 3, color: '#6c757d' }}>
             Asegúrate de que la planilla tenga el formato oficial correcto.
           </Typography>
-          
-          <Box sx={{ 
-            border: '2px dashed #dee2e6', 
-            borderRadius: 2, 
-            p: 3, 
+
+          <Box sx={{
+            border: '2px dashed #dee2e6',
+            borderRadius: 2,
+            p: 3,
             textAlign: 'center',
             mb: 3,
             backgroundColor: selectedFile ? '#f8f9fa' : 'transparent'
@@ -746,7 +744,7 @@ export default function AsistenciasMain() {
                 📄 Seleccionar Archivo
               </Button>
             </label>
-            
+
             {selectedFile && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -763,11 +761,11 @@ export default function AsistenciasMain() {
           </Box>
 
           {uploadMessage && (
-            <Alert 
+            <Alert
               severity={
-                uploadMessage.includes('✅') ? 'success' : 
-                uploadMessage.includes('❌') ? 'error' : 'info'
-              } 
+                uploadMessage.includes('✅') ? 'success' :
+                  uploadMessage.includes('❌') ? 'error' : 'info'
+              }
               sx={{ mb: 2 }}
             >
               {uploadMessage}
@@ -784,14 +782,14 @@ export default function AsistenciasMain() {
           )}
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 1 }}>
-          <Button 
+          <Button
             onClick={handleCloseModal}
             disabled={isUploading}
             sx={{ color: '#6c757d' }}
           >
             Cancelar
           </Button>
-          <Button 
+          <Button
             variant="contained"
             onClick={handleUploadFile}
             disabled={!selectedFile || isUploading}
@@ -806,8 +804,8 @@ export default function AsistenciasMain() {
       </Dialog>
 
       {/* Modal de Selección de Sala */}
-      <Dialog 
-        open={showSalaModal} 
+      <Dialog
+        open={showSalaModal}
         onClose={handleCloseSalaModal}
         maxWidth="sm"
         fullWidth
@@ -823,7 +821,7 @@ export default function AsistenciasMain() {
               </Typography>
             ))}
           </Box>
-          
+
           <TextField
             fullWidth
             placeholder="SG o SE(Auditorio Principal)"
@@ -833,13 +831,13 @@ export default function AsistenciasMain() {
           />
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 1 }}>
-          <Button 
+          <Button
             onClick={handleCloseSalaModal}
             sx={{ color: '#6c757d' }}
           >
             Cancelar
           </Button>
-          <Button 
+          <Button
             variant="contained"
             onClick={handleSalaSubmit}
             sx={{
@@ -853,8 +851,8 @@ export default function AsistenciasMain() {
       </Dialog>
 
       {/* Modal de Detalle del Curso */}
-      <Dialog 
-        open={showCourseDetail} 
+      <Dialog
+        open={showCourseDetail}
         onClose={handleCloseCourseDetail}
         maxWidth="lg"
         fullWidth
@@ -873,10 +871,10 @@ export default function AsistenciasMain() {
               {/* Tabs del detalle */}
               <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
                 <Stack direction="row" spacing={4}>
-                  <Button 
-                    variant="text" 
-                    sx={{ 
-                      color: '#007bff', 
+                  <Button
+                    variant="text"
+                    sx={{
+                      color: '#007bff',
                       borderBottom: '2px solid #007bff',
                       borderRadius: 0,
                       fontWeight: 600
@@ -950,9 +948,9 @@ export default function AsistenciasMain() {
 
               {qrCode && (
                 <Box sx={{ textAlign: 'center', mt: 3, p: 3, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                  <img 
-                    src={qrCode} 
-                    alt="Código QR" 
+                  <img
+                    src={qrCode}
+                    alt="Código QR"
                     style={{ maxWidth: '250px', height: 'auto' }}
                   />
                   <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 2 }}>

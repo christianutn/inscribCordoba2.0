@@ -19,6 +19,10 @@ export default class CambiosEstadoNotaDeAutorizacionService {
         );
     }
 
+    async autorizar(data, options = {}) {
+        return await this.cambiosEstadoNotaDeAutorizacionRepository.autorizar(data, options);
+    }
+
     async cerrarCambioEstadoNotaDeAutorizacion(id, data, options = {}) {
         return await this.cambiosEstadoNotaDeAutorizacionRepository.cerrarCambioEstadoNotaDeAutorizacion(id, data, options);
     }
@@ -30,6 +34,10 @@ export default class CambiosEstadoNotaDeAutorizacionService {
 
     async getTodosLosCambiosEstados() {
         return await this.cambiosEstadoNotaDeAutorizacionRepository.getTodosLosCambiosEstados();
+    }
+
+    async rechazar(data, options = {}) {
+        return await this.cambiosEstadoNotaDeAutorizacionRepository.rechazar(data, options);
     }
 
 }

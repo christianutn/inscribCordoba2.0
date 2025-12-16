@@ -35,6 +35,10 @@ import CambiosEstadosNotasDeAutorizacionRouter from "../domains/Inscribcordoba/a
 import CoordinadorRouter from "./coordinador.routes.js";
 import HistoricoTutoresEnCursoRouter from "../domains/Inscribcordoba/api/routes/historico_tutores_en_cursos.routes.js";
 
+import AsistenciasCursosRouter from "../domains/Asistencia/api/routes/cursos.routes.js";
+import EventosRouter from "../domains/Asistencia/api/routes/eventos.routes.js";
+import FechasInhabilitadasRouter from "./fechas_inhabilitadas.routes.js";
+
 const router = Router();
 
 router.use("/areas", areaRouter);
@@ -69,7 +73,8 @@ router.use("/notas-autorizacion", NotasAutorizacionRouter)
 router.use("/cambios-estados-notas-autorizacion", CambiosEstadosNotasDeAutorizacionRouter)
 router.use("/coordinadores", CoordinadorRouter)
 router.use("/historico-tutores-en-cursos", HistoricoTutoresEnCursoRouter)
-
-
+router.use("/asistencias/cursos", AsistenciasCursosRouter)
+router.use("/asistencias/eventos", EventosRouter)
+router.use("/fechas-inhabilitadas", FechasInhabilitadasRouter)
 
 export default router

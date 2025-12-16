@@ -15,6 +15,14 @@ export default class CambiosEstadoNotaDeAutorizacionRepository {
 
     async crear(data, options = {}) {
 
+        // // Buscamos último estado de nota de autorizacion
+
+        const ultimoCambioEstado = await this.getEstadoActualDeNotaDeAutorizacion(data.nota_autorizacion_id);
+
+        if (ultimoCambioEstado) {
+            await this.cerrarCambioEstadoNotaDeAutorizacion(ultimoCambioEstado.id, { fecha_hasta: data.fecha_desde }, { transaction: options.transaction })
+        }
+
         return await this.cambiosEstadoNotaDeAutorizacion.create(data, options);
 
     }
@@ -28,6 +36,24 @@ export default class CambiosEstadoNotaDeAutorizacionRepository {
         });
 
     }
+
+    async autorizar(data, options = {}) {
+
+        // // Buscamos último estado de nota de autorizacion
+
+        const ultimoCambioEstado = await this.getEstadoActualDeNotaDeAutorizacion(data.nota_autorizacion_id);
+
+        if (ultimoCambioEstado) {
+            await this.cerrarCambioEstadoNotaDeAutorizacion(ultimoCambioEstado.id, { fecha_hasta: data.fecha_desde }, { transaction: options.transaction })
+        }
+
+        return await this.cambiosEstadoNotaDeAutorizacion.create({
+            ...data,
+            estado_nota_autorizacion_cod: "AUT"
+        }, options);
+
+    }
+
 
     async getTodosLosCambiosEstados() {
         return await this.cambiosEstadoNotaDeAutorizacion.findAll({
@@ -68,5 +94,25 @@ export default class CambiosEstadoNotaDeAutorizacionRepository {
             },
             transaction
         });
+    }
+
+    async gestionarCierreUltimoEstado(nota_autorizacion_id, options = {}) {
+        const transaction = options.transaction;
+        const ultimoCambioEstado = await this.getEstadoActualDeNotaDeAutorizacion(nota_autorizacion_id);
+        if (ultimoCambioEstado) {
+            await this.cerrarCambioEstadoNotaDeAutorizacion(ultimoCambioEstado.id, { fecha_hasta: new Date() }, { transaction })
+        }
+    }
+
+
+    async rechazar(data, options = {}) {
+        try {
+            return await this.crear({
+                ...data,
+                estado_nota_autorizacion_cod: "REC"
+            }, options);
+        } catch (error) {
+            throw error;
+        }
     }
 }

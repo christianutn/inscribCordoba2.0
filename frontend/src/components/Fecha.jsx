@@ -11,12 +11,15 @@ import { getFeriadosDelAnio } from '../services/api.service.js';
 import { getFechasInvalidas } from '../services/instancias.service.js';
 import CircularProgress from '@mui/material/CircularProgress'; // Importar CircularProgress
 import Box from '@mui/material/Box';
+import { getFechasInhabilitadas } from '../services/fechas_inhabilitadas.service.js';
 
 const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [feriados, setFeriados] = useState([]);
   const [isLoading, setIsLoading] = useState(false)
-  const [fechasInvalidas, setFechasInvalidas] = useState([])
+  const [fechasInvalidas, setFechasInvalidas] = useState([]) // fechas que no cumplen con las restricciones
+  const [fechasInhabilitadas, setFechasInhabilitadas] = useState([]) // fechas inhabilitadas manualmente
+
 
   useEffect(() => {
     (async () => {
@@ -33,11 +36,15 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
         const anioSiguiente = ahoraArgentina.add(1, 'year').year().toString();
         const fechasInvalidas2025 = await getFechasInvalidas(anioActual)
         const fechasInvalidas2026 = await getFechasInvalidas(anioSiguiente)
+        const fechasInhabilitadas = await getFechasInhabilitadas()
+
+
         const feriados = await getFeriadosDelAnio();
         setFeriados(feriados);
-        
+
 
         setFechasInvalidas([...fechasInvalidas2025, ...fechasInvalidas2026])
+        setFechasInhabilitadas(fechasInhabilitadas)
 
       } catch (error) {
         console.error('Error al obtener la matriz de fechas:', error);
@@ -64,13 +71,16 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
     if (fieldFecha === "fechaCursadaDesde") {
       const fechaAValidar = dayjs(date).format('YYYY-MM-DD').split("-");
-  
+
       const stringFecha = `${fechaAValidar[0]}-${fechaAValidar[1]}-${fechaAValidar[2]}`;
 
       if (fechasInvalidas.map(element => element.calendario_fecha).includes(stringFecha)) return true;
-      
+
       if (feriados.map(element => element.fecha).includes(stringFecha)) return true;
 
+      if (fechasInhabilitadas.map(element => element.fecha).includes(stringFecha)) return true;
+
+      console.log("fechas inhabilitidas: ", fechasInhabilitadas)
     }
 
 

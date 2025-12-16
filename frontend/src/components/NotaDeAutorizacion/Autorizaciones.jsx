@@ -17,10 +17,11 @@ import {
     Stack,
     Container,
     Paper,
-    useTheme
+    useTheme,
+    Alert
 } from '@mui/material';
 import dayjs from 'dayjs';
-import { getUltimosEstadoDeAutorizaciones } from "../../services/cambiosEstadoAutorizacion.service.js";
+import { getUltimosEstadoDeAutorizaciones, rechazarNotaDeAutorizacion } from "../../services/cambiosEstadoAutorizacion.service.js";
 import { useNavigate } from 'react-router-dom';
 
 const Autorizaciones = () => {
@@ -34,11 +35,16 @@ const Autorizaciones = () => {
     });
     const [areas, setAreas] = useState([]);
 
+    const [alert, setAlert] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
+
     useEffect(() => {
         const fetchUltimoEstadoDeAutorizaciones = async () => {
             try {
                 const response = await getUltimosEstadoDeAutorizaciones();
-                console.log("Datos recibidos en Autorizaciones:", response); // Debugging log
                 setAutorizaciones(response);
 
                 // Extract unique areas for the filter
@@ -58,6 +64,39 @@ const Autorizaciones = () => {
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
+    };
+
+    const handleRechazar = async (id) => {
+        try {
+            await rechazarNotaDeAutorizacion({ nota_autorizacion_id: id });
+            const fetchUltimoEstadoDeAutorizaciones = async () => {
+                try {
+                    const response = await getUltimosEstadoDeAutorizaciones();
+                    setAutorizaciones(response);
+                } catch (error) {
+                    setAlert({
+                        open: true,
+                        message: "Error al obtener el último estado de autorizaciones",
+                        severity: "error"
+                    });
+                }
+            };
+            fetchUltimoEstadoDeAutorizaciones();
+            setAlert({
+                open: true,
+                message: "Nota de autorización rechazada exitosamente",
+                severity: "success"
+            });
+        } catch (error) {
+            setAlert({
+                open: true,
+                message: "Error al rechazar la nota de autorización",
+                severity: "error"
+            }).finally(() => {
+                // Scroll to top  
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            })
+        }
     };
 
     const filteredAutorizaciones = useMemo(() => {
@@ -97,6 +136,14 @@ const Autorizaciones = () => {
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 4 }}>
+            <Alert
+                open={alert.open}
+                onClose={() => setAlert({ ...alert, open: false })}
+                severity={alert.severity}
+                sx={{ mb: 2 }}
+            >
+                {alert.message}
+            </Alert>
             <Container maxWidth="xl">
                 <Box sx={{ mb: 4 }}>
                     <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom color="text.primary">
@@ -110,7 +157,7 @@ const Autorizaciones = () => {
                         Filtros
                     </Typography>
                     <Grid container spacing={3} alignItems="center">
-                        <Grid item xs={12} md={4} lg={3}>
+                        <Grid item xs={12} md={4} lg={4}>
                             <TextField
                                 fullWidth
                                 label="Nombre / Apellido de Referente"
@@ -121,7 +168,7 @@ const Autorizaciones = () => {
                                 size="medium"
                             />
                         </Grid>
-                        <Grid item xs={12} md={4} lg={3}>
+                        <Grid item xs={12} md={4} lg={4}>
                             <FormControl fullWidth variant="outlined">
                                 <InputLabel>Área</InputLabel>
                                 <Select
@@ -139,7 +186,7 @@ const Autorizaciones = () => {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12} md={4} lg={3}>
+                        <Grid item xs={12} md={4} lg={4}>
                             <FormControlLabel
                                 control={
                                     <Checkbox
@@ -152,19 +199,7 @@ const Autorizaciones = () => {
                                 label="Mostrar solo pendientes"
                             />
                         </Grid>
-                        <Grid item xs={12} lg={3}>
-                            {/* The "Aplicar Filtros" button is redundant with real-time filtering but included per design */}
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                fullWidth
-                                size="large"
-                                sx={{ height: '56px', fontWeight: 'bold' }}
-                                onClick={() => { }} // No-op since filtering is reactive
-                            >
-                                Aplicar Filtros
-                            </Button>
-                        </Grid>
+
                     </Grid>
                 </Paper>
 
@@ -181,6 +216,7 @@ const Autorizaciones = () => {
 
                         return (
                             <Grid item xs={12} md={6} xl={4} key={item.id}>
+
                                 <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 2 }} elevation={1}>
                                     <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
                                         <Box display="flex" justifyContent="space-between" alignItems="flex-start">
@@ -231,7 +267,7 @@ const Autorizaciones = () => {
                                                                 variant="contained"
                                                                 color="error"
                                                                 fullWidth
-                                                                onClick={() => { }}
+                                                                onClick={() => handleRechazar(nota?.id)}
                                                                 sx={{ fontWeight: 'bold' }}
                                                             >
                                                                 Rechazar

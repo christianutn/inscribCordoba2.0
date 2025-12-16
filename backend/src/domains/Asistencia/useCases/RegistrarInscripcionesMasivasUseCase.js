@@ -63,10 +63,10 @@ export default class RegistrarInscripcionesMasivasUseCase {
         capacidad: 100, // TODO: Ajustar a lo que se recibe por front
         sala: "Test", // TODO: Ajustar a lo que se recibe por front
       };
-      
+
       const nuevoEvento = await eventoService.crearEvento(eventoData, transaction);
       this.evento = nuevoEvento;
-      
+
       // 3. Crear Días de Evento (Carga Masiva)
       const diasEventoParaCrear = data.diasEvento.map(fecha => ({
         fecha: fecha,
@@ -76,7 +76,7 @@ export default class RegistrarInscripcionesMasivasUseCase {
       if (diasEventoParaCrear.length > 0) {
         await diaEventoRepository.crearVarios(diasEventoParaCrear, transaction);
       }
-      
+
       // 5. Gestionar Participantes (Carga Masiva)
       const cuilsParticipantes = data.participantes.map(p => p.cuil);
       const participantesExistentes = await participanteService.buscarParticipantesPorCuils(cuilsParticipantes);
@@ -101,23 +101,24 @@ export default class RegistrarInscripcionesMasivasUseCase {
       // 7. Cargar Asistencias (Carga Masiva)
       const asistenciasParaCrear = [];
       data.diasEvento.forEach(dia => {
-          data.participantes.forEach(participante => {
-              asistenciasParaCrear.push({
-                  cuil: participante.cuil,
-                  id_evento: data.nroEvento,
-                  fecha: dia,
-                  estado_asistencia: 0 // Asumiendo un estado por defecto
-              });
+        data.participantes.forEach(participante => {
+          asistenciasParaCrear.push({
+            cuil: participante.cuil,
+            id_evento: data.nroEvento,
+            fecha: dia,
+            estado_asistencia: 0 // Asumiendo un estado por defecto
           });
+        });
       });
 
+
       if (asistenciasParaCrear.length > 0) {
-          await asistenciaService.crearVarios(asistenciasParaCrear, transaction);
+        await asistenciaService.crearVarios(asistenciasParaCrear, transaction);
       }
 
       // Si todo fue exitoso, confirmar la transacción
       await transaction.commit();
-      
+
       return {
         success: true,
         message: 'Archivo procesado exitosamente con carga masiva.',

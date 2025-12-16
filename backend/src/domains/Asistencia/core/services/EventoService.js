@@ -9,6 +9,11 @@ export default class EventoService {
     }
 
 
+
+    async obtenerTodos() {
+        return await this.eventoRepository.obtenerTodos();
+    }
+
     async crearEvento(eventoData, transaction) {
         try {
 

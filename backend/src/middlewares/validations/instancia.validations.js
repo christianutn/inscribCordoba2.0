@@ -12,7 +12,7 @@ import Tutor from '../../domains/Inscribcordoba/api/models/tutor.models.js';
 import { DateTime } from 'luxon';
 import Departamento from '../../domains/Inscribcordoba/api/models/departamentos.models.js';
 import Usuario from '../../domains/Inscribcordoba/api/models/usuario.models.js';
-
+import FechasInhabilitadas from '../../domains/Inscribcordoba/api/models/fechas_inhabilitadas.models.js';
 
 // Middleware de validación para una ruta de creación/actualización de Curso/Evento
 const validarDatosCursoConCohortes = [
@@ -225,6 +225,10 @@ const validarDatosCursoConCohortes = [
             // Calcular la cantidad de cupo por dia
             if (esExcepcionParaFechas == "0" && await Instancia.supera_cantidad_cursos_dia(fechaCursadaDesdeString)) throw new AppError(`La cantidad de cursos en el dia supera el límite establecido`, 400);
 
+
+            // Verifica que no este incluida la fecha en las fechas inhabilitadas
+            const fechaInhabilitada = await FechasInhabilitadas.findOne({ where: { fecha: fechaCursadaDesdeString } });
+            if (fechaInhabilitada) throw new AppError(`La fecha ${fechaCursadaDesdeString} esta inhabilitada`, 400);
 
         }
 
