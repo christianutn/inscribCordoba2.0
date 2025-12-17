@@ -108,14 +108,15 @@ export const putUsuario = async (req, res, next) => {
             cuil,
             nombre,
             apellido,
-
         }
 
-        if (mail) dataPersona.mail = mail
-        if (celular) dataPersona.celular = celular
-        if (area) dataPersona.area = area
+        if (!celular) dataPersona.celular = null
+        if (!mail) dataPersona.mail = null
 
-        await Persona.update(dataPersona, { where: { cuil } })
+
+
+
+        await Persona.update(dataPersona, { where: { cuil }, transaction: t })
 
         const dataUsuario = {
             cuil,
@@ -125,7 +126,7 @@ export const putUsuario = async (req, res, next) => {
             activo
         }
 
-        await Usuario.update(dataUsuario, { where: { cuil } })
+        await Usuario.update(dataUsuario, { where: { cuil }, transaction: t })
 
         // Confirmamos la transacción
         await t.commit();

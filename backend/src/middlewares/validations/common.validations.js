@@ -16,23 +16,35 @@ export const commonCuil = check('cuil')
 
 export const commonEmail = body('mail')
     .trim()
-    .notEmpty().withMessage('El correo electrónico es obligatorio.')
+    .customSanitizer(value => {
+        if (value === "") return null;
+        return value;
+    })
     .isEmail().withMessage('El correo electrónico debe ser válido.')
-    .custom(async (objBody, { req }) => {
-        const { mail, cuil } = objBody;
+    .custom(async (value, { req }) => {
+        const mail = value;
+        // Si no hay mail (es null), no validamos unicidad
+        if (!mail) return true;
+
+        const { cuil } = req.body;
 
         // 1. Validamos que el mail no lo tenga una persona distinta al cuil que se pasa por parametro
+        // Si no hay cuil en el body (ej. creación sin cuil explícito o validación suelta), 
+        // la query buscará solo por mail, lo cual también es correcto para chequear existencia.
+        // Pero para update necesitamos el cuil para excluirlo.
+
+        const whereClause = { mail: mail };
+        if (cuil) {
+            whereClause.cuil = { [Op.ne]: cuil };
+        }
+
         const persona = await Persona.findOne({
-            where: {
-                mail: mail,
-                cuil: { [Op.ne]: cuil }
-            }
+            where: whereClause
         });
+
         if (persona) {
             throw new Error('El correo electrónico ya está registrado por otro usuario.');
         }
-
-
     })
 
 

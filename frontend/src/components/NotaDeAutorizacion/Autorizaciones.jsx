@@ -136,14 +136,18 @@ const Autorizaciones = () => {
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 4 }}>
-            <Alert
-                open={alert.open}
-                onClose={() => setAlert({ ...alert, open: false })}
-                severity={alert.severity}
-                sx={{ mb: 2 }}
-            >
-                {alert.message}
-            </Alert>
+            {
+                alert.open && (
+                    <Alert
+                        open={alert.open}
+                        onClose={() => setAlert({ ...alert, open: false })}
+                        severity={alert.severity}
+                        sx={{ mb: 2 }}
+                    >
+                        {alert.message}
+                    </Alert>
+                )
+            }
             <Container maxWidth="xl">
                 <Box sx={{ mb: 4 }}>
                     <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom color="text.primary">
