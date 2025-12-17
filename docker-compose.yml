@@ -1,15 +1,13 @@
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: christianbergero/inscribcordoba-backend:latest
     container_name: inscribcordoba-backend
     ports:
       - "4000:4000"
     env_file:
       - ./backend/.env
     volumes:
-      # Mapear carpeta de uploads del host al contenedor
+      # Carpeta de uploads persistente en el host
       - ./uploads:/app/uploads
     networks:
       - app-network
@@ -23,7 +21,7 @@ services:
     environment:
       - REACT_APP_API_URL=/api
     volumes:
-      # Si necesitas servir PDFs desde el frontend también
+      # Servir archivos estáticos (PDFs, etc.)
       - ./uploads:/usr/share/nginx/html/uploads:ro
     depends_on:
       - backend
