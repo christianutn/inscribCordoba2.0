@@ -8,9 +8,9 @@ import { descargarExcelCronograma as descargarExcel } from "../services/excel.se
 import { DataGrid } from '@mui/x-data-grid';
 import { esES } from '@mui/x-data-grid/locales';
 import {
-    Backdrop, CircularProgress, Box, Typography, Modal, Card, CardContent, CardHeader,
-    IconButton, Divider, List, ListItem, ListItemText, Paper, TextField, FormControl,
-    InputLabel, Select, MenuItem, Grid, Button, InputAdornment, Tooltip, Chip, Alert
+  Backdrop, CircularProgress, Box, Typography, Modal, Card, CardContent, CardHeader,
+  IconButton, Divider, List, ListItem, ListItemText, Paper, TextField, FormControl,
+  InputLabel, Select, MenuItem, Grid, Button, InputAdornment, Tooltip, Chip, Alert
 } from '@mui/material';
 
 import CloseIcon from '@mui/icons-material/Close';
@@ -36,7 +36,7 @@ const modalStyle = {
   borderRadius: 2, boxShadow: 24, p: 0, maxHeight: '90vh', display: 'flex', flexDirection: 'column',
 };
 
-const MONTH_NAMES = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ];
+const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 const DATE_FORMATS_TO_TRY = ['DD/MM/YYYY', 'D/M/YYYY', 'DD-MM-YYYY', 'D-M-YYYY', 'YYYY-MM-DD'];
 
 const parseDate = (dateString) => {
@@ -50,18 +50,18 @@ const parseDate = (dateString) => {
 };
 
 const formatBooleanToSiNo = (value) => {
-    if (value === true || value === 1) return 'Sí';
-    if (value === false || value === 0) return 'No';
-    return 'N/A';
+  if (value === true || value === 1) return 'Sí';
+  if (value === false || value === 0) return 'No';
+  return 'N/A';
 };
 
 // --- ESTILOS PARA LA MAQUETACIÓN DE GRID ---
 const gridContainerStyle = {
-    display: 'grid',
-    gap: '20px',
-    padding: '20px',
-    gridTemplateColumns: '1fr',
-    gridTemplateAreas: `
+  display: 'grid',
+  gap: '20px',
+  padding: '20px',
+  gridTemplateColumns: '1fr',
+  gridTemplateAreas: `
       "titulo"
       "divider"
       "filtros-cronograma"
@@ -84,8 +84,8 @@ const Cronograma = () => {
   const [monthFilter, setMonthFilter] = useState('all');
   const [activosFilterActive, setActivosFilterActive] = useState(false);
 
-  const COLUMNAS_VISIBLES = useMemo(() => [ "Ministerio", "Area", "Nombre del curso", "Fecha inicio de inscripción", "Fecha fin de inscripción", "Fecha inicio del curso", "Fecha fin del curso", "Estado de Instancia" ], []);
-  
+  const COLUMNAS_VISIBLES = useMemo(() => ["Ministerio", "Area", "Nombre del curso", "Fecha inicio de inscripción", "Fecha fin de inscripción", "Fecha inicio del curso", "Fecha fin del curso", "Estado de Instancia"], []);
+
   const columnsForGrid = useMemo(() => {
     return COLUMNAS_VISIBLES.map(headerKey => {
       let flex = 1;
@@ -106,7 +106,7 @@ const Cronograma = () => {
       try {
         const rawDataCronograma = await getInstancias();
         if (!Array.isArray(rawDataCronograma)) throw new Error("Los datos recibidos no son válidos.");
-        
+
         const minSet = new Set();
         const dataObjs = rawDataCronograma.map((instance, idx) => {
           const detalle = instance.detalle_curso || {};
@@ -141,9 +141,11 @@ const Cronograma = () => {
             "Restricciones por Correlatividad": instance.detalle_restricciones_por_correlatividad || [],
             "Tiene restricción por edad": instance.tiene_restriccion_edad ?? detalle.tiene_restriccion_edad,
             "Edad Desde": instance.restriccion_edad_desde,
-            "Edad Hasta": instance.restriccion_edad_hasta
+            "Edad Desde": instance.restriccion_edad_desde,
+            "Edad Hasta": instance.restriccion_edad_hasta,
+            _raw: instance // Guardamos la instancia original para el export
           };
-          
+
           if (obj["Ministerio"]) minSet.add(obj["Ministerio"]);
           return obj;
         });
@@ -194,14 +196,68 @@ const Cronograma = () => {
   const handleRowClick = useCallback(params => { setSelectedRowData(params.row); setModalOpen(true); }, []);
   const handleCloseModal = useCallback(() => { setModalOpen(false); setSelectedRowData(null); }, []);
   const handleDescargarExcel = useCallback(async () => {
-      if (!filteredData.length) return;
-      try {
-          await descargarExcel(filteredData, COLUMNAS_VISIBLES, "Cronograma_General");
-      } catch (e) {
-          setError("Error al generar el archivo Excel.");
-          console.error(e);
-      }
-  }, [filteredData, COLUMNAS_VISIBLES]);
+    if (!filteredData.length) return;
+    try {
+      // Mapeamos los datos filtrados usando la info cruda (_raw) para incluir TODAS las columnas
+      const dataParaExcel = filteredData.map(item => {
+        const raw = item._raw || {};
+        const det = raw.detalle_curso || {};
+        const asig = raw.detalle_asignado || {};
+        const pers = asig.detalle_persona || {};
+        const rol = asig.detalle_rol || {};
+        const areaAsig = asig.detalle_area || {};
+
+        return {
+          "Curso": raw.curso,
+          "Nombre del curso": det.nombre,
+          "Area del curso": raw.detalle_curso?.detalle_area?.nombre || "",
+          "Ministerio": raw.detalle_curso?.detalle_area?.detalle_ministerio?.nombre || "",
+          "Fecha inicio curso": raw.fecha_inicio_curso,
+          "Fecha fin curso": raw.fecha_fin_curso,
+          "Fecha inicio inscripción": raw.fecha_inicio_inscripcion,
+          "Fecha fin inscripción": raw.fecha_fin_inscripcion,
+          "Estado Instancia": raw.estado_instancia,
+          "Cupo": raw.cupo,
+          "Inscriptos": raw.cantidad_inscriptos || 0,
+          "Certificados": raw.cantidad_certificados || 0,
+          "Cantidad de horas": det.cantidad_horas,
+          "Publica en Portal": formatBooleanToSiNo(raw.es_publicada_portal_cc ?? det.publica_pcc),
+          "Es Autogestionado": formatBooleanToSiNo(raw.es_autogestionado ?? det.es_autogestionado),
+          "Medio de inscripción": det.detalle_medioInscripcion?.nombre || raw.medio_inscripcion,
+          "Plataforma de dictado": det.detalle_plataformaDictado?.nombre || raw.plataforma_dictado,
+          "Tipo de capacitación": det.detalle_tipoCapacitacion?.nombre || raw.tipo_capacitacion,
+          "Tiene correlatividad": formatBooleanToSiNo(raw.tiene_correlatividad),
+          "Tiene restricción edad": formatBooleanToSiNo(raw.tiene_restriccion_edad ?? det.tiene_restriccion_edad),
+          "Restricción Edad Desde": raw.restriccion_edad_desde,
+          "Restricción Edad Hasta": raw.restriccion_edad_hasta,
+          "Comentario": raw.comentario,
+          // Datos del Asignado (Coordinador/Responsable)
+          "Asignado CUIL": asig.cuil,
+          "Asignado Nombre": pers.nombre ? `${pers.nombre} ${pers.apellido}` : "",
+          "Asignado Mail": pers.mail,
+          "Asignado Rol": rol.nombre,
+          "Asignado Area": areaAsig.nombre,
+        };
+      });
+
+      // Definimos las columnas que queremos mostrar en el Excel (el orden importa)
+      const COLUMNAS_EXCEL = [
+        "Curso", "Nombre del curso", "Area del curso", "Ministerio",
+        "Fecha inicio curso", "Fecha fin curso", "Fecha inicio inscripción", "Fecha fin inscripción",
+        "Estado Instancia", "Cupo", "Inscriptos", "Certificados", "Cantidad de horas",
+        "Publica en Portal", "Es Autogestionado", "Medio de inscripción",
+        "Plataforma de dictado", "Tipo de capacitación",
+        "Tiene correlatividad", "Tiene restricción edad", "Restricción Edad Desde", "Restricción Edad Hasta",
+        "Comentario",
+        "Asignado CUIL", "Asignado Nombre", "Asignado Mail", "Asignado Rol", "Asignado Area"
+      ];
+
+      await descargarExcel(dataParaExcel, COLUMNAS_EXCEL, "Cronograma_Completo");
+    } catch (e) {
+      setError("Error al generar el archivo Excel.");
+      console.error(e);
+    }
+  }, [filteredData]);
   const handleMinisterioChange = useCallback(e => setMinisterioFilter(e.target.value), []);
   const handleAreaChange = useCallback(e => setAreaFilter(e.target.value), []);
   const handleNombreChange = useCallback(e => setNombreFilter(e.target.value), []);
@@ -209,7 +265,7 @@ const Cronograma = () => {
   const handleToggleActivosFilter = useCallback(() => setActivosFilterActive(prev => !prev), []);
   const handleClearFilters = useCallback(() => { setNombreFilter(''); setMinisterioFilter('all'); setAreaFilter('all'); setMonthFilter('all'); setActivosFilterActive(false); }, []);
   const isFilterActive = useMemo(() => nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive, [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive]);
-  
+
   const renderDetailItem = useCallback((label, value, isBoolean = false) => {
     const displayValue = isBoolean ? formatBooleanToSiNo(value) : (formatValue(value) || '-');
     if (displayValue === '' || displayValue === '-' || value === null) return null;
@@ -231,35 +287,35 @@ const Cronograma = () => {
     <>
       <div style={gridContainerStyle}>
         <div style={{ gridArea: 'titulo' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                <Titulo texto="Cronograma" />
-                <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={loading || !filteredData.length} />
-            </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Titulo texto="Cronograma" />
+            <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={loading || !filteredData.length} />
+          </Box>
         </div>
-        
+
         <div style={{ gridArea: 'divider' }}>
-            <Divider sx={{ mb: 1, borderBottomWidth: 2 }} />
+          <Divider sx={{ mb: 1, borderBottomWidth: 2 }} />
         </div>
 
         <div style={{ gridArea: 'filtros-cronograma' }}>
-            <Paper elevation={1} sx={{ p: 2, width: '100%' }}>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} sm={6} md={3}><TextField fullWidth label="Buscar por Nombre" variant="outlined" size="small" value={nombreFilter} onChange={handleNombreChange} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>), }} /></Grid>
-                    <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={ministerioOptions.length <= 1}><InputLabel>Ministerio</InputLabel><Select value={ministerioFilter} label="Ministerio" onChange={handleMinisterioChange}><MenuItem value="all"><em>Todos</em></MenuItem>{ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}</Select></FormControl></Grid>
-                    <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={areaOptions.length <= 1}><InputLabel>Área</InputLabel><Select value={areaFilter} label="Área" onChange={handleAreaChange}><MenuItem value="all"><em>Todas</em></MenuItem>{areaOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}{ministerioFilter !== 'all' && areaOptions.length <= 1 && (<MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>)}</Select></FormControl></Grid>
-                    <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined"><InputLabel>Mes Inicio Curso</InputLabel><Select value={monthFilter} label="Mes Inicio Curso" onChange={handleMonthChange}><MenuItem value="all"><em>Todos</em></MenuItem>{MONTH_NAMES.map((m, i) => (<MenuItem key={i} value={i.toString()}>{m}</MenuItem>))}</Select></FormControl></Grid>
-                    <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Tooltip title={activosFilterActive ? "Mostrar todos" : "Mostrar solo activos"}><Button fullWidth variant={activosFilterActive ? "contained" : "outlined"} size="medium" onClick={handleToggleActivosFilter} startIcon={<AccessTimeIcon />} sx={{ height: '40px' }}>Activos</Button></Tooltip></Grid>
-                    <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters} disabled={!isFilterActive} startIcon={<ClearAllIcon />} sx={{ height: '40px' }}>Limpiar</Button></Grid>
-                </Grid>
-            </Paper>
+          <Paper elevation={1} sx={{ p: 2, width: '100%' }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={6} md={3}><TextField fullWidth label="Buscar por Nombre" variant="outlined" size="small" value={nombreFilter} onChange={handleNombreChange} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>), }} /></Grid>
+              <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={ministerioOptions.length <= 1}><InputLabel>Ministerio</InputLabel><Select value={ministerioFilter} label="Ministerio" onChange={handleMinisterioChange}><MenuItem value="all"><em>Todos</em></MenuItem>{ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}</Select></FormControl></Grid>
+              <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={areaOptions.length <= 1}><InputLabel>Área</InputLabel><Select value={areaFilter} label="Área" onChange={handleAreaChange}><MenuItem value="all"><em>Todas</em></MenuItem>{areaOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}{ministerioFilter !== 'all' && areaOptions.length <= 1 && (<MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>)}</Select></FormControl></Grid>
+              <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined"><InputLabel>Mes Inicio Curso</InputLabel><Select value={monthFilter} label="Mes Inicio Curso" onChange={handleMonthChange}><MenuItem value="all"><em>Todos</em></MenuItem>{MONTH_NAMES.map((m, i) => (<MenuItem key={i} value={i.toString()}>{m}</MenuItem>))}</Select></FormControl></Grid>
+              <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Tooltip title={activosFilterActive ? "Mostrar todos" : "Mostrar solo activos"}><Button fullWidth variant={activosFilterActive ? "contained" : "outlined"} size="medium" onClick={handleToggleActivosFilter} startIcon={<AccessTimeIcon />} sx={{ height: '40px' }}>Activos</Button></Tooltip></Grid>
+              <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters} disabled={!isFilterActive} startIcon={<ClearAllIcon />} sx={{ height: '40px' }}>Limpiar</Button></Grid>
+            </Grid>
+          </Paper>
         </div>
-      
+
         {(loading && cursosData.length > 0) && (<Box sx={{ gridArea: 'tabla-cronograma', display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}><CircularProgress size={20} sx={{ mr: 1 }} /><Typography variant="body2">Actualizando...</Typography></Box>)}
-      
+
         <div style={{ gridArea: 'tabla-cronograma', overflowX: 'auto' }}>
-            <Paper elevation={3} sx={{ height: 600, width: '100%' }}>
-                <DataGrid rows={filteredData} columns={columnsForGrid} onRowClick={handleRowClick} getRowId={r => r.id} loading={loading} density="compact" disableRowSelectionOnClick />
-            </Paper>
+          <Paper elevation={3} sx={{ height: 600, width: '100%' }}>
+            <DataGrid rows={filteredData} columns={columnsForGrid} onRowClick={handleRowClick} getRowId={r => r.id} loading={loading} density="compact" disableRowSelectionOnClick />
+          </Paper>
         </div>
       </div>
 
@@ -293,11 +349,11 @@ const Cronograma = () => {
                   <Divider sx={{ my: 2 }}><Chip label="Configuración y Restricciones" size="small" /></Divider>
                   {renderDetailItem("Es Autogestionado", selectedRowData["Es Autogestionado"], true)}
                   {renderDetailItem("Publicada en Portal", selectedRowData["Publica PCC"], true)}
-                  
+
                   <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
                     <ListItemText primary="Restricción por Edad" />
                     <Typography variant="body2" color="text.secondary">
-                        {selectedRowData["Tiene restricción por edad"] ? `Desde ${selectedRowData["Edad Desde"]} hasta ${selectedRowData["Edad Hasta"] || 'sin límite'} años` : 'Ninguna'}
+                      {selectedRowData["Tiene restricción por edad"] ? `Desde ${selectedRowData["Edad Desde"]} hasta ${selectedRowData["Edad Hasta"] || 'sin límite'} años` : 'Ninguna'}
                     </Typography>
                   </ListItem>
                   <Divider component="li" sx={{ my: 0.5 }} />
@@ -305,21 +361,21 @@ const Cronograma = () => {
                   <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
                     <ListItemText primary="Restricción por Departamento" />
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
-                        {selectedRowData["Restricciones por Departamento"].length > 0 ? 
-                            selectedRowData["Restricciones por Departamento"].map(d => <Chip key={d.departamento_id} label={d.detalle_departamento?.nombre || d.departamento_id} size="small" />) :
-                            <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>
-                        }
+                      {selectedRowData["Restricciones por Departamento"].length > 0 ?
+                        selectedRowData["Restricciones por Departamento"].map(d => <Chip key={d.departamento_id} label={d.detalle_departamento?.nombre || d.departamento_id} size="small" />) :
+                        <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>
+                      }
                     </Box>
                   </ListItem>
                   <Divider component="li" sx={{ my: 0.5 }} />
-                  
+
                   <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
                     <ListItemText primary="Restricción por Correlatividad" />
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
-                        {selectedRowData["Restricciones por Correlatividad"].length > 0 ? 
-                            selectedRowData["Restricciones por Correlatividad"].map(c => <Chip key={c.curso_correlativo} label={c.detalle_curso_correlativo?.nombre || c.curso_correlativo} size="small" />) :
-                            <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>
-                        }
+                      {selectedRowData["Restricciones por Correlatividad"].length > 0 ?
+                        selectedRowData["Restricciones por Correlatividad"].map(c => <Chip key={c.curso_correlativo} label={c.detalle_curso_correlativo?.nombre || c.curso_correlativo} size="small" />) :
+                        <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>
+                      }
                     </Box>
                   </ListItem>
                 </List>
