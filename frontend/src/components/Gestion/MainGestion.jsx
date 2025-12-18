@@ -44,9 +44,9 @@ const MainGestion = () => {
                 return <GestionCursos />;
             case 'Usuarios':
                 return <GestionUsuarios />;
-            case 'Areas':
+            case 'Áreas':
                 return <GestionAreas />;
-            case 'Asignaciones Areas':
+            case 'Asignaciones Áreas':
                 return <GestionAsignacionesAreas />;
             case 'Ministerios':
                 return <GestionMinisterios />;
