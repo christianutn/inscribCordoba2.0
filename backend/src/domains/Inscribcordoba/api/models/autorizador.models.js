@@ -2,22 +2,23 @@ import { DataTypes } from 'sequelize';
 import sequelize from "../../../../config/database.js";
 
 const Autorizador = sequelize.define('autorizadores', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   area: {
     type: DataTypes.STRING(15),
     allowNull: false,
     references: {
-      model: 'areas', // Referencia a la tabla 'areas'
+      model: 'areas',
       key: 'cod',
     }
   },
   cuil: {
     type: DataTypes.STRING(11),
-    allowNull: false,
-    primaryKey: true, 
-    references: {
-      model: 'personas', 
-      key: 'cuil',
-    }
+    allowNull: true,
+    // Nota: Si en SQL no definiste FK a personas, Sequelize solo lo usa para documentación interna
   },
   descripcion_cargo: {
     type: DataTypes.STRING(255),
@@ -27,9 +28,27 @@ const Autorizador = sequelize.define('autorizadores', {
     type: DataTypes.DATEONLY,
     allowNull: false,
   },
+  // --- CAMPOS FALTANTES QUE ESTÁN EN TU SQL ---
+  nombre: {
+    type: DataTypes.STRING(100),
+    allowNull: true, // DEFAULT NULL en SQL
+  },
+  apellido: {
+    type: DataTypes.STRING(100),
+    allowNull: true, // DEFAULT NULL en SQL
+  },
+  mail: {
+    type: DataTypes.STRING(100),
+    allowNull: true, // DEFAULT NULL en SQL
+  },
+  celular: {
+    type: DataTypes.STRING(10),
+    allowNull: true, // DEFAULT NULL en SQL
+  },
 }, {
   tableName: 'autorizadores',
-  timestamps: false, 
+  timestamps: false,
+  underscored: false, // Para que coincida exactamente con los nombres de tu SQL
   indexes: [
     {
       unique: true,

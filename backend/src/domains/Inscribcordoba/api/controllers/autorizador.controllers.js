@@ -68,43 +68,46 @@ export const getAutorizadores = async (req, res, next) => {
     }
 }
 
+
 export const postAutorizador = async (req, res, next) => {
     try {
-
         const { cuil, nombre, apellido, mail, celular, area, descripcion_cargo } = req.body;
 
-        const dataPersona = {}
-
-        dataPersona.cuil = cuil;
-        dataPersona.nombre = nombre;
-        dataPersona.apellido = apellido;
-        if (mail) dataPersona.mail = mail;
-        if (celular) dataPersona.celular = celular;
-
-        // buscamos si existe la persona
-        const persona = await Persona.findOne({ where: { cuil } });
-
-        if (persona) {
-            // actualizamos la persona
-            await persona.update(dataPersona);
-        } else {
-            // creamos la persona
-            await Persona.create(dataPersona);
+        // 1. Validaciones básicas de campos obligatorios según tu SQL (NOT NULL)
+        if (!area || !descripcion_cargo) {
+            return res.status(400).json({
+                message: "Los campos area y descripcion_cargo son obligatorios."
+            });
         }
 
-        // fecha actual
-        const fechaActual = DateTime.now().toFormat('yyyy-MM-dd')
+        // 2. Obtener fecha actual en formato yyyy-MM-dd
+        const fechaActual = DateTime.now().toISODate();
+
+        // 3. Manejo de duplicados (Opcional pero recomendado)
+        // Podrías verificar si ya existe antes de crear, o dejar que el catch capture el error de la DB
 
         const nuevoAutorizador = await autorizadorModel.create({
-            cuil: cuil,
-            area: area,
-            descripcion_cargo: descripcion_cargo,
-            fecha_desde: fechaActual
-        })
+            cuil,
+            area,
+            descripcion_cargo,
+            fecha_desde: fechaActual,
+            nombre: nombre || null,    // Permite que sean null si no vienen
+            apellido: apellido || null,
+            mail: mail || null,
+            celular: celular || null
+        });
 
-        res.status(201).json(nuevoAutorizador);
+        return res.status(201).json(nuevoAutorizador);
 
     } catch (error) {
+        // 4. Manejo específico para la restricción UNIQUE de tu tabla
+        if (error.name === 'SequelizeUniqueConstraintError' || error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({
+                message: "Ya existe un registro para este CUIL en esta área con la fecha de hoy."
+            });
+        }
+
+        // Otros errores (ej. error de clave foránea si el 'area' no existe)
         next(error);
     }
 }

@@ -681,6 +681,7 @@ const Confirmacion = () => {
                 open={openModalTutor}
                 onClose={() => setOpenModalTutor(false)}
                 onSuccess={handleSuccessTutor}
+                areas={areas}
             />
             <ModalCrearArea
                 open={openModalArea}
@@ -691,11 +692,13 @@ const Confirmacion = () => {
                 open={openModalDirector}
                 onClose={() => setOpenModalDirector(false)}
                 onSuccess={handleSuccessDirector}
+                areas={areas}
             />
             <ModalCrearCurso
                 open={openModalCurso}
                 onClose={() => setOpenModalCurso(false)}
                 onSuccess={handleSuccessCurso}
+                areas={areas}
             />
             <ModalCrearCoordinador
                 open={openModalCoordinador}

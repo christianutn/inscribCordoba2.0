@@ -42,6 +42,8 @@ export default class NotaDeAutorizacionRepository {
 
   async actualizar(id, data, transaction = null) {
 
+
+
     return await NotaDeAutorizacion.update(data, {
       where: {
         id: id,

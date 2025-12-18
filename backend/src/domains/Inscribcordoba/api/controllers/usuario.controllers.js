@@ -104,19 +104,19 @@ export const putUsuario = async (req, res, next) => {
 
         let { cuil, nombre, apellido, mail, celular, area, rol, esExcepcionParaFechas, activo } = req.body;
 
+        // 1. Preparar datos de Persona
+        // Usamos null si el valor es undefined o una cadena vacía para limpiar la DB
         const dataPersona = {
-            cuil,
             nombre,
             apellido,
-        }
+            mail: mail || null,
+            celular: celular || null
+        };
 
-        if (!celular) dataPersona.celular = null
-        if (!mail) dataPersona.mail = null
-
-
-
-
-        await Persona.update(dataPersona, { where: { cuil }, transaction: t })
+        await Persona.update(dataPersona, {
+            where: { cuil },
+            transaction: t
+        });
 
         const dataUsuario = {
             cuil,

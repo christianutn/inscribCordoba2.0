@@ -11,10 +11,10 @@ import {
     Alert,
     CircularProgress
 } from "@mui/material";
-import { postAutorizador } from "../../../services/autorizadores.service";
-import { getAreas } from "../../../services/areas.service";
 
-const ModalCrearAutorizador = ({ open, onClose, onSuccess }) => {
+import { postAutorizador } from "../../../services/autorizadores.service";
+
+const ModalCrearAutorizador = ({ open, onClose, onSuccess, areas }) => {
     const [formData, setFormData] = useState({
         cuil: "",
         nombre: "",
@@ -24,28 +24,8 @@ const ModalCrearAutorizador = ({ open, onClose, onSuccess }) => {
         area: "",
         descripcion_cargo: ""
     });
-    const [areas, setAreas] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [loadingAreas, setLoadingAreas] = useState(false);
     const [error, setError] = useState(null);
-
-    useEffect(() => {
-        if (open) {
-            fetchAreas();
-        }
-    }, [open]);
-
-    const fetchAreas = async () => {
-        setLoadingAreas(true);
-        try {
-            const data = await getAreas();
-            setAreas(data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoadingAreas(false);
-        }
-    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -53,11 +33,12 @@ const ModalCrearAutorizador = ({ open, onClose, onSuccess }) => {
     };
 
     const validate = () => {
-        if (!formData.cuil || formData.cuil.length !== 11 || isNaN(formData.cuil)) return "El CUIL debe tener 11 dígitos numéricos.";
+        if (formData.cuil && (formData.cuil.length !== 11 || isNaN(formData.cuil))) return "El CUIL debe tener 11 dígitos numéricos.";
         if (!formData.nombre.trim()) return "El nombre es obligatorio.";
         if (!formData.apellido.trim()) return "El apellido es obligatorio.";
         if (formData.mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.mail)) return "El email no es válido.";
         if (!formData.area) return "Debe seleccionar un área.";
+        if (!formData.descripcion_cargo.trim()) return "La descripción del cargo es obligatoria.";
         return null;
     };
 
@@ -73,8 +54,7 @@ const ModalCrearAutorizador = ({ open, onClose, onSuccess }) => {
         try {
             // Add current date as fecha_desde
             const payload = {
-                ...formData,
-                fecha_desde: new Date().toISOString().split('T')[0]
+                ...formData
             };
             await postAutorizador(payload);
             onSuccess("Autorizador creado con éxito");
@@ -108,9 +88,8 @@ const ModalCrearAutorizador = ({ open, onClose, onSuccess }) => {
                             name="cuil"
                             value={formData.cuil}
                             onChange={handleChange}
-                            required
                             inputProps={{ maxLength: 11 }}
-                            helperText="11 dígitos sin guiones"
+                            helperText="11 dígitos sin guiones (Opcional)"
                         />
                     </Grid>
                     <Grid item xs={6}>
@@ -161,7 +140,6 @@ const ModalCrearAutorizador = ({ open, onClose, onSuccess }) => {
                             value={formData.area}
                             onChange={handleChange}
                             required
-                            disabled={loadingAreas}
                         >
                             {areas.map((a) => (
                                 <MenuItem key={a.cod} value={a.cod}>

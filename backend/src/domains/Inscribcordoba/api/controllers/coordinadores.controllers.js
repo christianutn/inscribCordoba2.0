@@ -2,6 +2,8 @@ import Coordinadores from '../models/coordinadores.models.js';
 import AppError from '../../../../utils/appError.js';
 import Persona from '../models/persona.models.js';
 import NotaAutorizacion from '../models/notas_autorizacion.models.js';
+import tratarNombres from '../../../../utils/tratarNombres.js';
+
 // 1. IMPORTANTE: Importar Op para usar operadores lógicos (OR, LIKE)
 import { Op } from 'sequelize';
 
@@ -68,8 +70,9 @@ export const postCoordinador = async (req, res, next) => {
 
         const dataPersona = {}
 
-        dataPersona.nombre = nombre;
-        dataPersona.apellido = apellido;
+        dataPersona.nombre = tratarNombres(nombre);
+        dataPersona.apellido = tratarNombres(apellido);
+        dataPersona.cuil = cuil;
         if (mail) dataPersona.mail = mail;
         if (celular) dataPersona.celular = celular;
 

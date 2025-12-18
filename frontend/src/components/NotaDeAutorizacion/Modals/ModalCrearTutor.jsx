@@ -12,10 +12,10 @@ import {
     CircularProgress,
     Autocomplete
 } from "@mui/material";
-import { postTutores } from "../../../services/tutores.service";
-import { getAreas } from "../../../services/areas.service";
 
-const ModalCrearTutor = ({ open, onClose, onSuccess }) => {
+import { postTutores } from "../../../services/tutores.service";
+
+const ModalCrearTutor = ({ open, onClose, onSuccess, areas }) => {
     const [formData, setFormData] = useState({
         cuil: "",
         esReferente: 0,
@@ -27,21 +27,6 @@ const ModalCrearTutor = ({ open, onClose, onSuccess }) => {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [areas, setAreas] = useState([]);
-
-    const fetchData = async () => {
-        try {
-            const res = await getAreas();
-            setAreas(res);
-        } catch (err) {
-            console.error("Error fetching data for modal:", err);
-            setError("Error al cargar los datos necesarios.");
-        }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
 
 
     const handleChange = (e) => {

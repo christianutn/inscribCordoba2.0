@@ -1,6 +1,7 @@
 
 import sequelize from "../../../config/database.js";
 import { DateTime } from "luxon";
+import CursoModel from "../api/models/curso.models.js";
 
 export default class RegistrarAutorizacionNotaDeAutorizacion {
     constructor({
@@ -37,6 +38,14 @@ export default class RegistrarAutorizacionNotaDeAutorizacion {
         const t = await sequelize.transaction();
 
         try {
+
+            // Actualizamos cursos
+
+            for (const curso of this.cursos) {
+                await CursoModel.update({ esta_autorizado: 1 }, { where: { cod: curso.cod }, transaction: t })
+            }
+
+
 
             // Actualizamos nota de autorización
 

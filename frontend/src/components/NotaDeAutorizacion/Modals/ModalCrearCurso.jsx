@@ -14,10 +14,10 @@ import {
 import { postCurso } from "../../../services/cursos.service";
 import { getMediosInscripcion } from "../../../services/mediosInscripcion.service";
 import { getPlataformasDictado } from "../../../services/plataformasDictado.service";
-import { getTiposCapacitacion } from "../../../services/tiposCapacitacion.service";
-import { getAreas } from "../../../services/areas.service";
 
-const ModalCrearCurso = ({ open, onClose, onSuccess }) => {
+import { getTiposCapacitacion } from "../../../services/tiposCapacitacion.service";
+
+const ModalCrearCurso = ({ open, onClose, onSuccess, areas }) => {
     const [formData, setFormData] = useState({
         cod: "",
         nombre: "",
@@ -31,7 +31,6 @@ const ModalCrearCurso = ({ open, onClose, onSuccess }) => {
     const [medios, setMedios] = useState([]);
     const [plataformas, setPlataformas] = useState([]);
     const [tipos, setTipos] = useState([]);
-    const [areas, setAreas] = useState([]);
 
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(false);
@@ -46,16 +45,14 @@ const ModalCrearCurso = ({ open, onClose, onSuccess }) => {
     const fetchData = async () => {
         setLoadingData(true);
         try {
-            const [mediosData, plataformasData, tiposData, areasData] = await Promise.all([
+            const [mediosData, plataformasData, tiposData] = await Promise.all([
                 getMediosInscripcion(),
                 getPlataformasDictado(),
-                getTiposCapacitacion(),
-                getAreas()
+                getTiposCapacitacion()
             ]);
             setMedios(mediosData);
             setPlataformas(plataformasData);
             setTipos(tiposData);
-            setAreas(areasData);
         } catch (err) {
             console.error(err);
         } finally {

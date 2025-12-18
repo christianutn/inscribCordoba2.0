@@ -94,6 +94,10 @@ const Curso = sequelize.define("cursos", {
     url_curso: {
         type: DataTypes.STRING(500),
         allowNull: true
+    },
+    esta_autorizado: {
+        type: DataTypes.TINYINT(0),
+        allowNull: true
     }
 }, {
     timestamps: false,

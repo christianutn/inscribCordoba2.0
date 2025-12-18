@@ -11,8 +11,7 @@ export const getAutorizadores = async (busqueda = "") => {
         });
         const data = await response.json();
         if (response.status !== 200) {
-            const error = await response.json();
-            throw new Error(error.message || "Error al obtener las areas temáticas");
+            throw new Error(data.message || "Error al obtener las areas temáticas");
         }
         return data
     } catch (error) {
@@ -23,18 +22,21 @@ export const getAutorizadores = async (busqueda = "") => {
 
 export const postAutorizador = async (autorizador) => {
     try {
+        console.log(autorizador)
         const response = await fetch(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
             },
-            body: JSON.stringify(autorizador)
+            body: JSON.stringify({
+                ...autorizador
+            })
         });
+
         const data = await response.json();
         if (response.status !== 201) {
-            const error = await response.json();
-            throw new Error(error.message || "Error al crear el autorizador");
+            throw new Error(data.message || "Error al crear el autorizador");
         }
         return data
     } catch (error) {
