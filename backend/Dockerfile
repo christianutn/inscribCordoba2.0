@@ -25,8 +25,5 @@ RUN mkdir -p /app/uploads/notas_de_autorizacion && \
 # Exponer el puerto en el que corre la app
 EXPOSE 4000
 
-# Variable de entorno opcional para diferenciar entornos
-ENV NODE_ENV=production
-
 # Comando por defecto para ejecutar el servidor
 CMD ["npm", "start"]
