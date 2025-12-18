@@ -18,6 +18,8 @@ import DetalleFechasPorDia from "./DetalleFechas.jsx";
 
 import DetalleMes from "./DetalleMes.jsx";
 import ModalInhabilitarFechas from "./ModalInhabilitarFechas.jsx";
+import ModalHabilitarFechas from "./ModalHabilitarFechas.jsx";
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 
 const RestriccionesFechasInicioCursada = () => {
     const navigate = useNavigate();
@@ -32,6 +34,7 @@ const RestriccionesFechasInicioCursada = () => {
     const [maximoCursosDiario, setMaximoCursosDiario] = useState("");
     const [maximoAcumulado, setMaximoAcumulado] = useState("");
     const [openModalInhabilitar, setOpenModalInhabilitar] = useState(false);
+    const [openModalHabilitar, setOpenModalHabilitar] = useState(false);
     const listaMeses = ["Sin Bloqueo", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
     useEffect(() => {
@@ -210,6 +213,11 @@ const RestriccionesFechasInicioCursada = () => {
                                 <EventBusyIcon />
                             </IconButton>
                         </Tooltip>
+                        <Tooltip title="Habilitar Fechas">
+                            <IconButton onClick={() => setOpenModalHabilitar(true)} disabled={cargando} color="success" size="small">
+                                <EventAvailableIcon />
+                            </IconButton>
+                        </Tooltip>
                     </Grid>
 
                     <Grid item xs={12}>
@@ -246,6 +254,10 @@ const RestriccionesFechasInicioCursada = () => {
             <ModalInhabilitarFechas
                 open={openModalInhabilitar}
                 onClose={() => setOpenModalInhabilitar(false)}
+            />
+            <ModalHabilitarFechas
+                open={openModalHabilitar}
+                onClose={() => setOpenModalHabilitar(false)}
             />
         </>
     );

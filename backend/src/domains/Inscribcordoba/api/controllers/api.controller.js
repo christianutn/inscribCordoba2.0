@@ -1,27 +1,39 @@
-export const getFeriados =  async (req, res) => {
-    try {
-      const { year } = req.query;
-      const targetYear = year || new Date().getFullYear();
-      const url = `https://api.argentinadatos.com/v1/feriados/${targetYear}`;
+export const getFeriados = async (req, res) => {
+  try {
+    const currentYear = new Date().getFullYear();
+    const nextYear = currentYear + 1;
 
-      const response = await fetch(url, {
+    const urls = [
+      `https://api.argentinadatos.com/v1/feriados/${currentYear}`,
+      `https://api.argentinadatos.com/v1/feriados/${nextYear}`
+    ];
+
+    // Ejecutamos ambas peticiones en paralelo
+    const responses = await Promise.all(
+      urls.map(url => fetch(url, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+        headers: { "Content-Type": "application/json" },
+      }))
+    );
 
+    // Verificamos si alguna petición falló
+    for (const response of responses) {
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error HTTP: ${response.status}`);
+        throw new Error(`Error en la API de feriados: ${response.status}`);
       }
-
-      const data = await response.json();
-      
-
-      res.status(200).json(data);
-    } catch (error) {
-      console.error("Error al obtener feriados:", error.message);
-      res.status(500).json({ message: error.message || "Error interno del servidor" });
     }
+
+    // Convertimos ambas respuestas a JSON
+    const [dataCurrent, dataNext] = await Promise.all(
+      responses.map(res => res.json())
+    );
+
+    // Combinamos ambos arrays en uno solo
+    const allFeriados = [...dataCurrent, ...dataNext];
+
+    res.status(200).json(allFeriados);
+  } catch (error) {
+    console.error("Error al obtener feriados:", error.message);
+    res.status(500).json({ message: error.message || "Error interno del servidor" });
   }
+};

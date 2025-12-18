@@ -8,7 +8,7 @@ const fechas_inhabilitadas = sequelize.define('fechas_inhabilitadas', {
         autoIncrement: true
     },
     fecha: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: false
     },
     motivo: {

@@ -40,3 +40,24 @@ export const postFechasInhabilitadas = async (fechas) => {
         throw error
     }
 }
+
+export const deleteFechasInhabilitadas = async (fechas) => {
+    try {
+        const response = await fetch(URL, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify(fechas)
+        });
+        const data = await response.json();
+        if (response.status !== 200) {
+            throw new Error("No se encontraron las fechas inhabilitadas");
+        }
+
+        return data
+    } catch (error) {
+        throw error
+    }
+}

@@ -90,10 +90,20 @@ const Cronograma = () => {
     return COLUMNAS_VISIBLES.map(headerKey => {
       let flex = 1;
       let minWidth = 130;
+      let valueFormatter = undefined;
+
       if (headerKey === "Nombre del curso") { flex = 2.5; minWidth = 250; }
       if (headerKey === "Ministerio" || headerKey === "Area") { flex = 1.5; minWidth = 150; }
-      if (headerKey.toLowerCase().includes("fecha")) { flex = 1.2; minWidth = 140; }
-      return { field: headerKey, headerName: headerKey, flex, minWidth };
+      if (headerKey.toLowerCase().includes("fecha")) {
+        flex = 1.2;
+        minWidth = 140;
+        valueFormatter = (value) => {
+          if (!value) return '';
+          const d = dayjs(value);
+          return d.isValid() ? d.format('DD/MM/YYYY') : value;
+        };
+      }
+      return { field: headerKey, headerName: headerKey, flex, minWidth, valueFormatter };
     });
   }, [COLUMNAS_VISIBLES]);
 

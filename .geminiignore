@@ -1,0 +1,41 @@
+# Archivos que el agente debe ignorar para optimizar el contexto
+# Dependencias y lockfiles (consumen muchos tokens y raramente se necesitan leer completos)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# Directorios de construcción y salida
+dist/
+build/
+out/
+.next/
+
+# Cobertura de tests
+coverage/
+
+# Archivos binarios o de medios que no suelen editarse mediante código
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.pdf
+*.zip
+*.tar
+*.gz
+
+# Archivos de configuración de IDEs (ya suelen estar en gitignore, pero por si acaso)
+.vscode/
+.idea/
+
+
+# Variables de entorno (Por seguridad y porque no aportan lógica)
+.env
+.env.local
+.env.*.local
+
+# Dependencias (Lo más pesado, ¡IGNORAR SIEMPRE!)
+node_modules/
+backend/node_modules/
+frontend/node_modules/

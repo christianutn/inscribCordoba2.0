@@ -70,13 +70,23 @@ const CronogramaGAReducido = () => {
     const columnsForGrid = useMemo(() => {
         return COLUMNAS_VISIBLES.map(headerKey => {
             let flex = 1; let minWidth = 130;
+            let valueFormatter = undefined;
+
             if (headerKey === "Nombre del curso") { flex = 2.0; minWidth = 220; }
             if (headerKey === "Asignado") { flex = 1.8; minWidth = 200; }
-            if (headerKey.toLowerCase().includes("fecha")) { flex = 1.0; minWidth = 140; }
+            if (headerKey.toLowerCase().includes("fecha")) {
+                flex = 1.0;
+                minWidth = 140;
+                valueFormatter = (value) => {
+                    if (!value) return '';
+                    const d = dayjs(value);
+                    return d.isValid() ? d.format('DD/MM/YYYY') : value;
+                };
+            }
             if (headerKey === "Código del curso") { flex = 0.7; minWidth = 100; }
             if (headerKey === "Es Autogestionado") { flex = 0.7; minWidth = 110; }
             if (headerKey === "Estado") { flex = 0.7; minWidth = 110; }
-            return { field: headerKey, headerName: headerKey, flex, minWidth };
+            return { field: headerKey, headerName: headerKey, flex, minWidth, valueFormatter };
         }).filter(Boolean);
     }, [COLUMNAS_VISIBLES]);
 
@@ -314,7 +324,7 @@ const CronogramaGAReducido = () => {
                     loading={loadingAction}
                     selectedRowData={selectedRowData}
                 />
-                
+
                 <ConfirmacionDialog
                     open={publicadaModalOpen}
                     onClose={handleCloseAllModals}

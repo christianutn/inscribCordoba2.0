@@ -88,6 +88,11 @@ const theme = createTheme({
         },
       },
     },
+    MuiDatePicker: {
+      defaultProps: {
+        format: 'DD/MM/YYYY',
+      },
+    },
   },
 }, esES); // Pasamos esES también para los componentes core de MUI (ej. DatePicker)
 
