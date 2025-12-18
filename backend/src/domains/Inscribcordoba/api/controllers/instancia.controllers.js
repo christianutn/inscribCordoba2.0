@@ -225,6 +225,10 @@ export const postInstancia = async (req, res, next) => {
                 throw new AppError(`Ya existe una instancia con el mismo curso y fecha de cursada.`, 400);
             }
 
+            if (esta_autorizado === 0) {
+                throw new AppError(`El curso no esta autorizado.`, 400);
+            }
+
             await instanciaModel.create({
                 curso: curso,
                 fecha_inicio_inscripcion: fechaInscripcionDesde,
@@ -244,7 +248,8 @@ export const postInstancia = async (req, res, next) => {
                 plataforma_dictado: plataforma_dictado,
                 tipo_capacitacion: tipo_capacitacion,
                 restriccion_edad_desde: restriccion_edad_desde,
-                restriccion_edad_hasta: restriccion_edad_hasta || null,
+                restriccion_edad_hasta: restriccion_edad_hasta || null
+
             }, { transaction: t });
 
             if (cursos_correlativos && cursos_correlativos.length > 0) {

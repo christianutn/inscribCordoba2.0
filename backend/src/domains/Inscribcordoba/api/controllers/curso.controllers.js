@@ -172,7 +172,8 @@ export const updateCurso = async (req, res, next) => {
             esta_maquetado,
             esta_configurado,
             aplica_sincronizacion_certificados,
-            url_curso
+            url_curso,
+            esta_autorizado
         } = req.body;
 
         const cursoData = {
@@ -183,16 +184,19 @@ export const updateCurso = async (req, res, next) => {
             medio_inscripcion,
             plataforma_dictado,
             tipo_capacitacion,
-            area
+            area,
+            esta_autorizado,
+            esVigente,
+            tiene_evento_creado,
+            numero_evento,
+            esta_maquetado,
+            esta_configurado,
+            aplica_sincronizacion_certificados,
+            url_curso: url_curso || null,
+            esta_autorizado: esta_autorizado
         }
 
-        if (esVigente) cursoData.esVigente = esVigente;
-        if (tiene_evento_creado) cursoData.tiene_evento_creado = tiene_evento_creado;
-        if (numero_evento) cursoData.numero_evento = numero_evento;
-        if (esta_maquetado) cursoData.esta_maquetado = esta_maquetado;
-        if (esta_configurado) cursoData.esta_configurado = esta_configurado;
-        if (aplica_sincronizacion_certificados) cursoData.aplica_sincronizacion_certificados = aplica_sincronizacion_certificados;
-        if (url_curso) cursoData.url_curso = url_curso;
+
 
 
 

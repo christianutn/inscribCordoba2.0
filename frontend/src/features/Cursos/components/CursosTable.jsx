@@ -52,6 +52,12 @@ const CursosTable = ({ data, onEdit }) => {
             valueGetter: (value, row) => row.tiene_evento_creado ? 'Sí' : 'No'
         },
         {
+            field: 'esta_autorizado',
+            headerName: 'Autorizado',
+            width: 100,
+            valueGetter: (value, row) => row.esta_autorizado ? 'Sí' : 'No'
+        },
+        {
             field: 'actions',
             headerName: 'Acciones',
             width: 120,

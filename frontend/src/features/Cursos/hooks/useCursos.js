@@ -105,9 +105,9 @@ const useCursos = () => {
                 esta_maquetado: item.esta_maquetado,
                 esta_configurado: item.esta_configurado,
                 aplica_sincronizacion_certificados: item.aplica_sincronizacion_certificados,
-                url_curso: item.url_curso
+                url_curso: item.url_curso,
+                esta_autorizado: item.esta_autorizado
             };
-            console.log("Payload to putCurso:", payload);
             await putCurso(payload);
             await fetchData();
             return { success: true };

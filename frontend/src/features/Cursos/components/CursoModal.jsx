@@ -24,6 +24,7 @@ const CursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
         esta_configurado: 0,
         aplica_sincronizacion_certificados: 0,
         url_curso: '',
+        esta_autorizado: 0,
     });
 
     const [errors, setErrors] = useState({});
@@ -46,6 +47,7 @@ const CursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
                 esta_configurado: (!!record.esta_configurado) ? 1 : 0,
                 aplica_sincronizacion_certificados: (!!record.aplica_sincronizacion_certificados) ? 1 : 0,
                 url_curso: record.url_curso || '',
+                esta_autorizado: (!!record.esta_autorizado) ? 1 : 0,
             });
         } else {
             setFormData({
@@ -64,6 +66,7 @@ const CursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
                 esta_configurado: 0,
                 aplica_sincronizacion_certificados: 0,
                 url_curso: '',
+                esta_autorizado: 0,
             });
         }
         setErrors({});
@@ -331,6 +334,20 @@ const CursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
                             </Select>
                         </FormControl>
                     </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                            <InputLabel>¿Está autorizado?</InputLabel>
+                            <Select
+                                name="esta_autorizado"
+                                value={formData.esta_autorizado}
+                                label="¿Está autorizado?"
+                                onChange={handleChange}
+                            >
+                                <MenuItem value={1}>Si</MenuItem>
+                                <MenuItem value={0}>No</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>
                     <Grid item xs={12}>
                         <TextField
                             name="url_curso"
@@ -352,7 +369,7 @@ const CursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
                     Guardar
                 </Button>
             </DialogActions>
-        </Dialog>
+        </Dialog >
     );
 };
 

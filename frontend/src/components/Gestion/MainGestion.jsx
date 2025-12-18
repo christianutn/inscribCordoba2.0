@@ -20,8 +20,8 @@ const MainGestion = () => {
     const options = [
         "Cursos",
         "Usuarios",
-        "Areas",
-        "Asignaciones Areas",
+        "Áreas",
+        "Asignaciones Áreas",
         "Ministerios",
         "Medios de Inscripción",
         "Plataformas de Dictado",
