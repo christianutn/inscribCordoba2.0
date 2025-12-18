@@ -8,19 +8,23 @@ let DB_PASSWORD;
 let DB_HOST;
 let DB_PORT;
 
+console.log("NODE_ENV: ", process.env.NODE_ENV);
+
 if (process.env.NODE_ENV == "production") {
+  console.log("Es variable de entorno  para Production");
   DB_NAME = process.env.DB_NAME_PROD;
   DB_USER = process.env.DB_USER_PROD;
   DB_PASSWORD = process.env.DB_PASSWORD_PROD;
   DB_HOST = process.env.DB_HOST_PROD;
   DB_PORT = process.env.DB_PORT_PROD;
 } else if (process.env.NODE_ENV == "development" || process.env.NODE_ENV == "test") {
+  console.log("Es variable de entorno  para Desarrollo/Test");
   DB_NAME = process.env.DB_NAME_DESARROLLO;
   DB_USER = process.env.DB_USER_DESARROLLO;
   DB_PASSWORD = process.env.DB_PASSWORD_DESARROLLO;
   DB_HOST = process.env.DB_HOST_DESARROLLO;
   DB_PORT = process.env.DB_PORT_DESARROLLO;
- 
+
 }
 
 

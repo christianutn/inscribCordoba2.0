@@ -21,6 +21,8 @@ import associateAllModels from './models/associateAllModels.js';
 
 const app = express();
 
+console.log("Comenzando index de la aplicación")
+
 // Inicialización de Sequelize
 export const initDb = async () => {
     try {
