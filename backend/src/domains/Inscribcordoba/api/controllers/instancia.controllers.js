@@ -12,6 +12,8 @@ import logger from '../../../../utils/logger.js';
 import RestriccionesPorCorrelatividad from "../models/restricciones_por_correlatividad.models.js";
 import RestriccionesPorDepartamento from "../models/restricciones_por_departamento.models.js";
 import AreasAsignadasUsuario from "../models/areasAsignadasUsuario.models.js";
+import CursoModel from "../models/curso.models.js"
+import Curso from "../models/curso.models.js";
 
 export const getInstancias = async (req, res, next) => {
     try {
@@ -194,6 +196,15 @@ export const postInstancia = async (req, res, next) => {
             cursos_correlativos
         } = req.body;
 
+
+        // Corroboramos que el curso este autorizado
+
+        const cursoEncontrado = await Curso.findByPk(curso)
+
+        if(!cursoEncontrado) throw AppError(`El cursos con cod: ${curso}`, 400)
+
+        if(!cursoEncontrado.esta_autorizado) throw AppError(`El curso con cod: ${curso} no está autorizado`)
+
         const fechaActual = DateTime.now().setZone('America/Argentina/Buenos_Aires');
         const fechaFormateada = fechaActual.toFormat('dd/MM/yyyy HH:mm');
 
@@ -225,9 +236,6 @@ export const postInstancia = async (req, res, next) => {
                 throw new AppError(`Ya existe una instancia con el mismo curso y fecha de cursada.`, 400);
             }
 
-            if (esta_autorizado === 0) {
-                throw new AppError(`El curso no esta autorizado.`, 400);
-            }
 
             await instanciaModel.create({
                 curso: curso,
