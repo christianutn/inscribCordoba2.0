@@ -69,6 +69,7 @@ export default class CambiosEstadoNotaDeAutorizacionRepository {
                         {
                             model: Usuario,
                             as: 'detalle_usuario',
+                            attributes: { exclude: ['contrasenia'] },
                             include: [
                                 { model: Persona, as: 'detalle_persona' },
                                 { model: Area, as: 'detalle_area', include: [{ model: Ministerio, as: 'detalle_ministerio' }] }

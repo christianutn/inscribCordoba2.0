@@ -21,6 +21,7 @@ export default class NotaDeAutorizacionRepository {
         {
           model: Usuario,
           as: 'detalle_usuario',
+          attributes: { exclude: ['contrasenia'] },
           include: [
             {
               model: Persona,
@@ -62,6 +63,7 @@ export default class NotaDeAutorizacionRepository {
         {
           model: Usuario,
           as: 'detalle_usuario',
+          attributes: { exclude: ['contrasenia'] },
           include: [
             {
               model: Persona,

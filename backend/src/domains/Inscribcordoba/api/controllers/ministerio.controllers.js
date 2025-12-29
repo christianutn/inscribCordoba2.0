@@ -25,9 +25,12 @@ export const getMinisterios = async (req, res, next) => {
         const areasAsignadas = await AreasAsignadasUsuario.findAll({
             where: { usuario: cuil },
             include: [
+
                 {
                     model: Usuario,
-                    as: 'detalle_usuario'
+                    as: 'detalle_usuario',
+                    attributes: { exclude: ['contrasenia'] },
+
                 },
                 {
                     model: Area,

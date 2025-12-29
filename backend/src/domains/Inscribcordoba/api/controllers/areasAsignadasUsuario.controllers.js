@@ -13,6 +13,7 @@ export const getAreasAsignadas = async (req, res, next) => {
                 {
                     model: Usuario,
                     as: 'detalle_usuario',
+                    attributes: { exclude: ['contrasenia'] },
                     include: [
                         {
                             model: Persona,
@@ -142,7 +143,9 @@ export const getAreasAsignadasPorUsuario = async (req, res, next) => {
                 },
                 {
                     model: Usuario,
-                    as: 'detalle_usuario'
+                    as: 'detalle_usuario',
+                    attributes: { exclude: ['contrasenia'] },
+                  
                 }
             ]
         });
