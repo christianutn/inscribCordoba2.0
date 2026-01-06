@@ -1,9 +1,10 @@
 import xlsx from 'xlsx';
 
 class ExcelParserService {
-  constructor() {}
+  constructor() { }
 
   parse(buffer) {
+
     const workbook = xlsx.read(buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
@@ -11,8 +12,8 @@ class ExcelParserService {
     const nroEvento = worksheet['C4'] ? worksheet['C4'].v : null;
     const nombreCurso = worksheet['C5'] ? worksheet['C5'].v : null;
     const nombreDocente = worksheet['C6'] ? worksheet['C6'].v : null;
-    const fechaDesde = worksheet['C7'] ? worksheet['C7'].v : null;
-    const fechaHasta = worksheet['C8'] ? worksheet['C8'].v : null;
+    const fechaDesde = `${xlsx.SSF.parse_date_code(worksheet['C7'].v).y}-${String(xlsx.SSF.parse_date_code(worksheet['C7'].v).m).padStart(2, '0')}-${String(xlsx.SSF.parse_date_code(worksheet['C7'].v).d).padStart(2, '0')}`;
+    const fechaHasta = `${xlsx.SSF.parse_date_code(worksheet['C8'].v).y}-${String(xlsx.SSF.parse_date_code(worksheet['C8'].v).m).padStart(2, '0')}-${String(xlsx.SSF.parse_date_code(worksheet['C8'].v).d).padStart(2, '0')}`;
     const horario = worksheet['F6'] ? worksheet['F6'].v : null;
 
     const participantes = this.extractParticipantes(worksheet);
@@ -67,7 +68,7 @@ class ExcelParserService {
       if (!cell || typeof cell.v !== 'number') { // Dates in xlsx are numbers, stop if not a number
         break;
       }
-      
+
       const date = xlsx.SSF.parse_date_code(cell.v);
       const formattedDate = `${date.y}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`;
       dias.push(formattedDate);
@@ -76,13 +77,13 @@ class ExcelParserService {
     return dias;
   }
 
-    tratarNombre(nombre) {
-        if (!nombre) return '';
-        return nombre
-            .trim()
-            .toLowerCase()
-            .replace(/\b\w/g, (c) => c.toUpperCase());
-    }
+  tratarNombre(nombre) {
+    if (!nombre) return '';
+    return nombre
+      .trim()
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
 }
 
 export default ExcelParserService;

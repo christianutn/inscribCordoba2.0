@@ -39,6 +39,9 @@ import AsistenciasCursosRouter from "../domains/Asistencia/api/routes/cursos.rou
 import EventosRouter from "../domains/Asistencia/api/routes/eventos.routes.js";
 import FechasInhabilitadasRouter from "./fechas_inhabilitadas.routes.js";
 
+import AsistenciaQrRouter from "../domains/Asistencia/api/routes/asistencia.routes.js";
+
+
 const router = Router();
 
 router.use("/areas", areaRouter);
@@ -76,5 +79,7 @@ router.use("/historico-tutores-en-cursos", HistoricoTutoresEnCursoRouter)
 router.use("/asistencias/cursos", AsistenciasCursosRouter)
 router.use("/asistencias/eventos", EventosRouter)
 router.use("/fechas-inhabilitadas", FechasInhabilitadasRouter)
+router.use("/asistencias/consultar", AsistenciaQrRouter)
+router.use("/asistencias/confirmar", AsistenciaQrRouter)
 
 export default router

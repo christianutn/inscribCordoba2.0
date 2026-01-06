@@ -31,7 +31,8 @@ import {
   School as SchoolIcon
 } from '@mui/icons-material';
 import QRCode from 'qrcode';
-import { postSubaMasiva, getlistadoEventos } from '../services/asistencias.service.js'
+import { postSubaMasiva, getlistadoEventos, getConsultarAsistencia, postConfirmarAsistencia } from '../services/asistencias.service.js'
+import ModalDatosParticipante from './ModalDatosParticipante.jsx';
 
 export default function AsistenciasMain() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -44,6 +45,10 @@ export default function AsistenciasMain() {
   const [cuilAsistente, setCuilAsistente] = useState('');
   const [isMarkingAttendance, setIsMarkingAttendance] = useState(false);
   const [attendanceMessage, setAttendanceMessage] = useState('');
+
+  // Estado para modal de confirmación de asistencia
+  const [participanteData, setParticipanteData] = useState(null);
+  const [showModalDatos, setShowModalDatos] = useState(false);
 
   // Estados para importar planilla
   const [showImportModal, setShowImportModal] = useState(false);
@@ -80,7 +85,10 @@ export default function AsistenciasMain() {
   ];
 
   const generateQR = async () => {
-    if (!selectedCourse) {
+    // Usamos el curso del detalle si está abierto, o el seleccionado en el dropdown
+    const course = selectedCourseDetail || eventos.find(c => c.id === parseInt(selectedCourse));
+
+    if (!course) {
       setStatusMessage('Por favor, selecciona un curso para generar el QR');
       return;
     }
@@ -89,16 +97,10 @@ export default function AsistenciasMain() {
     setStatusMessage('Generando código QR...');
 
     try {
-      const course = eventos.find(c => c.id === parseInt(selectedCourse));
-      const qrData = {
-        courseId: course.id,
-        courseName: course.curso.nombre,
-        date: course.fecha_desde,
-        timestamp: new Date().toISOString(),
-        action: 'mark_attendance'
-      };
-
-      const qrString = JSON.stringify(qrData);
+      // Generamos una URL directa al sistema de registro
+      const origin = window.location.origin;
+      const qrString = `${origin}/asistencia/registrar/${course.id}`;
+      // const qrString = JSON.stringify(qrData); // Anterior implementation
 
       const qrDataURL = await QRCode.toDataURL(qrString, {
         width: 300,
@@ -110,7 +112,7 @@ export default function AsistenciasMain() {
       });
 
       setQrCode(qrDataURL);
-      setStatusMessage(`QR generado para: ${course.name}`);
+      setStatusMessage(`QR generado para: ${course.curso?.nombre}`);
     } catch (error) {
       console.error('Error generando QR:', error);
       setStatusMessage('Error al generar el código QR');
@@ -131,25 +133,53 @@ export default function AsistenciasMain() {
     }
 
     setIsMarkingAttendance(true);
-    setAttendanceMessage('Verificando asistente...');
+    setAttendanceMessage('Consultando datos del asistente...'); // Feedback inicial
 
     try {
-      // Aquí iría la llamada al backend para marcar la asistencia
-      const course = eventos.find(c => c.id === parseInt(selectedCourse));
+      // 1. Consultar datos del participante
+      const data = await getConsultarAsistencia(cuilAsistente, selectedCourse);
 
-      // Simulación de llamada API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Simulación de respuesta exitosa
-      setAttendanceMessage(`✅ Asistencia registrada exitosamente para CUIL ${cuilAsistente} en el curso "${course.name}"`);
-      setCuilAsistente(''); // Limpiar el campo después del registro exitoso
+      // 2. Si tiene éxito, guardar datos y abrir modal
+      setParticipanteData(data);
+      setShowModalDatos(true);
+      setAttendanceMessage(''); // Limpiar mensaje si fue exitoso el fetch inicial
 
     } catch (error) {
-      console.error('Error marcando asistencia:', error);
-      setAttendanceMessage('❌ Error al registrar la asistencia. Verifica el CUIL e intenta nuevamente.');
+      console.error('Error consultando asistente:', error);
+      setAttendanceMessage(`❌ Error: ${error.message || 'No se pudo consultar el asistente.'}`);
     } finally {
       setIsMarkingAttendance(false);
     }
+  };
+
+  const handleConfirmAttendance = async (userData) => {
+    setIsMarkingAttendance(true);
+    setAttendanceMessage('Registrando asistencia...');
+    setShowModalDatos(false); // Cerrar modal mientras se procesa la confirmación
+
+    try {
+      const response = await postConfirmarAsistencia(userData.cuil, selectedCourse);
+
+      // Buscar el nombre del curso para el mensaje
+      const course = eventos.find(c => c.id === parseInt(selectedCourse));
+      const nombreCurso = course?.curso?.nombre || 'el curso';
+
+      setAttendanceMessage(`✅ Asistencia registrada exitosamente para ${userData.nombre} ${userData.apellido} en ${nombreCurso}`);
+      setCuilAsistente(''); // Limpiar campo
+      setParticipanteData(null);
+
+    } catch (error) {
+      console.error('Error confirmando asistencia:', error);
+      setAttendanceMessage(`❌ Error al registrar asistencia: ${error.message}`);
+      // Opcional: Reabrir modal si falla? Por ahora dejamos el mensaje de error.
+    } finally {
+      setIsMarkingAttendance(false);
+    }
+  };
+
+  const handleCloseModalDatos = () => {
+    setShowModalDatos(false);
+    setParticipanteData(null);
   };
 
   // Funciones para importar planilla
@@ -258,21 +288,25 @@ export default function AsistenciasMain() {
 
     const link = document.createElement('a');
     link.href = qrCode;
-    const course = eventos.find(c => c.id === parseInt(selectedCourse));
-    link.download = `QR_${course.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.png`;
-    link.click();
+    const course = selectedCourseDetail || eventos.find(c => c.id === parseInt(selectedCourse));
+    if (course) {
+      link.download = `QR_${(course.curso?.nombre || 'curso').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.png`;
+      link.click();
+    }
   };
 
   const printQR = () => {
     if (!qrCode) return;
 
     const printWindow = window.open('', '_blank');
-    const course = eventos.find(c => c.id === parseInt(selectedCourse));
+    const course = selectedCourseDetail || eventos.find(c => c.id === parseInt(selectedCourse));
+
+    if (!course) return;
 
     printWindow.document.write(`
       <html>
         <head>
-          <title>QR - ${course.name}</title>
+          <title>QR - ${course.curso?.nombre}</title>
           <style>
             body { 
               font-family: Arial, sans-serif; 
@@ -296,8 +330,8 @@ export default function AsistenciasMain() {
         <body>
           <h1>Código QR de Asistencia</h1>
           <div class="course-info">
-            <strong>${course.name}</strong><br>
-            Fecha: ${course.date}
+            <strong>${course.curso?.nombre}</strong><br>
+            Fecha: ${course.fecha_desde}
           </div>
           <div class="qr-container">
             <img src="${qrCode}" alt="Código QR" />
@@ -382,7 +416,6 @@ export default function AsistenciasMain() {
           </Button>
           <Button
             variant="contained"
-            startIcon={<QrCodeIcon />}
             sx={{
               backgroundColor: '#007bff',
               '&:hover': {
@@ -583,7 +616,7 @@ export default function AsistenciasMain() {
                 </MenuItem>
                 {eventos.map((course) => (
                   <MenuItem key={course.id} value={course.id}>
-                    {course.name} - {course.date}
+                    {course.curso?.nombre} - {course.fecha_desde}
                   </MenuItem>
                 ))}
               </Select>
@@ -633,28 +666,10 @@ export default function AsistenciasMain() {
                 backgroundColor: '#007bff',
                 '&:hover': { backgroundColor: '#0056b3' },
                 fontSize: '1rem',
-                fontWeight: 600
+                fontWeight: 1200
               }}
             >
               {isMarkingAttendance ? 'Buscando Asistente...' : '🔍 Buscar Asistente'}
-            </Button>
-
-            <Button
-              variant="outlined"
-              fullWidth
-              sx={{
-                py: 1.5,
-                color: '#6c757d',
-                borderColor: '#6c757d',
-                fontSize: '1rem',
-                fontWeight: 600,
-                '&:hover': {
-                  borderColor: '#495057',
-                  backgroundColor: 'rgba(108, 117, 125, 0.04)'
-                }
-              }}
-            >
-              ← Volver al Panel Principal
             </Button>
           </Stack>
         </CardContent>
@@ -694,6 +709,17 @@ export default function AsistenciasMain() {
       {activeTab === 'attendance' && renderAttendance()}
 
       {/* Modal de Importar Planilla */}
+      {showModalDatos && (
+        <ModalDatosParticipante
+          open={showModalDatos}
+          onClose={handleCloseModalDatos}
+          onConfirm={handleConfirmAttendance}
+          userData={participanteData}
+          idEvento={selectedCourse}
+          nombreCurso={eventos.find(c => c.id === parseInt(selectedCourse))?.curso?.nombre}
+        />
+      )}
+
       <Dialog
         open={showImportModal}
         onClose={handleCloseModal}
@@ -890,34 +916,28 @@ export default function AsistenciasMain() {
 
               {/* Información del curso */}
               <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-                {selectedCourseDetail.name}
+                {selectedCourseDetail.curso?.nombre}
               </Typography>
 
               <Grid container spacing={3} sx={{ mb: 4 }}>
                 <Grid item xs={12} md={6}>
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>N° de Evento:</Typography>
-                    <Typography variant="body1">85110</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'black' }}>N° de Evento:</Typography>
+                    <Typography variant="body1">{selectedCourseDetail?.id || "Error sin Id"}</Typography>
                   </Box>
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Docente/s:</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'black' }}>Docente/s:</Typography>
                     <Typography variant="body1">DRAGOTTO, JUAN MANUEL</Typography>
-                  </Box>
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Fechas:</Typography>
-                    <Typography variant="body1">
-                      {selectedCourseDetail.date} | 10/17/2025 | 10/18/2025 | 10/19/2025
-                    </Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Sala:</Typography>
-                    <Typography variant="body1">Sala de gestión</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'black' }}>Sala:</Typography>
+                    <Typography variant="body1">Falta implementar</Typography>
                   </Box>
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Capacidad:</Typography>
-                    <Typography variant="body1">{selectedCourseDetail.inscriptos} / 60</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'black' }}>Cantidad de inscriptos:</Typography>
+                    <Typography variant="body1">{selectedCourseDetail.cantidad_inscriptos}</Typography>
                   </Box>
                 </Grid>
               </Grid>

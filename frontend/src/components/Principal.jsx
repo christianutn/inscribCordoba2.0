@@ -49,7 +49,6 @@ import AsistenciasMain from './AsistenciasMain.jsx';
 import SubaNotaDeAutorizacion from './NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx';
 import Autorizaciones from './NotaDeAutorizacion/Autorizaciones.jsx';
 import MainGestion from './Gestion/MainGestion.jsx';
-
 import { getMyUser } from "../services/usuarios.service.js";
 
 const drawerWidth = 260;
@@ -68,6 +67,7 @@ const menuItemsConfig = [
   { label: "Versión reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
   { label: "Suba Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
   { label: "Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon />, roles: ['ADM', 'GA', 'REF'] },
+
 ];
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(

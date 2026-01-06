@@ -56,3 +56,50 @@ export const getlistadoEventos = async () => {
     }
 }
 
+
+export const getConsultarAsistencia = async (cuil, id_evento) => {
+    try {
+        const response = await fetch(`${URL}/consultar/${cuil}/${id_evento}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al consultar asistencia');
+        }
+
+        const data = await response.json();
+        return data; // { nombre, apellido, cuil, existe }
+    } catch (error) {
+        console.error("Error al consultar asistencia:", error);
+        throw error;
+    }
+}
+
+export const postConfirmarAsistencia = async (cuil, id_evento) => {
+    try {
+        const response = await fetch(`${URL}/confirmar`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({ cuil, id_evento })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al confirmar asistencia');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error al confirmar asistencia:", error);
+        throw error;
+    }
+}
