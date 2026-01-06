@@ -12,10 +12,10 @@ import CrearAviso from './components/CrearAviso';
 import MostrarAvisos from "./components/MostrarAvisos"
 import CardAvisos from "./components/Avisos";
 import VersionReducidaGA from './components/VersionReducidaGA';
-import AsistenciasMain from './components/AsistenciasMain';
+import AsistenciasMain from './components/AsistenciaQR/AsistenciasMain';
 import Layout from './components/layout/Layout';
 import Confirmaciones from './components/NotaDeAutorizacion/Confirmacion';
-import RegistroAsistencia from './components/RegistroAsistencia';
+import RegistroAsistencia from './components/AsistenciaQR/RegistroAsistencia';
 function App() {
 
   return (

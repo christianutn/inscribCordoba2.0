@@ -16,7 +16,7 @@ import {
     PersonSearch as PersonSearchIcon,
     Search as SearchIcon
 } from '@mui/icons-material';
-import { getConsultarAsistencia } from '../services/asistencias.service';
+import { getConsultarAsistencia } from '../../services/asistencias.service.js';
 import ModalDatosParticipante from './ModalDatosParticipante';
 
 const ModalConsultarCuil = ({ open, onClose, idEvento, nombreCurso, onConfirmAttendance }) => {
@@ -278,25 +278,7 @@ const ModalConsultarCuil = ({ open, onClose, idEvento, nombreCurso, onConfirmAtt
                     {loading ? 'Consultando...' : 'Consultar'}
                 </Button>
 
-                <Button
-                    variant="outlined"
-                    onClick={onClose}
-                    disabled={loading}
-                    fullWidth
-                    sx={{
-                        fontWeight: 'bold',
-                        py: 1.25,
-                        borderRadius: 2,
-                        color: 'text.primary',
-                        borderColor: 'divider',
-                        '&:hover': {
-                            borderColor: 'text.secondary',
-                            bgcolor: 'action.hover'
-                        }
-                    }}
-                >
-                    Cancelar
-                </Button>
+
             </Box>
         </Dialog>
     );

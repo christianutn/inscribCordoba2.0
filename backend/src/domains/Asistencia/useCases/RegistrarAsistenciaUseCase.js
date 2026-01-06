@@ -99,7 +99,7 @@ export default class RegistrarAsistenciaUseCase {
                         apellido: apellido,
                         es_empleado: esEmpleado,
                         reparticion: reparticion,
-                        // correo_electronico: personaCidi.Email // Opcional según requerimiento, no pedido explícitamente pero útil
+                        correo_electronico: personaCidi.Email
                     },
                     transaction
                 });

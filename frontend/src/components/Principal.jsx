@@ -45,7 +45,7 @@ import ReporteCursos from "./ReporteCursosCC.jsx";
 import CrearAviso from './CrearAviso.jsx';
 import VersionReducidaGa from './VersionReducidaGA.jsx';
 import VersionReducidaAdministradores from './VersionReducidaAdministradores.jsx';
-import AsistenciasMain from './AsistenciasMain.jsx';
+import AsistenciasMain from './AsistenciaQR/AsistenciasMain.jsx';
 import SubaNotaDeAutorizacion from './NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx';
 import Autorizaciones from './NotaDeAutorizacion/Autorizaciones.jsx';
 import MainGestion from './Gestion/MainGestion.jsx';

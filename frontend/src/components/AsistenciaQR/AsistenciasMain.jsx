@@ -21,18 +21,24 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  LinearProgress
+  LinearProgress,
+  Tooltip,
 } from '@mui/material';
 import {
   QrCode as QrCodeIcon,
   Download as DownloadIcon,
   Print as PrintIcon,
   Refresh as RefreshIcon,
-  School as SchoolIcon
+  School as SchoolIcon,
+  ListAlt,
+  EventNoteIcon,
+  Add as AddIcon,
+  Search as SearchIcon,
 } from '@mui/icons-material';
 import QRCode from 'qrcode';
-import { postSubaMasiva, getlistadoEventos, getConsultarAsistencia, postConfirmarAsistencia } from '../services/asistencias.service.js'
+import { postSubaMasiva, getlistadoEventos, getConsultarAsistencia, postConfirmarAsistencia, getListadosDeParticipantes } from '../../services/asistencias.service.js'
 import ModalDatosParticipante from './ModalDatosParticipante.jsx';
+import ModalListaParticipantesPorEvento from './ModalListaParticipantesPorEvento.jsx';
 
 export default function AsistenciasMain() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -63,11 +69,16 @@ export default function AsistenciasMain() {
   const [selectedCourseDetail, setSelectedCourseDetail] = useState(null);
   const [eventos, setEventos] = useState([]);
 
+  // Estados para lista de participantes
+  const [showParticipantsList, setShowParticipantsList] = useState(false);
+  const [participantesList, setParticipantesList] = useState([]);
+
   useEffect(() => {
     const fetchEventos = async () => {
       try {
         const response = await getlistadoEventos();
         setEventos(response);
+        setActiveTab('eventos');
       } catch (error) {
         console.error('Error al cargar eventos:', error);
       }
@@ -164,7 +175,7 @@ export default function AsistenciasMain() {
       const course = eventos.find(c => c.id === parseInt(selectedCourse));
       const nombreCurso = course?.curso?.nombre || 'el curso';
 
-      setAttendanceMessage(`✅ Asistencia registrada exitosamente para ${userData.nombre} ${userData.apellido} en ${nombreCurso}`);
+      setAttendanceMessage(`Asistencia registrada exitosamente para ${userData.nombre} ${userData.apellido} en ${nombreCurso}`);
       setCuilAsistente(''); // Limpiar campo
       setParticipanteData(null);
 
@@ -278,8 +289,26 @@ export default function AsistenciasMain() {
     setShowCourseDetail(true);
   };
 
+  const handleViewParticipantsList = async (course) => {
+    try {
+      setSelectedCourseDetail(course);
+      const participantes = await getListadosDeParticipantes(course.id);
+      setParticipantesList(participantes);
+      setShowParticipantsList(true);
+    } catch (error) {
+      console.error('Error al obtener participantes:', error);
+      alert('Error al obtener la lista de participantes: ' + error.message);
+    }
+  };
+
   const handleCloseCourseDetail = () => {
     setShowCourseDetail(false);
+    setSelectedCourseDetail(null);
+  };
+
+  const handleCloseParticipantsList = () => {
+    setShowParticipantsList(false);
+    setParticipantesList([]);
     setSelectedCourseDetail(null);
   };
 
@@ -303,7 +332,7 @@ export default function AsistenciasMain() {
 
     if (!course) return;
 
-    printWindow.document.write(`
+    const htmlContent = `
       <html>
         <head>
           <title>QR - ${course.curso?.nombre}</title>
@@ -311,19 +340,37 @@ export default function AsistenciasMain() {
             body { 
               font-family: Arial, sans-serif; 
               text-align: center; 
-              padding: 20px; 
+              padding: 0;
+              margin: 0;
+              height: 100vh;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
             }
             .qr-container { 
               margin: 20px 0; 
+              display: flex;
+              justify-content: center;
             }
             .course-info { 
               margin: 20px 0; 
-              font-size: 18px; 
+              font-size: 24px; 
             }
             .instructions { 
               margin-top: 30px; 
-              font-size: 14px; 
+              font-size: 16px; 
               color: #666; 
+            }
+            h1 {
+              font-size: 32px;
+              margin-bottom: 20px;
+            }
+            @media print {
+              body {
+                height: 100%;
+                justify-content: center;
+              }
             }
           </style>
         </head>
@@ -334,54 +381,28 @@ export default function AsistenciasMain() {
             Fecha: ${course.fecha_desde}
           </div>
           <div class="qr-container">
-            <img src="${qrCode}" alt="Código QR" />
+            <img src="${qrCode}" alt="Código QR" style="max-width: 300px;" />
           </div>
           <div class="instructions">
             <p>Escaneá este código QR para registrar tu asistencia</p>
             <p>Generado el: ${new Date().toLocaleString()}</p>
           </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 500);
+            };
+          </script>
         </body>
       </html>
-    `);
+    `;
 
+    printWindow.document.write(htmlContent);
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
-    printWindow.close();
   };
 
-  const renderDashboard = () => (
-    <Card>
-      <CardContent>
-        <Typography variant="h4" gutterBottom color="primary">
-          ¡Bienvenido al Sistema de Asistencias!
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Usa las pestañas para navegar entre las diferentes funciones:
-        </Typography>
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 2, textAlign: 'center' }}>
-              <SchoolIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-              <Typography variant="h6">Gestión de Cursos</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Visualiza y administra todos los cursos disponibles
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 2, textAlign: 'center' }}>
-              <QrCodeIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-              <Typography variant="h6">Registro de Asistencia</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Genera códigos QR para el registro de asistencias
-              </Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-      </CardContent>
-    </Card>
-  );
 
   const rendereventos = () => (
     <Box sx={{ width: '100%' }}>
@@ -395,35 +416,23 @@ export default function AsistenciasMain() {
         p: 2,
         borderRadius: 1
       }}>
-        <Typography variant="h4" sx={{ fontWeight: 600, color: '#1976d2' }}>
+        <Typography variant="h4" sx={{ fontWeight: 600, color: 'primary.main' }}>
           Gestión de Cursos
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<DownloadIcon />}
             onClick={handleImportClick}
-            sx={{
-              borderColor: '#6c757d',
-              color: '#6c757d',
-              '&:hover': {
-                borderColor: '#495057',
-                backgroundColor: 'rgba(108, 117, 125, 0.04)'
-              }
-            }}
+
           >
-            📊 Importar Planilla
+            Importar Planilla
           </Button>
           <Button
             variant="contained"
-            sx={{
-              backgroundColor: '#007bff',
-              '&:hover': {
-                backgroundColor: '#0056b3'
-              }
-            }}
+            startIcon={<AddIcon />}
           >
-            ➕ Crear Manualmente
+            Crear Manualmente
           </Button>
         </Box>
       </Box>
@@ -547,34 +556,48 @@ export default function AsistenciasMain() {
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleViewCourse(course)}
-                          sx={{
-                            color: '#007bff',
-                            '&:hover': { backgroundColor: 'rgba(0, 123, 255, 0.04)' }
+                        <Tooltip
+                          title="Generar Qr"
+                          arrow
+                          componentsProps={{
+                            tooltip: {
+                              sx: {
+                                fontSize: '0.9rem',
+                                padding: '8px 12px'
+                              }
+                            }
                           }}
                         >
-                          👁️
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          sx={{
-                            color: '#6c757d',
-                            '&:hover': { backgroundColor: 'rgba(108, 117, 125, 0.04)' }
-                          }}
-                        >
-                          ✏️
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          sx={{
-                            color: '#dc3545',
-                            '&:hover': { backgroundColor: 'rgba(220, 53, 69, 0.04)' }
-                          }}
-                        >
-                          🗑️
-                        </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleViewCourse(course)}
+
+                          >
+                            <QrCodeIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip
+                          title="Ver lista de inscriptos"
+                          arrow
+                          componentsProps={{
+                            tooltip: {
+                              sx: {
+                                fontSize: '0.9rem',
+                                padding: '8px 12px'
+                              }
+                            }
+                          }}>
+                          <IconButton
+                            size="small"
+                            sx={{
+
+                              '&:hover': { backgroundColor: 'rgba(0, 123, 255, 0.04)' }
+                            }}
+                            onClick={() => handleViewParticipantsList(course)}
+                          >
+                            <ListAlt />
+                          </IconButton>
+                        </Tooltip>
                       </Box>
                     </td>
                   </tr>
@@ -589,7 +612,7 @@ export default function AsistenciasMain() {
 
   const renderAttendance = () => (
     <Box sx={{ width: '100%', maxWidth: '800px', mx: 'auto', mt: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: '#1976d2', mb: 2, textAlign: 'center' }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 2, textAlign: 'center' }}>
         Registro de Asistencia
       </Typography>
       <Typography variant="body1" sx={{ mb: 4, color: '#6c757d', textAlign: 'center' }}>
@@ -604,19 +627,19 @@ export default function AsistenciasMain() {
               Selecciona el curso
             </Typography>
             <FormControl fullWidth>
-              <InputLabel>-- Por favor, elija un curso --</InputLabel>
+              <InputLabel id="curso-label">
+                Por favor, elija un curso
+              </InputLabel>
+
               <Select
+                labelId="curso-label"
                 value={selectedCourse}
+                label="Por favor, elija un curso"
                 onChange={(e) => setSelectedCourse(e.target.value)}
-                label="-- Por favor, elija un curso --"
-                displayEmpty
               >
-                <MenuItem value="" disabled>
-                  <em>-- Por favor, elija un curso --</em>
-                </MenuItem>
                 {eventos.map((course) => (
                   <MenuItem key={course.id} value={course.id}>
-                    {course.curso?.nombre} - {course.fecha_desde}
+                    {course.curso?.nombre} — {course.fecha_desde}
                   </MenuItem>
                 ))}
               </Select>
@@ -659,17 +682,16 @@ export default function AsistenciasMain() {
               variant="contained"
               onClick={markAttendanceByCUIL}
               disabled={isMarkingAttendance || !selectedCourse || !cuilAsistente}
-              startIcon={isMarkingAttendance ? <RefreshIcon /> : null}
+              startIcon={isMarkingAttendance ? <RefreshIcon /> : <SearchIcon />}
               fullWidth
               sx={{
                 py: 1.5,
-                backgroundColor: '#007bff',
                 '&:hover': { backgroundColor: '#0056b3' },
                 fontSize: '1rem',
                 fontWeight: 1200
               }}
             >
-              {isMarkingAttendance ? 'Buscando Asistente...' : '🔍 Buscar Asistente'}
+              {isMarkingAttendance ? 'Buscando Asistente...' : 'Buscar Asistente'}
             </Button>
           </Stack>
         </CardContent>
@@ -683,8 +705,7 @@ export default function AsistenciasMain() {
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Stack direction="row" spacing={0}>
           {[
-            { id: 'dashboard', label: 'Inicio', icon: '🏠' },
-            { id: 'eventos', label: 'Cursos', icon: '📊' },
+            { id: 'eventos', label: 'Eventos', icon: '📊' },
             { id: 'attendance', label: 'Asistencia', icon: '✓' },
           ].map((tab) => (
             <Button
@@ -704,7 +725,7 @@ export default function AsistenciasMain() {
       </Box>
 
       {/* Contenido */}
-      {activeTab === 'dashboard' && renderDashboard()}
+
       {activeTab === 'eventos' && rendereventos()}
       {activeTab === 'attendance' && renderAttendance()}
 
@@ -717,6 +738,17 @@ export default function AsistenciasMain() {
           userData={participanteData}
           idEvento={selectedCourse}
           nombreCurso={eventos.find(c => c.id === parseInt(selectedCourse))?.curso?.nombre}
+        />
+      )}
+
+      {/* Modal de Lista de Participantes */}
+      {showParticipantsList && (
+        <ModalListaParticipantesPorEvento
+          open={showParticipantsList}
+          onClose={handleCloseParticipantsList}
+          participantes={participantesList}
+          nombreCurso={selectedCourseDetail?.curso?.nombre}
+          idEvento={selectedCourseDetail?.id}
         />
       )}
 
@@ -908,9 +940,6 @@ export default function AsistenciasMain() {
                   >
                     Detalles y QR
                   </Button>
-                  <Button variant="text" sx={{ color: '#6c757d' }}>
-                    Asistentes
-                  </Button>
                 </Stack>
               </Box>
 
@@ -927,7 +956,7 @@ export default function AsistenciasMain() {
                   </Box>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" sx={{ fontWeight: 600, color: 'black' }}>Docente/s:</Typography>
-                    <Typography variant="body1">DRAGOTTO, JUAN MANUEL</Typography>
+                    <Typography variant="body1"> {selectedCourseDetail?.nombre_apellido_docente || "Error sin Docente"} </Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={6}>
@@ -937,7 +966,7 @@ export default function AsistenciasMain() {
                   </Box>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" sx={{ fontWeight: 600, color: 'black' }}>Cantidad de inscriptos:</Typography>
-                    <Typography variant="body1">{selectedCourseDetail.cantidad_inscriptos}</Typography>
+                    <Typography variant="body1">{selectedCourseDetail?.cantidad_inscriptos || "Error sin Cantidad"}</Typography>
                   </Box>
                 </Grid>
               </Grid>
@@ -957,11 +986,7 @@ export default function AsistenciasMain() {
                 startIcon={<QrCodeIcon />}
                 onClick={generateQR}
                 disabled={isGeneratingQR}
-                sx={{
-                  backgroundColor: '#007bff',
-                  '&:hover': { backgroundColor: '#0056b3' },
-                  mb: 3
-                }}
+
               >
                 {isGeneratingQR ? 'Generando...' : 'Generar QR de Asistencia'}
               </Button>

@@ -73,6 +73,7 @@ const theme = createTheme({
       fontFamily: typography.fontFamilyPrimary,
       fontWeight: typography.fontWeights.bold,
       fontSize: typography.fontSizes.medium,
+      color: colors.CBA_Blue,
     },
   },
   components: {
@@ -91,6 +92,14 @@ const theme = createTheme({
     MuiDatePicker: {
       defaultProps: {
         format: 'DD/MM/YYYY',
+      },
+    },
+
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          color: colors.CBA_Blue,
+        },
       },
     },
   },

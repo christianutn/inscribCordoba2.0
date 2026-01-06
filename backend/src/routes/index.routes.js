@@ -81,5 +81,7 @@ router.use("/asistencias/eventos", EventosRouter)
 router.use("/fechas-inhabilitadas", FechasInhabilitadasRouter)
 router.use("/asistencias/consultar", AsistenciaQrRouter)
 router.use("/asistencias/confirmar", AsistenciaQrRouter)
+router.use("/asistencias/obtenerListadoDeParticipantesPorEvento", AsistenciaQrRouter)
+router.use("/asistencias/operaciones", AsistenciaQrRouter)
 
 export default router

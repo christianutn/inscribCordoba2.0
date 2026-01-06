@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Typography, Alert, CircularProgress, Paper } from '@mui/material';
 import ModalConsultarCuil from './ModalConsultarCuil';
-import { getlistadoEventos } from '../services/asistencias.service';
-import { postConfirmarAsistencia } from '../services/asistencias.service';
+import { getlistadoEventos } from '../../services/asistencias.service.js';
+import { postConfirmarAsistencia } from '../../services/asistencias.service.js';
 
 const RegistroAsistencia = () => {
     const { courseId } = useParams();
