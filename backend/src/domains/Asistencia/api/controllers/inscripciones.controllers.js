@@ -1,6 +1,7 @@
-import RegistrarInscripcionesMasivasUseCase from '../../useCases/RegistrarInscripcionesMasivasUseCase.js';
+import EventoService from '../../core/services/EventoService.js';
+import EventoRepository from '../../core/repositories/EventoRepository.js';
 
-const registrarInscripcionesMasivasUseCase = new RegistrarInscripcionesMasivasUseCase();
+const eventoService = new EventoService(new EventoRepository());
 
 export const registrarInscripcionesMasivas = async (req, res, next) => {
   if (!req.file) {
@@ -8,15 +9,9 @@ export const registrarInscripcionesMasivas = async (req, res, next) => {
   }
 
   try {
-    const result = await registrarInscripcionesMasivasUseCase.execute(req.file.buffer);
-    if (result.success) {
-      res.status(200).json(result);
-    } else {
-      // Usamos 400 para errores de procesamiento del archivo, 500 para otros errores.
-      res.status(400).json(result);
-    }
+    const result = await eventoService.crearEventoMasivo(req.file.buffer);
+    res.status(200).json(result);
   } catch (error) {
-    console.error('Error en el controlador de inscripciones masivas:', error);
-    next(error); // Pasamos el error al siguiente middleware de manejo de errores
+    next(error);
   }
 };

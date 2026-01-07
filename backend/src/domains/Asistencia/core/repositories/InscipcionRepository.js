@@ -14,4 +14,18 @@ export default class InscripcionRepository {
     async obtenerCantidadInscriptos(id_evento) {
         return await Inscripcion.count({ where: { id_evento: id_evento } });
     }
+
+    async buscarPorCuilYEvento(cuil, id_evento, options = {}) {
+        return await Inscripcion.findOne({
+            where: { cuil, id_evento },
+            ...options
+        });
+    }
+
+    async listarPorEvento(id_evento, options = {}) {
+        return await Inscripcion.findAll({
+            where: { id_evento },
+            ...options
+        });
+    }
 }

@@ -18,4 +18,14 @@ export default class CursoRepository {
     async obtenerTodos() {
         return await Curso.findAll();
     }
+
+    // crear o actualizar curso
+    async findOrCreate(nombre_curso, transaction = null) {
+        const [curso, created] = await Curso.findOrCreate({
+            where: { nombre: nombre_curso },
+            defaults: { nombre: nombre_curso },
+            transaction
+        });
+        return curso;
+    }
 }

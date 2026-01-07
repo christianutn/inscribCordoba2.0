@@ -1,9 +1,14 @@
 import Asistencia from "../../api/models/asistencia.model.js"
+import { Op } from "sequelize";
 
 export default class AsistenciaRepository {
 
     async crearVarios(asistenciaData, transaction = null) {
         return await Asistencia.bulkCreate(asistenciaData, { transaction })
+    }
+
+    async crear(data, transaction = null) {
+        return await Asistencia.create(data, { transaction });
     }
 
     async obtenerCantidadAsistidos(id_evento) {

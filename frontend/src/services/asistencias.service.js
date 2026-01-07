@@ -233,3 +233,72 @@ export const putAsistencia = async (cuil, id_evento, fecha, estado_asistencia) =
         throw error;
     }
 }
+
+export const getCursosDeAsistencias = async () => {
+    try {
+        const response = await fetch(`${URL}/cursos`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al obtener los cursos de asistencia');
+        }
+
+        const data = await response.json();
+        return data; // Expected: [{ id: 61, nombre: "CIBERSEGURIDAD" }, ...]
+    } catch (error) {
+        console.error("Error al obtener cursos de asistencias:", error);
+        return [];
+    }
+}
+
+export const postEventoManual = async (eventoData) => {
+    try {
+        const response = await fetch(`${URL}/eventos/manual`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify(eventoData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al crear evento manual');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error al crear evento manual:", error);
+        throw error;
+    }
+}
+
+export const getDetalleEventoConAsistencia = async (id_evento) => {
+    try {
+        const response = await fetch(`${URL}/eventos/detalle-evento-con-asistencia/${id_evento}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener detalle del evento');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error al obtener detalle del evento:", error);
+        throw error;
+    }
+}

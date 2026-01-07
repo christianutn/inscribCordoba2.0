@@ -1,5 +1,4 @@
 import { registrarInscripcionesMasivas } from "../domains/Asistencia/api/controllers/inscripciones.controllers.js";
-import { consultarAsistencia, registrarAsistencia } from "../domains/Asistencia/api/controllers/asistencias.controllers.js";
 import { Router } from "express";
 import passport from "passport";
 import autorizar from "../utils/autorizar.js"

@@ -1,4 +1,5 @@
 import CursoRepository from '../repositories/CursoRepository.js';
+import AppError from '../../../../utils/appError.js';
 
 /**
  * Clase de servicio para manejar la lógica de negocio relacionada con Cursos.
@@ -26,7 +27,7 @@ export default class CursoService {
     async crearCurso(CursoData, transaction = null) {
         // 1. **Validación de Datos Básica** (puedes usar Joi o esquemas más complejos)
         if (!CursoData || !CursoData.nombreCurso) {
-            throw new Error("El nombre del curso es obligatorio.");
+            throw new AppError("El nombre del curso es obligatorio.", 400);
         }
 
         const { nombreCurso } = CursoData;
@@ -37,7 +38,7 @@ export default class CursoService {
         // Recordatorio: `existe()` retorna el objeto del curso o `null`.
         if (cursoExistente) {
             // Un error de lógica de negocio
-            throw new Error(`Ya existe un curso registrado con el nombre: ${nombreCurso}`);
+            throw new AppError(`Ya existe un curso registrado con el nombre: ${nombreCurso}`, 409); // 409 Conflict
         }
 
         // 3. **Llamada al Repositorio** para la interacción con la DB
@@ -48,8 +49,7 @@ export default class CursoService {
             return nuevoCurso;
         } catch (error) {
             // Puedes loggear el error o relanzar uno más amigable
-            console.error("Error al crear el curso en la DB:", error.message);
-            throw new Error("Error interno al registrar el curso. Intente de nuevo.");
+            throw new AppError("Error interno al registrar el curso: " + error.message, 500);
         }
     }
 
@@ -68,14 +68,18 @@ export default class CursoService {
      */
     async obtenerCursoPorNombre(nombreCurso) {
         if (!nombreCurso) {
-            throw new Error("El nombre del curso es requerido para la búsqueda.");
+            throw new AppError("El nombre del curso es requerido para la búsqueda.", 400);
         }
         // Llamamos directamente a 'existe' ya que ya retorna el objeto o null.
         return await this.cursoRepository.existe(nombreCurso);
     }
 
-    async getCursos() {
-        return await this.cursoRepository.getCursos();
+    async obtenerTodos() {
+        return await this.cursoRepository.obtenerTodos();
+    }
+
+    async buscarOCrear(nombreCurso, transaction = null) {
+        return await this.cursoRepository.findOrCreate(nombreCurso, transaction);
     }
 
 }

@@ -34,12 +34,15 @@ import {
   EventNoteIcon,
   Add as AddIcon,
   Search as SearchIcon,
+  SimCardDownload as SimCardDownloadIcon,
 } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
 import QRCode from 'qrcode';
-import { postSubaMasiva, getlistadoEventos, getConsultarAsistencia, postConfirmarAsistencia, getListadosDeParticipantes } from '../../services/asistencias.service.js'
+import { postSubaMasiva, getlistadoEventos, getConsultarAsistencia, postConfirmarAsistencia, getListadosDeParticipantes, getDetalleEventoConAsistencia } from '../../services/asistencias.service.js'
+import ExcelJS from 'exceljs';
 import ModalDatosParticipante from './ModalDatosParticipante.jsx';
 import ModalListaParticipantesPorEvento from './ModalListaParticipantesPorEvento.jsx';
+import ModalCrearEventoManual from './ModalCrearEventoManual.jsx';
 
 export default function AsistenciasMain() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -73,10 +76,17 @@ export default function AsistenciasMain() {
   const [showParticipantsList, setShowParticipantsList] = useState(false);
   const [participantesList, setParticipantesList] = useState([]);
 
+  // Estado para modal de crear evento manual
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // Estado para filtro de eventos
+  const [filterText, setFilterText] = useState('');
+
   const fetchEventos = async () => {
     try {
       const response = await getlistadoEventos();
       setEventos(response);
+
     } catch (error) {
       console.error('Error al cargar eventos:', error);
     }
@@ -98,9 +108,12 @@ export default function AsistenciasMain() {
 
 
 
-  const generateQR = async () => {
-    // Usamos el curso del detalle si está abierto, o el seleccionado en el dropdown
-    const course = selectedCourseDetail || eventos.find(c => c.id === parseInt(selectedCourse));
+  const generateQR = async (courseInput) => {
+    // Determine the course to use
+    // Check if courseInput is a valid course object (has .id) to avoid using the Click Event object
+    let course = (courseInput && courseInput.id)
+      ? courseInput
+      : (selectedCourseDetail || eventos.find(c => c.id === parseInt(selectedCourse)));
 
     if (!course) {
       setStatusMessage('Por favor, selecciona un curso para generar el QR');
@@ -108,6 +121,7 @@ export default function AsistenciasMain() {
     }
 
     setIsGeneratingQR(true);
+    setQrCode(''); // Clear previous QR
     setStatusMessage('Generando código QR...');
 
     try {
@@ -275,6 +289,7 @@ export default function AsistenciasMain() {
   const handleViewCourse = (course) => {
     setSelectedCourseDetail(course);
     setShowCourseDetail(true);
+    generateQR(course);
   };
 
   const handleViewParticipantsList = async (course) => {
@@ -392,6 +407,88 @@ export default function AsistenciasMain() {
   };
 
 
+  const handleDownloadExcel = async (row) => {
+    try {
+      const data = await getDetalleEventoConAsistencia(row.id);
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Asistencia');
+
+      // Obtener todas las fechas únicas de asistencias y ordenarlas
+      const allDates = new Set();
+      data.participantes.forEach(p => {
+        p.asistencias.forEach(a => allDates.add(a.fecha));
+      });
+      const sortedDates = Array.from(allDates).sort();
+
+      // Definir columnas estáticas
+      const columns = [
+        { header: 'Nro de Evento', key: 'nro_evento', width: 15 },
+        { header: 'Curso', key: 'curso', width: 30 },
+        { header: 'Nombre', key: 'nombre', width: 20 },
+        { header: 'Apellido', key: 'apellido', width: 20 },
+        { header: 'Correo Electrónico', key: 'email', width: 30 },
+        { header: 'Reparticion', key: 'reparticion', width: 20 },
+        { header: 'Empleado', key: 'empleado', width: 15 },
+        { header: 'Nota', key: 'nota', width: 10 },
+      ];
+
+      // Agregar columnas de fechas dinámicas
+      sortedDates.forEach(date => {
+        // Formatear fecha a mm/dd/aaaa
+        const [year, month, day] = date.split('-');
+        const formattedDate = `${month}/${day}/${year}`;
+        columns.push({ header: formattedDate, key: date, width: 15 });
+      });
+
+      worksheet.columns = columns;
+
+      // Agregar filas
+      data.participantes.forEach(participante => {
+        const rowData = {
+          nro_evento: data.id_evento,
+          curso: data.nombre_evento,
+          nombre: participante.nombre,
+          apellido: participante.apellido,
+          email: participante.correo_electronico,
+          reparticion: participante.reparticion,
+          empleado: participante.empleado === 1 ? 'SI' : 'NO',
+          nota: participante.nota || '',
+        };
+
+        // Llenar datos de asistencia
+        sortedDates.forEach(date => {
+          const asistencia = participante.asistencias.find(a => a.fecha === date);
+          // 1 para presente, 0 para ausente (asumimos 0 = "Ausente" aunque el usuario dijo "Asetente")
+          if (asistencia) {
+            rowData[date] = asistencia.estado_asistencia === 1 ? 'Presente' : 'Ausente';
+          } else {
+            rowData[date] = '-'; // O vacío si no hay registro para esa fecha
+          }
+        });
+
+        worksheet.addRow(rowData);
+      });
+
+      // Estilar encabezados
+      worksheet.getRow(1).font = { bold: true };
+
+      // Generar y descargar archivo
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${data.id_evento}.${data.nombre_evento.replace(/\s+/g, '_')}.xlsx`;
+      anchor.click();
+      window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error('Error al descargar Excel:', error);
+      alert('Error al descargar el archivo Excel');
+    }
+  };
+
   const rendereventos = () => (
     <Box sx={{ width: '100%' }}>
       {/* Header con título y botones */}
@@ -407,18 +504,34 @@ export default function AsistenciasMain() {
         <Typography variant="h4" sx={{ fontWeight: 600, color: 'primary.main' }}>
           Gestión de Cursos
         </Typography>
+
+        <Box sx={{ flexGrow: 1, mx: 4 }}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            size="small"
+            placeholder="Filtrar por ID de evento o Nombre de curso..."
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            InputProps={{
+              startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />
+            }}
+            sx={{ backgroundColor: 'white' }}
+          />
+        </Box>
+
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
             variant="contained"
             startIcon={<DownloadIcon />}
             onClick={handleImportClick}
-
           >
             Importar Planilla
           </Button>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
+            onClick={() => setShowCreateModal(true)}
           >
             Crear Manualmente
           </Button>
@@ -428,7 +541,14 @@ export default function AsistenciasMain() {
       {/* Tabla de cursos */}
       <Paper sx={{ width: '100%', height: 600 }}>
         <DataGrid
-          rows={eventos}
+          rows={eventos.filter(evento => {
+            if (!filterText) return true;
+            const searchLower = filterText.toLowerCase();
+            return (
+              evento.id?.toString().includes(searchLower) ||
+              evento.curso?.nombre?.toLowerCase().includes(searchLower)
+            );
+          })}
           columns={[
             {
               field: 'id_evento',
@@ -446,7 +566,7 @@ export default function AsistenciasMain() {
             },
             { field: 'fecha_desde', headerName: 'Fecha de Inicio', flex: 1 },
             { field: 'cantidad_inscriptos', headerName: 'Inscriptos', flex: 1, type: 'number', align: 'left', headerAlign: 'left' },
-            { field: 'cantidad_asistidos', headerName: 'Asistidos', flex: 1, type: 'number', align: 'left', headerAlign: 'left' },
+            { field: 'cantidad_asistidos', headerName: 'Asistencia', flex: 1, type: 'number', align: 'left', headerAlign: 'left' },
             {
               field: 'acciones',
               headerName: 'Acciones',
@@ -486,6 +606,22 @@ export default function AsistenciasMain() {
                   >
                     <IconButton size="small" onClick={() => handleViewParticipantsList(params.row)}>
                       <ListAlt />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip
+                    title="Descargar Listado de participantes (Excel)"
+                    arrow
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          fontSize: '0.9rem',
+                          padding: '8px 12px'
+                        }
+                      }
+                    }}
+                  >
+                    <IconButton size="small" onClick={() => handleDownloadExcel(params.row)}>
+                      <SimCardDownloadIcon />
                     </IconButton>
                   </Tooltip>
                 </Box>
@@ -756,6 +892,15 @@ export default function AsistenciasMain() {
         </DialogActions>
       </Dialog>
 
+      {/* Modal Crear Evento Manual */}
+      {showCreateModal && (
+        <ModalCrearEventoManual
+          open={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onConfirm={handleRefreshData}
+        />
+      )}
+
 
 
       {/* Modal de Detalle del Curso */}
@@ -770,7 +915,7 @@ export default function AsistenciasMain() {
             <IconButton onClick={handleCloseCourseDetail} sx={{ color: '#6c757d' }}>
               ←
             </IconButton>
-            Cursos
+            Detalle del Curso
           </Box>
         </DialogTitle>
         <DialogContent>
@@ -827,15 +972,7 @@ export default function AsistenciasMain() {
                 Muestra este QR en la entrada del evento para tomar asistencia.
               </Typography>
 
-              <Button
-                variant="contained"
-                startIcon={<QrCodeIcon />}
-                onClick={generateQR}
-                disabled={isGeneratingQR}
 
-              >
-                {isGeneratingQR ? 'Generando...' : 'Generar QR de Asistencia'}
-              </Button>
 
               {qrCode && (
                 <Box sx={{ textAlign: 'center', mt: 3, p: 3, border: '1px solid #e0e0e0', borderRadius: 2 }}>

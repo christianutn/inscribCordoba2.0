@@ -10,7 +10,7 @@ export default class CursoController {
 
     getCursos = async (req, res, next) => {
         try {
-            const cursos = await this.cursoService.getCursos();
+            const cursos = await this.cursoService.obtenerTodos();
             res.json(cursos);
         } catch (error) {
             next(error);

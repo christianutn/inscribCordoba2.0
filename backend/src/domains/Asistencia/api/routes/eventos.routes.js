@@ -10,7 +10,7 @@ import InscripcionService from "../../core/services/InscripcionService.js";
 import EventoRepository from "../../core/repositories/EventoRepository.js";
 import AsistenciaRepository from "../../core/repositories/AsistenciaRepository.js";
 import InscripcionRepository from "../../core/repositories/InscipcionRepository.js";
-import ObtenerListaEventosUseCase from "../../useCases/ObtenerListaEventosUseCase.js";
+// import ObtenerListaEventosUseCase from "../../useCases/ObtenerListaEventosUseCase.js";
 
 const router = Router();
 
@@ -20,18 +20,14 @@ const asistenciaRepository = new AsistenciaRepository();
 const inscripcionRepository = new InscripcionRepository();
 
 // Instantiate Services with Repositories
-const eventoService = new EventoService(eventoRepository);
 const asistenciaService = new AsistenciaService(asistenciaRepository);
 const inscripcionService = new InscripcionService(inscripcionRepository);
 
-const obtenerListaEventosUseCase = new ObtenerListaEventosUseCase(
-    eventoService,
-    asistenciaService,
-    inscripcionService
-);
+// EventoService depends on InscripcionService and AsistenciaService for stats
+const eventoService = new EventoService(eventoRepository, inscripcionService, asistenciaService);
 
 // Instantiate controller with dependencies
-const eventosController = new EventosController(obtenerListaEventosUseCase);
+const eventosController = new EventosController(eventoService);
 
 // Bind the method to the controller instance to preserve 'this' context
 router.get("/listado",
@@ -40,5 +36,23 @@ router.get("/listado",
     eventosController.obtenerListaEventos.bind(eventosController)
 
 );
+
+router.post("/manual",
+    passport.authenticate("jwt", { session: false }),
+    autorizar(['ADM', 'REF', 'GA']), // Assuming these roles based on context, user can adjust if needed
+    eventosController.crearEvento.bind(eventosController)
+)
+
+router.get("/detalle-evento-con-asistencia/:id_evento",
+    passport.authenticate("jwt", { session: false }),
+    autorizar(['ADM', 'REF', 'GA']), // Assuming these roles based on context, user can adjust if needed
+    eventosController.obtenerDetalleEventoConAsistencia.bind(eventosController)
+)
+
+
+
+
+
+
 
 export default router;
