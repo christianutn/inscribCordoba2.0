@@ -35,8 +35,8 @@ function App() {
           <Route path='/cardAvisos' element={<Layout><CardAvisos /></Layout>} />
           <Route path='/version-reducida-ga' element={<Layout><VersionReducidaGA /></Layout>} />
           <Route path='/asistencias' element={<Layout><AsistenciasMain /></Layout>} />
-          <Route path='/asistencia/registrar/:courseId' element={<Layout><RegistroAsistencia /></Layout>} />
           <Route path='/confirmaciones' element={<Layout><Confirmaciones /></Layout>} />
+          <Route path='/asistencia/registrar/:courseId' element={<Layout><RegistroAsistencia /></Layout>} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

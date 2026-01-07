@@ -13,15 +13,16 @@ export const postSubaMasiva = async (archivo) => {
             body: formData,
         });
 
-        await response.json();
+        const data = await response.json();
 
         if (!response.ok) {
-            throw new Error('Error al subir archivo');
+            throw new Error(`${data.message || 'Error al subir archivo'}`);
         }
 
         return true;
 
     } catch (error) {
+
         throw error;
     }
 }

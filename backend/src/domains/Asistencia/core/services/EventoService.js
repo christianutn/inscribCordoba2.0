@@ -127,7 +127,7 @@ export default class EventoService {
             };
         } catch (error) {
             await transaction.rollback();
-            throw new AppError('Ocurrió un error al procesar el archivo: ' + error.message, 500);
+            throw new AppError(error.message, 500);
         }
     }
 
@@ -143,7 +143,7 @@ export default class EventoService {
             // Analizamos si el evento ya existe 
             const eventoExistente = await this.eventoRepository.existe(eventoData);
             if (eventoExistente) {
-                throw new AppError('El evento ya existe.', 409);
+                throw new AppError(`El evento ${eventoData.id} ya existe.`, 409);
             }
 
             const cursoRepository = new CursoRepository();

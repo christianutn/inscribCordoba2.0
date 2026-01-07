@@ -79,6 +79,7 @@ export default class EventoRepository {
                 asistenciasP.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
                 return {
+                    cuil: p.cuil,
                     nombre: p.nombres,
                     apellido: p.apellido,
                     correo_electronico: p.correo_electronico,
