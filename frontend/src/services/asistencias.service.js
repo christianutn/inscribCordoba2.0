@@ -13,12 +13,16 @@ export const postSubaMasiva = async (archivo) => {
             body: formData,
         });
 
-        const data = await response.json();
+        await response.json();
 
-        alert(data.message);
+        if (!response.ok) {
+            throw new Error('Error al subir archivo');
+        }
+
+        return true;
+
     } catch (error) {
-        console.error("Error al enviar el archivo:", error);
-        alert("Error al enviar el archivo");
+        throw error;
     }
 }
 
@@ -147,6 +151,85 @@ export const getAsistenciaPorEvento = async (id_evento, cuil) => {
         return data;
     } catch (error) {
         console.error("Error al obtener asistencia por evento:", error);
+        throw error;
+    }
+}
+
+export const getNotasPorCuilYEvento = async (cuil, id_evento) => {
+    try {
+        const response = await fetch(`${URL}/notas/${cuil}/${id_evento}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+        });
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                return { message: "Nota no encontrada" };
+            }
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener nota');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error al obtener nota:", error);
+        throw error;
+    }
+}
+
+export const crearOActualizarNota = async (cuil, id_evento, nota) => {
+    try {
+        const response = await fetch(`${URL}/notas/${cuil}/${id_evento}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({ nota: nota }) // El backend espera { nota: ... } en el body
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al guardar nota');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error al guardar nota:", error);
+        throw error;
+    }
+}
+
+export const putAsistencia = async (cuil, id_evento, fecha, estado_asistencia) => {
+    try {
+        const response = await fetch(`${URL}/manual`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify({
+                cuil,
+                id_evento,
+                fecha,
+                estado_asistencia
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al actualizar asistencia manual');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error al actualizar asistencia:", error);
         throw error;
     }
 }

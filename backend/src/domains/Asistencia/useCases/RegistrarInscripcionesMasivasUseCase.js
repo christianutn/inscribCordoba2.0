@@ -59,9 +59,7 @@ export default class RegistrarInscripcionesMasivasUseCase {
         fecha_desde: data.fechaDesde,
         fecha_hasta: data.fechaHasta,
         comentario_horario: data.horario,
-        nombre_apellido_docente: data.nombreDocente,
-        capacidad: 100, // TODO: Ajustar a lo que se recibe por front
-        sala: "Test", // TODO: Ajustar a lo que se recibe por front
+        nombre_apellido_docente: data.nombreDocente
       };
 
       const nuevoEvento = await eventoService.crearEvento(eventoData, transaction);

@@ -35,6 +35,7 @@ import {
   Add as AddIcon,
   Search as SearchIcon,
 } from '@mui/icons-material';
+import { DataGrid } from '@mui/x-data-grid';
 import QRCode from 'qrcode';
 import { postSubaMasiva, getlistadoEventos, getConsultarAsistencia, postConfirmarAsistencia, getListadosDeParticipantes } from '../../services/asistencias.service.js'
 import ModalDatosParticipante from './ModalDatosParticipante.jsx';
@@ -61,8 +62,7 @@ export default function AsistenciasMain() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState('');
-  const [showSalaModal, setShowSalaModal] = useState(false);
-  const [selectedSala, setSelectedSala] = useState('');
+
 
   // Estados para detalle del curso
   const [showCourseDetail, setShowCourseDetail] = useState(false);
@@ -73,27 +73,30 @@ export default function AsistenciasMain() {
   const [showParticipantsList, setShowParticipantsList] = useState(false);
   const [participantesList, setParticipantesList] = useState([]);
 
+  const fetchEventos = async () => {
+    try {
+      const response = await getlistadoEventos();
+      setEventos(response);
+    } catch (error) {
+      console.error('Error al cargar eventos:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchEventos = async () => {
-      try {
-        const response = await getlistadoEventos();
-        setEventos(response);
-        setActiveTab('eventos');
-      } catch (error) {
-        console.error('Error al cargar eventos:', error);
-      }
-    };
-    fetchEventos();
+    fetchEventos().then(() => setActiveTab('eventos'));
   }, []);
 
+  const handleRefreshData = async () => {
+    await fetchEventos();
+    // Also refresh participants list if a course is selected
+    if (selectedCourseDetail) {
+      handleViewParticipantsList(selectedCourseDetail);
+    }
+  };
 
-  // Opciones de salas
-  const salas = [
-    { codigo: 'SG', nombre: 'Sala de gestión (ingrese SG)' },
-    { codigo: 'SI1', nombre: 'Sala de informática 1 (ingrese SI1)' },
-    { codigo: 'SI2', nombre: 'Sala de informática 2 (ingrese SI2)' },
-    { codigo: 'SE', nombre: 'Sala externa (ingrese SE(Nombre sala))' }
-  ];
+
+
+
 
   const generateQR = async () => {
     // Usamos el curso del detalle si está abierto, o el seleccionado en el dropdown
@@ -179,6 +182,9 @@ export default function AsistenciasMain() {
       setCuilAsistente(''); // Limpiar campo
       setParticipanteData(null);
 
+      // Refresh data to show new enrolled participant or updated stats
+      await handleRefreshData();
+
     } catch (error) {
       console.error('Error confirmando asistencia:', error);
       setAttendanceMessage(`❌ Error al registrar asistencia: ${error.message}`);
@@ -238,17 +244,16 @@ export default function AsistenciasMain() {
       await postSubaMasiva(selectedFile)
 
       setUploadMessage('✅ Archivo procesado exitosamente.');
+      await handleRefreshData();
 
-      // Cerrar modal de importación y mostrar modal de sala
+      // Cerrar modal de importación
       setTimeout(() => {
         setShowImportModal(false);
-        setShowSalaModal(true);
         setSelectedFile(null);
         setUploadMessage('');
       }, 1500);
 
     } catch (error) {
-      console.error('Error procesando archivo:', error);
       setUploadMessage('❌ Error al procesar el archivo. Verifica el formato e intenta nuevamente.');
     } finally {
       setIsUploading(false);
@@ -263,25 +268,8 @@ export default function AsistenciasMain() {
     }
   };
 
-  // Funciones para modal de sala
-  const handleSalaSubmit = () => {
-    if (!selectedSala.trim()) {
-      alert('Por favor, ingresa la sala donde se dictará el curso');
-      return;
-    }
 
-    // Cerrar modal y limpiar
-    setShowSalaModal(false);
-    setSelectedSala('');
 
-    // Mostrar mensaje de éxito
-    alert('Curso creado exitosamente con la sala: ' + selectedSala);
-  };
-
-  const handleCloseSalaModal = () => {
-    setShowSalaModal(false);
-    setSelectedSala('');
-  };
 
   // Funciones para detalle del curso
   const handleViewCourse = (course) => {
@@ -438,174 +426,80 @@ export default function AsistenciasMain() {
       </Box>
 
       {/* Tabla de cursos */}
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-        <Box sx={{ overflowX: 'auto' }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'separate',
-            borderSpacing: 0
-          }}>
-            <thead>
-              <tr style={{
-                backgroundColor: '#f8f9fa',
-                borderBottom: '2px solid #dee2e6'
-              }}>
-                <th style={{
-                  padding: '16px',
-                  textAlign: 'left',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  color: '#6c757d',
-                  borderBottom: '2px solid #dee2e6'
-                }}>
-                  Nombre del Curso
-                </th>
-                <th style={{
-                  padding: '16px',
-                  textAlign: 'left',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  color: '#6c757d',
-                  borderBottom: '2px solid #dee2e6'
-                }}>
-                  Fecha de Inicio
-                </th>
-                <th style={{
-                  padding: '16px',
-                  textAlign: 'left',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  color: '#6c757d',
-                  borderBottom: '2px solid #dee2e6'
-                }}>
-                  Inscriptos
-                </th>
-                <th style={{
-                  padding: '16px',
-                  textAlign: 'left',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  color: '#6c757d',
-                  borderBottom: '2px solid #dee2e6'
-                }}>
-                  Asistidos
-                </th>
-                <th style={{
-                  padding: '16px',
-                  textAlign: 'center',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  color: '#6c757d',
-                  borderBottom: '2px solid #dee2e6'
-                }}>
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {eventos.length === 0 ? (
-                <tr>
-                  <td colSpan={5} style={{
-                    padding: '40px',
-                    textAlign: 'center',
-                    color: '#6c757d',
-                    fontSize: '16px'
-                  }}>
-                    No hay cursos disponibles
-                  </td>
-                </tr>
-              ) : (
-                eventos.map((course, index) => (
-                  <tr
-                    key={course.id}
-                    style={{
-                      borderBottom: '1px solid #f1f3f5',
-                      backgroundColor: index % 2 === 0 ? '#ffffff' : '#fafbfc',
-                      '&:hover': {
-                        backgroundColor: '#f8f9fa'
+      <Paper sx={{ width: '100%', height: 600 }}>
+        <DataGrid
+          rows={eventos}
+          columns={[
+            {
+              field: 'id_evento',
+              headerName: 'ID del evento',
+              flex: 0.5,
+              align: 'left',
+              headerAlign: 'left',
+              valueGetter: (value, row) => row?.id
+            },
+            {
+              field: 'nombre',
+              headerName: 'Nombre del Curso',
+              flex: 2,
+              valueGetter: (value, row) => row?.curso?.nombre
+            },
+            { field: 'fecha_desde', headerName: 'Fecha de Inicio', flex: 1 },
+            { field: 'cantidad_inscriptos', headerName: 'Inscriptos', flex: 1, type: 'number', align: 'left', headerAlign: 'left' },
+            { field: 'cantidad_asistidos', headerName: 'Asistidos', flex: 1, type: 'number', align: 'left', headerAlign: 'left' },
+            {
+              field: 'acciones',
+              headerName: 'Acciones',
+              width: 150,
+              sortable: false,
+              align: 'center',
+              headerAlign: 'center',
+              renderCell: (params) => (
+                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', width: '100%' }}>
+                  <Tooltip
+                    title="Generar Qr"
+                    arrow
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          fontSize: '0.9rem',
+                          padding: '8px 12px'
+                        }
                       }
                     }}
                   >
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#212529'
-                    }}>
-                      {course.curso.nombre}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#6c757d'
-                    }}>
-                      {course.fecha_desde}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#6c757d'
-                    }}>
-                      {course.cantidad_inscriptos}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#6c757d'
-                    }}>
-                      {course.cantidad_asistidos}
-                    </td>
-                    <td style={{ padding: '16px', textAlign: 'center' }}>
-                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                        <Tooltip
-                          title="Generar Qr"
-                          arrow
-                          componentsProps={{
-                            tooltip: {
-                              sx: {
-                                fontSize: '0.9rem',
-                                padding: '8px 12px'
-                              }
-                            }
-                          }}
-                        >
-                          <IconButton
-                            size="small"
-                            onClick={() => handleViewCourse(course)}
-
-                          >
-                            <QrCodeIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip
-                          title="Ver lista de inscriptos"
-                          arrow
-                          componentsProps={{
-                            tooltip: {
-                              sx: {
-                                fontSize: '0.9rem',
-                                padding: '8px 12px'
-                              }
-                            }
-                          }}>
-                          <IconButton
-                            size="small"
-                            sx={{
-
-                              '&:hover': { backgroundColor: 'rgba(0, 123, 255, 0.04)' }
-                            }}
-                            onClick={() => handleViewParticipantsList(course)}
-                          >
-                            <ListAlt />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </Box>
+                    <IconButton size="small" onClick={() => handleViewCourse(params.row)}>
+                      <QrCodeIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip
+                    title="Ver lista de inscriptos"
+                    arrow
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          fontSize: '0.9rem',
+                          padding: '8px 12px'
+                        }
+                      }
+                    }}
+                  >
+                    <IconButton size="small" onClick={() => handleViewParticipantsList(params.row)}>
+                      <ListAlt />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              )
+            }
+          ]}
+          pageSize={10}
+          rowsPerPageOptions={[10, 25, 50]}
+          disableSelectionOnClick
+          sx={{
+            '& .MuiDataGrid-cell': { borderBottom: '1px solid #f0f0f0' },
+            '& .MuiDataGrid-columnHeaders': { backgroundColor: '#f8f9fa', fontWeight: 'bold' }
+          }}
+        />
       </Paper>
     </Box>
   );
@@ -749,6 +643,7 @@ export default function AsistenciasMain() {
           participantes={participantesList}
           nombreCurso={selectedCourseDetail?.curso?.nombre}
           idEvento={selectedCourseDetail?.id}
+          onDataChange={handleRefreshData}
         />
       )}
 
@@ -861,52 +756,7 @@ export default function AsistenciasMain() {
         </DialogActions>
       </Dialog>
 
-      {/* Modal de Selección de Sala */}
-      <Dialog
-        open={showSalaModal}
-        onClose={handleCloseSalaModal}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle sx={{ fontWeight: 600, fontSize: '1.25rem', textAlign: 'center' }}>
-          Ingrese la sala donde se dictará el curso
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mb: 3 }}>
-            {salas.map((sala) => (
-              <Typography key={sala.codigo} variant="body2" sx={{ mb: 1, color: '#6c757d' }}>
-                {sala.nombre}
-              </Typography>
-            ))}
-          </Box>
 
-          <TextField
-            fullWidth
-            placeholder="SG o SE(Auditorio Principal)"
-            value={selectedSala}
-            onChange={(e) => setSelectedSala(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 3, pt: 1 }}>
-          <Button
-            onClick={handleCloseSalaModal}
-            sx={{ color: '#6c757d' }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSalaSubmit}
-            sx={{
-              backgroundColor: '#007bff',
-              '&:hover': { backgroundColor: '#0056b3' }
-            }}
-          >
-            Enviar
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Modal de Detalle del Curso */}
       <Dialog
@@ -960,10 +810,6 @@ export default function AsistenciasMain() {
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'black' }}>Sala:</Typography>
-                    <Typography variant="body1">Falta implementar</Typography>
-                  </Box>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" sx={{ fontWeight: 600, color: 'black' }}>Cantidad de inscriptos:</Typography>
                     <Typography variant="body1">{selectedCourseDetail?.cantidad_inscriptos || "Error sin Cantidad"}</Typography>

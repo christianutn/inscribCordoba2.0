@@ -4,6 +4,7 @@ import ObtenerAsistenciaPorEventoUseCase from '../../useCases/ObtenerAsistenciaP
 import ConsultarAsistenciaUseCase from '../../useCases/ConsultarAsistenciaUseCase.js';
 import RegistrarAsistenciaUseCase from '../../useCases/RegistrarAsistenciaUseCase.js';
 import ObtenerListaParticipantesPorEventoUseCase from '../../useCases/ObtenerListaParticipantesPorEventoUseCase.js';
+import AsistenciaModel from '../models/asistencia.model.js';
 
 export const obtenerAsistenciaPorEvento = async (req, res) => {
     try {
@@ -73,3 +74,37 @@ export const obtenerListaParticipantes = async (req, res) => {
         res.status(500).json({ message: error.message || 'Error interno al obtener lista de participantes' });
     }
 };
+
+export const registrarAsistenciaManual = async (req, res) => {
+    try {
+        const { cuil, id_evento, fecha, estado_asistencia } = req.body; // Recibimos del body
+
+        if (!cuil || !id_evento || !fecha) {
+            return res.status(400).json({ message: 'CUIL, ID de evento y fecha son requeridos.' });
+        }
+
+        if (estado_asistencia != '1' && estado_asistencia != '0') {
+            return res.status(400).json({ message: 'Estado de asistencia debe ser 1 o 0.' });
+        }
+
+        // devolver error si la asitencia no existe
+
+        const asistencia = await AsistenciaModel.findOne({ where: { cuil, id_evento, fecha } });
+        if (!asistencia) {
+            return res.status(404).json({ message: 'Asistencia no encontrada.' });
+        }
+
+        // actualizar la asistencia
+        asistencia.fecha = fecha;
+        asistencia.estado_asistencia = estado_asistencia;
+        await asistencia.save();
+
+        res.status(200).json(asistencia);
+
+    } catch (error) {
+        console.error("Error en registrarAsistenciaManual controller:", error);
+        res.status(500).json({ message: error.message || 'Error interno al registrar asistencia manual' });
+    }
+};
+
+

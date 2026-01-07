@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { consultarAsistencia, registrarAsistencia, obtenerListaParticipantes, obtenerAsistenciaPorEvento } from '../controllers/asistencias.controllers.js';
+import { consultarAsistencia, registrarAsistencia, obtenerListaParticipantes, obtenerAsistenciaPorEvento, registrarAsistenciaManual } from '../controllers/asistencias.controllers.js';
 
 const router = Router();
 
@@ -16,6 +16,9 @@ router.get('/:cuil/:id_evento', consultarAsistencia);
 
 // Confirmar asistencia (Registrar)
 router.post('/', registrarAsistencia);
+
+// Registrar asistencia manual
+router.put('/manual', registrarAsistenciaManual);
 
 
 

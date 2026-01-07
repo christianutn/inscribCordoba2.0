@@ -19,7 +19,7 @@ import ModalAsistenciasYNota from './ModalAsistenciasYNota.jsx';
 import { getAsistenciaPorEvento } from '../../services/asistencias.service.js';
 import { DataGrid } from '@mui/x-data-grid';
 
-const ModalListaParticipantesPorEvento = ({ open, onClose, participantes, nombreCurso, idEvento }) => {
+const ModalListaParticipantesPorEvento = ({ open, onClose, participantes, nombreCurso, idEvento, onDataChange }) => {
     const columns = [
         { field: 'cuil', headerName: 'CUIL', width: 130, headerAlign: 'center', align: 'center' },
         { field: 'nombres', headerName: 'Nombres', width: 180, headerAlign: 'center' },
@@ -32,9 +32,9 @@ const ModalListaParticipantesPorEvento = ({ open, onClose, participantes, nombre
             width: 100,
             headerAlign: 'center',
             align: 'center',
-            valueGetter: (params) => {
-                if (!params || !params.row) return 'N/A';
-                return params.row.es_empleado ? 'Sí' : 'No';
+            valueGetter: (value, row) => {
+                if (!row) return 'N/A';
+                return row.es_empleado ? 'Sí' : 'No';
             }
         },
         {
@@ -75,8 +75,7 @@ const ModalListaParticipantesPorEvento = ({ open, onClose, participantes, nombre
     // Filter state
     const [filterText, setFilterText] = useState('');
 
-    // Filtered rows based on CUIL, nombres, apellido
-    // Filtered rows based on CUIL, nombres or apellido
+    // Filtered rows
     const filteredRows = rows.filter((row) => {
         const lower = filterText.toLowerCase();
         return (
@@ -175,6 +174,7 @@ const ModalListaParticipantesPorEvento = ({ open, onClose, participantes, nombre
                     asistencia={asistenciaData}
                     nombreCurso={nombreCurso}
                     idEvento={idEvento}
+                    onDataChange={onDataChange}
                 />
             )}
         </Dialog>

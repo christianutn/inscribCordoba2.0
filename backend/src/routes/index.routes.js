@@ -40,6 +40,7 @@ import EventosRouter from "../domains/Asistencia/api/routes/eventos.routes.js";
 import FechasInhabilitadasRouter from "./fechas_inhabilitadas.routes.js";
 
 import AsistenciaQrRouter from "../domains/Asistencia/api/routes/asistencia.routes.js";
+import NotasRouter from "../domains/Asistencia/api/routes/nota.routes.js";
 
 
 const router = Router();
@@ -83,5 +84,7 @@ router.use("/asistencias/consultar", AsistenciaQrRouter)
 router.use("/asistencias/confirmar", AsistenciaQrRouter)
 router.use("/asistencias/obtenerListadoDeParticipantesPorEvento", AsistenciaQrRouter)
 router.use("/asistencias/operaciones", AsistenciaQrRouter)
-
+router.use("/asistencias/notas", NotasRouter)
+router.use("/asistencias", AsistenciaRouter)
+router.use("/asistencias", AsistenciaQrRouter)
 export default router
