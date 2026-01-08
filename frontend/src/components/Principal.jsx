@@ -262,7 +262,7 @@ export default function Principal() {
               </Typography>
             )}
             <Tooltip title="Cerrar Sesión">
-              <IconButton color="inherit" onClick={handleLogout}>
+              <IconButton color="inherit" onClick={handleLogout} sx={{ color: 'white' }}>
                 <LogoutIcon />
               </IconButton>
             </Tooltip>
