@@ -6,16 +6,16 @@ const router = Router();
 
 
 // Obtener lista de participantes por evento
-router.get('/participantes', obtenerListaParticipantes);
+router.get('/operaciones/participantes', obtenerListaParticipantes);
 
 // Obtener asistencia por evento y cuil
-router.get('/', obtenerAsistenciaPorEvento);
+router.get('/obtenerListadoDeParticipantesPorEvento', obtenerAsistenciaPorEvento);
 
 // Consultar asistencia (o datos de participante)
-router.get('/:cuil/:id_evento', consultarAsistencia);
+router.get('/consultar/:cuil/:id_evento', consultarAsistencia);
 
 // Confirmar asistencia (Registrar)
-router.post('/', registrarAsistencia);
+router.post('/confirmar', registrarAsistencia);
 
 // Registrar asistencia manual
 router.put('/manual', registrarAsistenciaManual);

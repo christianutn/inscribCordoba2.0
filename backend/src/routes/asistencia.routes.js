@@ -4,6 +4,11 @@ import passport from "passport";
 import autorizar from "../utils/autorizar.js"
 import upload from "../middlewares/upload.js";
 
+import AsistenciasCursosRouter from "../domains/Asistencia/api/routes/cursos.routes.js";
+import EventosRouter from "../domains/Asistencia/api/routes/eventos.routes.js";
+import NotasRouter from "../domains/Asistencia/api/routes/nota.routes.js";
+import AsistenciaQrRouter from "../domains/Asistencia/api/routes/asistencia.routes.js";
+
 
 const inscripcionesRouter = Router();
 
@@ -17,6 +22,11 @@ inscripcionesRouter.post("/inscripciones/cargas-masivas",
     autorizar(['ADM', 'REF', 'GA']), // O los roles que correspondan
     upload.single('excelFile'),
     registrarInscripcionesMasivas)
+
+inscripcionesRouter.use("/cursos", AsistenciasCursosRouter);
+inscripcionesRouter.use("/eventos", EventosRouter);
+inscripcionesRouter.use("/notas", NotasRouter);
+inscripcionesRouter.use("/", AsistenciaQrRouter);
 
 
 

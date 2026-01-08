@@ -8,7 +8,8 @@ import {
     Box,
     IconButton,
     Typography,
-    TextField
+    TextField,
+    Tooltip
 } from '@mui/material';
 import {
     Close as CloseIcon,
@@ -61,13 +62,26 @@ const ModalListaParticipantesPorEvento = ({ open, onClose, participantes, nombre
             align: 'center',
             sortable: false,
             renderCell: (params) => (
-                <IconButton
-                    size="small"
-                    onClick={() => handleClickOpenModalAsistenciasYNota(params.row)}
-                    sx={{ color: 'primary.main', '&:hover': { backgroundColor: 'rgba(0, 123, 255, 0.04)' } }}
+                <Tooltip
+                    title="Ver detalle asistencia y nota"
+                    arrow
+                    componentsProps={{
+                        tooltip: {
+                            sx: {
+                                fontSize: '0.9rem',
+                                padding: '8px 12px'
+                            }
+                        }
+                    }}
                 >
-                    <PreviewIcon />
-                </IconButton>
+                    <IconButton
+                        size="small"
+                        onClick={() => handleClickOpenModalAsistenciasYNota(params.row)}
+                        sx={{ color: 'primary.main', '&:hover': { backgroundColor: 'rgba(0, 123, 255, 0.04)' } }}
+                    >
+                        <PreviewIcon />
+                    </IconButton>
+                </Tooltip>
             )
         }
     ];

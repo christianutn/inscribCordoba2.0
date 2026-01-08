@@ -35,12 +35,7 @@ import CambiosEstadosNotasDeAutorizacionRouter from "../domains/Inscribcordoba/a
 import CoordinadorRouter from "./coordinador.routes.js";
 import HistoricoTutoresEnCursoRouter from "../domains/Inscribcordoba/api/routes/historico_tutores_en_cursos.routes.js";
 
-import AsistenciasCursosRouter from "../domains/Asistencia/api/routes/cursos.routes.js";
-import EventosRouter from "../domains/Asistencia/api/routes/eventos.routes.js";
 import FechasInhabilitadasRouter from "./fechas_inhabilitadas.routes.js";
-
-import AsistenciaQrRouter from "../domains/Asistencia/api/routes/asistencia.routes.js";
-import NotasRouter from "../domains/Asistencia/api/routes/nota.routes.js";
 
 
 const router = Router();
@@ -72,19 +67,12 @@ router.use("/areasAsignadasUsuario", AreasAsignadasUsuario)
 router.use("/estadosInstancia", EstadosInstanciaRouter)
 router.use("/departamentos", DepartamentoRouter)
 router.use("/cidi", CidiRouter)
-router.use("/asistencias", AsistenciaRouter)
 router.use("/notas-autorizacion", NotasAutorizacionRouter)
 router.use("/cambios-estados-notas-autorizacion", CambiosEstadosNotasDeAutorizacionRouter)
 router.use("/coordinadores", CoordinadorRouter)
 router.use("/historico-tutores-en-cursos", HistoricoTutoresEnCursoRouter)
-router.use("/asistencias/cursos", AsistenciasCursosRouter)
-router.use("/asistencias/eventos", EventosRouter)
 router.use("/fechas-inhabilitadas", FechasInhabilitadasRouter)
-router.use("/asistencias/consultar", AsistenciaQrRouter)
-router.use("/asistencias/confirmar", AsistenciaQrRouter)
-router.use("/asistencias/obtenerListadoDeParticipantesPorEvento", AsistenciaQrRouter)
-router.use("/asistencias/operaciones", AsistenciaQrRouter)
-router.use("/asistencias/notas", NotasRouter)
 router.use("/asistencias", AsistenciaRouter)
-router.use("/asistencias", AsistenciaQrRouter)
+
+
 export default router
