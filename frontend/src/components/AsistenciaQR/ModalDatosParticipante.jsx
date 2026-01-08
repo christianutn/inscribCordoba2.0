@@ -51,17 +51,17 @@ const ModalDatosParticipante = ({ open, onClose, onConfirm, userData, idEvento, 
                 <CloseIcon />
             </IconButton>
 
-            <Box sx={{ p: 4, pt: 5, textAlign: 'center' }}>
+            <Box sx={{ p: { xs: 2, sm: 4 }, pt: { xs: 3, sm: 5 }, textAlign: 'center' }}>
                 {/* Avatar / Icon */}
                 <Avatar
                     sx={{
                         mx: 'auto',
-                        mb: 3,
-                        width: 80,
-                        height: 80,
+                        mb: 2,
+                        width: { xs: 60, sm: 80 },
+                        height: { xs: 60, sm: 80 },
                         bgcolor: 'primary.light',
                         color: 'primary.main',
-                        fontSize: 40
+                        fontSize: { xs: 30, sm: 40 }
                     }}
                 >
                     <PersonIcon fontSize="inherit" />
@@ -73,7 +73,8 @@ const ModalDatosParticipante = ({ open, onClose, onConfirm, userData, idEvento, 
                     sx={{
                         fontWeight: 'bold',
                         color: 'text.primary',
-                        mb: 1
+                        mb: 1,
+                        fontSize: { xs: '1.25rem', sm: '1.5rem' }
                     }}
                 >
                     Confirmar Asistencia
@@ -81,7 +82,7 @@ const ModalDatosParticipante = ({ open, onClose, onConfirm, userData, idEvento, 
 
                 {/* Course Info */}
                 {nombreCurso && (
-                    <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 'medium', mb: 0.5 }}>
+                    <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 'medium', mb: 0.5, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                         {nombreCurso}
                     </Typography>
                 )}
@@ -91,14 +92,14 @@ const ModalDatosParticipante = ({ open, onClose, onConfirm, userData, idEvento, 
                     </Typography>
                 )}
 
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                     Verifique los datos del participante antes de confirmar.
                 </Typography>
 
                 {/* User Details */}
                 <Box sx={{
                     bgcolor: 'grey.50',
-                    p: 3,
+                    p: 2,
                     borderRadius: 3,
                     mb: 2,
                     border: 1,
@@ -108,7 +109,7 @@ const ModalDatosParticipante = ({ open, onClose, onConfirm, userData, idEvento, 
                         <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
                             NOMBRE Y APELLIDO
                         </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
                             {userData.nombre} {userData.apellido}
                         </Typography>
                     </Box>
@@ -134,7 +135,7 @@ const ModalDatosParticipante = ({ open, onClose, onConfirm, userData, idEvento, 
             <Box
                 sx={{
                     bgcolor: 'grey.50',
-                    px: 3,
+                    px: { xs: 2, sm: 3 },
                     py: 2,
                     borderTop: 1,
                     borderColor: 'divider',
