@@ -22,7 +22,14 @@ export const getTodosLosUltimosEstadoDeNotaDeAutorizacion = async (req, res, nex
 
         const obtenerTodosUltimoEstadoDeNotasDeAutorizacion = new ObtenerTodosUltimoEstadoDeNotasDeAutorizacion({ repositorioCambioEstadoNotaDeAutorizacion: cambioEstadoNotaDeAutorizacionService })
 
-        const ultimosCambiosEstados = await obtenerTodosUltimoEstadoDeNotasDeAutorizacion.ejecutar();
+
+        // Si el rol es de referente entonces se deben filtrar los resultados
+
+        let areaDeReferente = null;
+        if (req.user.user.rol == "REF") {
+            areaDeReferente = req.user.user.area
+        }
+        const ultimosCambiosEstados = await obtenerTodosUltimoEstadoDeNotasDeAutorizacion.ejecutar(areaDeReferente);
 
         res.status(200).json(ultimosCambiosEstados);
 

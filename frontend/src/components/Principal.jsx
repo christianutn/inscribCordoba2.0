@@ -49,6 +49,7 @@ import AsistenciasMain from './AsistenciaQR/AsistenciasMain.jsx';
 import SubaNotaDeAutorizacion from './NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx';
 import Autorizaciones from './NotaDeAutorizacion/Autorizaciones.jsx';
 import MainGestion from './Gestion/MainGestion.jsx';
+import VisualizacionMisNotasRefentes from './NotaDeAutorizacion/VisualizacionMisNotasRefentes.jsx';
 import { getMyUser } from "../services/usuarios.service.js";
 
 const drawerWidth = 260;
@@ -64,9 +65,10 @@ const menuItemsConfig = [
   { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon />, roles: ["ADM"] },
   { label: "Versión reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon />, roles: ['GA', 'ADM'] },
   { label: "Versión reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
-  { label: "Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon />, roles: ['ADM', 'GA', 'REF'] },
+  { label: "Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon />, roles: ['ADM', 'REF'] },
   { label: "Suba Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
   { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["ADM", "REF", 'GA', 'LOG'] },
+  { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon />, roles: ['REF'] },
 
 ];
 
@@ -223,6 +225,7 @@ export default function Principal() {
       case "VersionReducidaAdministradores": return <VersionReducidaAdministradores />;
       case "SubaNotaDeAutorizacion": return <SubaNotaDeAutorizacion />;
       case "Autorizaciones": return <Autorizaciones />;
+      case "MisNotasAutorizacionIdentifier": return <VisualizacionMisNotasRefentes />;
       case "Home":
       default: return <Home nombre={user?.nombre} setOpcionSeleccionada={setOpcionSeleccionada} />;
     }

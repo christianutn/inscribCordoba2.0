@@ -16,6 +16,7 @@ import AsistenciasMain from './components/AsistenciaQR/AsistenciasMain';
 import Layout from './components/layout/Layout';
 import Confirmaciones from './components/NotaDeAutorizacion/Confirmacion';
 import RegistroAsistencia from './components/AsistenciaQR/RegistroAsistencia';
+import VisualizacionMisNotasRefentes from './components/NotaDeAutorizacion/VisualizacionMisNotasRefentes';
 function App() {
 
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path='/asistencias' element={<Layout><AsistenciasMain /></Layout>} />
           <Route path='/confirmaciones' element={<Layout><Confirmaciones /></Layout>} />
           <Route path='/asistencia/registrar/:courseId' element={<Layout><RegistroAsistencia /></Layout>} />
+          <Route path='/mis-notas-autorizacion' element={<Layout><VisualizacionMisNotasRefentes /></Layout>} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

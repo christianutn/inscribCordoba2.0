@@ -13,11 +13,10 @@ const manejadorArchivos = new ManejadorArchivos("nota_autorizacion");
 
 
 
-router.get('/', getNotasDeAutorizacion);
 
 router.put('/',
     passport.authenticate('jwt', { session: false }),
-    autorizar(['ADM', 'REF', 'GA']),
+    autorizar(['ADM']),
     autorizarNotaDeAutorizacion
 )
 

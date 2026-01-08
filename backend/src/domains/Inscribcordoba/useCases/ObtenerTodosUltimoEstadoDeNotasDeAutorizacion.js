@@ -4,9 +4,15 @@ class ObtenerTodosUltimoEstadoDeNotasDeAutorizacion {
         this.repositorioCambioEstadoNotaDeAutorizacion = repositorioCambioEstadoNotaDeAutorizacion;
     }
 
-    async ejecutar() {
+    async ejecutar(areaReferente = null) {
 
-        const todosLosCambiosEstados = await this.repositorioCambioEstadoNotaDeAutorizacion.getTodosLosCambiosEstados();
+        let todosLosCambiosEstados = await this.repositorioCambioEstadoNotaDeAutorizacion.getTodosLosCambiosEstados();
+
+        if (areaReferente) {
+            todosLosCambiosEstados = todosLosCambiosEstados.filter(cambio =>
+                cambio.NotaAutorizacion.detalle_usuario.area === areaReferente
+            );
+        }
 
         // filtramos y dejamos sólo los últimos, son aquellos que tiene fecha_hasta igual a null
         const ultimosCambiosEstados = todosLosCambiosEstados.filter(cambio =>
