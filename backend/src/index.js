@@ -20,6 +20,8 @@ import manejarErrorGlobales from "./middlewares/manejoGlobalErrores.js"
 import associateAllModels from './models/associateAllModels.js';
 
 const app = express();
+// Configurar confianza en proxy (necesario para Rate Limit detrás de AWS LB / Nginx)
+app.set('trust proxy', 1);
 
 console.log("Comenzando index de la aplicación")
 

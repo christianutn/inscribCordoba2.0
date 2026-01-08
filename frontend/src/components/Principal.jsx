@@ -62,11 +62,11 @@ const menuItemsConfig = [
   { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon />, roles: ["ADM", "GA"] },
   { label: "Restricciones Fechas", identifier: "RestriccionesFechasInicioCursada", icon: <GavelIcon />, roles: ["ADM"] },
   { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon />, roles: ["ADM"] },
-  { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["ADM", "REF", 'GA'] },
   { label: "Versión reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon />, roles: ['GA', 'ADM'] },
   { label: "Versión reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
-  { label: "Suba Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
   { label: "Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon />, roles: ['ADM', 'GA', 'REF'] },
+  { label: "Suba Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
+  { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["ADM", "REF", 'GA', 'LOG'] },
 
 ];
 
@@ -239,7 +239,7 @@ export default function Principal() {
               aria-label="open drawer"
               onClick={handleDrawerOpen}
               edge="start"
-              sx={{ mr: 1, ...(open && { display: 'none' }) }}
+              sx={{ mr: 1, ...(open && { display: 'none' }), color: 'white' }}
             >
               <MenuIcon />
             </IconButton>

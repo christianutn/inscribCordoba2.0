@@ -31,21 +31,19 @@ const eventosController = new EventosController(eventoService);
 
 // Bind the method to the controller instance to preserve 'this' context
 router.get("/listado",
-    passport.authenticate("jwt", { session: false }),
-    autorizar(['ADM', 'REF', 'GA']), // Assuming these roles based on context, user can adjust if needed
     eventosController.obtenerListaEventos.bind(eventosController)
 
 );
 
 router.post("/manual",
     passport.authenticate("jwt", { session: false }),
-    autorizar(['ADM', 'REF', 'GA']), // Assuming these roles based on context, user can adjust if needed
+    autorizar(['ADM', 'LOG', 'GA']), // Assuming these roles based on context, user can adjust if needed
     eventosController.crearEvento.bind(eventosController)
 )
 
 router.get("/detalle-evento-con-asistencia/:id_evento",
     passport.authenticate("jwt", { session: false }),
-    autorizar(['ADM', 'REF', 'GA']), // Assuming these roles based on context, user can adjust if needed
+    autorizar(['ADM', 'LOG', 'GA']), // Assuming these roles based on context, user can adjust if needed
     eventosController.obtenerDetalleEventoConAsistencia.bind(eventosController)
 )
 
