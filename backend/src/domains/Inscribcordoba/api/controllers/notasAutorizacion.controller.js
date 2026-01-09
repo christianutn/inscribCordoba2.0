@@ -8,6 +8,10 @@ import RegistrarAutoricionDeNotaDeAutorizacion from "../../useCases/RegistrarAut
 
 import CambiosEstadoNotaDeAutorizacionRepository from "../../core/repositories/CambiosEstadosNotasDeAutorizacionRepository.js";
 import CambiosEstadoNotaDeAutorizacionService from "../../core/services/CambiosEstadosNotasDeAutorizacionService.js";
+import EmailAdapter from "../../../../adapters/EmailAdapter.js";
+import Personas from "../models/persona.models.js";
+import Area from "../models/area.models.js";
+
 
 import HistoricoTutoresEnCursoService from "../../core/services/HistoricoTutoresEnCursoService.js";
 import HistoricoTutoresEnCursoRepository from "../../core/repositories/HistoricoTutoresEnCursoRepository.js";
@@ -46,6 +50,9 @@ export const registrarNotaDeAutorizacion = async (req, res, next) => {
             repositorioCambioEstadoNotaDeAutorizacion: cambiosEstadoNotaDeAutorizacionRepository
         });
 
+        // Instanciamos el adapter de email
+        const emailAdapter = new EmailAdapter();
+
 
         // Creamos la instancia del caso de uso, inyectando las dependencias
         const registrarNota = new RegistrarNotaAutorizacionUseCase(
@@ -57,7 +64,10 @@ export const registrarNotaDeAutorizacion = async (req, res, next) => {
                 googleDriveService,
                 notaDeAutorizacionService,
                 manejadorArchivos,
-                cambiosEstadoNotaDeAutorizacionService
+                cambiosEstadoNotaDeAutorizacionService,
+                emailAdapter,
+                personaModel: Personas,
+                areaModel: Area
 
             }
         );

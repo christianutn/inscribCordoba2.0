@@ -2,6 +2,7 @@ import GoogleDrive from "../../../services/GoogleDriveService.js"
 import sequelize from "../../../config/database.js";
 import { DateTime } from "luxon";
 
+
 class RegistrarNotaDeAutorizacion {
 
     constructor(archivo_nota_autorizacion, cuil_usuario, apellido_coordinador, cod_area,
@@ -10,6 +11,9 @@ class RegistrarNotaDeAutorizacion {
             notaDeAutorizacionService,
             manejadorArchivos,
             cambiosEstadoNotaDeAutorizacionService,
+            emailAdapter,
+            personaModel,
+            areaModel
 
         }) {
         this.archivo_nota_autorizacion = archivo_nota_autorizacion;
@@ -22,6 +26,9 @@ class RegistrarNotaDeAutorizacion {
         this.notaDeAutorizacionService = notaDeAutorizacionService;
         this.manejadorArchivos = manejadorArchivos;
         this.cambiosEstadoNotaDeAutorizacionService = cambiosEstadoNotaDeAutorizacionService;
+        this.emailAdapter = emailAdapter;
+        this.personaModel = personaModel;
+        this.areaModel = areaModel;
 
     }
 
@@ -36,7 +43,7 @@ class RegistrarNotaDeAutorizacion {
             // 2. Creamos la nota de autorización en la DB dentro de la transacción
             const nuevaNotaAutorizacion = await this.notaDeAutorizacionService.crearNotaAutorizacion(this.cuil_usuario, fechaActual, t);
 
-            // 3. Subimos el archivo a Google Drive. Si esto falla, el catch hará rollback.
+
 
             // Queda pendiente ya que se necesita una cuenta workpace
             // await this.googleDrive.uploadFile(this.archivo_nota_autorizacion, this.cod_area, this.apellido_coordinador, nuevaNotaAutorizacion.id);
@@ -64,8 +71,34 @@ class RegistrarNotaDeAutorizacion {
                 }
             )
 
+            // 7. Enviamos correo a soporte indicando que se registró una nota de autorización
+            // Obtenemos datos del usuario
+            const persona = await this.personaModel.findByPk(this.cuil_usuario);
+            if (!persona) {
+                throw new Error(`No se encontró la persona con CUIL: ${this.cuil_usuario}`);
+            }
 
-            // 7. Si todo fue exitoso, confirmamos la transacción.
+            // Obtenemos datos del área
+            const area = await this.areaModel.findByPk(this.cod_area);
+            if (!area) {
+                throw new Error(`No se encontró el área con código: ${this.cod_area}`);
+            }
+
+            // Preparamos los datos para el correo
+            const datosUsuario = {
+                nombre: persona.nombre,
+                apellido: persona.apellido,
+                cuil: persona.cuil,
+                nombreArea: area.nombre
+            };
+
+            // Enviamos el correo. Si falla, se lanzará una excepción y se hará rollback
+            await this.emailAdapter.enviarNotificacionNotaAutorizacion(
+                datosUsuario,
+                nuevaNotaAutorizacion.id
+            );
+
+            // 8. Si todo fue exitoso (incluyendo el envío del correo), confirmamos la transacción.
             await t.commit();
 
             return respuestaGuardadoArchivo;
@@ -78,6 +111,12 @@ class RegistrarNotaDeAutorizacion {
         }
     }
 
+
+
+
 }
+
+
+
 
 export default RegistrarNotaDeAutorizacion;
