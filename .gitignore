@@ -27,4 +27,10 @@ yarn-debug.log*
 Thumbs.db
 AI_CONTEXT.md
 
-uploads/notas_de_autorizacion
+# Archivos subidos por usuarios
+# Ignora todo el contenido de la carpeta uploads
+uploads/*
+# EXCEPTO los archivos .gitkeep para mantener la estructura de carpetas
+!uploads/.gitkeep
+!uploads/*/.gitkeep
+!uploads/**/.gitkeep
