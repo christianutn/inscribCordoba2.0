@@ -212,7 +212,7 @@ const VisualizacionMisNotasRefentes = () => {
                                             </Typography>
                                             {isAutorizado && (
                                                 <Typography >
-                                                    <Box component="span" fontWeight="bold">Fecha de Aprobación:</Box> {item.fecha_hasta ? dayjs(item.fecha_hasta).format('DD-MM-YYYY') : '-'}
+                                                    <Box component="span" fontWeight="bold">Fecha de Aprobación:</Box> {item.fecha_desde ? dayjs(item.fecha_desde).format('DD-MM-YYYY') : '-'}
                                                 </Typography>
                                             )}
                                         </Box>
