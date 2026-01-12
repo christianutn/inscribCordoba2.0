@@ -52,7 +52,7 @@ const config = {
         url: ENV === 'production'
             ? process.env.URL_PROD_FRONTEND
             : ENV === 'development'
-                ? process.env.URL_TEST_FRONTEND
+                ? process.env.URL_LOCAL_SIN_PORT_FRONTEND
                 : process.env.URL_LOCAL_SIN_PORT_FRONTEND || 'http://localhost:3000',
     },
 
@@ -60,7 +60,11 @@ const config = {
     email: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
-        supportEmail: 'soportecampuscordoba@cba.gov.ar',
+        supportEmail: ENV === 'production'
+            ? process.env.EMAIL_SUPPORT_PROD
+            : ENV === 'development'
+                ? process.env.EMAIL_SUPPORT_DEV
+                : process.env.EMAIL_SUPPORT_DEV,
     },
 
     // JWT

@@ -95,7 +95,8 @@ class RegistrarNotaDeAutorizacion {
             // Enviamos el correo. Si falla, se lanzará una excepción y se hará rollback
             await this.emailAdapter.enviarNotificacionNotaAutorizacion(
                 datosUsuario,
-                nuevaNotaAutorizacion.id
+                nuevaNotaAutorizacion.id,
+                respuestaGuardadoArchivo.ruta // Ruta completa del archivo PDF guardado
             );
 
             // 8. Si todo fue exitoso (incluyendo el envío del correo), confirmamos la transacción.
