@@ -23,4 +23,11 @@ yarn-debug.log*
 # Archivos generados por el sistema operativo
 .DS_Store
 Thumbs.db
-uploads
+
+# Archivos subidos por usuarios
+# Ignora todo el contenido de la carpeta uploads
+uploads/*
+# EXCEPTO los archivos .gitkeep para mantener la estructura de carpetas
+!uploads/.gitkeep
+!uploads/*/.gitkeep
+!uploads/**/.gitkeep

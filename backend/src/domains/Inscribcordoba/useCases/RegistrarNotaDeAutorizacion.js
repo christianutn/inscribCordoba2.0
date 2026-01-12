@@ -35,6 +35,7 @@ class RegistrarNotaDeAutorizacion {
     async ejecutar() {
         // Iniciamos transacción
         const t = await sequelize.transaction();
+        let archivoGuardado = null; // Tracking del archivo para limpieza en caso de error
 
         try {
             // 1. Creamos fecha actual de Argentina con formato AAAA-MM-DD
@@ -43,23 +44,20 @@ class RegistrarNotaDeAutorizacion {
             // 2. Creamos la nota de autorización en la DB dentro de la transacción
             const nuevaNotaAutorizacion = await this.notaDeAutorizacionService.crearNotaAutorizacion(this.cuil_usuario, fechaActual, t);
 
-
-
-            // Queda pendiente ya que se necesita una cuenta workpace
-            // await this.googleDrive.uploadFile(this.archivo_nota_autorizacion, this.cod_area, this.apellido_coordinador, nuevaNotaAutorizacion.id);
-
-            // 4. Guardamos localmente el archivo. Si esto falla, el catch hará rollback.
+            // 3. Guardamos localmente el archivo. Si esto falla, el catch hará rollback.
             const respuestaGuardadoArchivo = await this.manejadorArchivos.guardarNotaDeAutorizacionLocalmente(nuevaNotaAutorizacion.id, this.archivo_nota_autorizacion);
 
-            // 5. Actualizamos la nota con la ruta local, dentro de la misma transacción.
+            // Marcamos que el archivo fue guardado (para compensación en caso de error)
+            archivoGuardado = respuestaGuardadoArchivo;
+
+            // 4. Actualizamos la nota con la ruta local, dentro de la misma transacción.
             await this.notaDeAutorizacionService.actualizar(
                 nuevaNotaAutorizacion.id,
                 { ruta_archivo_local: respuestaGuardadoArchivo.rutaRelativa },
                 t
             );
 
-            // 6. Debo además crear el cambio de estado de nota de autorización
-
+            // 5. Creamos el cambio de estado de nota de autorización
             await this.cambiosEstadoNotaDeAutorizacionService.crear({
                 nota_autorizacion_id: nuevaNotaAutorizacion.id,
                 fecha_desde: fechaActual,
@@ -71,7 +69,7 @@ class RegistrarNotaDeAutorizacion {
                 }
             )
 
-            // 7. Enviamos correo a soporte indicando que se registró una nota de autorización
+            // 6. Enviamos correo a soporte indicando que se registró una nota de autorización
             // Obtenemos datos del usuario
             const persona = await this.personaModel.findByPk(this.cuil_usuario);
             if (!persona) {
@@ -99,7 +97,7 @@ class RegistrarNotaDeAutorizacion {
                 respuestaGuardadoArchivo.ruta // Ruta completa del archivo PDF guardado
             );
 
-            // 8. Si todo fue exitoso (incluyendo el envío del correo), confirmamos la transacción.
+            // 7. Si todo fue exitoso (incluyendo el envío del correo), confirmamos la transacción.
             await t.commit();
 
             return respuestaGuardadoArchivo;
@@ -107,8 +105,32 @@ class RegistrarNotaDeAutorizacion {
         } catch (error) {
             // Si algo falló, revertimos todos los cambios en la base de datos.
             await t.rollback();
-            // relanzamos el error para que el controlador lo maneje.
+
+            // Limpieza compensatoria: Si se guardó un archivo físico, lo eliminamos para mantener consistencia
+            if (archivoGuardado) {
+                await this.eliminarArchivoCompensatorio(archivoGuardado.ruta);
+            }
+
+            // Relanzamos el error para que el controlador lo maneje.
             throw error;
+        }
+    }
+
+    /**
+     * Elimina un archivo del sistema de archivos como compensación de una transacción fallida.
+     * Este método se ejecuta cuando ocurre un rollback de DB pero ya se había guardado un archivo físico.
+     * @param {string} rutaArchivo - Ruta completa del archivo a eliminar
+     */
+    async eliminarArchivoCompensatorio(rutaArchivo) {
+        try {
+            const fs = await import('fs/promises');
+            await fs.unlink(rutaArchivo);
+            console.log(`[COMPENSACIÓN] Archivo eliminado exitosamente: ${rutaArchivo}`);
+        } catch (errorEliminacion) {
+            // Si falla la eliminación, lo registramos pero NO lanzamos error
+            // para no ocultar el error original que causó el rollback
+            console.error(`[COMPENSACIÓN] Error al eliminar archivo ${rutaArchivo}:`, errorEliminacion);
+            console.error(`[ADVERTENCIA] El archivo ${rutaArchivo} quedó huérfano y debe ser eliminado manualmente.`);
         }
     }
 
