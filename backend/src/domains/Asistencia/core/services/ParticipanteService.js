@@ -95,4 +95,29 @@ export default class ParticipanteService {
             throw new AppError("Error al actualizar o crear el participante: " + error.message, 500);
         }
     }
+
+    async actualizarOCrearVarios(participantesData, transaction = null) {
+        const t = transaction || await sequelize.transaction();
+        const isLocalTransaction = !transaction;
+
+        try {
+            const sonParticipantesValidos = participantesData.every(p => p.nombres && p.apellido && p.cuil);
+            if (!sonParticipantesValidos) {
+                throw new AppError("Todos los participantes deben tener nombre, apellido y cuil", 400);
+            }
+
+            const result = await this.participanteRepository.actualizarOCrearVarios(participantesData, t);
+
+            if (isLocalTransaction) {
+                await t.commit();
+            }
+
+            return result;
+        } catch (error) {
+            if (isLocalTransaction) {
+                await t.rollback();
+            }
+            throw new AppError("Error al actualizar o crear varios participantes: " + error.message, 500);
+        }
+    }
 }

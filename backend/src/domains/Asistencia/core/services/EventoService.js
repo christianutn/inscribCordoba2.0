@@ -79,16 +79,16 @@ export default class EventoService {
 
             await this.crearEvento(eventoData, transaction);
 
-            // 5. Gestionar Participantes
-            const cuilsParticipantes = data.participantes.map(p => p.cuil);
-            const participantesExistentes = await participanteService.buscarParticipantesPorCuils(cuilsParticipantes);
-            const cuilsExistentes = new Set(participantesExistentes.map(p => p.cuil));
-
-            const participantesParaCrear = data.participantes.filter(p => !cuilsExistentes.has(p.cuil));
-
-            if (participantesParaCrear.length > 0) {
-                await participanteService.crearVarios(participantesParaCrear, transaction);
-            }
+            // 5. Gestionar Participantes (crear o actualizar - operación masiva)
+            // Usamos actualizarOCrearVarios para hacer un upsert masivo de todos los participantes
+            // Esto es mucho más eficiente que hacer un upsert individual en un loop
+            await participanteService.actualizarOCrearVarios(
+                data.participantes.map(participante => ({
+                    ...participante,
+                    es_empleado: 1
+                })),
+                transaction
+            );
 
             // 6. Crear Inscripciones
             const inscripcionesParaCrear = data.participantes.map(participante => ({

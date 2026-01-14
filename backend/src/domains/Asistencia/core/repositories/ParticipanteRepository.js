@@ -66,4 +66,22 @@ export default class ParticipanteRepository {
         }
     }
 
+    async actualizarOCrearVarios(participantesData, transaction = null) {
+        try {
+            // bulkCreate con updateOnDuplicate hace upsert masivo
+            // Si el registro existe (por clave primaria 'cuil'), actualiza los campos listados
+            // Si no existe, lo crea
+            const participantes = await Participante.bulkCreate(
+                participantesData,
+                {
+                    updateOnDuplicate: ['nombres', 'apellido', 'correo_electronico', 'es_empleado', 'reparticion'],
+                    transaction
+                }
+            );
+            return participantes;
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
