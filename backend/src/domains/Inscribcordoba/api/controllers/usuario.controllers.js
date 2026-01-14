@@ -8,7 +8,7 @@ import { createHash } from "../../../../utils/bcrypt.js"
 import generarToken from "../../../../utils/jwt.js";
 import enviarCorreo from "../../../../utils/enviarCorreo.js";
 import parseEsExcepcionParaFechas from "../../../../utils/parseEsExcepcionParaFechas.js"
-import { obtenerURLporEntornoFrontend } from "../../../../utils/obtenerURLporEntorno.js"
+import envConfig from "../../../../config/env.config.js"
 
 export const getUsuario = async (req, res, next) => {
     try {
@@ -303,7 +303,7 @@ export const recuperoContrasenia = async (req, res, next) => {
     try {
         const { cuil } = req.body;
         // Quiero recuperar la URL que hace la petición
-        const url = obtenerURLporEntornoFrontend();
+        const url = envConfig.frontend.url;
 
 
 

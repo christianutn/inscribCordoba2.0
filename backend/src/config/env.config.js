@@ -52,8 +52,8 @@ const config = {
         url: ENV === 'production'
             ? process.env.URL_PROD_FRONTEND
             : ENV === 'development'
-                ? process.env.URL_LOCAL_SIN_PORT_FRONTEND
-                : process.env.URL_LOCAL_SIN_PORT_FRONTEND || 'http://localhost:3000',
+                ? process.env.URL_TEST_FRONTEND
+                : process.env.URL_TEST_FRONTEND || process.env.URL_LOCAL_FRONTEND,
     },
 
     // Email (SMTP)
