@@ -5,6 +5,10 @@ import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 import obtenerToken from '../services/obtenerToken.js';
 import { useState, useEffect } from 'react';
@@ -24,7 +28,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
 
 const Login = () => {
-    const [mensajeDeError, setMensajeDeError] = useState(null); 
+    const [mensajeDeError, setMensajeDeError] = useState(null);
     const [mensajeDeExito, setMensajeDeExito] = useState(null);
     const [open, setOpen] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -32,6 +36,7 @@ const Login = () => {
     const [cuil, setCuil] = useState('');
     const [contrasenia, setContrasenia] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         const rememberedCuil = localStorage.getItem('rememberedCuil');
@@ -167,12 +172,26 @@ const Login = () => {
                 required
                 fullWidth
                 label="Contraseña"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="contrasenia"
                 autoComplete="current-password"
                 variant="outlined"
                 value={contrasenia}
                 onChange={(e) => setContrasenia(e.target.value)}
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton
+                                aria-label="toggle password visibility"
+                                onClick={() => setShowPassword(!showPassword)}
+                                onMouseDown={(e) => e.preventDefault()}
+                                edge="end"
+                            >
+                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                }}
             />
             <FormControlLabel
                 control={<Checkbox value="remember" color="primary" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}
@@ -205,7 +224,7 @@ const Login = () => {
 
     const renderForgotPasswordForm = () => (
         <Box component="form" onSubmit={handleForgotPasswordSubmit} noValidate sx={{ mt: 1 }}>
-           
+
             <Typography variant="body2" align="center" sx={{ mb: 2 }}>
                 Ingresa tu CUIL para recibir instrucciones de recuperación.
             </Typography>
