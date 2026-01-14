@@ -37,6 +37,9 @@ const Login = () => {
     const [contrasenia, setContrasenia] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [cuilRecovery, setCuilRecovery] = useState('');
+    const [emailSent, setEmailSent] = useState(false);
+    const [maskedEmail, setMaskedEmail] = useState('');
 
     useEffect(() => {
         const rememberedCuil = localStorage.getItem('rememberedCuil');
@@ -82,20 +85,19 @@ const Login = () => {
         setMensajeDeError(null);
         setMensajeDeExito(null);
 
-        const data = new FormData(event.currentTarget);
-        const cuil = data.get('cuilRecovery');
-
         try {
-            const resp = await recuperoContrasenia(cuil);
+            const resp = await recuperoContrasenia(cuilRecovery);
             if (resp && resp.cuilRecovery) {
+                setMaskedEmail(resp.cuilRecovery);
                 setMensajeDeExito(
-                    `Si el CUIL está registrado, recibirás instrucciones para restablecer tu contraseña en el correo: ${resp.cuilRecovery}`
+                    `Instrucciones enviadas al correo registrado.`
                 );
             } else {
                 setMensajeDeExito(
-                    "Si el CUIL está registrado, recibirás instrucciones para restablecer tu contraseña."
+                    "Instrucciones enviadas al correo registrado."
                 );
             }
+            setEmailSent(true);
         } catch (error) {
             setMensajeDeError("No se pudo procesar la solicitud de recuperación. Intente nuevamente.");
         } finally {
@@ -127,6 +129,9 @@ const Login = () => {
         setShowForgotPassword(!showForgotPassword);
         setMensajeDeError(null);
         setMensajeDeExito(null);
+        setCuilRecovery('');
+        setEmailSent(false);
+        setMaskedEmail('');
     };
 
     const renderAlerts = () => (
@@ -224,43 +229,80 @@ const Login = () => {
 
     const renderForgotPasswordForm = () => (
         <Box component="form" onSubmit={handleForgotPasswordSubmit} noValidate sx={{ mt: 1 }}>
-
-            <Typography variant="body2" align="center" sx={{ mb: 2 }}>
-                Ingresa tu CUIL para recibir instrucciones de recuperación.
-            </Typography>
-            <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="cuilRecovery"
-                label="CUIL"
-                name="cuilRecovery"
-                autoComplete="username"
-                autoFocus
-                variant="outlined"
-            />
-            <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{
-                    mt: 3,
-                    mb: 2,
-                    borderRadius: '50px',
-                    padding: '10px 0',
-                    fontWeight: 'bold',
-                }}
-                disabled={open}
-            >
-                Enviar Instrucciones
-            </Button>
-            <Grid container justifyContent="center">
-                <Grid item>
-                    <Link href="#" variant="body2" onClick={toggleFormView} sx={{ cursor: 'pointer' }}>
-                        Volver a Iniciar Sesión
-                    </Link>
-                </Grid>
-            </Grid>
+            {!emailSent ? (
+                <>
+                    <Typography variant="body2" align="center" sx={{ mb: 2 }}>
+                        Ingresa tu CUIL para recibir instrucciones de recuperación.
+                    </Typography>
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="cuilRecovery"
+                        label="CUIL"
+                        name="cuilRecovery"
+                        autoComplete="off"
+                        autoFocus
+                        variant="outlined"
+                        value={cuilRecovery}
+                        onChange={(e) => setCuilRecovery(e.target.value)}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{
+                            mt: 3,
+                            mb: 2,
+                            borderRadius: '50px',
+                            padding: '10px 0',
+                            fontWeight: 'bold',
+                        }}
+                        disabled={open || !cuilRecovery.trim()}
+                    >
+                        Enviar Instrucciones
+                    </Button>
+                    <Grid container justifyContent="center">
+                        <Grid item>
+                            <Link href="#" variant="body2" onClick={toggleFormView} sx={{ cursor: 'pointer' }}>
+                                Volver a Iniciar Sesión
+                            </Link>
+                        </Grid>
+                    </Grid>
+                </>
+            ) : (
+                <>
+                    <Box sx={{
+                        bgcolor: '#e8f5e9',
+                        p: 3,
+                        borderRadius: 2,
+                        mb: 3,
+                        textAlign: 'center'
+                    }}>
+                        <Typography variant="h6" sx={{ color: '#2e7d32', mb: 2, fontWeight: 'bold' }}>
+                            ✓ Instrucciones Enviadas
+                        </Typography>
+                        <Typography variant="body1" sx={{ mb: 2 }}>
+                            Hemos enviado las instrucciones para restablecer tu contraseña al siguiente correo:
+                        </Typography>
+                        {maskedEmail && (
+                            <Typography variant="h6" sx={{ color: '#1976d2', mb: 2, fontWeight: 'medium' }}>
+                                {maskedEmail}
+                            </Typography>
+                        )}
+                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                            Por favor, revisa tu bandeja de entrada y sigue los pasos indicados en el correo.
+                        </Typography>
+                    </Box>
+                    <Grid container justifyContent="center">
+                        <Grid item>
+                            <Link href="#" variant="body2" onClick={toggleFormView} sx={{ cursor: 'pointer' }}>
+                                Volver a Iniciar Sesión
+                            </Link>
+                        </Grid>
+                    </Grid>
+                </>
+            )}
         </Box>
     );
 
