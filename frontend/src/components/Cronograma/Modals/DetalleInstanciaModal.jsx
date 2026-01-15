@@ -22,7 +22,9 @@ const DetalleInstanciaModal = ({
     onOpenFechasModal,
     onOpenComentariosModal,
     onOpenPublicadaModal,
-    onOpenCupoModal
+    onOpenCupoModal,
+    showReasignar = true,
+    showCambiarFechas = true
 }) => {
 
     const originalInstanciaData = selectedRowData?.originalInstancia;
@@ -32,7 +34,7 @@ const DetalleInstanciaModal = ({
             return null;
         }
         const displayValue = isBoolean ? formatBooleanToSiNo(value) : (formatValue(value) || '-');
-        return ( 
+        return (
             <React.Fragment key={label}>
                 <ListItem sx={{ py: 0.8, px: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <ListItemText
@@ -77,7 +79,7 @@ const DetalleInstanciaModal = ({
                     />
                     <CardContent sx={{ overflowY: 'auto', flexGrow: 1, p: 2 }}>
                         <List dense>
-                            {renderDetailItem("Asignado", selectedRowData["Asignado"], false, <ActionButton onClick={onOpenReasignModal}>Reasignar</ActionButton>)}
+                            {renderDetailItem("Asignado", selectedRowData["Asignado"], false, showReasignar ? <ActionButton onClick={onOpenReasignModal}>Reasignar</ActionButton> : null)}
                             {renderDetailItem("Estado de Instancia", originalInstanciaData.estado_instancia, false, <ActionButton onClick={onOpenEstadoModal}>Cambiar</ActionButton>)}
 
                             <Divider sx={{ my: 1 }}><Chip label="Fechas Instancia" size="small" /></Divider>
@@ -85,11 +87,13 @@ const DetalleInstanciaModal = ({
                             {renderDetailItem("Fecha Fin Curso", originalInstanciaData.fecha_fin_curso)}
                             {renderDetailItem("Fecha Inicio Inscripción", originalInstanciaData.fecha_inicio_inscripcion)}
                             {renderDetailItem("Fecha Fin Inscripción", originalInstanciaData.fecha_fin_inscripcion, false)}
-                            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                                <ActionButton onClick={onOpenFechasModal}>
-                                    Cambiar Fechas
-                                </ActionButton>
-                            </Box>
+                            {showCambiarFechas && (
+                                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                                    <ActionButton onClick={onOpenFechasModal}>
+                                        Cambiar Fechas
+                                    </ActionButton>
+                                </Box>
+                            )}
 
                             <Divider sx={{ my: 1 }}><Chip label="Detalles Instancia" size="small" /></Divider>
                             {renderDetailItem("Cupo", originalInstanciaData.cupo || 0, false, <ActionButton onClick={onOpenCupoModal}>Cambiar</ActionButton>)}

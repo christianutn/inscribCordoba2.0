@@ -271,6 +271,8 @@ const CronogramaGAReducido = () => {
                     onOpenComentariosModal={() => setComentariosModalOpen(true)}
                     onOpenPublicadaModal={() => setPublicadaModalOpen(true)}
                     onOpenCupoModal={() => setCupoModalOpen(true)}
+                    showReasignar={false}
+                    showCambiarFechas={false}
                 />
 
 

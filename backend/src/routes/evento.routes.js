@@ -67,6 +67,6 @@ eventoRouter.post("/",
 
 eventoRouter.delete("/:curso", passport.authenticate('jwt', { session: false }), autorizar(['ADM']), deleteEvento)
 
-eventoRouter.put("/:curso", passport.authenticate('jwt', { session: false }), autorizar(['ADM']), putEvento)
+eventoRouter.put("/:curso", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'GA']), putEvento)
 
 export default eventoRouter;

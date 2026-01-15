@@ -11,7 +11,7 @@ import { validateCreateUsuario, validateUpdateUsuario, validateDeleteUsuario } f
 const usuarioRouter = Router();
 
 
-usuarioRouter.get("/", passport.authenticate('jwt', { session: false }), autorizar(['ADM']), getUsuario)
+usuarioRouter.get("/", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'GA']), getUsuario)
 
 usuarioRouter.post("/registrar",
     passport.authenticate('jwt', { session: false }),
