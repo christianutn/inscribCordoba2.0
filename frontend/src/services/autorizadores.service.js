@@ -22,7 +22,6 @@ export const getAutorizadores = async (busqueda = "") => {
 
 export const postAutorizador = async (autorizador) => {
     try {
-        console.log(autorizador)
         const response = await fetch(URL, {
             method: "POST",
             headers: {

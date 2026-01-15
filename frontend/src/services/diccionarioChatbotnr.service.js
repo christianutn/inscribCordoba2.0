@@ -10,7 +10,6 @@ export const getDiccionarioChatbotnr = async () => {
         });
         const data = await response.json();
         if (response.status !== 200) {
-            console.log(response);
             throw new Error("No se encontraron registros");
         }
         return data;

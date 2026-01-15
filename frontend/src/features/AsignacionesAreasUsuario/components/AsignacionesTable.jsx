@@ -3,7 +3,6 @@ import { DataGrid } from '@mui/x-data-grid';
 import { Box, Chip, Tooltip } from '@mui/material';
 
 const AsignacionesTable = ({ data, onDelete }) => {
-    console.log(data);
     // Transform data: Group by user (cuil) and collect all their areas
     const transformedData = useMemo(() => {
         return data.reduce((acc, asignacion) => {

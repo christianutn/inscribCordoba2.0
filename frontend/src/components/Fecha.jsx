@@ -80,7 +80,6 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
       if (fechasInhabilitadas.map(element => element.fecha).includes(stringFecha)) return true;
 
-      console.log("fechas inhabilitidas: ", fechasInhabilitadas)
     }
 
 

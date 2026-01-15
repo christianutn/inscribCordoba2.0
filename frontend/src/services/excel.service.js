@@ -25,14 +25,14 @@ export const descargarExcel = async (data, columns, nameFile) => {
 
         // Crear un buffer para el archivo
         const blob = await workbook.xlsx.writeBuffer();
-        
+
         // Crear una URL para el blob y descargar el archivo
         const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
         const link = document.createElement('a');
         link.href = url;
         link.download = nameFile || 'archivoDescargado.xlsx';
         link.click();
-        
+
         // Limpiar el URL del objeto
         window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -90,9 +90,9 @@ export const descargarExcelCronograma = async (data, columns, nameFile) => {
         const headerRow = worksheet.getRow(1);
         headerRow.font = { name: 'Calibri', size: 12, bold: true, color: { argb: 'FF000000' } };
         headerRow.fill = {
-          type: 'pattern',
-          pattern:'solid',
-          fgColor:{argb:'FFD3D3D3'}
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFD3D3D3' }
         };
         headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
         headerRow.height = 20;
@@ -129,7 +129,6 @@ export const descargarExcelCronograma = async (data, columns, nameFile) => {
         // 8. Limpiar la URL del objeto
         window.URL.revokeObjectURL(url);
 
-        console.log('Archivo Excel ordenado generado y descarga iniciada.');
 
     } catch (error) {
         console.error('Error detallado al generar el archivo Excel ordenado:', error);

@@ -61,7 +61,6 @@ const useEventos = () => {
                 certifica_en_cc: item.certifica_en_cc,
                 disenio_a_cargo_cc: item.disenio_a_cargo_cc
             };
-            console.log("Payload to putEvento:", payload);
             await putEvento(payload);
             await fetchData();
             return { success: true };

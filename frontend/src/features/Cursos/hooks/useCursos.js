@@ -75,7 +75,6 @@ const useCursos = () => {
                 aplica_sincronizacion_certificados: newItem.aplica_sincronizacion_certificados,
                 url_curso: newItem.url_curso
             };
-            console.log("Payload to postCurso:", payload);
             await postCurso(payload);
             await fetchData(); // Refresh data
             return { success: true };

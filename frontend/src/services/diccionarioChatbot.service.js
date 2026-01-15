@@ -4,7 +4,6 @@ const URLCNC = process.env.REACT_APP_API_URL + "/diccionarioChatbot/Cnc";
 
 
 
-console.log(URL);
 export const getDiccionarioChatbot = async (pregunta, idCategoria) => {
     try {
         const response = await fetch(`${URL}?pregunta=${pregunta}&idCategoria=${idCategoria}`, {

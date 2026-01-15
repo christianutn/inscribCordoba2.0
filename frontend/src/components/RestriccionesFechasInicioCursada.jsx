@@ -50,7 +50,6 @@ const RestriccionesFechasInicioCursada = () => {
 
                 const rest = await getRestricciones();
 
-                console.log(rest);
 
                 setSelectedMes(listaMeses[rest.restriccion.mesBloqueado ?? 0]);
                 setMaximoCuposDiario(String(rest.restriccion.maximoCuposXDia ?? ""));
@@ -60,7 +59,6 @@ const RestriccionesFechasInicioCursada = () => {
                 setMaximoAcumulado(String(rest.restriccion.maximoAcumulado ?? ""));
 
             } catch (error) {
-                console.error("Error fetching data:", error);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 setSuccess(false);
                 setError(error.message || "Error al cargar los datos");

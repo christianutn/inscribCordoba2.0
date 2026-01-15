@@ -24,7 +24,6 @@ const UsuarioModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
 
     useEffect(() => {
         if (record) {
-            console.log(record);
             setFormData({
                 cuil: record.cuil || '',
                 area: record.detalle_area?.cod || '',
