@@ -27,9 +27,6 @@ import AreasAsignadasUsuario from "./areasAsignadasUsuario.routes.js";
 import EstadosInstanciaRouter from "./estadosInstancia.routes.js";
 import DepartamentoRouter from "./departamento.routes.js"
 import NotasAutorizacionRouter from "../domains/Inscribcordoba/api/routes/notas_autorizacion.routes.js"
-
-import CidiRouter from "./cidi.routes.js";
-
 import AsistenciaRouter from "./asistencia.routes.js";
 import CambiosEstadosNotasDeAutorizacionRouter from "../domains/Inscribcordoba/api/routes/cambios_estados_notas_de_autorizacion.routes.js";
 import CoordinadorRouter from "./coordinador.routes.js";
@@ -66,7 +63,6 @@ router.use("/argentina/feriados", ApiArgentinaFeriadosRouter)
 router.use("/areasAsignadasUsuario", AreasAsignadasUsuario)
 router.use("/estadosInstancia", EstadosInstanciaRouter)
 router.use("/departamentos", DepartamentoRouter)
-router.use("/cidi", CidiRouter)
 router.use("/notas-autorizacion", NotasAutorizacionRouter)
 router.use("/cambios-estados-notas-autorizacion", CambiosEstadosNotasDeAutorizacionRouter)
 router.use("/coordinadores", CoordinadorRouter)
