@@ -9,10 +9,12 @@ import sequelize from '../../../../config/database.js';
 import Persona from '../models/persona.models.js';
 import Usuario from '../models/usuario.models.js';
 import { DateTime } from "luxon"
+import logger from '../../../../utils/logger.js';
 
 
 export const getEventos = async (req, res, next) => {
     try {
+        logger.info('🎉 Iniciando consulta de eventos');
         const eventos = await Evento.findAll({
             order: [
                 ['curso', 'ASC']
@@ -49,7 +51,7 @@ export const getEventos = async (req, res, next) => {
             ]
         });
 
-
+        logger.info(`✅ Eventos obtenidos exitosamente - Total: ${eventos.length} registros`);
         res.status(200).json(eventos); // Se envía directamente la variable 'eventos'
     } catch (error) {
         next(error);
@@ -59,7 +61,17 @@ export const getEventos = async (req, res, next) => {
 export const getEventoByCod = async (req, res, next) => {
     try {
         const { cod } = req.params;
+
+        logger.info(`🔍 Buscando evento por código - Cod: ${cod}`);
+
         const evento = await Evento.findOne({ where: { curso: cod } });
+
+        if (!evento) {
+            logger.warn(`⚠️ Evento no encontrado - Cod: ${cod}`);
+        } else {
+            logger.info(`✅ Evento encontrado - Cod: ${cod}`);
+        }
+
         res.status(200).json(evento);
     } catch (error) {
         next(error);
@@ -69,28 +81,32 @@ export const getEventoByCod = async (req, res, next) => {
 
 export const postEvento = async (req, res, next) => {
 
-
     // Datos del usuario
     try {
-        const { curso, perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc } = req.body;
+        logger.info('🎆 Iniciando creación de evento');
 
+        const { curso, perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc } = req.body;
+        const usuarioCuil = req.user.user.cuil;
+
+        logger.info(`📚 Curso: ${curso} - Usuario: ${usuarioCuil}`);
 
         // obtener curso
         const cursoEvento = await Curso.findOne({ where: { cod: curso } });
         if (!cursoEvento) {
+            logger.warn(`⚠️ Intento de crear evento con curso inexistente - Curso: ${curso}`);
             throw new AppError("Curso no existe", 400);;
         }
 
         // si cursiEvento.tiene_evento_Creado es 1, entonces no se puede crear el evento
         if (cursoEvento.tiene_evento_creado === 1) {
+            logger.warn(`⚠️ Intento de crear evento duplicado - Curso: ${curso} ya tiene evento creado`);
             throw new AppError("El curso ya tiene un evento creado", 400);;
         }
 
 
-
-
         const existeEvento = await Evento.findOne({ where: { curso } });
         if (existeEvento) {
+            logger.warn(`⚠️ Evento ya existe en la base de datos - Curso: ${curso}`);
             throw new AppError("Ya eviste el evento", 400);;
         }
 
@@ -118,6 +134,7 @@ export const postEvento = async (req, res, next) => {
         cursoEvento.tiene_evento_creado = 1;
         await cursoEvento.save();
 
+        logger.info(`✅ Evento creado exitosamente - Curso: ${curso} - Nombre: ${cursoEvento.nombre}`);
 
 
         const htmlBodyCorreo = `<!DOCTYPE html>
@@ -173,8 +190,16 @@ export const postEvento = async (req, res, next) => {
   </body>
 </html>`
         enviarCorreo(htmlBodyCorreo, "Nuevo Formulario - Creación de Evento", "rnicolascarballo@gmail.com");
+
+        logger.info(`📧 Correo de notificación enviado - Curso: ${cursoEvento.nombre}`);
+
         res.status(201).json(evento);
     } catch (error) {
+        logger.error(`❌ Error al crear evento - Curso: ${req.body.curso} - Usuario: ${req.user?.user?.cuil || 'N/A'} - Error: ${error.message}`, {
+            stack: error.stack,
+            curso: req.body.curso,
+            usuario: req.user?.user?.cuil
+        });
         next(error);
     }
 };
@@ -185,10 +210,12 @@ export const deleteEvento = async (req, res, next) => {
     let transaction; // Declara la variable para la transacción aquí
 
     try {
+        const { curso } = req.params;
+
+        logger.info(`🗑️ Iniciando eliminación de evento - Curso: ${curso}`);
+
         // Inicia la transacción
         transaction = await sequelize.transaction();
-
-        const { curso } = req.params;
 
         // 1. Buscar la instancia del evento, dentro de la transacción
         const evento = await Evento.findOne({
@@ -198,6 +225,7 @@ export const deleteEvento = async (req, res, next) => {
         }, { transaction }); // ¡Importante pasar la transacción aquí!
 
         if (!evento) {
+            logger.warn(`⚠️ Intento de eliminar evento inexistente - Curso: ${curso}`);
             // Si el evento no existe, revierte la transacción antes de lanzar el error
             await transaction.rollback();
             throw new AppError("Evento no existe", 400);
@@ -221,6 +249,9 @@ export const deleteEvento = async (req, res, next) => {
 
         // 4. Si todo fue exitoso, commitea la transacción
         await transaction.commit();
+
+        logger.info(`✅ Evento eliminado exitosamente - Curso: ${curso}`);
+
         res.status(200).json({ message: "Evento eliminado y curso actualizado." }); // Mensaje más descriptivo
 
     } catch (error) {
@@ -228,6 +259,12 @@ export const deleteEvento = async (req, res, next) => {
         if (transaction) {
             await transaction.rollback();
         }
+
+        logger.error(`❌ Error al eliminar evento - Curso: ${req.params.curso} - Error: ${error.message}`, {
+            stack: error.stack,
+            curso: req.params.curso
+        });
+
         next(error); // Pasa el error al siguiente middleware de manejo de errores
     }
 };
@@ -238,12 +275,25 @@ export const putEvento = async (req, res, next) => {
         const { curso } = req.params;
         const { perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc } = req.body;
 
+        logger.info(`✏️ Iniciando actualización de evento - Curso: ${curso}`);
+
         const evento = await Evento.findOne({ where: { curso } });
+
+        if (!evento) {
+            logger.warn(`⚠️ Intento de actualizar evento inexistente - Curso: ${curso}`);
+            throw new AppError("Evento no existe", 404);
+        }
 
         await evento.update({ perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc });
 
+        logger.info(`✅ Evento actualizado exitosamente - Curso: ${curso}`);
+
         res.status(200).json(evento);
     } catch (error) {
+        logger.error(`❌ Error al actualizar evento - Curso: ${req.params.curso} - Error: ${error.message}`, {
+            stack: error.stack,
+            curso: req.params.curso
+        });
         next(error);
     }
 }

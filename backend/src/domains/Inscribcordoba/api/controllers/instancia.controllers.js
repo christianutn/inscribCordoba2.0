@@ -17,8 +17,12 @@ import Curso from "../models/curso.models.js";
 
 export const getInstancias = async (req, res, next) => {
     try {
+        logger.info('📋 Iniciando consulta de instancias');
+
         // 1. Obtener los valores del token
         const { rol, area: areaPrincipal, cuil } = req.user.user;
+
+        logger.info(`👤 Usuario consultando: ${cuil} - Rol: ${rol} - Área: ${areaPrincipal || 'N/A'}`);
 
         // 2. Crear la lista de áreas permitidas para el usuario
         //    Esta lógica se ejecuta para todos los roles, pero solo se usará para filtrar si no es ADM/GA.
@@ -166,11 +170,14 @@ export const getInstancias = async (req, res, next) => {
         }
 
         // 6. Enviar la respuesta
+        logger.info(`✅ Instancias obtenidas exitosamente - Total: ${finalResults.length} registros - Filtrado por rol: ${rol}`);
         res.status(200).json(finalResults);
 
     } catch (error) {
-        // Tu logger y manejo de errores (sin cambios)
-        logger.error(`Error en getInstancias por ${req.user?.user?.nombre || 'N/A'} ${req.user?.user?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
+        logger.error(`❌ Error en getInstancias - CUIL: ${req.user?.user?.cuil || 'N/A'} - Error: ${error.message}`, {
+            stack: error.stack,
+            cuil: req.user?.user?.cuil
+        });
         next(error);
     }
 };
@@ -180,6 +187,8 @@ export const postInstancia = async (req, res, next) => {
     const usuario = req.user.user;
 
     try {
+        logger.info('📝 Iniciando creación de instancia(s)');
+
         const {
             curso,
             medio_inscripcion,
@@ -196,14 +205,22 @@ export const postInstancia = async (req, res, next) => {
             cursos_correlativos
         } = req.body;
 
+        logger.info(`📚 Curso: ${curso} - Cohortes: ${cohortes?.length || 0} - Usuario: ${usuario.cuil}`);
+
 
         // Corroboramos que el curso este autorizado
 
         const cursoEncontrado = await Curso.findByPk(curso)
 
-        if(!cursoEncontrado) throw AppError(`El cursos con cod: ${curso}`, 400)
+        if (!cursoEncontrado) {
+            logger.warn(`⚠️ Intento de crear instancia con curso inexistente - Curso: ${curso}`);
+            throw AppError(`El cursos con cod: ${curso}`, 400)
+        }
 
-        if(!cursoEncontrado.esta_autorizado) throw AppError(`El curso con cod: ${curso} no está autorizado`)
+        if (!cursoEncontrado.esta_autorizado) {
+            logger.warn(`⚠️ Intento de crear instancia con curso no autorizado - Curso: ${curso}`);
+            throw AppError(`El curso con cod: ${curso} no está autorizado`)
+        }
 
         const fechaActual = DateTime.now().setZone('America/Argentina/Buenos_Aires');
         const fechaFormateada = fechaActual.toFormat('dd/MM/yyyy HH:mm');
@@ -233,6 +250,7 @@ export const postInstancia = async (req, res, next) => {
             })
 
             if (existeInstancia) {
+                logger.warn(`⚠️ Intento de crear instancia duplicada - Curso: ${curso} - Fecha: ${fechaCursadaDesde}`);
                 throw new AppError(`Ya existe una instancia con el mismo curso y fecha de cursada.`, 400);
             }
 
@@ -283,12 +301,16 @@ export const postInstancia = async (req, res, next) => {
 
         await t.commit();
 
-        logger.info(`Instancia(s) creada(s) por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Curso=${curso}, Cantidad de Cohortes=${cohortes.length}`);
+        logger.info(`✅ Instancia(s) creada(s) exitosamente - Usuario: ${usuario.cuil} - Curso: ${curso} - Cohortes: ${cohortes.length}`);
         res.status(201).json({ message: "Instancias creado exitosamente" });
 
     } catch (error) {
         await t.rollback();
-        logger.error(`Error en postInstancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
+        logger.error(`❌ Error al crear instancia - Usuario: ${usuario?.cuil || 'N/A'} - Curso: ${req.body.curso} - Error: ${error.message}`, {
+            stack: error.stack,
+            usuario: usuario?.cuil,
+            curso: req.body.curso
+        });
         next(error);
     }
 };
@@ -298,6 +320,8 @@ export const deleteInstancia = async (req, res, next) => {
 
     try {
         const { curso, fecha_inicio_curso } = req.body;
+
+        logger.info(`🗑️ Intento de eliminación de instancia - Usuario: ${usuario.cuil} - Curso: ${curso} - Fecha: ${fecha_inicio_curso}`);
         const instancia = await instanciaModel.findOne({
             where: {
                 curso,
@@ -306,7 +330,7 @@ export const deleteInstancia = async (req, res, next) => {
         });
 
         if (!instancia) {
-            logger.warn(`Intento fallido de eliminación por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Instancia no encontrada (Curso: ${curso}, Fecha: ${fecha_inicio_curso})`);
+            logger.warn(`⚠️ Eliminación fallida - Instancia no encontrada - Curso: ${curso} - Fecha: ${fecha_inicio_curso}`);
             const error = new Error("La instancia no existe");
             error.statusCode = 404;
             throw error;
@@ -314,11 +338,15 @@ export const deleteInstancia = async (req, res, next) => {
 
         await instancia.destroy();
 
-        logger.warn(`Instancia eliminada por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Curso=${curso}, Fecha=${fecha_inicio_curso}`);
+        logger.info(`✅ Instancia eliminada exitosamente - Usuario: ${usuario.cuil} - Curso: ${curso} - Fecha: ${fecha_inicio_curso}`);
         res.status(200).json({ message: "Instancia eliminada" });
 
     } catch (error) {
-        logger.error(`Error en deleteInstancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
+        logger.error(`❌ Error al eliminar instancia - Usuario: ${usuario?.cuil || 'N/A'} - Error: ${error.message}`, {
+            stack: error.stack,
+            usuario: usuario?.cuil,
+            curso: req.body.curso
+        });
         next(error);
     }
 };
@@ -328,6 +356,8 @@ export const get_fechas_invalidas = async (req, res, next) => {
     let results = [];
 
     try {
+        logger.info(`📅 Consulta de fechas inválidas - Año: ${targetYear}`);
+
         const cuil = req.user.user.cuil;
         const usuario = await Usuario.findByPk(cuil);
         const es_excepcion_para_fechas = parseInt(usuario.esExcepcionParaFechas);
@@ -430,9 +460,14 @@ export const get_fechas_invalidas = async (req, res, next) => {
                 type: QueryTypes.SELECT,
             });
         }
+
+        logger.info(`✅ Fechas inválidas obtenidas - Año: ${targetYear} - Total: ${results.length} fechas`);
         res.status(200).send(results);
     } catch (error) {
-        logger.error(`Error en get_fechas_invalidas por ${req.user?.user?.nombre || 'N/A'} ${req.user?.user?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
+        logger.error(`❌ Error al consultar fechas inválidas - Año: ${req.params.targetYear} - Error: ${error.message}`, {
+            stack: error.stack,
+            year: req.params.targetYear
+        });
         next(error);
     }
 };
@@ -493,13 +528,15 @@ export const putInstancia = async (req, res, next) => {
     const t = await sequelize.transaction();
 
     try {
+        logger.info('✏️ Iniciando actualización de instancia');
+
         const { curso_params, fecha_inicio_curso_params } = req.params;
         const where = buildUpdateQuery(req.body);
 
+        logger.info(`📝 Usuario: ${usuario.cuil} - Curso: ${curso_params} - Fecha: ${fecha_inicio_curso_params}`);
+
         await updateRestricciones(RestriccionesPorDepartamento, req.body, req.params, t, 'departamentos', req.body.departamentos, 'departamento_id');
         await updateRestricciones(RestriccionesPorCorrelatividad, req.body, req.params, t, 'cursos_correlativos', req.body.cursos_correlativos, 'curso_correlativo');
-
-        logger.info(`Intento de actualización de instancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: Curso=${curso_params}, Fecha=${fecha_inicio_curso_params}, Datos=${JSON.stringify(where)}`);
 
         const [updatedCount] = await instanciaModel.update(where, {
             where: {
@@ -510,9 +547,9 @@ export const putInstancia = async (req, res, next) => {
         });
 
         if (updatedCount > 0) {
-            logger.info(`Instancia actualizada exitosamente por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${updatedCount} fila(s) afectadas.`);
+            logger.info(`✅ Instancia actualizada exitosamente - Usuario: ${usuario.cuil} - Curso: ${curso_params} - Filas afectadas: ${updatedCount}`);
         } else {
-            logger.warn(`Actualización de instancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'} no afectó filas (Curso: ${curso_params}, Fecha: ${fecha_inicio_curso_params}).`);
+            logger.warn(`⚠️ Actualización no afectó filas - Usuario: ${usuario.cuil} - Curso: ${curso_params} - Fecha: ${fecha_inicio_curso_params}`);
         }
 
         await t.commit();
@@ -520,7 +557,11 @@ export const putInstancia = async (req, res, next) => {
 
     } catch (error) {
         await t.rollback();
-        logger.error(`Error en putInstancia por ${usuario?.nombre || 'N/A'} ${usuario?.apellido || 'N/A'}: ${error.message}`, { meta: error.stack });
+        logger.error(`❌ Error al actualizar instancia - Usuario: ${usuario?.cuil || 'N/A'} - Curso: ${req.params.curso_params} - Error: ${error.message}`, {
+            stack: error.stack,
+            usuario: usuario?.cuil,
+            curso: req.params.curso_params
+        });
         next(new AppError("Error al actualizar la instancia", 500));
     }
 };

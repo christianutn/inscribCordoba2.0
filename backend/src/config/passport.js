@@ -36,9 +36,10 @@ const inicializarPassport = () => {
         secretOrKey: process.env.JWT_SECRET
     }, async (jwt_payload, done) => { //jwt_payload = info del token (en este caso, datos del cliente)
         try {
-
+            logger.info(`🔐 Token JWT válido - Usuario: ${jwt_payload.user?.cuil || 'N/A'} - Rol: ${jwt_payload.user?.id_rol || 'N/A'}`);
             return done(null, jwt_payload)
         } catch (error) {
+            logger.error(`❌ Error al validar token JWT: ${error.message}`, { stack: error.stack });
             return done(error)
         }
 
@@ -51,29 +52,35 @@ const inicializarPassport = () => {
     }, async function (req, cuil, contrasenia, done) {
         // Login
         try {
+            logger.info(`🔑 Intento de login - CUIL: ${cuil}`);
 
             const usuario = await Usuario.findOne({ where: { cuil: cuil } });
             if (!usuario) {
-                logger.info(`Error en postLogin: Usuario: No existe`); 
+                logger.warn(`⚠️ Login fallido - Usuario no existe - CUIL: ${cuil}`);
                 return done(null, false);
             }
 
             if (!validatePassword(String(contrasenia), usuario.contrasenia)) {
-                logger.info(`Error en postLogin: Usuario: ${usuario.nombre} (Contraseña/Usuario incorrectos)`);
+                logger.warn(`⚠️ Login fallido - Contraseña incorrecta - CUIL: ${cuil}`);
                 return done(null, false);
             }
 
             const persona = await Persona.findOne({ where: { cuil: cuil } });
             if (!persona) {
+                logger.warn(`⚠️ Login fallido - Persona no encontrada en DB - CUIL: ${cuil}`);
                 return done(null, false);
             }
 
             const datosUsuario = { ...usuario.dataValues, nombre: persona.nombre, apellido: persona.apellido } //Unifico los datos del usuario y de la persona para que se guarde en la sesión
 
+            logger.info(`✅ Login exitoso - Usuario: ${persona.apellido}, ${persona.nombre} (${cuil}) - Rol: ${usuario.rol}`);
             return done(null, datosUsuario); //Devuelvo el usuario y la persona para que se guarde en la sesión;
         } catch (error) {
-
-           return done(error)
+            logger.error(`❌ Error crítico en login - CUIL: ${cuil} - Error: ${error.message}`, {
+                stack: error.stack,
+                cuil: cuil
+            });
+            return done(error)
         }
     }));
 

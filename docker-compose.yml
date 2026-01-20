@@ -23,6 +23,8 @@ services:
     volumes:
       # Servir archivos estáticos (PDFs, etc.)
       - ./uploads:/usr/share/nginx/html/uploads:ro
+      # NUEVA LÍNEA: Persistir logs fuera del contenedor
+      - ./logs:/app/logs
     depends_on:
       - backend
     networks:
