@@ -18,9 +18,11 @@ RUN npm cache clean --force
 # Copiar el resto del código fuente
 COPY . .
 
-# ⚠️ NUEVO: Crear la carpeta de uploads y dar permisos
+# ⚠️ NUEVO: Crear las carpetas de uploads y logs, y dar permisos
 RUN mkdir -p /app/uploads/notas_de_autorizacion && \
-    chmod -R 755 /app/uploads
+    mkdir -p /app/logs && \
+    chmod -R 755 /app/uploads && \
+    chmod -R 755 /app/logs
 
 # Exponer el puerto en el que corre la app
 EXPOSE 4000

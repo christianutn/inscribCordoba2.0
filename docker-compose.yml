@@ -9,6 +9,8 @@ services:
     volumes:
       # Carpeta de uploads persistente en el host
       - ./uploads:/app/uploads
+      # 👇 Persistir logs fuera del contenedor
+      - ./logs:/app/logs
     networks:
       - app-network
     restart: always
@@ -23,8 +25,6 @@ services:
     volumes:
       # Servir archivos estáticos (PDFs, etc.)
       - ./uploads:/usr/share/nginx/html/uploads:ro
-      # NUEVA LÍNEA: Persistir logs fuera del contenedor
-      - ./logs:/app/logs
     depends_on:
       - backend
     networks:
