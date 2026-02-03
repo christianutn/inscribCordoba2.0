@@ -1,0 +1,208 @@
+diff --git a/frontend/.env b/frontend/.env
+index bcbf1f2..c3de5d8 100644
+--- a/frontend/.env
++++ b/frontend/.env
+@@ -1,3 +1,2 @@
+ REACT_APP_API_URL=/api
+ NODE_ENV=development
+-DANGEROUSLY_DISABLE_HOST_CHECK=true
+\ No newline at end of file
+diff --git a/frontend/public/index.html b/frontend/public/index.html
+index 98171db..a422c13 100644
+--- a/frontend/public/index.html
++++ b/frontend/public/index.html
+@@ -1,11 +1,12 @@
+ <!DOCTYPE html>
+-<html lang="en">
++<html lang="es">
+ 
+ <head>
+   <meta charset="utf-8" />
+   <link rel="icon" href="%PUBLIC_URL%/favicon.png" />
+   <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="theme-color" content="#000000" />
++  <meta name="google" content="notranslate" />
+   <meta name="description" content="Web site created using create-react-app" />
+   <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+   <!--
+diff --git a/frontend/src/components/Cronograma/FilterBar.jsx b/frontend/src/components/Cronograma/FilterBar.jsx
+index 9a20c33..45799f1 100644
+--- a/frontend/src/components/Cronograma/FilterBar.jsx
++++ b/frontend/src/components/Cronograma/FilterBar.jsx
+@@ -35,8 +35,8 @@ const FilterBar = ({
+                 </Grid>
+                 <Grid item xs={12} sm={6} md={2}>
+                     <FormControl fullWidth size="small" variant="outlined" disabled={loading || ministerioOptions.length <= 1}>
+-                        <InputLabel id="adm-filter-label">ADM (Ministerio)</InputLabel>
+-                        <Select labelId="adm-filter-label" value={ministerioFilter} label="ADM (Ministerio)" onChange={(e) => setMinisterioFilter(e.target.value)} startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><AccountBalanceIcon color="action" fontSize='small' /></InputAdornment>} sx={{ '& .MuiSelect-select': { pl: 1 } }} >
++                        <InputLabel id="adm-filter-label">Ministerio</InputLabel>
++                        <Select labelId="adm-filter-label" value={ministerioFilter} label="Ministerio" onChange={(e) => setMinisterioFilter(e.target.value)} startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><AccountBalanceIcon color="action" fontSize='small' /></InputAdornment>} sx={{ '& .MuiSelect-select': { pl: 1 } }} >
+                             <MenuItem value="all"><em>Todos</em></MenuItem>
+                             {ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}
+                         </Select>
+diff --git a/frontend/src/components/Formulario.jsx b/frontend/src/components/Formulario.jsx
+index 10feda9..129be14 100644
+--- a/frontend/src/components/Formulario.jsx
++++ b/frontend/src/components/Formulario.jsx
+@@ -195,7 +195,7 @@ export default function Formulario() {
+       {nuevoEvento ? <NuevoEvento setNuevoEvento={setNuevoEvento} setOpenAlertDialog={setOpenAlertDialog} setTituloAlerta={setTituloAlerta} setMensajeAlerta={setMensajeAlerta} selectCurso={selectCurso} onEventoCreado={handleEventoCreado} /> :
+         <form id="form-crear-instancia"> {/* Añadido el ID para consistencia */}
+           <div className='grid-container-formulario'>
+-            <div className='titulo'><Titulo texto='Formulario: Nuevas cohortes' /></div>
++            <div className='titulo'><Titulo texto='Formulario: Crear Cohorte' /></div>
+             <div className='divider'><Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} /></div>
+             <div className='info-curso'>
+               <div className='select-ministerio'><Autocomplete options={ministerios.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio} getValue={(value) => { setSelectMinisterio(value); setSelectArea(""); setSelectCurso(""); const ministerioSeleccionado = ministerios.find(m => m.nombre === value); if (ministerioSeleccionado) { setAreas(ministerioSeleccionado.detalle_areas); setCursos([]); } else { setAreas([]); setCursos([]); } }} /></div>
+diff --git a/frontend/src/components/NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx b/frontend/src/components/NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx
+index 6c8ffb6..4659f37 100644
+--- a/frontend/src/components/NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx
++++ b/frontend/src/components/NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx
+@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
+ import { Button, Tooltip, Backdrop, CircularProgress, Alert } from '@mui/material';
+ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+ import { styled } from '@mui/material/styles';
+-import {subirNotaDeAutorizacion} from '../../services/notasDeAutorizacion.service';
++import { subirNotaDeAutorizacion } from '../../services/notasDeAutorizacion.service';
+ 
+ const VisuallyHiddenInput = styled('input')({
+   clip: 'rect(0 0 0 0)',
+@@ -42,7 +42,7 @@ const SubaNotaDeAutorizacion = () => {
+     try {
+       await subirNotaDeAutorizacion(file);
+       setAlert({ open: true, message: 'Nota de autorización subida correctamente.', severity: 'success' });
+-      setFile(null); 
++      setFile(null);
+       if (fileInputRef.current) {
+         fileInputRef.current.value = '';
+       }
+@@ -83,8 +83,8 @@ const SubaNotaDeAutorizacion = () => {
+   return (
+     <div style={{ padding: '20px', maxWidth: '960px', margin: 'auto' }}>
+       {alert.open && (
+-        <Alert 
+-          severity={alert.severity} 
++        <Alert
++          severity={alert.severity}
+           sx={{ width: '100%', mb: 2 }}
+           onClose={() => setAlert({ ...alert, open: false })}
+         >
+@@ -92,16 +92,16 @@ const SubaNotaDeAutorizacion = () => {
+         </Alert>
+       )}
+       <div style={{ marginBottom: '20px' }}>
+-        <h2>Suba su Nota de Autorización</h2>
+-        <p style={{ fontSize: '14px', color: '#666666' }}>Subí la nota de autorización para continuar. Solo se aceptan archivos PDF.</p>
++        <h2>Cargar Nota de Autorización</h2>
++        <p style={{ fontSize: '14px', color: '#666666' }}>Adjuntá la nota de autorización para habilitar los cursos.</p>
+       </div>
+ 
+-      <div 
+-        style={{ 
+-          border: isDragOver ? '2px dashed #3f51b5' : '2px dashed #dae1e7', 
+-          borderRadius: '8px', 
+-          padding: '56px 24px', 
+-          textAlign: 'center', 
++      <div
++        style={{
++          border: isDragOver ? '2px dashed #3f51b5' : '2px dashed #dae1e7',
++          borderRadius: '8px',
++          padding: '56px 24px',
++          textAlign: 'center',
+           marginBottom: '24px',
+           cursor: 'pointer',
+           backgroundColor: isDragOver ? '#f0f4ff' : 'transparent'
+@@ -113,7 +113,8 @@ const SubaNotaDeAutorizacion = () => {
+       >
+         <VisuallyHiddenInput type="file" accept=".pdf" onChange={handleFileChange} ref={fileInputRef} />
+         <CloudUploadIcon style={{ fontSize: '50px', color: '#9e9e9e' }} />
+-        <p style={{ fontSize: '18px', color: '#333333' }}>Arrastrá y soltá tu PDF acá</p>
++        <p style={{ fontSize: '18px', color: '#333333' }}>Arrastrá tu archivo acá
++        </p>
+         <p style={{ fontSize: '14px', color: '#666666' }}>o seleccioná un archivo desde tu computadora</p>
+         <Button
+           component="label"
+@@ -121,26 +122,25 @@ const SubaNotaDeAutorizacion = () => {
+           variant="contained"
+           tabIndex={-1}
+           startIcon={<CloudUploadIcon />}
+-          
++
+         >
+-          Seleccionar Archivo
++          Seleccionar Archivo PDF
+           <VisuallyHiddenInput type="file" accept=".pdf" onChange={handleFileChange} ref={fileInputRef} />
+         </Button>
+         {file && <p style={{ marginTop: '16px' }}>Archivo seleccionado: {file.name}</p>}
+-        <p style={{ fontSize: '12px', color: '#666666', paddingTop: '8px' }}>Solo se aceptan archivos PDF.</p>
+       </div>
+ 
+       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
+         <Tooltip title="Subir la nota de autorización seleccionada">
+           <span>
+-            <Button 
+-              variant="contained" 
+-              color="primary" 
+-              onClick={handleUpload} 
++            <Button
++              variant="contained"
++              color="primary"
++              onClick={handleUpload}
+               disabled={!file || loading}
+-              
++
+             >
+-              Subir Nota
++              Subir nota de autorización
+             </Button>
+           </span>
+         </Tooltip>
+diff --git a/frontend/src/components/Principal.jsx b/frontend/src/components/Principal.jsx
+index 773b540..cd18194 100644
+--- a/frontend/src/components/Principal.jsx
++++ b/frontend/src/components/Principal.jsx
+@@ -57,7 +57,7 @@ const drawerWidth = 260;
+ 
+ const menuItemsConfig = [
+   { label: "Inicio", identifier: "Home", icon: <HouseIcon />, roles: ["ADM", "REF", 'GA'] },
+-  { label: "Nueva Cohorte", identifier: "Formulario", icon: <EditCalendarIcon />, roles: ["ADM", "REF", 'GA'] },
++  { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon />, roles: ["ADM", "REF", 'GA'] },
+   { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon />, roles: ["ADM", "REF", 'GA'] },
+   { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon />, roles: ["ADM", "REF", 'GA'] },
+   { label: "Gestion Eventos", identifier: "GestionEventos", icon: <SettingsSuggestIcon />, roles: ["GA"] },
+@@ -67,8 +67,8 @@ const menuItemsConfig = [
+   { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon />, roles: ["ADM"] },
+   { label: "Versión reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon />, roles: ['GA', 'ADM'] },
+   { label: "Versión reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
+-  { label: "Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon />, roles: ['ADM'] },
+-  { label: "Suba Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
++  { label: "Gestionar Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon />, roles: ['ADM'] },
++  { label: "Cargar Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
+   { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["ADM", 'GA', 'LOG'] },
+   { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon />, roles: ['REF'] },
+ ];
+diff --git a/frontend/src/components/VersionReducidaAdministradores.jsx b/frontend/src/components/VersionReducidaAdministradores.jsx
+index 30cf34d..aa751af 100644
+--- a/frontend/src/components/VersionReducidaAdministradores.jsx
++++ b/frontend/src/components/VersionReducidaAdministradores.jsx
+@@ -233,7 +233,7 @@ const CronogramaAdminReducido = () => {
+                 {dataError && !successMessage && <Alert severity="error" onClose={() => { setError(null); setSuccessMessage(''); }} sx={{ mb: 2 }}>{dataError}</Alert>}
+ 
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
+-                    <Titulo texto="Cronograma Admin Reducido" />
++                    <Titulo texto="Cronograma Administradores" />
+                     <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={dataLoading || !filteredData.length} />
+                 </Box>
+                 <Divider sx={{ mb: 3, borderBottomWidth: 2 }} />
+diff --git a/frontend/src/components/VersionReducidaGA.jsx b/frontend/src/components/VersionReducidaGA.jsx
+index b02ecb1..324dd76 100644
+--- a/frontend/src/components/VersionReducidaGA.jsx
++++ b/frontend/src/components/VersionReducidaGA.jsx
+@@ -227,7 +227,7 @@ const CronogramaGAReducido = () => {
+                 {dataError && !successMessage && <Alert severity="error" onClose={() => { setError(null); setSuccessMessage(''); }} sx={{ mb: 2 }}>{dataError}</Alert>}
+ 
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
+-                    <Titulo texto="Cronograma Admin Reducido" />
++                    <Titulo texto="Cronograma Gestión Académica" />
+                     <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={dataLoading || !filteredData.length} />
+                 </Box>
+                 <Divider sx={{ mb: 3, borderBottomWidth: 2 }} />
