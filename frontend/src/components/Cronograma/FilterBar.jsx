@@ -35,8 +35,8 @@ const FilterBar = ({
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
                     <FormControl fullWidth size="small" variant="outlined" disabled={loading || ministerioOptions.length <= 1}>
-                        <InputLabel id="adm-filter-label">ADM (Ministerio)</InputLabel>
-                        <Select labelId="adm-filter-label" value={ministerioFilter} label="ADM (Ministerio)" onChange={(e) => setMinisterioFilter(e.target.value)} startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><AccountBalanceIcon color="action" fontSize='small' /></InputAdornment>} sx={{ '& .MuiSelect-select': { pl: 1 } }} >
+                        <InputLabel id="adm-filter-label">Ministerio</InputLabel>
+                        <Select labelId="adm-filter-label" value={ministerioFilter} label="Ministerio" onChange={(e) => setMinisterioFilter(e.target.value)} startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><AccountBalanceIcon color="action" fontSize='small' /></InputAdornment>} sx={{ '& .MuiSelect-select': { pl: 1 } }} >
                             <MenuItem value="all"><em>Todos</em></MenuItem>
                             {ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}
                         </Select>

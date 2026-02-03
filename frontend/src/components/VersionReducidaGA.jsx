@@ -227,7 +227,7 @@ const CronogramaGAReducido = () => {
                 {dataError && !successMessage && <Alert severity="error" onClose={() => { setError(null); setSuccessMessage(''); }} sx={{ mb: 2 }}>{dataError}</Alert>}
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
-                    <Titulo texto="Cronograma Admin Reducido" />
+                    <Titulo texto="Cronograma Gestión Académica" />
                     <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={dataLoading || !filteredData.length} />
                 </Box>
                 <Divider sx={{ mb: 3, borderBottomWidth: 2 }} />

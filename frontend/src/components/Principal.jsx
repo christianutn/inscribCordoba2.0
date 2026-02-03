@@ -57,7 +57,7 @@ const drawerWidth = 260;
 
 const menuItemsConfig = [
   { label: "Inicio", identifier: "Home", icon: <HouseIcon />, roles: ["ADM", "REF", 'GA'] },
-  { label: "Nueva Cohorte", identifier: "Formulario", icon: <EditCalendarIcon />, roles: ["ADM", "REF", 'GA'] },
+  { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon />, roles: ["ADM", "REF", 'GA'] },
   { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon />, roles: ["ADM", "REF", 'GA'] },
   { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon />, roles: ["ADM", "REF", 'GA'] },
   { label: "Gestion Eventos", identifier: "GestionEventos", icon: <SettingsSuggestIcon />, roles: ["GA"] },
@@ -67,8 +67,8 @@ const menuItemsConfig = [
   { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon />, roles: ["ADM"] },
   { label: "Versión reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon />, roles: ['GA', 'ADM'] },
   { label: "Versión reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
-  { label: "Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon />, roles: ['ADM'] },
-  { label: "Suba Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
+  { label: "Gestionar Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon />, roles: ['ADM'] },
+  { label: "Cargar Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
   { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["ADM", 'GA', 'LOG'] },
   { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon />, roles: ['REF'] },
 ];

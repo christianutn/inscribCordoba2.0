@@ -195,7 +195,7 @@ export default function Formulario() {
       {nuevoEvento ? <NuevoEvento setNuevoEvento={setNuevoEvento} setOpenAlertDialog={setOpenAlertDialog} setTituloAlerta={setTituloAlerta} setMensajeAlerta={setMensajeAlerta} selectCurso={selectCurso} onEventoCreado={handleEventoCreado} /> :
         <form id="form-crear-instancia"> {/* Añadido el ID para consistencia */}
           <div className='grid-container-formulario'>
-            <div className='titulo'><Titulo texto='Formulario: Nuevas cohortes' /></div>
+            <div className='titulo'><Titulo texto='Formulario: Crear Cohorte' /></div>
             <div className='divider'><Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} /></div>
             <div className='info-curso'>
               <div className='select-ministerio'><Autocomplete options={ministerios.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio} getValue={(value) => { setSelectMinisterio(value); setSelectArea(""); setSelectCurso(""); const ministerioSeleccionado = ministerios.find(m => m.nombre === value); if (ministerioSeleccionado) { setAreas(ministerioSeleccionado.detalle_areas); setCursos([]); } else { setAreas([]); setCursos([]); } }} /></div>

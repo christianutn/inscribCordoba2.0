@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Button, Tooltip, Backdrop, CircularProgress, Alert } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
-import {subirNotaDeAutorizacion} from '../../services/notasDeAutorizacion.service';
+import { subirNotaDeAutorizacion } from '../../services/notasDeAutorizacion.service';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -42,7 +42,7 @@ const SubaNotaDeAutorizacion = () => {
     try {
       await subirNotaDeAutorizacion(file);
       setAlert({ open: true, message: 'Nota de autorización subida correctamente.', severity: 'success' });
-      setFile(null); 
+      setFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -83,8 +83,8 @@ const SubaNotaDeAutorizacion = () => {
   return (
     <div style={{ padding: '20px', maxWidth: '960px', margin: 'auto' }}>
       {alert.open && (
-        <Alert 
-          severity={alert.severity} 
+        <Alert
+          severity={alert.severity}
           sx={{ width: '100%', mb: 2 }}
           onClose={() => setAlert({ ...alert, open: false })}
         >
@@ -92,16 +92,16 @@ const SubaNotaDeAutorizacion = () => {
         </Alert>
       )}
       <div style={{ marginBottom: '20px' }}>
-        <h2>Suba su Nota de Autorización</h2>
-        <p style={{ fontSize: '14px', color: '#666666' }}>Subí la nota de autorización para continuar. Solo se aceptan archivos PDF.</p>
+        <h2>Cargar Nota de Autorización</h2>
+        <p style={{ fontSize: '14px', color: '#666666' }}>Adjuntá la nota de autorización para habilitar los cursos.</p>
       </div>
 
-      <div 
-        style={{ 
-          border: isDragOver ? '2px dashed #3f51b5' : '2px dashed #dae1e7', 
-          borderRadius: '8px', 
-          padding: '56px 24px', 
-          textAlign: 'center', 
+      <div
+        style={{
+          border: isDragOver ? '2px dashed #3f51b5' : '2px dashed #dae1e7',
+          borderRadius: '8px',
+          padding: '56px 24px',
+          textAlign: 'center',
           marginBottom: '24px',
           cursor: 'pointer',
           backgroundColor: isDragOver ? '#f0f4ff' : 'transparent'
@@ -113,7 +113,8 @@ const SubaNotaDeAutorizacion = () => {
       >
         <VisuallyHiddenInput type="file" accept=".pdf" onChange={handleFileChange} ref={fileInputRef} />
         <CloudUploadIcon style={{ fontSize: '50px', color: '#9e9e9e' }} />
-        <p style={{ fontSize: '18px', color: '#333333' }}>Arrastrá y soltá tu PDF acá</p>
+        <p style={{ fontSize: '18px', color: '#333333' }}>Arrastrá tu archivo acá
+        </p>
         <p style={{ fontSize: '14px', color: '#666666' }}>o seleccioná un archivo desde tu computadora</p>
         <Button
           component="label"
@@ -121,26 +122,25 @@ const SubaNotaDeAutorizacion = () => {
           variant="contained"
           tabIndex={-1}
           startIcon={<CloudUploadIcon />}
-          
+
         >
-          Seleccionar Archivo
+          Seleccionar Archivo PDF
           <VisuallyHiddenInput type="file" accept=".pdf" onChange={handleFileChange} ref={fileInputRef} />
         </Button>
         {file && <p style={{ marginTop: '16px' }}>Archivo seleccionado: {file.name}</p>}
-        <p style={{ fontSize: '12px', color: '#666666', paddingTop: '8px' }}>Solo se aceptan archivos PDF.</p>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
         <Tooltip title="Subir la nota de autorización seleccionada">
           <span>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={handleUpload} 
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleUpload}
               disabled={!file || loading}
-              
+
             >
-              Subir Nota
+              Subir nota de autorización
             </Button>
           </span>
         </Tooltip>
