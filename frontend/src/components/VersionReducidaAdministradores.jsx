@@ -33,6 +33,7 @@ import ConfirmacionDialog from './Cronograma/Modals/ConfirmacionDialog';
 import GestionarRestriccionesModal from './Cronograma/Modals/GestionarRestriccionesModal';
 import CambiarComentariosModal from './Cronograma/Modals/CambiarComentariosModal';
 import CambiarCupoModal from './Cronograma/Modals/CambiarCupoModal.jsx';
+import CambiarMedioInscripcionModal from './Cronograma/Modals/CambiarMedioInscripcionModal.jsx';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
@@ -43,7 +44,7 @@ const CronogramaAdminReducido = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const {
         cursosData, loading: dataLoading, error: dataError, fetchData, allUsers, adminUsers,
-        allEstados, allCursos, allDepartamentos, ministerioOptions, setError
+        allEstados, allCursos, allDepartamentos, allMediosInscripcion, ministerioOptions, setError
     } = useCronogramaData();
 
     const {
@@ -63,6 +64,7 @@ const CronogramaAdminReducido = () => {
     const [comentariosModalOpen, setComentariosModalOpen] = useState(false);
     const [publicadaModalOpen, setPublicadaModalOpen] = useState(false);
     const [cupoModalOpen, setCupoModalOpen] = useState(false)
+    const [medioInscripcionModalOpen, setMedioInscripcionModalOpen] = useState(false);
 
 
     // Loading states for modal actions
@@ -108,6 +110,7 @@ const CronogramaAdminReducido = () => {
         setPublicadaModalOpen(false);
         setLoadingAction(false);
         setCupoModalOpen(false);
+        setMedioInscripcionModalOpen(false);
         // No limpiar selectedRowData aquí para que el modal principal no parpadee al cerrar los sub-modales
     }, []);
 
@@ -210,6 +213,11 @@ const CronogramaAdminReducido = () => {
         (data) => data
     );
 
+    const handleUpdateMedioInscripcion = createUpdateHandler(
+        (medioCod) => `Medio de inscripción actualizado a "${allMediosInscripcion.find(m => m.cod === medioCod)?.nombre || medioCod}" exitosamente.`,
+        (medioCod) => ({ medio_inscripcion: medioCod })
+    );
+
 
 
     const handleDescargarExcel = useCallback(async () => {
@@ -278,6 +286,7 @@ const CronogramaAdminReducido = () => {
                     onOpenComentariosModal={() => setComentariosModalOpen(true)}
                     onOpenPublicadaModal={() => setPublicadaModalOpen(true)}
                     onOpenCupoModal={() => setCupoModalOpen(true)}
+                    onOpenMedioInscripcionModal={() => setMedioInscripcionModalOpen(true)}
                 />
 
                 <ReasignarModal
@@ -365,6 +374,15 @@ const CronogramaAdminReducido = () => {
                     <strong> {formatBooleanToSiNo(!selectedRowData?.originalInstancia?.es_autogestionado)}</strong>.
                     <Typography sx={{ mt: 2 }}>¿Desea confirmar esta acción?</Typography>
                 </ConfirmacionDialog>
+
+                <CambiarMedioInscripcionModal
+                    open={medioInscripcionModalOpen}
+                    onClose={handleCloseAllModals}
+                    onUpdate={handleUpdateMedioInscripcion}
+                    loading={loadingAction}
+                    selectedRowData={selectedRowData}
+                    allMedios={allMediosInscripcion}
+                />
 
             </div>
         </LocalizationProvider>

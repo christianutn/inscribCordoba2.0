@@ -6,6 +6,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
 import SettingsIcon from '@mui/icons-material/Settings';
+import dayjs from 'dayjs';
 import ActionButton from '../../UIElements/ActionButton';
 import { modalStyle } from '../constants';
 import { formatBooleanToSiNo, formatValue } from '../utils';
@@ -23,6 +24,7 @@ const DetalleInstanciaModal = ({
     onOpenComentariosModal,
     onOpenPublicadaModal,
     onOpenCupoModal,
+    onOpenMedioInscripcionModal,
     showReasignar = true,
     showCambiarFechas = true
 }) => {
@@ -33,7 +35,17 @@ const DetalleInstanciaModal = ({
         if (!showIf) {
             return null;
         }
-        const displayValue = isBoolean ? formatBooleanToSiNo(value) : (formatValue(value) || '-');
+
+        let displayValue;
+        if (isBoolean) {
+            displayValue = formatBooleanToSiNo(value);
+        } else if (label.toLowerCase().includes("fecha") && value) {
+            const d = dayjs(value);
+            displayValue = d.isValid() ? d.format('DD/MM/YYYY') : formatValue(value);
+        } else {
+            displayValue = formatValue(value) || '-';
+        }
+
         return (
             <React.Fragment key={label}>
                 <ListItem sx={{ py: 0.8, px: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -100,6 +112,7 @@ const DetalleInstanciaModal = ({
                             {renderDetailItem("Es Autogestionado", originalInstanciaData.es_autogestionado, true, <ActionButton onClick={onToggleAutogestionado}>Cambiar</ActionButton>)}
                             {renderDetailItem("Publicada en Portal", originalInstanciaData.es_publicada_portal_cc, true, <ActionButton onClick={onOpenPublicadaModal}>Cambiar</ActionButton>)}
                             {renderDetailItem("Comentario", originalInstanciaData.comentario, false, <ActionButton onClick={onOpenComentariosModal}>Cambiar</ActionButton>)}
+                            {renderDetailItem("Medio de inscripción", originalInstanciaData.medio_inscripcion, false, <ActionButton onClick={onOpenMedioInscripcionModal}>Cambiar</ActionButton>)}
                             {renderDetailItem("Cantidad de Inscriptos", originalInstanciaData.cantidad_inscriptos || 0, false, <ActionButton onClick={onOpenOtrosModal}>Cambiar</ActionButton>)}
 
                             <Divider sx={{ my: 1 }}><Chip label="Restricciones" size="small" /></Divider>

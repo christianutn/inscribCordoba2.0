@@ -16,9 +16,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
 import SearchIcon from '@mui/icons-material/Search';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import BotonCircular from "./UIElements/BotonCircular.jsx";
@@ -277,8 +275,19 @@ const Cronograma = () => {
   const isFilterActive = useMemo(() => nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive, [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive]);
 
   const renderDetailItem = useCallback((label, value, isBoolean = false) => {
-    const displayValue = isBoolean ? formatBooleanToSiNo(value) : (formatValue(value) || '-');
+    let displayValue;
+    if (isBoolean) {
+      displayValue = formatBooleanToSiNo(value);
+    } else if (label.toLowerCase().includes("inicio") || label.toLowerCase().includes("fin") || label.toLowerCase().includes("fecha")) {
+      // Intentamos parsear como fecha si el label sugiere que lo es
+      const d = dayjs(value);
+      displayValue = (value && d.isValid()) ? d.format('DD/MM/YYYY') : (formatValue(value) || '-');
+    } else {
+      displayValue = formatValue(value) || '-';
+    }
+
     if (displayValue === '' || displayValue === '-' || value === null) return null;
+
     return (
       <React.Fragment key={label}>
         <ListItem sx={{ py: 0.8, px: 0 }}>
@@ -324,7 +333,20 @@ const Cronograma = () => {
 
         <div style={{ gridArea: 'tabla-cronograma', overflowX: 'auto' }}>
           <Paper elevation={3} sx={{ height: 600, width: '100%' }}>
-            <DataGrid rows={filteredData} columns={columnsForGrid} onRowClick={handleRowClick} getRowId={r => r.id} loading={loading} density="compact" disableRowSelectionOnClick />
+            <DataGrid
+              rows={filteredData}
+              columns={columnsForGrid}
+              onRowClick={handleRowClick}
+              getRowId={r => r.id}
+              loading={loading}
+              density="compact"
+              disableRowSelectionOnClick
+              initialState={{
+                sorting: {
+                  sortModel: [{ field: 'Fecha inicio del curso', sort: 'asc' }],
+                },
+              }}
+            />
           </Paper>
         </div>
       </div>
@@ -333,7 +355,15 @@ const Cronograma = () => {
         <Box sx={modalStyle}>
           {selectedRowData && (
             <Card sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
-              <CardHeader avatar={<InfoIcon color="primary" />} id="course-detail-title" title={selectedRowData["Nombre del curso"]} subheader={`Código: ${selectedRowData["Código del curso"]}`} action={<IconButton onClick={handleCloseModal}><CloseIcon /></IconButton>} sx={{ bgcolor: 'grey.100' }} />
+              <CardHeader
+                avatar={<InfoIcon color="primary" />}
+                id="course-detail-title"
+                title={selectedRowData["Nombre del curso"]}
+                subheader={`Código: ${selectedRowData["Código del curso"]}`}
+                titleTypographyProps={{ variant: 'h6', fontWeight: 'bold', color: 'primary.main' }}
+                action={<IconButton onClick={handleCloseModal}><CloseIcon /></IconButton>}
+                sx={{ bgcolor: 'grey.100', borderBottom: '1px solid', borderColor: 'divider' }}
+              />
               <CardContent sx={{ overflowY: 'auto', flexGrow: 1, p: 2 }}>
                 <List dense>
                   <Divider sx={{ mb: 1 }}><Chip label="Detalles del Curso" size="small" /></Divider>
@@ -360,33 +390,45 @@ const Cronograma = () => {
                   {renderDetailItem("Es Autogestionado", selectedRowData["Es Autogestionado"], true)}
                   {renderDetailItem("Publicada en Portal", selectedRowData["Publica PCC"], true)}
 
-                  <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
-                    <ListItemText primary="Restricción por Edad" />
-                    <Typography variant="body2" color="text.secondary">
-                      {selectedRowData["Tiene restricción por edad"] ? `Desde ${selectedRowData["Edad Desde"]} hasta ${selectedRowData["Edad Hasta"] || 'sin límite'} años` : 'Ninguna'}
-                    </Typography>
+                  <ListItem sx={{ py: 0.8, px: 0 }}>
+                    <ListItemText
+                      primary={selectedRowData["Tiene restricción por edad"] ? `Desde ${selectedRowData["Edad Desde"]} hasta ${selectedRowData["Edad Hasta"] || 'sin límite'} años` : 'Ninguna'}
+                      secondary="Restricción por Edad"
+                      primaryTypographyProps={{ fontWeight: 500, color: 'text.primary', wordBreak: 'break-word' }}
+                      secondaryTypographyProps={{ fontSize: '0.8rem', color: 'text.secondary' }}
+                    />
                   </ListItem>
                   <Divider component="li" sx={{ my: 0.5 }} />
 
-                  <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
-                    <ListItemText primary="Restricción por Departamento" />
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
-                      {selectedRowData["Restricciones por Departamento"].length > 0 ?
-                        selectedRowData["Restricciones por Departamento"].map(d => <Chip key={d.departamento_id} label={d.detalle_departamento?.nombre || d.departamento_id} size="small" />) :
-                        <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>
+                  <ListItem sx={{ py: 0.8, px: 0 }}>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                          {selectedRowData["Restricciones por Departamento"].length > 0 ?
+                            selectedRowData["Restricciones por Departamento"].map(d => <Chip key={d.departamento_id} label={d.detalle_departamento?.nombre || d.departamento_id} size="small" />) :
+                            <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500 }}>Ninguna</Typography>
+                          }
+                        </Box>
                       }
-                    </Box>
+                      secondary="Restricción por Departamento"
+                      secondaryTypographyProps={{ fontSize: '0.8rem', color: 'text.secondary' }}
+                    />
                   </ListItem>
                   <Divider component="li" sx={{ my: 0.5 }} />
 
-                  <ListItem sx={{ py: 1, px: 0, display: 'block' }}>
-                    <ListItemText primary="Restricción por Correlatividad" />
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
-                      {selectedRowData["Restricciones por Correlatividad"].length > 0 ?
-                        selectedRowData["Restricciones por Correlatividad"].map(c => <Chip key={c.curso_correlativo} label={c.detalle_curso_correlativo?.nombre || c.curso_correlativo} size="small" />) :
-                        <Typography variant="body2" color="text.secondary"><i>Ninguna</i></Typography>
+                  <ListItem sx={{ py: 0.8, px: 0 }}>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5, mb: 0.5 }}>
+                          {selectedRowData["Restricciones por Correlatividad"].length > 0 ?
+                            selectedRowData["Restricciones por Correlatividad"].map(c => <Chip key={c.curso_correlativo} label={c.detalle_curso_correlativo?.nombre || c.curso_correlativo} size="small" />) :
+                            <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500 }}>Ninguna</Typography>
+                          }
+                        </Box>
                       }
-                    </Box>
+                      secondary="Restricción por Correlatividad"
+                      secondaryTypographyProps={{ fontSize: '0.8rem', color: 'text.secondary' }}
+                    />
                   </ListItem>
                 </List>
               </CardContent>

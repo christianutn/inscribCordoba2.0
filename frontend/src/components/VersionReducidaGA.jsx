@@ -21,7 +21,6 @@ import Titulo from "./fonts/TituloPrincipal.jsx";
 import { useCronogramaData } from '../hooks/useCronogramaData';
 import { useCronogramaFilters } from '../hooks/useCronogramaFilters';
 
-import { COLUMNAS_VISIBLES } from './Cronograma/constants';
 import { formatBooleanToSiNo } from './Cronograma/utils';
 import FilterBar from './Cronograma/FilterBar';
 import DetalleInstanciaModal from './Cronograma/Modals/DetalleInstanciaModal';
@@ -33,6 +32,7 @@ import ConfirmacionDialog from './Cronograma/Modals/ConfirmacionDialog';
 import GestionarRestriccionesModal from './Cronograma/Modals/GestionarRestriccionesModal';
 import CambiarComentariosModal from './Cronograma/Modals/CambiarComentariosModal';
 import CambiarCupoModal from './Cronograma/Modals/CambiarCupoModal.jsx';
+import CambiarMedioInscripcionModal from './Cronograma/Modals/CambiarMedioInscripcionModal.jsx';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
@@ -43,7 +43,7 @@ const CronogramaGAReducido = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const {
         cursosData, loading: dataLoading, error: dataError, fetchData, allUsers, adminUsers,
-        allEstados, allCursos, allDepartamentos, ministerioOptions, setError
+        allEstados, allCursos, allDepartamentos, allMediosInscripcion, ministerioOptions, setError
     } = useCronogramaData();
 
     const {
@@ -62,18 +62,38 @@ const CronogramaGAReducido = () => {
     const [comentariosModalOpen, setComentariosModalOpen] = useState(false);
     const [publicadaModalOpen, setPublicadaModalOpen] = useState(false);
     const [cupoModalOpen, setCupoModalOpen] = useState(false)
+    const [medioInscripcionModalOpen, setMedioInscripcionModalOpen] = useState(false);
 
 
     // Loading states for modal actions
     const [loadingAction, setLoadingAction] = useState(false);
 
+    const GA_COLUMNS = [
+        "ID del evento",
+        "Nombre del curso",
+        "Fecha inicio inscripción",
+        "Fecha fin inscripción",
+        "Fecha inicio del curso",
+        "Fecha fin del curso",
+        "Es Autogestionado",
+        "Publica en portal",
+        "Medio de inscripción",
+        "Ministerio",
+        "Area"
+    ];
+
     const columnsForGrid = useMemo(() => {
-        return COLUMNAS_VISIBLES.map(headerKey => {
-            let flex = 1; let minWidth = 130;
+        return GA_COLUMNS.map(headerKey => {
+            let flex = 1;
+            let minWidth = 130;
             let valueFormatter = undefined;
 
             if (headerKey === "Nombre del curso") { flex = 2.0; minWidth = 220; }
-            if (headerKey === "Asignado") { flex = 1.8; minWidth = 200; }
+            if (headerKey === "Ministerio") { flex = 1.5; minWidth = 180; }
+            if (headerKey === "Area") { flex = 1.5; minWidth = 180; }
+            if (headerKey === "Medio de inscripción") { flex = 1.2; minWidth = 150; }
+            if (headerKey === "Es Autogestionado") { flex = 0.7; minWidth = 110; }
+
             if (headerKey.toLowerCase().includes("fecha")) {
                 flex = 1.0;
                 minWidth = 140;
@@ -83,12 +103,10 @@ const CronogramaGAReducido = () => {
                     return d.isValid() ? d.format('DD/MM/YYYY') : value;
                 };
             }
-            if (headerKey === "Código del curso") { flex = 0.7; minWidth = 100; }
-            if (headerKey === "Es Autogestionado") { flex = 0.7; minWidth = 110; }
-            if (headerKey === "Estado") { flex = 0.7; minWidth = 110; }
+            if (headerKey === "ID del evento") { flex = 0.7; minWidth = 100; }
             return { field: headerKey, headerName: headerKey, flex, minWidth, valueFormatter };
         }).filter(Boolean);
-    }, [COLUMNAS_VISIBLES]);
+    }, []);
 
     const handleRowClick = useCallback(params => {
         setSelectedRowData(params.row);
@@ -106,6 +124,7 @@ const CronogramaGAReducido = () => {
         setPublicadaModalOpen(false);
         setLoadingAction(false);
         setCupoModalOpen(false);
+        setMedioInscripcionModalOpen(false);
         // No limpiar selectedRowData aquí para que el modal principal no parpadee al cerrar los sub-modales
     }, []);
 
@@ -204,17 +223,22 @@ const CronogramaGAReducido = () => {
         (data) => data
     );
 
+    const handleUpdateMedioInscripcion = createUpdateHandler(
+        (medioCod) => `Medio de inscripción actualizado a "${allMediosInscripcion.find(m => m.cod === medioCod)?.nombre || medioCod}" exitosamente.`,
+        (medioCod) => ({ medio_inscripcion: medioCod })
+    );
+
 
 
     const handleDescargarExcel = useCallback(async () => {
         if (!filteredData.length) return;
         try {
-            await descargarExcel(filteredData, COLUMNAS_VISIBLES, "Cronograma_Admin_Reducido");
+            await descargarExcel(filteredData, GA_COLUMNS, "Cronograma_Admin_Reducido");
         } catch (error) {
             setError("Error al generar el archivo Excel.");
             console.error(error);
         }
-    }, [filteredData, COLUMNAS_VISIBLES, setError]);
+    }, [filteredData, GA_COLUMNS, setError]);
 
     if (dataLoading && !cursosData.length) return (<Backdrop open sx={{ zIndex: t => t.zIndex.drawer + 1, color: '#fff' }}><CircularProgress color="inherit" /></Backdrop>);
     if (dataError && !successMessage) return (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}><Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}><Typography variant="h6" color="error" gutterBottom>Error</Typography><Typography>{dataError}</Typography><Button onClick={fetchData} sx={{ mt: 2 }}>Reintentar</Button></Paper></Box>);
@@ -253,7 +277,7 @@ const CronogramaGAReducido = () => {
                         loading={dataLoading}
                         density="compact"
                         disableRowSelectionOnClick
-                        initialState={{ sorting: { sortModel: [{ field: 'Fecha inicio del curso', sort: 'asc' }] } }}
+                        initialState={{ sorting: { sortModel: [{ field: 'Fecha inicio inscripción', sort: 'asc' }] } }}
                         sx={{ border: 0, '& .MuiDataGrid-columnHeaders': { backgroundColor: 'primary.light', color: 'text.primary' }, '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none!important' }, '& .MuiDataGrid-row': { cursor: 'pointer' }, '& .MuiDataGrid-row:hover': { backgroundColor: 'action.hover', }, '& .MuiDataGrid-overlay': { backgroundColor: 'rgba(255,255,255,0.7)' } }}
                         slots={{ noRowsOverlay: () => (<Box sx={{ mt: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', p: 2 }}><InfoIcon color="action" sx={{ mb: 1, fontSize: '3rem' }} /><Typography align="center">{cursosData.length === 0 ? "No hay datos disponibles." : "No hay cursos que coincidan."}</Typography></Box>) }}
                     />
@@ -271,6 +295,7 @@ const CronogramaGAReducido = () => {
                     onOpenComentariosModal={() => setComentariosModalOpen(true)}
                     onOpenPublicadaModal={() => setPublicadaModalOpen(true)}
                     onOpenCupoModal={() => setCupoModalOpen(true)}
+                    onOpenMedioInscripcionModal={() => setMedioInscripcionModalOpen(true)}
                     showReasignar={false}
                     showCambiarFechas={false}
                 />
@@ -335,8 +360,8 @@ const CronogramaGAReducido = () => {
                     loading={loadingAction}
                 >
                     Está a punto de cambiar el estado 'Es Publicada en Portal' de
-                    <strong> {formatBooleanToSiNo(selectedRowData?.originalInstancia?.publica_cc)} </strong> a
-                    <strong> {formatBooleanToSiNo(!selectedRowData?.originalInstancia?.publica_cc)}</strong>.
+                    <strong> {formatBooleanToSiNo(selectedRowData?.originalInstancia?.es_publicada_portal_cc)} </strong> a
+                    <strong> {formatBooleanToSiNo(!selectedRowData?.originalInstancia?.es_publicada_portal_cc)}</strong>.
                     <Typography sx={{ mt: 2 }}>¿Desea confirmar esta acción?</Typography>
                 </ConfirmacionDialog>
 
@@ -352,6 +377,15 @@ const CronogramaGAReducido = () => {
                     <strong> {formatBooleanToSiNo(!selectedRowData?.originalInstancia?.es_autogestionado)}</strong>.
                     <Typography sx={{ mt: 2 }}>¿Desea confirmar esta acción?</Typography>
                 </ConfirmacionDialog>
+
+                <CambiarMedioInscripcionModal
+                    open={medioInscripcionModalOpen}
+                    onClose={handleCloseAllModals}
+                    onUpdate={handleUpdateMedioInscripcion}
+                    loading={loadingAction}
+                    selectedRowData={selectedRowData}
+                    allMedios={allMediosInscripcion}
+                />
 
             </div>
         </LocalizationProvider>
