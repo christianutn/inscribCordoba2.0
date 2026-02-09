@@ -248,9 +248,6 @@ export default function Principal() {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" noWrap component="div" sx={{ display: { xs: 'none', sm: 'block' } }}>
-              {opcionesAMostrar.find(opt => opt.identifier === opcionSeleccionada)?.label || 'InscribCórdoba'}
-            </Typography>
           </Stack>
 
           <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 600, flexGrow: 1, textAlign: 'center' }} >

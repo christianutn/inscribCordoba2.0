@@ -3,8 +3,6 @@
     grid-template-columns: 1fr 1fr; // Dos columnas para una mejor distribución
     grid-template-rows: auto;
     grid-template-areas:
-        "titulo titulo"
-        "divider divider"
         "info-curso info-curso"
         "opciones-evento opciones-evento"
         "restricciones restricciones"
@@ -14,8 +12,8 @@
     grid-gap: 25px; // Aumento el espacio para mayor claridad
     margin: 20px 50px; // Margen ajustado
 
-    .titulo { grid-area: titulo; }
-    .divider { grid-area: divider; }
+    // .titulo { grid-area: titulo; }
+    // .divider { grid-area: divider; }
 
     // Contenedor para la información principal del curso
     .info-curso {
@@ -31,7 +29,7 @@
         gap: 10px;
     }
 
-    .opciones-evento { 
+    .opciones-evento {
         grid-area: opciones-evento;
         border-top: 1px solid #ccc; // Separador visual
         padding-top: 20px;
@@ -43,7 +41,7 @@
         display: flex;
         flex-direction: column;
         gap: 15px;
-        
+
         .restriccion-edad {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -52,22 +50,22 @@
         }
     }
 
-    .tutores { 
-        grid-area: tutores; 
-        display: flex; 
-        flex-direction: column; 
+    .tutores {
+        grid-area: tutores;
+        display: flex;
+        flex-direction: column;
         border-top: 1px solid #ccc; // Separador visual
         padding-top: 20px;
     }
 
-    .cohortes { 
-        grid-area: cohortes; 
+    .cohortes {
+        grid-area: cohortes;
         border-top: 1px solid #ccc; // Separador visual
         padding-top: 20px;
     }
 
-    .submit { 
-        grid-area: submit; 
+    .submit {
+        grid-area: submit;
         justify-self: end; // Alinea el botón a la derecha
     }
 
@@ -75,8 +73,6 @@
     @media (max-width: 768px) {
         grid-template-columns: 1fr; // Una sola columna
         grid-template-areas:
-            "titulo"
-            "divider"
             "info-curso"
             "opciones-evento"
             "restricciones"

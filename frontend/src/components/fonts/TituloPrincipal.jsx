@@ -3,9 +3,9 @@ import { Typography } from "@mui/material";
 
 const TituloPrincipal = ({ texto, fontWeight }) => {
     return (
-        <Typography 
+        <Typography
             className="titulo-principal"
-            variant="h3"
+            variant="h5"
             color="text.primary"
             style={{ fontWeight: fontWeight || 'bold' }} // Aplicar fontWeight dinámicamente
         >

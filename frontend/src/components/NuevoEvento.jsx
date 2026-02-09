@@ -9,6 +9,7 @@ import Titulo from "./fonts/TituloPrincipal";
 import Autocomplete from "./UIElements/Autocomplete";
 import Button from "./UIElements/Button";
 import { useEffect } from "react";
+import Divider from '@mui/material/Divider';
 
 //import carga inicial
 import { getPerfiles } from "../services/perfiles.service";
@@ -154,7 +155,7 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
       {
         success &&
         <Alert className='alert' variant="filled" severity="success"  >
-          Nuevo evento cargado con éxtito
+          Nuevo evento cargado con éxito
         </Alert>
       }
       {
@@ -168,7 +169,8 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         {" "}
         {/* Added some margin top/bottom */}
-        <Titulo texto="Formulario: Nuevo Evento" />
+        <Titulo texto="Crear Evento" />
+        <div className='divider'><Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} /></div>
         <Box component="form" noValidate sx={{ mt: 3 }}>
           {" "}
           {/* Using Box as a form container */}

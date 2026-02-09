@@ -22,7 +22,7 @@ import OpcionesEvento from './OpcionesEvento.jsx';
 import NuevoEvento from './NuevoEvento.jsx';
 import Alerta from "./UIElements/Dialog.jsx";
 import { getDepartamentos } from "../services/departamentos.service.js";
-import { Autocomplete as MuiAutocomplete, TextField as MuiTextField, MenuItem, Card, Avatar, Typography, Box } from '@mui/material';
+import { Autocomplete as MuiAutocomplete, TextField as MuiTextField, MenuItem, Card, Avatar, Typography, Box, Container } from '@mui/material';
 import { getHistoricoTutoresVigentesPorCurso } from "../services/historicoTutoresEnCurso.service.js";
 
 export default function Formulario() {
@@ -193,88 +193,92 @@ export default function Formulario() {
       {cargando && <Backdrop sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={cargando}><CircularProgress color="inherit" /></Backdrop>}
 
       {nuevoEvento ? <NuevoEvento setNuevoEvento={setNuevoEvento} setOpenAlertDialog={setOpenAlertDialog} setTituloAlerta={setTituloAlerta} setMensajeAlerta={setMensajeAlerta} selectCurso={selectCurso} onEventoCreado={handleEventoCreado} /> :
-        <form id="form-crear-instancia"> {/* Añadido el ID para consistencia */}
-          <div className='grid-container-formulario'>
-            <div className='titulo'><Titulo texto='Formulario: Crear Cohorte' /></div>
-            <div className='divider'><Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} /></div>
-            <div className='info-curso'>
-              <div className='select-ministerio'><Autocomplete options={ministerios.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio} getValue={(value) => { setSelectMinisterio(value); setSelectArea(""); setSelectCurso(""); const ministerioSeleccionado = ministerios.find(m => m.nombre === value); if (ministerioSeleccionado) { setAreas(ministerioSeleccionado.detalle_areas); setCursos([]); } else { setAreas([]); setCursos([]); } }} /></div>
-              <div className='select-area'><Autocomplete options={areas.filter(a => a.esVigente === 1).map(a => a.nombre)} label={"Seleccione un área"} value={selectArea} getValue={(value) => { setSelectArea(value); setSelectCurso(""); const areaSeleccionada = areas.find(a => a.nombre === value); if (areaSeleccionada) { setCursos(areaSeleccionada.detalle_cursos); } else { setCursos([]); } }} /></div>
-              <div className='select-curso'><Autocomplete options={cursos.filter(c => c.esVigente === 1 && c.esta_autorizado === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso} getValue={async (value) => { setSelectCurso(value); const codCurso = cursos.find(c => c.nombre === value)?.cod; if (codCurso) { try { const tutoresData = await getHistoricoTutoresVigentesPorCurso(codCurso); setTutores(tutoresData); } catch (e) { console.error(e); setTutores([]); } if (!tiene_el_curso_evento_creado(codCurso)) { setTituloAlerta("El curso no tiene un evento creado"); setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${value}'. Por favor, complete este formulario.`); setOpenAlertDialog(true); setNuevoEvento(true); } } else { setTutores([]); } }} /></div>
-              <div className='select-medio-inscripcion'><Autocomplete options={mediosInscripcion.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion} getValue={(value) => setSelectMedioInscripcion(value)} /></div>
-              <div className='select-plataforma-dictado'><Autocomplete options={plataformasDictado.filter(p => p.esVigente === 1).map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado} getValue={(value) => setSelectPlataformaDictado(value)} /></div>
-              <div className='select-tipo-capacitacion'><Autocomplete options={tiposCapacitaciones.filter(t => t.esVigente === 1).map(t => t.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion} getValue={(value) => setSelectTipoCapacitacion(value)} /></div>
-              <div className='input'>
-                <TextField label={"Cupo"} getValue={(value) => setCupo(value)} value={cupo} />
-                <TextField label={"Cantidad de horas"} getValue={(value) => setHoras(value)} value={horas} />
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Titulo texto='Crear Cohorte' />
+          <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} />
+          <form id="form-crear-instancia"> {/* Añadido el ID para consistencia */}
+            <div className='grid-container-formulario'>
+              {/* <div className='titulo'><Titulo texto='Crear Cohorte' /></div> */}
+              {/* <div className='divider'><Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} /></div> */}
+              <div className='info-curso'>
+                <div className='select-ministerio'><Autocomplete options={ministerios.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio} getValue={(value) => { setSelectMinisterio(value); setSelectArea(""); setSelectCurso(""); const ministerioSeleccionado = ministerios.find(m => m.nombre === value); if (ministerioSeleccionado) { setAreas(ministerioSeleccionado.detalle_areas); setCursos([]); } else { setAreas([]); setCursos([]); } }} /></div>
+                <div className='select-area'><Autocomplete options={areas.filter(a => a.esVigente === 1).map(a => a.nombre)} label={"Seleccione un área"} value={selectArea} getValue={(value) => { setSelectArea(value); setSelectCurso(""); const areaSeleccionada = areas.find(a => a.nombre === value); if (areaSeleccionada) { setCursos(areaSeleccionada.detalle_cursos); } else { setCursos([]); } }} /></div>
+                <div className='select-curso'><Autocomplete options={cursos.filter(c => c.esVigente === 1 && c.esta_autorizado === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso} getValue={async (value) => { setSelectCurso(value); const codCurso = cursos.find(c => c.nombre === value)?.cod; if (codCurso) { try { const tutoresData = await getHistoricoTutoresVigentesPorCurso(codCurso); setTutores(tutoresData); } catch (e) { console.error(e); setTutores([]); } if (!tiene_el_curso_evento_creado(codCurso)) { setTituloAlerta("El curso no tiene un evento creado"); setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${value}'. Por favor, complete este formulario.`); setOpenAlertDialog(true); setNuevoEvento(true); } } else { setTutores([]); } }} /></div>
+                <div className='select-medio-inscripcion'><Autocomplete options={mediosInscripcion.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion} getValue={(value) => setSelectMedioInscripcion(value)} /></div>
+                <div className='select-plataforma-dictado'><Autocomplete options={plataformasDictado.filter(p => p.esVigente === 1).map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado} getValue={(value) => setSelectPlataformaDictado(value)} /></div>
+                <div className='select-tipo-capacitacion'><Autocomplete options={tiposCapacitaciones.filter(t => t.esVigente === 1).map(t => t.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion} getValue={(value) => setSelectTipoCapacitacion(value)} /></div>
+                <div className='input'>
+                  <TextField label={"Cupo"} getValue={(value) => setCupo(value)} value={cupo} />
+                  <TextField label={"Cantidad de horas"} getValue={(value) => setHoras(value)} value={horas} />
+                </div>
               </div>
-            </div>
-            <div className='opciones-evento'><OpcionesEvento opciones={opciones} onOpcionesChange={manejarCambioOpciones} /></div>
-            <div className='restricciones'>
-              {opciones.edad && (<div className='restriccion-edad'><TextField label="Edad desde" type="number" value={edadDesde} getValue={(value) => { if (value >= 16) setEdadDesde(value); }} /><MuiTextField select label="Edad hasta" value={edadHasta} onChange={(e) => { const value = e.target.value; if (value === "Sin Restricción" || value >= edadDesde) setEdadHasta(value); }} fullWidth><MenuItem value="Sin Restricción">Sin Restricción</MenuItem>{Array.from({ length: 83 }, (_, i) => i + 18).map((edad) => (<MenuItem key={edad} value={edad} disabled={edad < edadDesde}>{edad}</MenuItem>))}</MuiTextField></div>)}
-              {opciones.departamento && (<div className='restriccion-departamento'><MuiAutocomplete multiple options={departamentos} getOptionLabel={(option) => option.nombre} value={departamentosSeleccionados} onChange={(event, newValue) => setDepartamentosSeleccionados(newValue)} renderInput={(params) => (<MuiTextField {...params} variant="standard" label="Seleccione departamentos" placeholder="Departamentos" />)} /></div>)}
-              {opciones.correlatividad && (<div className='restriccion-correlatividad'><MuiAutocomplete multiple options={cursos} getOptionLabel={(option) => option.nombre} value={cursosCorrelativosSeleccionados} onChange={(event, newValue) => setCursosCorrelativosSeleccionados(newValue)} renderInput={(params) => (<MuiTextField {...params} variant="standard" label="Seleccione cursos correlativos" placeholder="Cursos" />)} /></div>)}
-            </div>
-            <div className='tutores'>
-              <SubtituloPrincipal texto='Tutores' />
-              <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
-                {/* Profesores con permiso de edición */}
-                {tutores.some(t => t.rol_tutor_cod === 'CPE') && (
-                  <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: '#004582' }}>
-                      Profesores con permiso de edición
-                    </Typography>
-                    {tutores.filter(t => t.rol_tutor_cod === 'CPE').map((tutor) => (
-                      <Card key={tutor.id} sx={{ display: 'flex', alignItems: 'center', p: 1, mb: 1, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
-                        <Avatar sx={{ bgcolor: '#009ada', mr: 2 }}>
-                          {tutor.detalle_persona.nombre.charAt(0)}{tutor.detalle_persona.apellido.charAt(0)}
-                        </Avatar>
-                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                          <Typography variant="body1">
-                            {tutor.detalle_persona.nombre} {tutor.detalle_persona.apellido}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            {tutor.detalle_rol_tutor.nombre}
-                          </Typography>
-                        </Box>
-                      </Card>
-                    ))}
-                  </Box>
-                )}
+              <div className='opciones-evento'><OpcionesEvento opciones={opciones} onOpcionesChange={manejarCambioOpciones} /></div>
+              <div className='restricciones'>
+                {opciones.edad && (<div className='restriccion-edad'><TextField label="Edad desde" type="number" value={edadDesde} getValue={(value) => { if (value >= 16) setEdadDesde(value); }} /><MuiTextField select label="Edad hasta" value={edadHasta} onChange={(e) => { const value = e.target.value; if (value === "Sin Restricción" || value >= edadDesde) setEdadHasta(value); }} fullWidth><MenuItem value="Sin Restricción">Sin Restricción</MenuItem>{Array.from({ length: 83 }, (_, i) => i + 18).map((edad) => (<MenuItem key={edad} value={edad} disabled={edad < edadDesde}>{edad}</MenuItem>))}</MuiTextField></div>)}
+                {opciones.departamento && (<div className='restriccion-departamento'><MuiAutocomplete multiple options={departamentos} getOptionLabel={(option) => option.nombre} value={departamentosSeleccionados} onChange={(event, newValue) => setDepartamentosSeleccionados(newValue)} renderInput={(params) => (<MuiTextField {...params} variant="standard" label="Seleccione departamentos" placeholder="Departamentos" />)} /></div>)}
+                {opciones.correlatividad && (<div className='restriccion-correlatividad'><MuiAutocomplete multiple options={cursos} getOptionLabel={(option) => option.nombre} value={cursosCorrelativosSeleccionados} onChange={(event, newValue) => setCursosCorrelativosSeleccionados(newValue)} renderInput={(params) => (<MuiTextField {...params} variant="standard" label="Seleccione cursos correlativos" placeholder="Cursos" />)} /></div>)}
+              </div>
+              <div className='tutores'>
+                <SubtituloPrincipal texto='Tutores' />
+                <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
+                  {/* Profesores con permiso de edición */}
+                  {tutores.some(t => t.rol_tutor_cod === 'CPE') && (
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: '#004582' }}>
+                        Profesores con permiso de edición
+                      </Typography>
+                      {tutores.filter(t => t.rol_tutor_cod === 'CPE').map((tutor) => (
+                        <Card key={tutor.id} sx={{ display: 'flex', alignItems: 'center', p: 1, mb: 1, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
+                          <Avatar sx={{ bgcolor: '#009ada', mr: 2 }}>
+                            {tutor.detalle_persona.nombre.charAt(0)}{tutor.detalle_persona.apellido.charAt(0)}
+                          </Avatar>
+                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                            <Typography variant="body1">
+                              {tutor.detalle_persona.nombre} {tutor.detalle_persona.apellido}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              {tutor.detalle_rol_tutor.nombre}
+                            </Typography>
+                          </Box>
+                        </Card>
+                      ))}
+                    </Box>
+                  )}
 
-                {/* Profesores sin permiso de edición */}
-                {tutores.some(t => t.rol_tutor_cod === 'SPE') && (
-                  <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: '#004582' }}>
-                      Profesores sin permiso de edición
-                    </Typography>
-                    {tutores.filter(t => t.rol_tutor_cod === 'SPE').map((tutor) => (
-                      <Card key={tutor.id} sx={{ display: 'flex', alignItems: 'center', p: 1, mb: 1, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
-                        <Avatar sx={{ bgcolor: '#899dac', mr: 2 }}>
-                          {tutor.detalle_persona.nombre.charAt(0)}{tutor.detalle_persona.apellido.charAt(0)}
-                        </Avatar>
-                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                          <Typography variant="body1">
-                            {tutor.detalle_persona.nombre} {tutor.detalle_persona.apellido}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            {tutor.detalle_rol_tutor.nombre}
-                          </Typography>
-                        </Box>
-                      </Card>
-                    ))}
-                  </Box>
-                )}
+                  {/* Profesores sin permiso de edición */}
+                  {tutores.some(t => t.rol_tutor_cod === 'SPE') && (
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: '#004582' }}>
+                        Profesores sin permiso de edición
+                      </Typography>
+                      {tutores.filter(t => t.rol_tutor_cod === 'SPE').map((tutor) => (
+                        <Card key={tutor.id} sx={{ display: 'flex', alignItems: 'center', p: 1, mb: 1, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
+                          <Avatar sx={{ bgcolor: '#899dac', mr: 2 }}>
+                            {tutor.detalle_persona.nombre.charAt(0)}{tutor.detalle_persona.apellido.charAt(0)}
+                          </Avatar>
+                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                            <Typography variant="body1">
+                              {tutor.detalle_persona.nombre} {tutor.detalle_persona.apellido}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              {tutor.detalle_rol_tutor.nombre}
+                            </Typography>
+                          </Box>
+                        </Card>
+                      ))}
+                    </Box>
+                  )}
+                </div>
+              </div>
+              <div className='cohortes'>
+                <Cohortes getCohortes={handleCohortes} key={resetCohortesKey} />
+              </div>
+              <div className='submit'>
+                <Button mensaje={"Registrar"} type="button" hanldeOnClick={handleEnviarFormulario} />
               </div>
             </div>
-            <div className='cohortes'>
-              <Cohortes getCohortes={handleCohortes} key={resetCohortesKey} />
-            </div>
-            <div className='submit'>
-              <Button mensaje={"Registrar"} type="button" hanldeOnClick={handleEnviarFormulario} />
-            </div>
-          </div>
-        </form>
+          </form>
+        </Container>
       }
       {<Alerta openAlertDialog={openAlertDialog} setOpenAlertDialog={setOpenAlertDialog} titulo={tituloAlerta} mensaje={mensajeAlerta} />}
     </>
