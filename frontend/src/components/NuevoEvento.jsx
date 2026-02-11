@@ -112,7 +112,9 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
       };
       await postEvento(formData); // Call the service to post the dat
 
-      onEventoCreado(cursoSeleccionado.cod);
+      if (cursoSeleccionado && typeof onEventoCreado === 'function') {
+        onEventoCreado(cursoSeleccionado.cod);
+      }
 
       setSuccess(true);
       setError(null);
