@@ -55,23 +55,41 @@ import { getMyUser } from "../services/usuarios.service.js";
 
 const drawerWidth = 260;
 
-const menuItemsConfig = [
-  { label: "Inicio", identifier: "Home", icon: <HouseIcon />, roles: ["ADM", "REF", 'GA'] },
-  { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon />, roles: ["ADM", "REF", 'GA'] },
-  { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon />, roles: ["ADM", "REF", 'GA'] },
-  { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon />, roles: ["ADM", "REF", 'GA'] },
-  { label: "Gestion Eventos", identifier: "GestionEventos", icon: <SettingsSuggestIcon />, roles: ["GA"] },
-  { label: "Reporte de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon />, roles: ["ADM", 'GA', 'REF'] },
-  { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon />, roles: ["ADM"] },
-  { label: "Restricciones Fechas", identifier: "RestriccionesFechasInicioCursada", icon: <GavelIcon />, roles: ["ADM"] },
-  { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon />, roles: ["ADM"] },
-  { label: "Versión reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon />, roles: ['GA', 'ADM'] },
-  { label: "Versión reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon />, roles: ['ADM'] },
-  { label: "Gestionar Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon />, roles: ['ADM'] },
-  { label: "Cargar Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon />, roles: ['ADM', 'GA', 'REF'] },
-  { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon />, roles: ["ADM", 'GA', 'LOG'] },
-  { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon />, roles: ['REF'] },
-];
+const menuConfigByRole = {
+  ADM: [
+    { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
+    { label: "Reportes de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
+    { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
+    { label: "Versión Reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon /> },
+    { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
+    { label: "Gestionar Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon /> },
+    { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon /> },
+    { label: "Restricciones Fechas", identifier: "RestriccionesFechasInicioCursada", icon: <GavelIcon /> },
+    { label: "Cargar Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon /> },
+    { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
+    { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
+    { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon /> },
+    { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
+  ],
+  REF: [
+    { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
+    { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
+    { label: "Cargar Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon /> },
+    { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
+    { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
+    { label: "Reportes", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
+    { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon /> },
+  ],
+  GA: [
+    { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
+    { label: "Reportes de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
+    { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
+    { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
+    { label: "Gestión", identifier: "GestionEventos", icon: <SettingsSuggestIcon /> },
+    { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
+    { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
+  ],
+};
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -160,16 +178,15 @@ export default function Principal() {
 
         const userRol = res.rol;
 
-        const filteredOptions = menuItemsConfig.filter(item =>
-          item.roles.includes(userRol)
-        );
+        // Obtenemos las opciones directas para el rol, si existen
+        const optionsForRole = menuConfigByRole[userRol] || [];
 
-        setOpcionesAMostrar(filteredOptions);
+        setOpcionesAMostrar(optionsForRole);
 
-        const currentOptionIsValid = filteredOptions.some(opt => opt.identifier === opcionSeleccionada);
-        if (!currentOptionIsValid && filteredOptions.length > 0) {
-          setOpcionSeleccionada(filteredOptions.find(opt => opt.identifier === "Home") ? "Home" : filteredOptions[0].identifier);
-        } else if (filteredOptions.length === 0) {
+        const currentOptionIsValid = optionsForRole.some(opt => opt.identifier === opcionSeleccionada);
+        if (!currentOptionIsValid && optionsForRole.length > 0) {
+          setOpcionSeleccionada(optionsForRole.find(opt => opt.identifier === "Home") ? "Home" : optionsForRole[0].identifier);
+        } else if (optionsForRole.length === 0) {
           console.warn("Usuario no tiene opciones de menú válidas.");
         }
 
