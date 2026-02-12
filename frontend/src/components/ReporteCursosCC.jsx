@@ -82,25 +82,23 @@ const encontrarMesPico = (data, field) => {
 function KpiCard({ title, value, icon, color = 'primary', description }) {
     const IconComponent = icon;
     return (
-        <Card elevation={3} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <CardContent sx={{ flexGrow: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <>
-                        {IconComponent && (
-                            <Box component="span" sx={{ mr: 1.5, display: 'flex', alignItems: 'center', color: theme => theme.palette[color]?.main ?? theme.palette.primary.main }}>
-                                {React.cloneElement(IconComponent, { fontSize: 'large' })}
-                            </Box>
-                        )}
-                        <Typography variant="h6" component="div" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
-                            {title}
-                        </Typography>
-                    </>
+        <Card elevation={3} sx={{ display: 'flex', flexDirection: 'column', height: '100%', borderRadius: 3, transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 } }}>
+            <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    {IconComponent && (
+                        <Box component="span" sx={{ mr: 2, p: 1, borderRadius: '12px', bgcolor: theme => theme.palette[color]?.light ? `${theme.palette[color].light}30` : 'action.hover', color: theme => theme.palette[color]?.main ?? theme.palette.primary.main, display: 'flex', alignItems: 'center' }}>
+                            {React.cloneElement(IconComponent, { fontSize: 'medium' })}
+                        </Box>
+                    )}
+                    <Typography variant="subtitle1" component="div" color="text.secondary" sx={{ fontSize: '1rem', fontWeight: 600, lineHeight: 1.2, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {title}
+                    </Typography>
                 </Box>
-                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', mb: 1, fontSize: '1.8rem' }}>
+                <Typography variant="h3" component="div" sx={{ fontWeight: 800, mb: 1, fontSize: '2.5rem', color: 'text.primary' }}>
                     {value}
                 </Typography>
                 {description && (
-                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.95rem', fontWeight: 500 }}>
                         {description}
                     </Typography>
                 )}
@@ -248,7 +246,7 @@ const ReporteCursosCC = () => {
 
         const summaryData = [];
         for (let mesIndex = 0; mesIndex < 12; mesIndex++) {
-            let cursosPorMes = 0, cursosActivosAnteriores = 0, plataformaExterna = 0, canceladosSuspendidos = 0, autogestionados = 0;
+            let cursosPorMes = 0, cursosActivosAnteriores = 0, plataformaExterna = 0, cursosCC = 0, canceladosSuspendidos = 0, autogestionados = 0;
             let participantesPorMes = 0;
 
             filteredCronogramaData.forEach(instancia => {
@@ -289,12 +287,23 @@ const ReporteCursosCC = () => {
                 if (mesInicioCurso === mesIndex) {
                     if (!isCancelledOrSuspended) {
                         cursosPorMes++;
-                        const plataforma = instancia.plataforma_dictado || instancia.detalle_curso?.plataforma_dictado;
-                        if (String(plataforma).toUpperCase().includes("EXT")) {
+
+                        let codPlataforma = instancia.plataforma_dictado;
+                        if (!codPlataforma && instancia.detalle_curso) {
+                            codPlataforma = instancia.detalle_curso.plataforma_dictado;
+                        }
+                        // Fallback to detailed object if string is not present or if we need to check nested
+                        if (!codPlataforma && instancia.detalle_curso?.detalle_plataformaDictado) {
+                            codPlataforma = instancia.detalle_curso.detalle_plataformaDictado.cod;
+                        }
+
+                        if (codPlataforma === 'CC') {
+                            cursosCC++;
+                            participantesPorMes += participantes;
+                            if (esAutogestionado) autogestionados++;
+                        } else if (codPlataforma === 'EXT') {
                             plataformaExterna++;
                         }
-                        if (esAutogestionado) autogestionados++;
-                        participantesPorMes += participantes;
                     } else {
                         canceladosSuspendidos++;
                     }
@@ -311,11 +320,11 @@ const ReporteCursosCC = () => {
             });
 
             const totalCursosAcumulados = cursosPorMes + cursosActivosAnteriores;
-            const porcentajeAutogestionadosNum = cursosPorMes > 0 ? (autogestionados / cursosPorMes) * 100 : 0;
+            const porcentajeAutogestionadosNum = cursosCC > 0 ? (autogestionados / cursosCC) * 100 : 0;
 
             summaryData.push({
                 id: mesIndex, mesAbrev: mesesAbrev[mesIndex], mesNombre: mesesFull[mesIndex],
-                cursosPorMes, cursosActivosAnteriores, plataformaExterna, totalCursosAcumulados,
+                cursosPorMes, cursosActivosAnteriores, plataformaExterna, cursosCC, totalCursosAcumulados,
                 canceladosSuspendidos, autogestionados, porcentajeAutogestionados: porcentajeAutogestionadosNum,
                 participantesPorMes
             });
@@ -337,16 +346,19 @@ const ReporteCursosCC = () => {
         if (selectedMonth === 'all') {
             const totalNuevosAnual = allMonthsData.reduce((sum, m) => sum + m.cursosPorMes, 0);
             const totalCanceladosAnual = allMonthsData.reduce((sum, m) => sum + m.canceladosSuspendidos, 0);
+            const totalCCAnual = allMonthsData.reduce((sum, m) => sum + (m.cursosCC || 0), 0);
+            const totalExtAnual = allMonthsData.reduce((sum, m) => sum + (m.plataformaExterna || 0), 0);
 
             const mesesConActividad = allMonthsData.filter(m => m.totalCursosAcumulados > 0 || m.cursosPorMes > 0 || m.canceladosSuspendidos > 0);
             const totalActivosSum = mesesConActividad.reduce((sum, m) => sum + m.totalCursosAcumulados, 0);
             const promedioActivosMes = mesesConActividad.length > 0 ? (totalActivosSum / mesesConActividad.length) : 0;
 
             const totalAutogestionadosAnual = allMonthsData.reduce((sum, m) => sum + m.autogestionados, 0);
-            const porcentajeAutogestionadoAnual = totalNuevosAnual > 0 ? (totalAutogestionadosAnual / totalNuevosAnual) * 100 : 0;
+            const porcentajeAutogestionadoAnual = totalCCAnual > 0 ? (totalAutogestionadosAnual / totalCCAnual) * 100 : 0;
 
             setDisplayKpiData({
                 nuevos: totalNuevosAnual, cancelados: totalCanceladosAnual,
+                cursosCC: totalCCAnual, cursosExt: totalExtAnual,
                 activosPromedio: promedioActivosMes.toFixed(1),
                 porcAutogestionado: porcentajeAutogestionadoAnual.toFixed(1) + '%',
                 totalParticipantes: totalParticipantesAnual, isAnnual: true
@@ -369,6 +381,7 @@ const ReporteCursosCC = () => {
 
                 setDisplayKpiData({
                     nuevos: monthData.cursosPorMes, cancelados: monthData.canceladosSuspendidos,
+                    cursosCC: monthData.cursosCC || 0, cursosExt: monthData.plataformaExterna || 0,
                     activosPromedio: monthData.totalCursosAcumulados,
                     porcAutogestionado: monthData.porcentajeAutogestionados.toFixed(1) + '%',
                     totalParticipantes: participantesNuevosMes,
@@ -432,14 +445,14 @@ const ReporteCursosCC = () => {
             const mesMasActivos = encontrarMesPico(displaySummaryData, 'totalCursosAcumulados');
             return (
                 <List dense sx={{ '& .MuiListItemText-secondary': { fontSize: '0.8rem' } }}>
-                    <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><CheckCircleOutlineIcon color="success" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Nuevos Cursos (${currentYear}): ${displayKpiData.nuevos}`} secondary="Cantidad total de cursos que iniciaron durante el año (filtrado)." /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><HighlightOffIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Cancelados/Suspendidos: ${displayKpiData.cancelados}`} secondary="Cursos cuyo inicio estaba programado para este año pero fueron cancelados/suspendidos (filtrado)." /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><TrendingUpIcon color="action" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Promedio Cursos Activos por Mes: ${displayKpiData.activosPromedio}`} secondary="Número promedio de cursos en estado activo (nuevos + de meses anteriores) cada mes (filtrado)." /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`% Autogestionados (sobre nuevos): ${displayKpiData.porcAutogestionado}`} secondary="Porcentaje anual de los nuevos cursos iniciados que fueron de tipo autogestionado (filtrado)." /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Participantes (Cursos Nuevos ${currentYear}): ${displayKpiData.totalParticipantes}`} secondary="Suma de participantes de cursos iniciados en el año (filtrado)." /> </ListItem>
+                    <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><CheckCircleOutlineIcon color="success" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cursos en ${currentYear}: ${displayKpiData.nuevos}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><HighlightOffIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Cancelados/Suspendidos: ${displayKpiData.cancelados}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><TrendingUpIcon color="action" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Promedio de Cursos Acumulados por Mes: ${displayKpiData.activosPromedio}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Porcentaje de Cursos Autogestionados: ${displayKpiData.porcAutogestionado}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cupos (Campus Córdoba ${currentYear}): ${displayKpiData.totalParticipantes}`} /> </ListItem>
                     <Divider component="li" sx={{ my: 2 }} />
                     <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Mes con Más Cursos Nuevos: ${mesMasNuevos}`} /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Mes con Mayor Total de Cursos Activos: ${mesMasActivos}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Mes con Mayor Total de Cursos Acumulados: ${mesMasActivos}`} /> </ListItem>
                 </List>
             );
         } else {
@@ -447,9 +460,9 @@ const ReporteCursosCC = () => {
             if (!monthData) return null;
             return (
                 <List dense sx={{ '& .MuiListItemText-secondary': { fontSize: '0.8rem' } }}>
-                    <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><CheckCircleOutlineIcon color="primary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Nuevos Cursos en ${monthData.mesNombre}: ${monthData.cursosPorMes}`} /> </ListItem>
+                    <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><CheckCircleOutlineIcon color="primary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cursos en ${monthData.mesNombre}: ${monthData.cursosPorMes}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><TrendingUpIcon color="success" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cursos Activos de Meses Anteriores: ${monthData.cursosActivosAnteriores}`} /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Cursos Activos en ${monthData.mesNombre}: ${monthData.totalCursosAcumulados}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Cursos Acumulados en ${monthData.mesNombre}: ${monthData.totalCursosAcumulados}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><CancelIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cancelados/Suspendidos (iniciaban en ${monthData.mesNombre}): ${monthData.canceladosSuspendidos}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Autogestionados (nuevos en ${monthData.mesNombre}): ${monthData.autogestionados} (${monthData.porcentajeAutogestionados.toFixed(1)}%)`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Participantes (Nuevos Cursos ${monthData.mesNombre}): ${displayKpiData.totalParticipantes}`} secondary="Suma de participantes de cursos iniciados en el mes (filtrado)." /> </ListItem>
@@ -468,9 +481,9 @@ const ReporteCursosCC = () => {
             filtersApplied.push(mesesFull[selectedMonth]);
         }
         if (filtersApplied.length > 0) {
-            title += ` (${filtersApplied.join(' / ')})`;
+            title += ` - ${filtersApplied.join(' / ')}`;
         } else if (selectedMonth === 'all') {
-            title += " (Anual General)";
+            title += " - Anual";
         }
         return title;
     };
@@ -568,14 +581,18 @@ const ReporteCursosCC = () => {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-end' } }}>
                             <Button
-                                fullWidth
-                                variant="outlined"
-                                size="medium"
+                                variant="text"
+                                color="primary"
                                 onClick={handleClearFilters}
                                 disabled={!isFilterActive || loading}
                                 startIcon={<ClearAllIcon />}
+                                sx={{
+                                    textTransform: 'none',
+                                    width: { xs: '100%', sm: 'auto' },
+                                    fontWeight: 500
+                                }}
                             >
                                 Limpiar Filtros
                             </Button>
@@ -583,7 +600,7 @@ const ReporteCursosCC = () => {
                     </Grid>
                 </Paper>
             </div>
-            
+
             {loading && (<div style={{ gridArea: 'kpis', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}> <CircularProgress /> <Typography sx={{ ml: 2 }}>Cargando datos...</Typography> </div>)}
             {error && !loading && (<div style={{ gridArea: 'kpis' }}><Alert severity="error" elevation={3}> <strong>Error al cargar el reporte:</strong> {error} </Alert></div>)}
 
@@ -592,15 +609,15 @@ const ReporteCursosCC = () => {
                     {displayKpiData && (
                         <div style={{ gridArea: 'kpis' }}>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title="Nuevos Cursos" value={displayKpiData.nuevos ?? '0'} icon={<AddCircleOutlineIcon />} color="primary" description={displayKpiData.isAnnual ? `Total ${currentYear}` : `En ${displayKpiData.monthName}`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title="Total de Cursos" value={displayKpiData.nuevos ?? '0'} icon={<AddCircleOutlineIcon />} color="primary" description={`Campus Córdoba: ${displayKpiData.cursosCC ?? 0} | Externos: ${displayKpiData.cursosExt ?? 0}`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={6} lg={2.4}> <KpiCard title="Total de Cupos" value={displayKpiData.totalParticipantes ?? '0'} icon={<PeopleIcon />} color="info" description={displayKpiData.isAnnual ? `Total ${currentYear} - Campus Córdoba` : `En ${displayKpiData.monthName} - Campus Córdoba`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title={displayKpiData.isAnnual ? "Acumulados Prom./Mes" : "Total Acumulados Mes"} value={displayKpiData.activosPromedio ?? '0'} icon={<TrendingUpIcon />} color="success" description={displayKpiData.isAnnual ? `Promedio ${currentYear}` : `En ${displayKpiData.monthName}`} /> </Grid>
+                                <Grid item xs={12} sm={12} md={6} lg={2.4}> <KpiCard title="% Autogestionados" value={displayKpiData.porcAutogestionado ?? '0%'} icon={<SettingsSuggestIcon />} color="warning" description={displayKpiData.isAnnual ? `Anual - Campus Córdoba` : `En ${displayKpiData.monthName} - Campus Córdoba`} /> </Grid>
                                 <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title="Cancelados/Susp." value={displayKpiData.cancelados ?? '0'} icon={<CancelIcon />} color="error" description={displayKpiData.isAnnual ? `Iniciaban ${currentYear}` : `Iniciaban en ${displayKpiData.monthName}`} /> </Grid>
-                                <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title={displayKpiData.isAnnual ? "Activos Prom./Mes" : "Total Activos Mes"} value={displayKpiData.activosPromedio ?? '0'} icon={<TrendingUpIcon />} color="success" description={displayKpiData.isAnnual ? `Promedio ${currentYear}` : `En ${displayKpiData.monthName}`} /> </Grid>
-                                <Grid item xs={12} sm={6} md={6} lg={2.4}> <KpiCard title="Participantes" value={displayKpiData.totalParticipantes ?? '0'} icon={<PeopleIcon />} color="info" description={displayKpiData.isAnnual ? `Total ${currentYear} (Nuevos)` : `En ${displayKpiData.monthName} (Nuevos)`} /> </Grid>
-                                <Grid item xs={12} sm={12} md={6} lg={2.4}> <KpiCard title="% Autogestionados" value={displayKpiData.porcAutogestionado ?? '0%'} icon={<SettingsSuggestIcon />} color="warning" description={displayKpiData.isAnnual ? `Anual (s/ nuevos)` : `Mes (s/ nuevos)`} /> </Grid>
                             </Grid>
                         </div>
                     )}
-                    
+
                     <div style={{ gridArea: 'graficos-y-resumen' }}>
                         {allMonthsData && allMonthsData.length > 0 ? (
                             <Grid container spacing={3}>
@@ -611,7 +628,7 @@ const ReporteCursosCC = () => {
                                         <Grid item xs={12}>
                                             <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, mt: { xs: 2, lg: 0 }, height: '100%' }}>
                                                 <Typography variant="h5" component="h2" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                    <BarChartIcon sx={{ mr: 1 }} color="primary" /> Resumen Anual ({currentYear})
+                                                    <BarChartIcon sx={{ mr: 1 }} color="primary" /> Resumen Anual {currentYear}
                                                 </Typography>
                                                 {renderSummaryText()}
                                             </Paper>
@@ -650,7 +667,7 @@ const ReporteCursosCC = () => {
 
             {!loading && !error && (!rawCronogramaData || rawCronogramaData.length === 0) && (
                 <div style={{ gridArea: 'kpis' }}>
-                     <Paper elevation={3} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
+                    <Paper elevation={3} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
                         <Typography variant="h6" gutterBottom>No hay datos disponibles</Typography>
                         <Typography variant="body1" color="textSecondary"> No se encontraron datos de cursos para el año {currentYear}. Verifica la fuente de datos. </Typography>
                     </Paper>

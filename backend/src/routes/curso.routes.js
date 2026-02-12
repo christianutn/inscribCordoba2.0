@@ -12,14 +12,14 @@ cursoRouter.get("/", passport.authenticate('jwt', { session: false }), autorizar
 
 cursoRouter.post("/",
     passport.authenticate('jwt', { session: false }),
-    autorizar(['ADM']),
+    autorizar(['ADM', 'GA']),
     validateUpdateCurso, // es la misma que para actualizar
     manejarValidacionErrores,
     postCurso)
 
 cursoRouter.put("/",
     passport.authenticate('jwt', { session: false }),
-    autorizar(['ADM']),
+    autorizar(['ADM', 'GA']),
     validateUpdateCurso,
     manejarValidacionErrores,
     updateCurso)

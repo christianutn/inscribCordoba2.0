@@ -13,12 +13,12 @@ const areaRouter = Router();
 
 areaRouter.get("/",
     passport.authenticate('jwt', { session: false }),
-    autorizar(['ADM']),
+    autorizar(['ADM', 'GA']),
     getAreas)
 
 areaRouter.put("/",
     passport.authenticate('jwt', { session: false }),
-    autorizar(['ADM']),
+    autorizar(['ADM', 'GA']),
     areaUpdateValidation,
     manejarValidacionErrores,
     putArea)
