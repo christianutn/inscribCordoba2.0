@@ -15,6 +15,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
@@ -232,6 +233,7 @@ const ReporteCursosCC = () => {
         for (let mesIndex = 0; mesIndex < 12; mesIndex++) {
             let cursosPorMes = 0, cursosActivosAnteriores = 0, plataformaExterna = 0, cursosCC = 0, canceladosSuspendidos = 0, autogestionados = 0;
             let participantesPorMes = 0;
+            let horasPorMes = 0;
 
             filteredCronogramaData.forEach(instancia => {
                 if (!instancia || typeof instancia !== 'object') return;
@@ -284,6 +286,7 @@ const ReporteCursosCC = () => {
                         if (codPlataforma === 'CC') {
                             cursosCC++;
                             participantesPorMes += participantes;
+                            horasPorMes += parseInt(instancia.cantidad_horas, 10) || 0;
                             if (esAutogestionado) autogestionados++;
                         } else if (codPlataforma === 'EXT') {
                             plataformaExterna++;
@@ -308,7 +311,7 @@ const ReporteCursosCC = () => {
                 id: mesIndex, mesAbrev: mesesAbrev[mesIndex], mesNombre: mesesFull[mesIndex],
                 cursosPorMes, cursosActivosAnteriores, plataformaExterna, cursosCC, totalCursosAcumulados,
                 canceladosSuspendidos, autogestionados, porcentajeAutogestionados: porcentajeAutogestionadosNum,
-                participantesPorMes
+                participantesPorMes, horasPorMes
             });
         }
         setAllMonthsData(summaryData);
@@ -337,13 +340,15 @@ const ReporteCursosCC = () => {
 
             const totalAutogestionadosAnual = allMonthsData.reduce((sum, m) => sum + m.autogestionados, 0);
             const porcentajeAutogestionadoAnual = totalCCAnual > 0 ? (totalAutogestionadosAnual / totalCCAnual) * 100 : 0;
+            const totalHorasAnual = allMonthsData.reduce((sum, m) => sum + m.horasPorMes, 0);
 
             setDisplayKpiData({
                 nuevos: totalNuevosAnual, cancelados: totalCanceladosAnual,
                 cursosCC: totalCCAnual, cursosExt: totalExtAnual,
                 activosPromedio: promedioActivosMes.toFixed(1),
                 porcAutogestionado: porcentajeAutogestionadoAnual.toFixed(1) + '%',
-                totalParticipantes: totalParticipantesAnual, isAnnual: true
+                totalParticipantes: totalParticipantesAnual, isAnnual: true,
+                totalHorasCC: totalHorasAnual
             });
 
             const labels = allMonthsData.map(d => d.mesAbrev);
@@ -367,7 +372,8 @@ const ReporteCursosCC = () => {
                     activosPromedio: monthData.totalCursosAcumulados,
                     porcAutogestionado: monthData.porcentajeAutogestionados.toFixed(1) + '%',
                     totalParticipantes: participantesNuevosMes,
-                    isAnnual: false, monthName: monthData.mesNombre
+                    isAnnual: false, monthName: monthData.mesNombre,
+                    totalHorasCC: monthData.horasPorMes || 0
                 });
 
                 const monthlyCourseDetailLabels = ['Nuevos', 'Act. Ant.', 'Canc/Susp.'];
@@ -432,6 +438,7 @@ const ReporteCursosCC = () => {
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><TrendingUpIcon color="action" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Promedio de Cursos Acumulados por Mes: ${displayKpiData.activosPromedio}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Porcentaje de Cursos Autogestionados: ${displayKpiData.porcAutogestionado}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cupos (Campus Córdoba ${currentYear}): ${displayKpiData.totalParticipantes}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><AccessTimeIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Horas de Capacitación (Campus Córdoba ${currentYear}): ${displayKpiData.totalHorasCC ?? 0}`} /> </ListItem>
                     <Divider component="li" sx={{ my: 2 }} />
                     <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Mes con Más Cursos Nuevos: ${mesMasNuevos}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Mes con Mayor Total de Cursos Acumulados: ${mesMasActivos}`} /> </ListItem>
@@ -448,6 +455,7 @@ const ReporteCursosCC = () => {
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><CancelIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cancelados/Suspendidos (Iniciaban en ${monthData.mesNombre}): ${monthData.canceladosSuspendidos}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Autogestionados (Nuevos en ${monthData.mesNombre}): ${monthData.autogestionados} (${monthData.porcentajeAutogestionados.toFixed(1)}%)`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cupos (Nuevos Cursos ${monthData.mesNombre}): ${displayKpiData.totalParticipantes}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><AccessTimeIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Horas de Capacitación (Campus Córdoba ${monthData.mesNombre}): ${displayKpiData.totalHorasCC ?? 0}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><ShowChartIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cursos en Plataforma Externa (Nuevos en ${monthData.mesNombre}): ${monthData.plataformaExterna}`} /> </ListItem>
                 </List>
             );
@@ -521,7 +529,7 @@ const ReporteCursosCC = () => {
                                         <MenuItem
                                             key={year}
                                             value={year}
-                                            sx={year === new Date().getFullYear() ? {
+                                            sx={year === selectedYear ? {
                                                 fontWeight: 600,
                                                 color: 'primary.main',
                                                 '& .MuiTypography-root': { fontWeight: 700 }
@@ -591,11 +599,12 @@ const ReporteCursosCC = () => {
                     {displayKpiData && (
                         <div style={{ gridArea: 'kpis' }}>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title="Total de Cursos" value={displayKpiData.nuevos ?? '0'} icon={<AddCircleOutlineIcon />} color="primary" description={`Campus Córdoba: ${displayKpiData.cursosCC ?? 0} | Externos: ${displayKpiData.cursosExt ?? 0}`} /> </Grid>
-                                <Grid item xs={12} sm={6} md={6} lg={2.4}> <KpiCard title="Total de Cupos" value={displayKpiData.totalParticipantes ?? '0'} icon={<PeopleIcon />} color="info" description={displayKpiData.isAnnual ? `Total ${currentYear} - Campus Córdoba` : `En ${displayKpiData.monthName} - Campus Córdoba`} /> </Grid>
-                                <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title={displayKpiData.isAnnual ? "Acumulados Prom./Mes" : "Total Acumulados Mes"} value={displayKpiData.activosPromedio ?? '0'} icon={<TrendingUpIcon />} color="success" description={displayKpiData.isAnnual ? `Promedio ${currentYear}` : `En ${displayKpiData.monthName}`} /> </Grid>
-                                <Grid item xs={12} sm={12} md={6} lg={2.4}> <KpiCard title="% Autogestionados" value={displayKpiData.porcAutogestionado ?? '0%'} icon={<SettingsSuggestIcon />} color="warning" description={displayKpiData.isAnnual ? `Anual - Campus Córdoba` : `En ${displayKpiData.monthName} - Campus Córdoba`} /> </Grid>
-                                <Grid item xs={12} sm={6} md={4} lg={2.4}> <KpiCard title="Cancelados/Susp." value={displayKpiData.cancelados ?? '0'} icon={<CancelIcon />} color="error" description={displayKpiData.isAnnual ? `Iniciaban ${currentYear}` : `Iniciaban en ${displayKpiData.monthName}`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title="Total de Cursos" value={displayKpiData.nuevos ?? '0'} icon={<AddCircleOutlineIcon />} color="primary" description={`Campus Córdoba: ${displayKpiData.cursosCC ?? 0} | Externos: ${displayKpiData.cursosExt ?? 0}`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title="Total de Cupos" value={displayKpiData.totalParticipantes ?? '0'} icon={<PeopleIcon />} color="info" description={displayKpiData.isAnnual ? `Total ${currentYear} - Campus Córdoba` : `En ${displayKpiData.monthName} - Campus Córdoba`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title="Total Horas de Capacitación" value={displayKpiData.totalHorasCC ?? '0'} icon={<AccessTimeIcon />} color="secondary" description={displayKpiData.isAnnual ? `Total ${currentYear} - Campus Córdoba` : `En ${displayKpiData.monthName} - Campus Córdoba`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title={displayKpiData.isAnnual ? "Acumulados Prom./Mes" : "Total Acumulados Mes"} value={displayKpiData.activosPromedio ?? '0'} icon={<TrendingUpIcon />} color="success" description={displayKpiData.isAnnual ? `Promedio ${currentYear}` : `En ${displayKpiData.monthName}`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title="% Autogestionados" value={displayKpiData.porcAutogestionado ?? '0%'} icon={<SettingsSuggestIcon />} color="warning" description={displayKpiData.isAnnual ? `Anual - Campus Córdoba` : `En ${displayKpiData.monthName} - Campus Córdoba`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title="Cancelados/Susp." value={displayKpiData.cancelados ?? '0'} icon={<CancelIcon />} color="error" description={displayKpiData.isAnnual ? `Iniciaban ${currentYear}` : `Iniciaban en ${displayKpiData.monthName}`} /> </Grid>
                             </Grid>
                         </div>
                     )}
