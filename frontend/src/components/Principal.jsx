@@ -169,6 +169,7 @@ export default function Principal() {
         if (!isMounted) return;
 
         if (!res) {
+          localStorage.removeItem('jwt');
           navigate('/login');
           return;
         }
@@ -195,6 +196,7 @@ export default function Principal() {
       } catch (error) {
         if (!isMounted) return;
         console.error("Error fetching user:", error);
+        localStorage.removeItem('jwt');
         navigate('/login');
       } finally {
         if (isMounted) {

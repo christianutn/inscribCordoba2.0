@@ -42,6 +42,11 @@ const Login = () => {
     const [maskedEmail, setMaskedEmail] = useState('');
 
     useEffect(() => {
+        const token = localStorage.getItem('jwt');
+        if (token) {
+            navigate("/principal");
+        }
+
         const rememberedCuil = localStorage.getItem('rememberedCuil');
         const rememberedContrasenia = localStorage.getItem('rememberedContrasenia');
         if (rememberedCuil && rememberedContrasenia) {
@@ -49,7 +54,7 @@ const Login = () => {
             setContrasenia(rememberedContrasenia);
             setRememberMe(true);
         }
-    }, []);
+    }, [navigate]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
