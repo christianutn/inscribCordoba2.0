@@ -25,40 +25,24 @@ import {
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import dayjs from 'dayjs';
-
 ChartJS.register(
     CategoryScale, LinearScale, BarElement, LineElement, PointElement,
     Title, Tooltip, Legend, Filler,
     ChartDataLabels
 );
 
+// Parsea un string "YYYY-MM-DD" y devuelve { year, month (0-indexed), day } 
+// sin crear objetos Date, evitando cualquier problema de timezone.
 const parseDateString = (dateString) => {
-    if (!dateString || typeof dateString !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-        return null;
-    }
-    try {
-        const [year, month, day] = dateString.split('-').map(Number);
-        if (month < 1 || month > 12 || day < 1 || day > 31) { return null; }
-        const date = new Date(Date.UTC(year, month - 1, day)); // Use Date.UTC
-        if (isNaN(date.getTime()) || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
-            return null;
-        }
-        return date; // Devuelve un objeto Date de JavaScript
-    } catch (e) {
-        console.error("Error parsing date:", dateString, e);
-        return null;
-    }
-};
-
-// Helper para convertir objeto Date de JS a Dayjs y verificar validez
-const getValidDayjsObject = (dateString) => {
-    const jsDate = parseDateString(dateString);
-    if (jsDate) {
-        const djsObject = dayjs(jsDate); // Convierte el objeto Date de JS a Dayjs
-        return djsObject.isValid() ? djsObject : null;
-    }
-    return null;
+    if (!dateString || typeof dateString !== 'string') return null;
+    // Aceptar tanto "YYYY-MM-DD" como "YYYY-MM-DDT..." (ISO con hora)
+    const match = String(dateString).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!match) return null;
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10); // 1-12
+    const day = parseInt(match[3], 10);
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    return { year, month: month - 1, day }; // month 0-indexed para consistencia con JS
 };
 
 
@@ -267,20 +251,20 @@ const ReporteCursosCC = () => {
 
                 const participantes = parseInt(instancia.cupo, 10) || 0;
 
-                const fechaInicioObj = getValidDayjsObject(fechaInicioCursoStr);
-                const fechaFinObj = getValidDayjsObject(fechaFinCursoStr);
+                const fechaInicioObj = parseDateString(fechaInicioCursoStr);
+                const fechaFinObj = parseDateString(fechaFinCursoStr);
 
                 if (!fechaInicioObj) return;
-                const anioInicioCurso = fechaInicioObj.year();
+                const anioInicioCurso = fechaInicioObj.year;
 
                 if (anioInicioCurso !== currentYear) return;
 
-                const mesInicioCurso = fechaInicioObj.month();
+                const mesInicioCurso = fechaInicioObj.month;
 
                 const esFechaFinValida = fechaFinObj !== null;
 
-                const mesFinCurso = esFechaFinValida ? fechaFinObj.month() : -1;
-                const anioFinCurso = esFechaFinValida ? fechaFinObj.year() : -1;
+                const mesFinCurso = esFechaFinValida ? fechaFinObj.month : -1;
+                const anioFinCurso = esFechaFinValida ? fechaFinObj.year : -1;
 
                 const isCancelledOrSuspended = estadoCurso === "SUSP" || estadoCurso === "CANC";
 
@@ -308,14 +292,12 @@ const ReporteCursosCC = () => {
                         canceladosSuspendidos++;
                     }
                 } else if (!isCancelledOrSuspended && esFechaFinValida &&
-                    (fechaInicioObj.isBefore(dayjs().year(currentYear).month(mesIndex).startOf('month'))) &&
-                    (fechaFinObj.isSameOrAfter(dayjs().year(currentYear).month(mesIndex).startOf('month')))
+                    // Curso inició antes del mes actual
+                    (anioInicioCurso < currentYear || (anioInicioCurso === currentYear && mesInicioCurso < mesIndex)) &&
+                    // Curso termina en o después del mes actual
+                    (anioFinCurso > currentYear || (anioFinCurso === currentYear && mesFinCurso >= mesIndex))
                 ) {
-                    if ((anioInicioCurso < currentYear || (anioInicioCurso === currentYear && mesInicioCurso < mesIndex)) &&
-                        (anioFinCurso > currentYear || (anioFinCurso === currentYear && mesFinCurso >= mesIndex))
-                    ) {
-                        cursosActivosAnteriores++;
-                    }
+                    cursosActivosAnteriores++;
                 }
             });
 
@@ -463,10 +445,10 @@ const ReporteCursosCC = () => {
                     <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><CheckCircleOutlineIcon color="primary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cursos en ${monthData.mesNombre}: ${monthData.cursosPorMes}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><TrendingUpIcon color="success" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cursos Activos de Meses Anteriores: ${monthData.cursosActivosAnteriores}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Cursos Acumulados en ${monthData.mesNombre}: ${monthData.totalCursosAcumulados}`} /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><CancelIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cancelados/Suspendidos (iniciaban en ${monthData.mesNombre}): ${monthData.canceladosSuspendidos}`} /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Autogestionados (nuevos en ${monthData.mesNombre}): ${monthData.autogestionados} (${monthData.porcentajeAutogestionados.toFixed(1)}%)`} /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Participantes (Nuevos Cursos ${monthData.mesNombre}): ${displayKpiData.totalParticipantes}`} secondary="Suma de participantes de cursos iniciados en el mes (filtrado)." /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><ShowChartIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cursos en Plataforma Externa (nuevos en ${monthData.mesNombre}): ${monthData.plataformaExterna}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><CancelIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cancelados/Suspendidos (Iniciaban en ${monthData.mesNombre}): ${monthData.canceladosSuspendidos}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Autogestionados (Nuevos en ${monthData.mesNombre}): ${monthData.autogestionados} (${monthData.porcentajeAutogestionados.toFixed(1)}%)`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cupos (Nuevos Cursos ${monthData.mesNombre}): ${displayKpiData.totalParticipantes}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><ShowChartIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cursos en Plataforma Externa (Nuevos en ${monthData.mesNombre}): ${monthData.plataformaExterna}`} /> </ListItem>
                 </List>
             );
         }
