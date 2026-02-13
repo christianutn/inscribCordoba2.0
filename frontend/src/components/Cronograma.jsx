@@ -10,8 +10,10 @@ import { esES } from '@mui/x-data-grid/locales';
 import {
   Backdrop, CircularProgress, Box, Typography, Modal, Card, CardContent, CardHeader,
   IconButton, Divider, List, ListItem, ListItemText, Paper, TextField, FormControl,
-  InputLabel, Select, MenuItem, Grid, Button, InputAdornment, Tooltip, Chip, Alert
+  InputLabel, Select, MenuItem, Grid, Button, InputAdornment, Tooltip, Chip, Alert,
+  Switch, FormControlLabel
 } from '@mui/material';
+import BlockIcon from '@mui/icons-material/Block';
 
 import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
@@ -81,6 +83,7 @@ const Cronograma = () => {
   const [nombreFilter, setNombreFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('all');
   const [activosFilterActive, setActivosFilterActive] = useState(false);
+  const [omitirCancelados, setOmitirCancelados] = useState(false);
 
   const COLUMNAS_VISIBLES = useMemo(() => ["Ministerio", "Area", "Nombre del curso", "Fecha inicio de inscripción", "Fecha fin de inscripción", "Fecha inicio del curso", "Fecha fin del curso", "Estado de Instancia"], []);
 
@@ -198,8 +201,11 @@ const Cronograma = () => {
         return startDate && endDate && startDate.isSameOrBefore(today) && endDate.isSameOrAfter(today);
       });
     }
+    if (omitirCancelados) {
+      data = data.filter(c => c["Estado de Instancia"] !== 'CANC');
+    }
     setFilteredData(data);
-  }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, loading]);
+  }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, omitirCancelados, loading]);
 
   const handleRowClick = useCallback(params => { setSelectedRowData(params.row); setModalOpen(true); }, []);
   const handleCloseModal = useCallback(() => { setModalOpen(false); setSelectedRowData(null); }, []);
@@ -271,8 +277,15 @@ const Cronograma = () => {
   const handleNombreChange = useCallback(e => setNombreFilter(e.target.value), []);
   const handleMonthChange = useCallback(e => setMonthFilter(e.target.value), []);
   const handleToggleActivosFilter = useCallback(() => setActivosFilterActive(prev => !prev), []);
-  const handleClearFilters = useCallback(() => { setNombreFilter(''); setMinisterioFilter('all'); setAreaFilter('all'); setMonthFilter('all'); setActivosFilterActive(false); }, []);
-  const isFilterActive = useMemo(() => nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive, [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive]);
+  const handleToggleOmitirCancelados = useCallback(() => setOmitirCancelados(prev => !prev), []);
+  const handleClearFilters = useCallback(() => { setNombreFilter(''); setMinisterioFilter('all'); setAreaFilter('all'); setMonthFilter('all'); setActivosFilterActive(false); setOmitirCancelados(false); }, []);
+  const isFilterActive = useMemo(() => nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive || omitirCancelados, [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive, omitirCancelados]);
+
+  const getRowClassName = useCallback((params) => {
+    const estado = params.row["Estado de Instancia"];
+    if (estado === 'CANC') return 'row-cancelado';
+    return '';
+  }, []);
 
   const renderDetailItem = useCallback((label, value, isBoolean = false) => {
     let displayValue;
@@ -325,6 +338,27 @@ const Cronograma = () => {
               <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined"><InputLabel>Mes Inicio Curso</InputLabel><Select value={monthFilter} label="Mes Inicio Curso" onChange={handleMonthChange}><MenuItem value="all"><em>Todos</em></MenuItem>{MONTH_NAMES.map((m, i) => (<MenuItem key={i} value={i.toString()}>{m}</MenuItem>))}</Select></FormControl></Grid>
               <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Tooltip title={activosFilterActive ? "Mostrar todos" : "Mostrar solo activos"}><Button fullWidth variant={activosFilterActive ? "contained" : "outlined"} size="medium" onClick={handleToggleActivosFilter} startIcon={<AccessTimeIcon />} sx={{ height: '40px' }}>Activos</Button></Tooltip></Grid>
               <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters} disabled={!isFilterActive} startIcon={<ClearAllIcon />} sx={{ height: '40px' }}>Limpiar</Button></Grid>
+              <Grid item xs={12} sm={6} md={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={omitirCancelados}
+                      onChange={handleToggleOmitirCancelados}
+                      color="secondary"
+                      size="small"
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <BlockIcon fontSize="small" color={omitirCancelados ? 'secondary' : 'action'} />
+                      <Typography variant="body2" sx={{ fontWeight: omitirCancelados ? 600 : 400, color: omitirCancelados ? 'secondary.main' : 'text.secondary' }}>
+                        Omitir Cancelados
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ mr: 0 }}
+                />
+              </Grid>
             </Grid>
           </Paper>
         </div>
@@ -341,9 +375,23 @@ const Cronograma = () => {
               loading={loading}
               density="compact"
               disableRowSelectionOnClick
+              getRowClassName={getRowClassName}
               initialState={{
                 sorting: {
                   sortModel: [{ field: 'Fecha inicio del curso', sort: 'asc' }],
+                },
+              }}
+              sx={{
+                '& .row-cancelado': {
+                  backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                  borderLeft: '4px solid #d32f2f',
+                  color: '#b71c1c',
+                  '&:hover': {
+                    backgroundColor: 'rgba(211, 47, 47, 0.15)',
+                  },
+                  '& .MuiDataGrid-cell': {
+                    color: '#b71c1c',
+                  },
                 },
               }}
             />
