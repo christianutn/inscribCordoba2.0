@@ -4,46 +4,50 @@ import { Box, IconButton, Tooltip, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const EventosTable = ({ data, onEdit, onDelete }) => {
+const EventoYCursoTable = ({ data, onEdit, onDelete }) => {
     const columns = [
         {
             field: 'curso',
-            headerName: 'Código Curso',
-            width: 120
+            headerName: 'Código',
+            width: 100
         },
         {
-            field: 'cursNombre',
+            field: 'cursoNombre',
             headerName: 'Nombre Curso',
             flex: 1,
             minWidth: 200,
             valueGetter: (value, row) => row.detalle_curso?.nombre || row.curso
         },
         {
-            field: 'presentacion',
-            headerName: 'Presentación',
-            flex: 1,
-            minWidth: 250,
-            valueGetter: (value, row) => {
-                const text = row.presentacion || '';
-                return text.length > 100 ? text.substring(0, 100) + '...' : text;
-            }
+            field: 'cupo',
+            headerName: 'Cupo',
+            width: 80,
+            type: 'number',
+            valueGetter: (value, row) => row.detalle_curso?.cupo || 'N/A'
+        },
+        {
+            field: 'cantidad_horas',
+            headerName: 'Horas',
+            width: 80,
+            type: 'number',
+            valueGetter: (value, row) => row.detalle_curso?.cantidad_horas || 'N/A'
         },
         {
             field: 'perfil',
             headerName: 'Perfil',
-            width: 180,
+            width: 150,
             valueGetter: (value, row) => row.detalle_perfil?.descripcion || 'N/A'
         },
         {
             field: 'area_tematica',
             headerName: 'Área Temática',
-            width: 180,
+            width: 150,
             valueGetter: (value, row) => row.detalle_areaTematica?.descripcion || 'N/A'
         },
         {
             field: 'tipo_certificacion',
             headerName: 'Tipo Certificación',
-            width: 220,
+            width: 180,
             valueGetter: (value, row) => row.detalle_tipoCertificacion?.descripcion || 'N/A'
         },
         {
@@ -59,13 +63,25 @@ const EventosTable = ({ data, onEdit, onDelete }) => {
             )
         },
         {
-            field: 'disenio_a_cargo_cc',
-            headerName: 'Diseño CC',
-            width: 110,
+            field: 'esta_autorizado',
+            headerName: 'Autorizado',
+            width: 100,
             renderCell: (params) => (
                 <Chip
-                    label={params.row.disenio_a_cargo_cc ? 'Sí' : 'No'}
-                    color={params.row.disenio_a_cargo_cc ? 'success' : 'default'}
+                    label={params.row.detalle_curso?.esta_autorizado ? 'Sí' : 'No'}
+                    color={params.row.detalle_curso?.esta_autorizado ? 'success' : 'default'}
+                    size="small"
+                />
+            )
+        },
+        {
+            field: 'esVigente',
+            headerName: 'Vigente',
+            width: 90,
+            renderCell: (params) => (
+                <Chip
+                    label={params.row.detalle_curso?.esVigente ? 'Sí' : 'No'}
+                    color={params.row.detalle_curso?.esVigente ? 'success' : 'default'}
                     size="small"
                 />
             )
@@ -110,4 +126,4 @@ const EventosTable = ({ data, onEdit, onDelete }) => {
     );
 };
 
-export default EventosTable;
+export default EventoYCursoTable;

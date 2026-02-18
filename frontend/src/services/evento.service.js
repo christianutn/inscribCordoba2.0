@@ -81,5 +81,28 @@ export const putEvento = async (evento) => {
     }
 }
 
+/**
+ * Actualiza Evento y Curso en una sola petición.
+ * Envía todos los campos (de evento + curso) al endpoint PUT /eventos/:curso
+ */
+export const putEventoYCurso = async (payload) => {
+    try {
+        const response = await fetch(URL + "/" + payload.curso, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (response.status !== 200) {
+            throw new Error(data.message || "Error al actualizar evento y curso");
+        }
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
 
 

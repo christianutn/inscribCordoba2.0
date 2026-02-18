@@ -1,21 +1,21 @@
 import React, { useState, useMemo } from 'react';
 import {
-    Box, Button, Alert, CircularProgress, Snackbar,
+    Box, Alert, CircularProgress, Snackbar,
     TextField, InputAdornment, Dialog, DialogTitle,
     DialogContent, DialogContentText, DialogActions,
-    Typography
+    Typography, Button
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import useEventos from './hooks/useEventos';
-import EventosTable from './components/EventosTable';
-import EventoModal from './components/EventoModal';
+import useEventoYCurso from './hooks/useEventoYCurso';
+import EventoYCursoTable from './components/EventoYCursoTable';
+import EventoYCursoModal from './components/EventoYCursoModal';
 
-const GestionEventos = () => {
+const GestionEventoYCurso = () => {
     const {
         data, loading, error,
         updateItem, deleteItem,
         auxiliaryData
-    } = useEventos();
+    } = useEventoYCurso();
 
     const [modalOpen, setModalOpen] = useState(false);
     const [currentRecord, setCurrentRecord] = useState(null);
@@ -72,7 +72,7 @@ const GestionEventos = () => {
         if (result.success) {
             setNotification({
                 open: true,
-                message: 'Evento actualizado correctamente',
+                message: 'Evento y curso actualizados correctamente',
                 severity: 'success'
             });
             setModalOpen(false);
@@ -115,13 +115,13 @@ const GestionEventos = () => {
                 />
             </Box>
 
-            <EventosTable
+            <EventoYCursoTable
                 data={filteredData}
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
             />
 
-            <EventoModal
+            <EventoYCursoModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 onSave={handleSave}
@@ -165,4 +165,4 @@ const GestionEventos = () => {
     );
 };
 
-export default GestionEventos;
+export default GestionEventoYCurso;

@@ -2,8 +2,7 @@ import { getEventos, getEventoByCod, postEvento, deleteEvento, putEvento } from 
 import { Router } from 'express';
 import passport from 'passport';
 import autorizar from '../utils/autorizar.js';
-import manejarValidacionErrores from "../utils/manejarValidacionErrores.js";
-import { check, param, body } from "express-validator";
+import { body } from "express-validator";
 import AppError from "../utils/appError.js"
 import Curso from "../domains/Inscribcordoba/api/models/curso.models.js"
 import Perfil from "../domains/Inscribcordoba/api/models/perfil.models.js"
@@ -68,5 +67,6 @@ eventoRouter.post("/",
 eventoRouter.delete("/:curso", passport.authenticate('jwt', { session: false }), autorizar(['ADM']), deleteEvento)
 
 eventoRouter.put("/:curso", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'GA']), putEvento)
+
 
 export default eventoRouter;
