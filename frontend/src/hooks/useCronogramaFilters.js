@@ -10,6 +10,7 @@ export const useCronogramaFilters = (cursosData, loading) => {
     const [monthFilter, setMonthFilter] = useState('all');
     const [activosFilterActive, setActivosFilterActive] = useState(false);
     const [asignadoFilter, setAsignadoFilter] = useState('');
+    const [omitirCancelados, setOmitirCancelados] = useState(false);
     const [areaOptions, setAreaOptions] = useState(['all']);
 
     useEffect(() => {
@@ -62,12 +63,15 @@ export const useCronogramaFilters = (cursosData, loading) => {
                 return startDate && endDate && startDate.isSameOrBefore(today) && endDate.isSameOrAfter(today);
             });
         }
+        if (omitirCancelados) {
+            data = data.filter(c => c["Estado"] !== 'CANC');
+        }
         if (asignadoFilter.trim()) {
             const term = asignadoFilter.trim().toLowerCase();
             data = data.filter(c => c["Asignado"]?.toLowerCase().includes(term));
         }
         setFilteredData(data);
-    }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, asignadoFilter, loading]);
+    }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, asignadoFilter, omitirCancelados, loading]);
 
     const handleClearFilters = () => {
         setMinisterioFilter('all');
@@ -76,11 +80,12 @@ export const useCronogramaFilters = (cursosData, loading) => {
         setMonthFilter('all');
         setActivosFilterActive(false);
         setAsignadoFilter('');
+        setOmitirCancelados(false);
     };
 
     const isFilterActive = useMemo(() =>
-        nombreFilter || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive || asignadoFilter,
-        [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive, asignadoFilter]
+        nombreFilter || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive || asignadoFilter || omitirCancelados,
+        [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive, asignadoFilter, omitirCancelados]
     );
 
     return {
@@ -92,6 +97,7 @@ export const useCronogramaFilters = (cursosData, loading) => {
             monthFilter,
             activosFilterActive,
             asignadoFilter,
+            omitirCancelados,
         },
         setFilters: {
             setMinisterioFilter,
@@ -100,6 +106,7 @@ export const useCronogramaFilters = (cursosData, loading) => {
             setMonthFilter,
             setActivosFilterActive,
             setAsignadoFilter,
+            setOmitirCancelados,
         },
         areaOptions,
         handleClearFilters,

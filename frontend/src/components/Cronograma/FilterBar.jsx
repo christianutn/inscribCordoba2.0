@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     Grid, TextField, FormControl, InputLabel, Select, MenuItem,
-    InputAdornment, Tooltip, Button, Paper
+    InputAdornment, Tooltip, Button, Paper, Switch, FormControlLabel, Box, Typography
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -10,6 +10,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import BlockIcon from '@mui/icons-material/Block';
 import { MONTH_NAMES } from './constants';
 
 const FilterBar = ({
@@ -21,8 +22,8 @@ const FilterBar = ({
     isFilterActive,
     loading
 }) => {
-    const { ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, asignadoFilter } = filters;
-    const { setMinisterioFilter, setAreaFilter, setNombreFilter, setMonthFilter, setActivosFilterActive, setAsignadoFilter } = setFilters;
+    const { ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, asignadoFilter, omitirCancelados } = filters;
+    const { setMinisterioFilter, setAreaFilter, setNombreFilter, setMonthFilter, setActivosFilterActive, setAsignadoFilter, setOmitirCancelados } = setFilters;
 
     return (
         <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
@@ -68,6 +69,27 @@ const FilterBar = ({
                 </Grid>
                 <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}>
                     <Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters} disabled={!isFilterActive || loading} startIcon={<ClearAllIcon />} sx={{ height: '40px', minWidth: 'auto' }}>Limpiar</Button>
+                </Grid>
+                <Grid item xs={12} sm={6} md={9} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={omitirCancelados}
+                                onChange={(e) => setOmitirCancelados(e.target.checked)}
+                                color="secondary"
+                                size="small"
+                            />
+                        }
+                        label={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <BlockIcon fontSize="small" color={omitirCancelados ? 'secondary' : 'action'} />
+                                <Typography variant="body2" sx={{ fontWeight: omitirCancelados ? 600 : 400, color: omitirCancelados ? 'secondary.main' : 'text.secondary' }}>
+                                    Omitir Cancelados
+                                </Typography>
+                            </Box>
+                        }
+                        sx={{ mr: 0 }}
+                    />
                 </Grid>
             </Grid>
         </Paper>

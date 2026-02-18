@@ -230,6 +230,12 @@ const CronogramaAdminReducido = () => {
         }
     }, [filteredData, COLUMNAS_VISIBLES, setError]);
 
+    const getRowClassName = useCallback((params) => {
+        const estado = params.row["Estado"];
+        if (estado === 'CANC') return 'row-cancelado';
+        return '';
+    }, []);
+
     if (dataLoading && !cursosData.length) return (<Backdrop open sx={{ zIndex: t => t.zIndex.drawer + 1, color: '#fff' }}><CircularProgress color="inherit" /></Backdrop>);
     if (dataError && !successMessage) return (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}><Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}><Typography variant="h6" color="error" gutterBottom>Error</Typography><Typography>{dataError}</Typography><Button onClick={fetchData} sx={{ mt: 2 }}>Reintentar</Button></Paper></Box>);
     if (!dataLoading && !dataError && cursosData.length === 0) return (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}><Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}><Typography variant="h6" gutterBottom>No Hay Datos</Typography><Typography>No se encontraron datos en el cronograma.</Typography></Paper></Box>);
@@ -267,8 +273,23 @@ const CronogramaAdminReducido = () => {
                         loading={dataLoading}
                         density="compact"
                         disableRowSelectionOnClick
+                        getRowClassName={getRowClassName}
                         initialState={{ sorting: { sortModel: [{ field: 'Fecha inicio del curso', sort: 'asc' }] } }}
-                        sx={{ border: 0, '& .MuiDataGrid-columnHeaders': { backgroundColor: 'primary.light', color: 'text.primary' }, '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none!important' }, '& .MuiDataGrid-row': { cursor: 'pointer' }, '& .MuiDataGrid-row:hover': { backgroundColor: 'action.hover', }, '& .MuiDataGrid-overlay': { backgroundColor: 'rgba(255,255,255,0.7)' } }}
+                        sx={{
+                            border: 0,
+                            '& .MuiDataGrid-columnHeaders': { backgroundColor: 'primary.light', color: 'text.primary' },
+                            '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none!important' },
+                            '& .MuiDataGrid-row': { cursor: 'pointer' },
+                            '& .MuiDataGrid-row:hover': { backgroundColor: 'action.hover', },
+                            '& .MuiDataGrid-overlay': { backgroundColor: 'rgba(255,255,255,0.7)' },
+                            '& .row-cancelado': {
+                                backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                                borderLeft: '4px solid #d32f2f',
+                                color: '#b71c1c',
+                                '&:hover': { backgroundColor: 'rgba(211, 47, 47, 0.15)', },
+                                '& .MuiDataGrid-cell': { color: '#b71c1c', },
+                            },
+                        }}
                         slots={{ noRowsOverlay: () => (<Box sx={{ mt: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', p: 2 }}><InfoIcon color="action" sx={{ mb: 1, fontSize: '3rem' }} /><Typography align="center">{cursosData.length === 0 ? "No hay datos disponibles." : "No hay cursos que coincidan."}</Typography></Box>) }}
                     />
                 </Paper>
