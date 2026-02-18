@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Divider, Alert } from '@mui/material';
 import Autocomplete from '../UIElements/Autocomplete'; // Adjust path if necessary
 import Titulo from '../fonts/TituloPrincipal';
-import GestionCursos from '../../features/Cursos/GestionCursos';
+import GestionEventoYCurso from '../../features/EventoYCurso/GestionEventoYCurso';
 import GestionUsuarios from '../../features/Usuarios/GestionUsuarios';
 import GestionAsignacionesAreas from '../../features/AsignacionesAreasUsuario/GestionAsignacionesAreas';
 import GestionAreas from '../../features/Areas/GestionAreas';
@@ -10,7 +10,6 @@ import GestionMinisterios from '../../features/Ministerios/GestionMinisterios';
 import GestionMediosInscripcion from '../../features/MediosDeInscripcion/GestionMediosInscripcion';
 import GestionPlataformasDictado from '../../features/PlataformasDeDictado/GestionPlataformasDictado';
 import GestionTiposCapacitacion from '../../features/TiposDeCapacitacion/GestionTiposCapacitacion';
-import GestionEventos from '../../features/Eventos/GestionEventos';
 import GestionRolesTutores from '../../features/RolTutores/GestionRolTutores';
 import GestionTutores from '../../features/Tutores/GestionTutores';
 
@@ -18,7 +17,7 @@ const MainGestion = () => {
     const [selectedOption, setSelectedOption] = useState(null);
 
     const options = [
-        "Cursos",
+        "Eventos",
         "Usuarios",
         "Áreas",
         "Asignaciones Áreas",
@@ -26,7 +25,6 @@ const MainGestion = () => {
         "Medios de Inscripción",
         "Plataformas de Dictado",
         "Tipos de Capacitación",
-        "Eventos",
         "Roles Tutores",
         "Tutores",
         // Add other options as features are implemented
@@ -40,8 +38,8 @@ const MainGestion = () => {
 
     const renderFeature = () => {
         switch (selectedOption) {
-            case 'Cursos':
-                return <GestionCursos />;
+            case 'Eventos':
+                return <GestionEventoYCurso />;
             case 'Usuarios':
                 return <GestionUsuarios />;
             case 'Áreas':
@@ -56,8 +54,7 @@ const MainGestion = () => {
                 return <GestionPlataformasDictado />;
             case 'Tipos de Capacitación':
                 return <GestionTiposCapacitacion />;
-            case 'Eventos':
-                return <GestionEventos />;
+
             case 'Roles Tutores':
                 return <GestionRolesTutores />;
             case 'Tutores':

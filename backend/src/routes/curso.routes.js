@@ -17,14 +17,6 @@ cursoRouter.post("/",
     manejarValidacionErrores,
     postCurso)
 
-cursoRouter.put("/",
-    passport.authenticate('jwt', { session: false }),
-    autorizar(['ADM', 'GA']),
-    validateUpdateCurso,
-    manejarValidacionErrores,
-    updateCurso)
-
-
 cursoRouter.delete("/:cod", passport.authenticate('jwt', { session: false }), autorizar(['ADM']), deleteCurso)
 
 

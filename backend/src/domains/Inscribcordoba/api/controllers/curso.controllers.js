@@ -151,105 +151,91 @@ export const postCurso = async (req, res, next) => {
 }
 
 
+/**
+ * Función reutilizable para actualizar un curso en la base de datos.
+ * Puede ser invocada desde cualquier controlador, recibiendo una transacción externa.
+ *
+ * @param {Object} cursoData - Objeto con los campos del curso a actualizar.
+ * @param {string} cod - Código identificador del curso.
+ * @param {Object} transaction - Instancia de transacción de Sequelize.
+ * @returns {Object} Resultado de la operación de update.
+ * @throws {AppError} Si no se actualizó ninguna fila.
+ */
+export const actualizarCursoDB = async (cursoData, cod, transaction) => {
+    const result = await cursoModel.update(
+        cursoData,
+        {
+            where: { cod },
+            transaction
+        }
+    );
+
+
+    return result;
+};
+
+/**
+ * Arma el objeto de datos del curso a partir del body del request.
+ * Centraliza la extracción y normalización de campos para evitar duplicación.
+ *
+ * @param {Object} body - req.body con los campos del curso.
+ * @returns {Object} Objeto listo para pasar a actualizarCursoDB.
+ */
+export const buildCursoData = (body) => {
+    const {
+        curso, nombre, cupo, cantidad_horas,
+        medio_inscripcion, plataforma_dictado,
+        tipo_capacitacion, area, esVigente,
+        tiene_evento_creado, numero_evento,
+        esta_maquetado, esta_configurado,
+        aplica_sincronizacion_certificados,
+        url_curso, esta_autorizado
+    } = body;
+
+    return {
+        curso,
+        nombre,
+        cupo,
+        cantidad_horas,
+        medio_inscripcion,
+        plataforma_dictado,
+        tipo_capacitacion,
+        area,
+        esVigente,
+        tiene_evento_creado,
+        numero_evento,
+        esta_maquetado,
+        esta_configurado,
+        aplica_sincronizacion_certificados,
+        url_curso: url_curso || null,
+        esta_autorizado
+    };
+};
+
+
 export const updateCurso = async (req, res, next) => {
 
-    // Inicia la transacción de Sequelize DESPUÉS de las validaciones iniciales
     const t = await sequelize.transaction();
 
     try {
-        const {
-            cod,
-            nombre,
-            cupo,
-            cantidad_horas,
-            medio_inscripcion,
-            plataforma_dictado,
-            tipo_capacitacion,
-            area,
-            esVigente,
-            tiene_evento_creado,
-            numero_evento,
-            esta_maquetado,
-            esta_configurado,
-            aplica_sincronizacion_certificados,
-            url_curso,
-            esta_autorizado
-        } = req.body;
+        const cursoData = buildCursoData(req.body);
 
-        const cursoData = {
-            cod,
-            nombre,
-            cupo,
-            cantidad_horas,
-            medio_inscripcion,
-            plataforma_dictado,
-            tipo_capacitacion,
-            area,
-            esta_autorizado,
-            esVigente,
-            tiene_evento_creado,
-            numero_evento,
-            esta_maquetado,
-            esta_configurado,
-            aplica_sincronizacion_certificados,
-            url_curso: url_curso || null,
-            esta_autorizado: esta_autorizado
-        }
-
-
-
-
-
-        // --- Actualización en base de datos (Sin cambios en lógica, AÑADIDA transacción) ---
-        const result = await cursoModel.update(
-            cursoData,
-            {
-                where: {
-                    cod: cod,
-                },
-                transaction: t // <-- Pasa la transacción
-            },
-        );
-
-        // Verificamos si la actualización afectó alguna fila (Sin cambios en lógica)
-        if (result[0] === 0) {
-            // Lanzamos el error. El catch lo capturará y hará rollback.
-            // Mantenemos tu lógica original de considerar 0 filas afectadas como error.
-            throw new AppError("No hubo actualización de datos", 400);
-        }
-
-
-        // --- Actualización en Google Sheets (Sin cambios en lógica) ---
-        // Esta operación NO es parte de la transacción de DB. Si falla,
-        // el catch hará rollback de la DB, pero el cambio en Sheets no se deshace aquí.
-
+        await actualizarCursoDB(cursoData, cursoData.cod, t);
 
         // --- Commit de la transacción y respuesta al cliente ---
-        await t.commit(); // Confirma los cambios en la base de datos
+        await t.commit();
 
-        // Si todo fue exitoso, respondemos al cliente
         res.status(200).json({ message: "Se actualizo correctamente el curso" });
 
-
     } catch (error) {
-        // --- Manejo de Errores y Rollback ---
-
-        // Si la transacción fue creada (t es una instancia) y no ha sido ya finalizada
         if (t && !t.finished) {
             try {
-                await t.rollback(); // Intenta revertir los cambios en la base de datos
-                // No usamos console.log/error para el rollback exitoso según tu requisito estricto,
-                // pero en un sistema real, un log aquí sería útil para monitorear.
+                await t.rollback();
             } catch (rollbackError) {
-                // Captura si el rollback falla (raro). Este SÍ es un error de sistema crítico
-                // que probablemente QUERRÁS loguear para depuración de infraestructura,
-                // aunque rompa la regla estricta de "no console.log". Mantengo el log solo para este caso excepcional.
                 console.error('Sequelize Rollback Error: Error al intentar revertir la transacción:', rollbackError);
             }
         }
 
-        // Pasa el error original capturado al siguiente middleware (manejador de errores)
-        // Esto incluye errores de validación, errores de DB, errores de Google Sheets, etc.
         next(error);
     }
 };

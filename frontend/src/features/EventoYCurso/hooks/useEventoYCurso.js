@@ -1,52 +1,64 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getCursos, postCurso, putCurso } from '../../../services/cursos.service';
+import { getEventos, deleteEvento, putEventoYCurso } from '../../../services/evento.service';
+import { getPerfiles } from '../../../services/perfiles.service';
+import { getAreasTematicas } from '../../../services/areasTematicas.service';
+import { getTiposCertificaciones } from '../../../services/tiposCertificaciones.service';
 import { getPlataformasDictado } from '../../../services/plataformasDictado.service';
 import { getMediosInscripcion } from '../../../services/mediosInscripcion.service';
 import { getTiposCapacitacion } from '../../../services/tiposCapacitacion.service';
 import { getAreas } from '../../../services/areas.service';
-import { getMinisterios } from '../../../services/ministerios.service';
 
-const useCursos = () => {
+const useEventoYCurso = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Auxiliary data for dropdowns
+    // Datos auxiliares del Evento
+    const [perfiles, setPerfiles] = useState([]);
+    const [areasTematicas, setAreasTematicas] = useState([]);
+    const [tiposCertificacion, setTiposCertificacion] = useState([]);
+
+    // Datos auxiliares del Curso
     const [plataformas, setPlataformas] = useState([]);
     const [medios, setMedios] = useState([]);
     const [tipos, setTipos] = useState([]);
     const [areas, setAreas] = useState([]);
-    const [ministerios, setMinisterios] = useState([]);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const [
-                cursosRes,
+                eventosRes,
+                perfilesRes,
+                areasTematicasRes,
+                tiposCertificacionRes,
                 plataformasRes,
                 mediosRes,
                 tiposRes,
-                areasRes,
-                ministeriosRes
+                areasRes
             ] = await Promise.all([
-                getCursos(),
+                getEventos(),
+                getPerfiles(),
+                getAreasTematicas(),
+                getTiposCertificaciones(),
                 getPlataformasDictado(),
                 getMediosInscripcion(),
                 getTiposCapacitacion(),
-                getAreas(),
-                getMinisterios()
+                getAreas()
             ]);
 
-            setData(cursosRes);
+            setData(eventosRes);
+            setPerfiles(perfilesRes);
+            setAreasTematicas(areasTematicasRes);
+            setTiposCertificacion(tiposCertificacionRes);
             setPlataformas(plataformasRes);
             setMedios(mediosRes);
             setTipos(tiposRes);
             setAreas(areasRes);
-            setMinisterios(ministeriosRes);
             setError(null);
         } catch (err) {
-            console.error("Error fetching Cursos data:", err);
-            setError(err.message || "Error al cargar los datos de Cursos.");
+            console.error("Error fetching Evento y Curso data:", err);
+            setError(err.message || "Error al cargar los datos de Evento y Curso.");
         } finally {
             setLoading(false);
         }
@@ -56,41 +68,12 @@ const useCursos = () => {
         fetchData();
     }, [fetchData]);
 
-    const createItem = async (newItem) => {
-        setLoading(true);
-        try {
-            const payload = {
-                cod: newItem.cod,
-                nombre: newItem.nombre,
-                cupo: parseInt(newItem.cupo),
-                cantidad_horas: parseInt(newItem.cantidad_horas),
-                medio_inscripcion: newItem.codMedioInscripcion,
-                plataforma_dictado: newItem.codPlataformaDictado,
-                tipo_capacitacion: newItem.codTipoCapacitacion,
-                area: newItem.codArea || null,
-                tiene_evento_creado: newItem.tiene_evento_creado,
-                numero_evento: newItem.numero_evento ? parseInt(newItem.numero_evento) : null,
-                esta_maquetado: newItem.esta_maquetado,
-                esta_configurado: newItem.esta_configurado,
-                aplica_sincronizacion_certificados: newItem.aplica_sincronizacion_certificados,
-                url_curso: newItem.url_curso
-            };
-            await postCurso(payload);
-            await fetchData(); // Refresh data
-            return { success: true };
-        } catch (err) {
-            setError(err.message || "Error al crear el curso.");
-            return { success: false, error: err.message };
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const updateItem = async (item) => {
         setLoading(true);
         try {
             const payload = {
-                cod: item.cod,
+                // Campos del Curso
+                curso: item.curso,
                 nombre: item.nombre,
                 cupo: parseInt(item.cupo),
                 cantidad_horas: parseInt(item.cantidad_horas),
@@ -105,27 +88,38 @@ const useCursos = () => {
                 esta_configurado: item.esta_configurado,
                 aplica_sincronizacion_certificados: item.aplica_sincronizacion_certificados,
                 url_curso: item.url_curso,
-                esta_autorizado: item.esta_autorizado
+                esta_autorizado: item.esta_autorizado,
+                // Campos del Evento
+                perfil: item.perfil,
+                area_tematica: item.area_tematica,
+                tipo_certificacion: item.tipo_certificacion,
+                presentacion: item.presentacion,
+                objetivos: item.objetivos,
+                requisitos_aprobacion: item.requisitos_aprobacion,
+                ejes_tematicos: item.ejes_tematicos,
+                certifica_en_cc: item.certifica_en_cc,
+                disenio_a_cargo_cc: item.disenio_a_cargo_cc
             };
-            await putCurso(payload);
+
+            await putEventoYCurso(payload);
             await fetchData();
             return { success: true };
         } catch (err) {
-            setError(err.message || "Error al actualizar el curso.");
+            setError(err.message || "Error al actualizar el evento y curso.");
             return { success: false, error: err.message };
         } finally {
             setLoading(false);
         }
     };
 
-    const deleteItem = async (id) => {
+    const deleteItem = async (curso) => {
         setLoading(true);
         try {
-            //await deleteRow(id, 'Cursos');
+            await deleteEvento(curso);
             await fetchData();
             return { success: true };
         } catch (err) {
-            setError(err.message || "Error al eliminar el curso.");
+            setError(err.message || "Error al eliminar el evento.");
             return { success: false, error: err.message };
         } finally {
             setLoading(false);
@@ -136,17 +130,21 @@ const useCursos = () => {
         data,
         loading,
         error,
-        createItem,
         updateItem,
         deleteItem,
+        refreshData: fetchData,
         auxiliaryData: {
+            // Evento
+            perfiles,
+            areasTematicas,
+            tiposCertificacion,
+            // Curso
             plataformas,
             medios,
             tipos,
-            areas,
-            ministerios
+            areas
         }
     };
 };
 
-export default useCursos;
+export default useEventoYCurso;

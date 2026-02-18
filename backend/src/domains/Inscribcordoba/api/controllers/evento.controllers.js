@@ -4,6 +4,7 @@ import AreaTematica from '../models/areaTematica.models.js';
 import TipoCertificacion from '../models/tipoCertificacion.models.js';
 import AppError from "../../../../utils/appError.js"
 import Curso from '../models/curso.models.js';
+import { actualizarCursoDB, buildCursoData } from './curso.controllers.js';
 import enviarCorreo from '../../../../utils/enviarCorreo.js';
 import sequelize from '../../../../config/database.js';
 import Persona from '../models/persona.models.js';
@@ -271,29 +272,70 @@ export const deleteEvento = async (req, res, next) => {
 
 
 export const putEvento = async (req, res, next) => {
+    const t = await sequelize.transaction();
+
     try {
         const { curso } = req.params;
-        const { perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc } = req.body;
 
-        logger.info(`✏️ Iniciando actualización de evento - Curso: ${curso}`);
+        // --- Datos del Evento ---
+        const {
+            perfil, area_tematica, tipo_certificacion,
+            presentacion, objetivos, requisitos_aprobacion,
+            ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc
+        } = req.body;
 
-        const evento = await Evento.findOne({ where: { curso } });
+        logger.info(`✏️ Iniciando actualización de evento y curso - Curso: ${curso}`);
+
+        // --- 1. Verificar que el Evento existe ---
+        const evento = await Evento.findOne({ where: { curso }, transaction: t });
 
         if (!evento) {
             logger.warn(`⚠️ Intento de actualizar evento inexistente - Curso: ${curso}`);
             throw new AppError("Evento no existe", 404);
         }
 
-        await evento.update({ perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc });
+        // --- 2. Actualizar Evento dentro de la transacción ---
+        await evento.update(
+            { perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc },
+            { transaction: t }
+        );
 
         logger.info(`✅ Evento actualizado exitosamente - Curso: ${curso}`);
 
-        res.status(200).json(evento);
+        // --- 3. Actualizar Curso reutilizando la función de curso.controllers ---
+        const cursoData = buildCursoData(req.body);
+        await actualizarCursoDB(cursoData, curso, t);
+
+        logger.info(`✅ Curso actualizado exitosamente - Curso: ${curso}`);
+
+        // --- 4. Commit de la transacción ---
+        await t.commit();
+
+        logger.info(`✅ Transacción completada: evento y curso actualizados - Curso: ${curso}`);
+
+        res.status(200).json({
+            message: "Evento y curso actualizados correctamente",
+            evento
+        });
+
     } catch (error) {
-        logger.error(`❌ Error al actualizar evento - Curso: ${req.params.curso} - Error: ${error.message}`, {
+        // --- Rollback si la transacción aún no fue finalizada ---
+        if (t && !t.finished) {
+            try {
+                await t.rollback();
+                logger.info(`🔄 Rollback ejecutado exitosamente - Curso: ${req.params.curso}`);
+            } catch (rollbackError) {
+                logger.error(`❌ Error en rollback - Curso: ${req.params.curso} - Error: ${rollbackError.message}`, {
+                    stack: rollbackError.stack
+                });
+            }
+        }
+
+        logger.error(`❌ Error al actualizar evento y curso - Curso: ${req.params.curso} - Error: ${error.message}`, {
             stack: error.stack,
             curso: req.params.curso
         });
         next(error);
     }
 }
+

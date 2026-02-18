@@ -50,8 +50,7 @@ import SubaNotaDeAutorizacion from './NotaDeAutorizacion/SubaNotaDeAutorizacion.
 import Autorizaciones from './NotaDeAutorizacion/Autorizaciones.jsx';
 import MainGestion from './Gestion/MainGestion.jsx';
 import VisualizacionMisNotasRefentes from './NotaDeAutorizacion/VisualizacionMisNotasRefentes.jsx';
-import GestionEventos from '../features/Eventos/GestionEventos.jsx'
-import GestionCursos from '../features/Cursos/GestionCursos.jsx'
+import GestionEventoYCurso from '../features/EventoYCurso/GestionEventoYCurso.jsx'
 import { getMyUser } from "../services/usuarios.service.js";
 
 const drawerWidth = 260;
@@ -86,8 +85,7 @@ const menuConfigByRole = {
     { label: "Reportes de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
     { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
-    { label: "Gestión de Evento", identifier: "GestionEventos", icon: <SettingsSuggestIcon /> },
-    { label: "Gestión de Cursos", identifier: "GestionCursos", icon: <SettingsSuggestIcon /> },
+    { label: "Gestión de Eventos", identifier: "GestionEventoYCurso", icon: <SettingsSuggestIcon /> },
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
     { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
   ],
@@ -240,8 +238,7 @@ export default function Principal() {
       case "Gestion": return <MainGestion />;
       case "RestriccionesFechasInicioCursada": return <RestriccionesFechasInicioCursada />;
       case "Eventos": return <NuevoEvento />;
-      case "GestionEventos": return <GestionEventos />;
-      case "GestionCursos": return <GestionCursos />;
+      case "GestionEventoYCurso": return <GestionEventoYCurso />;
       case "ReporteCursosIdentifier": return <ReporteCursos />;
       case "CrearAviso": return <CrearAviso />;
       case "AsistenciasMain": return <AsistenciasMain />;
