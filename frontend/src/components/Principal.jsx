@@ -111,7 +111,8 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
       duration: theme.transitions.duration.enteringScreen,
     }),
     marginLeft: `-${drawerWidth}px`,
-    minWidth: 0, // <-- ¡¡¡LA SOLUCIÓN DEFINITIVA ESTÁ AQUÍ!!!
+    minWidth: 0,
+    overflowX: 'hidden',
     ...(open && {
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.sharp,
@@ -256,7 +257,7 @@ export default function Principal() {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', maxWidth: '100vw', overflowX: 'hidden' }}>
       <CssBaseline />
       <AppBarStyled position="fixed" open={open}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -272,14 +273,25 @@ export default function Principal() {
             </IconButton>
           </Stack>
 
-          <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 600, flexGrow: 1, textAlign: 'center' }} >
+          <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 600, flexGrow: 1, textAlign: 'left' }} >
             InscribCórdoba
           </Typography>
 
           <Stack direction="row" alignItems="center" spacing={1}>
             {user && (
-              <Typography sx={{ display: { xs: 'none', md: 'block' } }}>
-                Hola, {user.nombre} ({user.rol})
+              <Typography
+                variant="body2"
+                sx={{
+                  display: { xs: 'none', md: 'block' },
+                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: '16px',
+                  fontWeight: 500,
+                  letterSpacing: '0.02em'
+                }}
+              >
+                {user.nombre} ({user.rol})
               </Typography>
             )}
             <Tooltip title="Cerrar Sesión">

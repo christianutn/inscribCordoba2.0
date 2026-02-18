@@ -194,86 +194,32 @@ const Home = ({ nombre, setOpcionSeleccionada }) => {
 
       <Box
         sx={theme => ({
-          background: theme.palette.grey[100],
+          background: '#fff',
           color: theme.palette.text.primary,
-          py: { xs: 6, md: 10 },
+          py: { xs: 2.5, md: 3.5 },
           textAlign: 'center',
-          borderBottom: `1px solid ${theme.palette.grey[300]}`
         })}
       >
         <Container maxWidth="md">
           <Typography
-            variant="h2"
+            variant="h4"
             component="h1"
             sx={{
               fontFamily: 'Poppins, sans-serif',
               fontWeight: 700,
-              mb: 2,
+              mb: 0,
               color: 'primary.main',
-              fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' }
+              fontSize: { xs: '1.6rem', sm: '2rem', md: '2.4rem' }
             }}
           >
             {nombre
               ? `¡Hola ${nombre}!`
               : 'Bienvenido/a a InscribCórdoba'}
           </Typography>
-          <Typography
-            variant="h6"
-            component="p"
-            color="text.secondary"
-            sx={{ mb: 4, fontWeight: 400 }}
-          >
-            Tu espacio central para planificar y consultar las capacitaciones de Campus Córdoba.
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => setOpcionSeleccionada('Calendario')}
-            endIcon={<ArrowForwardIcon />}
-            sx={{
-              borderRadius: '50px',
-              px: 4,
-              py: 1.5,
-              fontWeight: 600,
-              backgroundColor: 'primary.main',
-              '&:hover': {                backgroundColor: 'custom.CBA_Blue_Darker',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 6px 15px rgba(0, 81, 156, 0.3)'
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            Ver Capacitaciones
-          </Button>
-          
-          {/* <Button
-            variant="outlined"
-            size="large"
-            onClick={() => setOpcionSeleccionada('AsistenciasMain')}
-            endIcon={<ArrowForwardIcon />}
-            sx={{
-              borderRadius: '50px',
-              px: 4,
-              py: 1.5,
-              fontWeight: 600,
-              ml: 2,
-              borderColor: 'primary.main',
-              color: 'primary.main',
-              '&:hover': {
-                backgroundColor: 'primary.main',
-                color: 'common.white',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 6px 15px rgba(0, 81, 156, 0.3)'
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            Registro de Asistencias
-          </Button> */}
         </Container>
       </Box>
 
-      <Container sx={{ py: { xs: 4, md: 8 } }}>
+      <Container sx={{ py: { xs: 2, md: 4 } }}>
         <Grid container spacing={5}>
           <Grid item xs={12} md={12} lg={12}>
             <Paper sx={{ ...paperStyles, p: 4 }}>
