@@ -268,7 +268,7 @@ const ReporteCursosCC = () => {
                 const mesFinCurso = esFechaFinValida ? fechaFinObj.month : -1;
                 const anioFinCurso = esFechaFinValida ? fechaFinObj.year : -1;
 
-                const isCancelledOrSuspended = estadoCurso === "SUSP" || estadoCurso === "CANC";
+                const isCancelledOrSuspended = estadoCurso === "CANC";
 
                 if (mesInicioCurso === mesIndex) {
                     if (!isCancelledOrSuspended) {
@@ -354,7 +354,7 @@ const ReporteCursosCC = () => {
             const labels = allMonthsData.map(d => d.mesAbrev);
             setDisplayChartData({
                 labels,
-                tendencias: { datasets: [{ label: 'Nuevos', data: allMonthsData.map(d => d.cursosPorMes), borderColor: 'rgb(53, 162, 235)', backgroundColor: 'rgba(53, 162, 235, 0.5)', yAxisID: 'y', tension: 0.1 }, { label: 'Total Act.', data: allMonthsData.map(d => d.totalCursosAcumulados), borderColor: 'rgb(75, 192, 192)', backgroundColor: 'rgba(75, 192, 192, 0.5)', yAxisID: 'y', tension: 0.1 }, { label: 'Canc/Susp.', data: allMonthsData.map(d => d.canceladosSuspendidos), borderColor: 'rgb(255, 99, 132)', backgroundColor: 'rgba(255, 99, 132, 0.5)', yAxisID: 'y', tension: 0.1 },] },
+                tendencias: { datasets: [{ label: 'Nuevos', data: allMonthsData.map(d => d.cursosPorMes), borderColor: 'rgb(53, 162, 235)', backgroundColor: 'rgba(53, 162, 235, 0.5)', yAxisID: 'y', tension: 0.1 }, { label: 'Total Act.', data: allMonthsData.map(d => d.totalCursosAcumulados), borderColor: 'rgb(75, 192, 192)', backgroundColor: 'rgba(75, 192, 192, 0.5)', yAxisID: 'y', tension: 0.1 }, { label: 'Cancelados', data: allMonthsData.map(d => d.canceladosSuspendidos), borderColor: 'rgb(255, 99, 132)', backgroundColor: 'rgba(255, 99, 132, 0.5)', yAxisID: 'y', tension: 0.1 },] },
                 composicionActivos: { datasets: [{ label: 'Nuevos Mes', data: allMonthsData.map(d => d.cursosPorMes), backgroundColor: 'rgba(53, 162, 235, 0.7)', stack: 'Stack 0' }, { label: 'Act. Ant.', data: allMonthsData.map(d => d.cursosActivosAnteriores), backgroundColor: 'rgba(75, 192, 192, 0.7)', stack: 'Stack 0' },] },
             });
             setDisplaySummaryData(allMonthsData);
@@ -376,7 +376,7 @@ const ReporteCursosCC = () => {
                     totalHorasCC: monthData.horasPorMes || 0
                 });
 
-                const monthlyCourseDetailLabels = ['Nuevos', 'Act. Ant.', 'Canc/Susp.'];
+                const monthlyCourseDetailLabels = ['Nuevos', 'Act. Ant.', 'Cancelados'];
                 const monthlyCourseDetailData = [monthData.cursosPorMes, monthData.cursosActivosAnteriores, monthData.canceladosSuspendidos];
 
                 setDisplayChartData({
@@ -434,7 +434,7 @@ const ReporteCursosCC = () => {
             return (
                 <List dense sx={{ '& .MuiListItemText-secondary': { fontSize: '0.8rem' } }}>
                     <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><CheckCircleOutlineIcon color="success" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cursos en ${currentYear}: ${displayKpiData.nuevos}`} /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><HighlightOffIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Cancelados/Suspendidos: ${displayKpiData.cancelados}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><HighlightOffIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Cancelados: ${displayKpiData.cancelados}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><TrendingUpIcon color="action" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Promedio de Cursos Acumulados por Mes: ${displayKpiData.activosPromedio}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Porcentaje de Cursos Autogestionados: ${displayKpiData.porcAutogestionado}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cupos (Campus Córdoba ${currentYear}): ${displayKpiData.totalParticipantes}`} /> </ListItem>
@@ -452,7 +452,7 @@ const ReporteCursosCC = () => {
                     <ListItem disablePadding> <ListItemIcon sx={{ minWidth: '40px' }}><CheckCircleOutlineIcon color="primary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cursos en ${monthData.mesNombre}: ${monthData.cursosPorMes}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><TrendingUpIcon color="success" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cursos Activos de Meses Anteriores: ${monthData.cursosActivosAnteriores}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><BarChartIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Cursos Acumulados en ${monthData.mesNombre}: ${monthData.totalCursosAcumulados}`} /> </ListItem>
-                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><CancelIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cancelados/Suspendidos (Iniciaban en ${monthData.mesNombre}): ${monthData.canceladosSuspendidos}`} /> </ListItem>
+                    <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><CancelIcon color="error" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Cancelados (Iniciaban en ${monthData.mesNombre}): ${monthData.canceladosSuspendidos}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><SettingsSuggestIcon color="warning" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Autogestionados (Nuevos en ${monthData.mesNombre}): ${monthData.autogestionados} (${monthData.porcentajeAutogestionados.toFixed(1)}%)`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><PeopleIcon color="info" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total de Cupos (Nuevos Cursos ${monthData.mesNombre}): ${displayKpiData.totalParticipantes}`} /> </ListItem>
                     <ListItem disablePadding sx={{ mt: 1 }}> <ListItemIcon sx={{ minWidth: '40px' }}><AccessTimeIcon color="secondary" /></ListItemIcon> <ListItemText {...textStyleProps} primary={`Total Horas de Capacitación (Campus Córdoba ${monthData.mesNombre}): ${displayKpiData.totalHorasCC ?? 0}`} /> </ListItem>
@@ -604,7 +604,7 @@ const ReporteCursosCC = () => {
                                 <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title="Total Horas de Capacitación" value={displayKpiData.totalHorasCC ?? '0'} icon={<AccessTimeIcon />} color="secondary" description={displayKpiData.isAnnual ? `Total ${currentYear} - Campus Córdoba` : `En ${displayKpiData.monthName} - Campus Córdoba`} /> </Grid>
                                 <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title={displayKpiData.isAnnual ? "Acumulados Prom./Mes" : "Total Acumulados Mes"} value={displayKpiData.activosPromedio ?? '0'} icon={<TrendingUpIcon />} color="success" description={displayKpiData.isAnnual ? `Promedio ${currentYear}` : `En ${displayKpiData.monthName}`} /> </Grid>
                                 <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title="% Autogestionados" value={displayKpiData.porcAutogestionado ?? '0%'} icon={<SettingsSuggestIcon />} color="warning" description={displayKpiData.isAnnual ? `Anual - Campus Córdoba` : `En ${displayKpiData.monthName} - Campus Córdoba`} /> </Grid>
-                                <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title="Cancelados/Susp." value={displayKpiData.cancelados ?? '0'} icon={<CancelIcon />} color="error" description={displayKpiData.isAnnual ? `Iniciaban ${currentYear}` : `Iniciaban en ${displayKpiData.monthName}`} /> </Grid>
+                                <Grid item xs={12} sm={6} md={4} lg={4}> <KpiCard title="Cancelados" value={displayKpiData.cancelados ?? '0'} icon={<CancelIcon />} color="error" description={displayKpiData.isAnnual ? `Iniciaban ${currentYear}` : `Iniciaban en ${displayKpiData.monthName}`} /> </Grid>
                             </Grid>
                         </div>
                     )}

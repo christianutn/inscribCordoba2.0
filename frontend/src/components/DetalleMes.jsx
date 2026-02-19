@@ -76,9 +76,9 @@ const DetalleMesChart = () => {
         text: 'Mes',
       },
       labels: {
-          style: {
-              fontSize: '10px' // Ajustar tamaño si los nombres de los meses son largos
-          }
+        style: {
+          fontSize: '10px' // Ajustar tamaño si los nombres de los meses son largos
+        }
       }
     },
     yaxis: {
@@ -100,7 +100,7 @@ const DetalleMesChart = () => {
       // theme: 'dark', // Opcional
       x: {
         formatter: function (value, { seriesIndex, dataPointIndex, w }) {
-           // 'value' aquí es el índice de la categoría, usamos 'labels' para obtener el nombre del mes
+          // 'value' aquí es el índice de la categoría, usamos 'labels' para obtener el nombre del mes
           return labels[dataPointIndex] || '';
         }
       },
@@ -114,7 +114,7 @@ const DetalleMesChart = () => {
       text: 'Resumen Mensual',
       align: 'center',
       style: {
-          fontSize: '16px'
+        fontSize: '16px'
       }
     },
     legend: { show: true, position: 'top', horizontalAlign: 'center', offsetY: 10 }, // Mostrar leyenda
@@ -126,12 +126,12 @@ const DetalleMesChart = () => {
       try {
         const todasInstancias = await getInstancias();
         if (!Array.isArray(todasInstancias)) {
-            throw new Error("La respuesta de getInstancias no es un array");
+          throw new Error("La respuesta de getInstancias no es un array");
         }
 
-        // Filtrar instancias activas (no CANC ni SUSP)
+        // Filtrar instancias activas (no CANC )
         const instanciasActivas = todasInstancias.filter(inst =>
-          inst.estado_instancia !== 'CANC' && inst.estado_instancia !== 'SUSP'
+          inst.estado_instancia !== 'CANC'
         );
 
         // Agrupar por mes

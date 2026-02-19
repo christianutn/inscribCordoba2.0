@@ -382,7 +382,7 @@ export const get_fechas_invalidas = async (req, res, next) => {
                 SELECT
                     curso, fecha_inicio_curso, fecha_fin_curso, cupo, estado_instancia
                 FROM instancias
-                WHERE estado_instancia NOT IN ('SUSP', 'CANC')
+                WHERE estado_instancia NOT IN ('CANC')
                   AND YEAR(fecha_inicio_curso) = :target_year
             ),
             DailyMetricsCTE AS (
@@ -411,7 +411,7 @@ export const get_fechas_invalidas = async (req, res, next) => {
                 FROM DatesCTE d
                 LEFT JOIN instancias fi ON fi.fecha_inicio_curso <= d.calendario_fecha 
                                        AND fi.fecha_fin_curso > d.calendario_fecha
-                                       AND fi.estado_instancia NOT IN ('SUSP', 'CANC')
+                                       AND fi.estado_instancia NOT IN ('CANC')
                 GROUP BY d.calendario_fecha
             )
             SELECT DISTINCT

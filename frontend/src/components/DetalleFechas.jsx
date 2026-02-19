@@ -62,7 +62,7 @@ const DetalleFechasChart = () => {
       try {
         const data = await getInstancias();
         if (!Array.isArray(data)) {
-            throw new Error("La respuesta de getInstancias no es un array");
+          throw new Error("La respuesta de getInstancias no es un array");
         }
         setAllInstancias(data);
 
@@ -73,7 +73,7 @@ const DetalleFechasChart = () => {
             const monthYear = dayjs(instancia.fecha_inicio_curso).format('YYYY-MM');
             uniqueMonths.add(monthYear);
           }
-           if (instancia.fecha_fin_curso) { // Considerar también fechas de fin para el rango de meses
+          if (instancia.fecha_fin_curso) { // Considerar también fechas de fin para el rango de meses
             const monthYear = dayjs(instancia.fecha_fin_curso).format('YYYY-MM');
             uniqueMonths.add(monthYear);
           }
@@ -87,7 +87,7 @@ const DetalleFechasChart = () => {
           if (sortedMonths.includes(currentMonthFormatted)) {
             setMesSeleccionado(currentMonthFormatted);
           } else {
-            setMesSeleccionado(sortedMonths[sortedMonths.length -1]); // O el primero: sortedMonths[0]
+            setMesSeleccionado(sortedMonths[sortedMonths.length - 1]); // O el primero: sortedMonths[0]
           }
         } else {
           setLoading(false);
@@ -128,9 +128,9 @@ const DetalleFechasChart = () => {
     const currentDataCursosInician = [];
     const currentDataCursosActivos = [];
 
-    // Filtrar instancias activas (no CANC ni SUSP)
+    // Filtrar instancias activas (no CANC)
     const instanciasActivas = allInstancias.filter(inst =>
-      inst.estado_instancia !== 'CANC' && inst.estado_instancia !== 'SUSP'
+      inst.estado_instancia !== 'CANC'
     );
 
     for (let d = 1; d <= diasDelMes; d++) {
@@ -159,12 +159,12 @@ const DetalleFechasChart = () => {
             cursosActivosDelDia++;
           }
         } else if (fechaInicio.isValid() && !fechaFin) { // Si no hay fecha de fin, se asume activo si ya empezó
-           if (currentDate.isSameOrAfter(fechaInicio, 'day')) {
-             // Podrías decidir si esto cuenta como activo indefinidamente o requiere una fecha de fin
-             // Por ahora, si no hay fecha fin, y ya empezó, lo contamos como activo.
-             // O podrías omitirlo si siempre debe haber fecha de fin.
-             // cursosActivosDelDia++;
-           }
+          if (currentDate.isSameOrAfter(fechaInicio, 'day')) {
+            // Podrías decidir si esto cuenta como activo indefinidamente o requiere una fecha de fin
+            // Por ahora, si no hay fecha fin, y ya empezó, lo contamos como activo.
+            // O podrías omitirlo si siempre debe haber fecha de fin.
+            // cursosActivosDelDia++;
+          }
         }
       });
 
