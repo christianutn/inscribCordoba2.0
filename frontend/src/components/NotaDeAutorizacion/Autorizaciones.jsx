@@ -18,11 +18,18 @@ import {
     Container,
     Paper,
     useTheme,
-    Alert
+    Alert,
+    IconButton,
+    Tooltip,
+    ToggleButton,
+    ToggleButtonGroup
 } from '@mui/material';
+import { ViewModule, ViewList } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { getUltimosEstadoDeAutorizaciones, rechazarNotaDeAutorizacion } from "../../services/cambiosEstadoAutorizacion.service.js";
 import { useNavigate } from 'react-router-dom';
+import VistaCards from './VistaCards';
+import VistaLista from './VistaLista';
 
 const Autorizaciones = () => {
     const navigate = useNavigate();
@@ -40,6 +47,7 @@ const Autorizaciones = () => {
         message: '',
         severity: 'success'
     });
+    const [viewType, setViewType] = useState('cards');
 
     useEffect(() => {
         const fetchUltimoEstadoDeAutorizaciones = async () => {
@@ -191,116 +199,58 @@ const Autorizaciones = () => {
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} md={4} lg={4}>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={filtros.soloPendientes}
-                                        onChange={handleFiltroChange}
-                                        name="soloPendientes"
-                                        color="primary"
-                                    />
-                                }
-                                label="Mostrar solo pendientes"
-                            />
+                            <Box display="flex" alignItems="center" justifyContent="space-between">
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={filtros.soloPendientes}
+                                            onChange={handleFiltroChange}
+                                            name="soloPendientes"
+                                            color="primary"
+                                        />
+                                    }
+                                    label="Mostrar solo pendientes"
+                                />
+                                <ToggleButtonGroup
+                                    value={viewType}
+                                    exclusive
+                                    onChange={(e, nextView) => nextView && setViewType(nextView)}
+                                    aria-label="tipo de vista"
+                                    size="small"
+                                >
+                                    <ToggleButton value="cards" aria-label="vista cards">
+                                        <Tooltip title="Vista de Tarjetas">
+                                            <ViewModule />
+                                        </Tooltip>
+                                    </ToggleButton>
+                                    <ToggleButton value="list" aria-label="vista lista">
+                                        <Tooltip title="Vista de Lista">
+                                            <ViewList />
+                                        </Tooltip>
+                                    </ToggleButton>
+                                </ToggleButtonGroup>
+                            </Box>
                         </Grid>
 
                     </Grid>
                 </Paper>
 
-                {/* Cards Grid */}
-                <Grid container spacing={3}>
-                    {filteredAutorizaciones.map((item) => {
-                        const nota = item.NotaAutorizacion;
-                        const persona = nota?.detalle_usuario?.detalle_persona;
-                        const area = nota?.detalle_usuario?.detalle_area;
-                        const ministerio = area?.detalle_ministerio;
-                        const estado = item.Estado;
-                        const isPendiente = item.estado_nota_autorizacion_cod === 'PEND';
-                        const isAutorizado = item.estado_nota_autorizacion_cod === 'AUT';
-
-                        return (
-                            <Grid item xs={12} md={6} xl={4} key={item.id}>
-
-                                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 2 }} elevation={1}>
-                                    <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                                            <Typography variant="h6" component="div" fontWeight="bold">
-                                                {area?.nombre} / {ministerio?.nombre}
-                                            </Typography>
-                                            <Chip
-                                                label={estado?.nombre}
-                                                color={isPendiente ? "warning" : isAutorizado ? "success" : "default"}
-                                                size="small"
-                                                sx={{ fontWeight: 'bold' }}
-                                            />
-                                        </Box>
-
-                                        <Box sx={{ color: 'text.primary', fontSize: '0.875rem', flexGrow: 1 }}>
-                                            <Typography gutterBottom>
-                                                <Box component="span" fontWeight="bold">Referente:</Box> {persona ? `${persona.apellido}, ${persona.nombre}` : 'No disponible'}
-                                            </Typography>
-                                            <Typography gutterBottom>
-                                                <Box component="span" fontWeight="bold">Fecha de Recepción:</Box> {nota?.fecha_desde ? dayjs(nota.fecha_desde).format('DD-MM-YYYY') : '-'}
-                                            </Typography>
-                                            {isAutorizado && (
-                                                <Typography >
-                                                    <Box component="span" fontWeight="bold">Fecha de Aprobación:</Box> {item.fecha_desde ? dayjs(item.fecha_desde).format('DD-MM-YYYY') : '-'}
-                                                </Typography>
-                                            )}
-                                        </Box>
-
-                                        <Stack spacing={2} mt={2}>
-                                            <Box>
-                                                <Button
-                                                    variant="contained"
-                                                    size="small"
-                                                    onClick={() => handleVerPdf(nota?.ruta_archivo_local)}
-                                                    sx={{
-                                                        bgcolor: theme.palette.primary.main,
-                                                        '&:hover': { bgcolor: theme.palette.primary.dark }
-                                                    }}
-                                                >
-                                                    Ver PDF
-                                                </Button>
-                                            </Box>
-                                            <Stack direction="row" spacing={2}>
-                                                {
-                                                    isPendiente && (
-                                                        <>
-                                                            <Button
-                                                                variant="contained"
-                                                                color="error"
-                                                                fullWidth
-                                                                onClick={() => handleRechazar(nota?.id)}
-                                                                sx={{ fontWeight: 'bold' }}
-                                                            >
-                                                                Rechazar
-                                                            </Button>
-                                                            <Button
-                                                                variant="contained"
-                                                                fullWidth
-                                                                onClick={() => {
-                                                                    navigate('/confirmaciones', { state: { datos: nota } });
-                                                                }}
-                                                                sx={{
-                                                                    bgcolor: theme.palette.primary.main,
-                                                                    '&:hover': { bgcolor: theme.palette.primary.dark },
-                                                                    fontWeight: 'bold'
-                                                                }}
-                                                            >
-                                                                Autorizar
-                                                            </Button>
-                                                        </>
-                                                    )
-                                                }
-                                            </Stack>
-                                        </Stack>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        );
-                    })}
-                </Grid>
+                {/* Content Section */}
+                {viewType === 'cards' ? (
+                    <VistaCards
+                        data={filteredAutorizaciones}
+                        onVerPdf={handleVerPdf}
+                        onRechazar={handleRechazar}
+                        onAutorizar={(nota) => navigate('/confirmaciones', { state: { datos: nota } })}
+                    />
+                ) : (
+                    <VistaLista
+                        data={filteredAutorizaciones}
+                        onVerPdf={handleVerPdf}
+                        onRechazar={handleRechazar}
+                        onAutorizar={(nota) => navigate('/confirmaciones', { state: { datos: nota } })}
+                    />
+                )}
             </Container>
         </Box>
     );
