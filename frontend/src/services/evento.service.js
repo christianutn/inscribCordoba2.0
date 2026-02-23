@@ -105,4 +105,27 @@ export const putEventoYCurso = async (payload) => {
     }
 }
 
+/**
+ * Obtiene TODOS los cursos con su evento asociado (si existe).
+ * Cursos sin evento tendrán detalle_evento: null.
+ */
+export const getCursosConEventos = async () => {
+    try {
+        const response = await fetch(URL + "/cursos-con-eventos", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        });
+        const data = await response.json();
+        if (response.status !== 200) {
+            throw new Error(data.message || "Error al obtener cursos con eventos");
+        }
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 

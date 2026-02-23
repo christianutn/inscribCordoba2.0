@@ -92,6 +92,9 @@ const associateInscribModels = () => {
     Evento.belongsTo(Usuario, { foreignKey: 'usuario', as: 'detalle_usuario' });
     Evento.belongsTo(Curso, { foreignKey: 'curso', as: 'detalle_curso' });
 
+    // Relación inversa: Un Curso puede tener (o no) un Evento asociado
+    Curso.hasOne(Evento, { foreignKey: 'curso', sourceKey: 'cod', as: 'detalle_evento' });
+
     RestriccionesPorCorrelatividad.belongsTo(Curso, { foreignKey: 'curso', as: 'detalle_curso' });
     RestriccionesPorCorrelatividad.belongsTo(Curso, { foreignKey: 'curso_correlativo', as: 'detalle_curso_correlativo' });
 

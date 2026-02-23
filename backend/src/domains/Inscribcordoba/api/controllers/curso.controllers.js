@@ -177,13 +177,14 @@ export const actualizarCursoDB = async (cursoData, cod, transaction) => {
 /**
  * Arma el objeto de datos del curso a partir del body del request.
  * Centraliza la extracción y normalización de campos para evitar duplicación.
+ * Acepta tanto 'cod' como 'curso' como identificador del curso.
  *
  * @param {Object} body - req.body con los campos del curso.
  * @returns {Object} Objeto listo para pasar a actualizarCursoDB.
  */
 export const buildCursoData = (body) => {
     const {
-        curso, nombre, cupo, cantidad_horas,
+        cod, curso, nombre, cupo, cantidad_horas,
         medio_inscripcion, plataforma_dictado,
         tipo_capacitacion, area, esVigente,
         tiene_evento_creado, numero_evento,
@@ -193,7 +194,8 @@ export const buildCursoData = (body) => {
     } = body;
 
     return {
-        curso,
+        cod: cod || curso, // Acepta ambos nombres de campo
+        curso: curso || cod,
         nombre,
         cupo,
         cantidad_horas,

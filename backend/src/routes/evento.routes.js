@@ -1,4 +1,4 @@
-import { getEventos, getEventoByCod, postEvento, deleteEvento, putEvento } from '../domains/Inscribcordoba/api/controllers/evento.controllers.js';
+import { getCursosConEventos, getEventos, getEventoByCod, postEvento, deleteEvento, putEvento } from '../domains/Inscribcordoba/api/controllers/evento.controllers.js';
 import { Router } from 'express';
 import passport from 'passport';
 import autorizar from '../utils/autorizar.js';
@@ -11,6 +11,7 @@ import TipoCertificación from "../domains/Inscribcordoba/api/models/tipoCertifi
 const eventoRouter = Router();
 
 eventoRouter.get("/", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), getEventos);
+eventoRouter.get("/cursos-con-eventos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), getCursosConEventos);
 eventoRouter.get("/:cod", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), getEventoByCod);
 eventoRouter.post("/",
     passport.authenticate('jwt', { session: false }),

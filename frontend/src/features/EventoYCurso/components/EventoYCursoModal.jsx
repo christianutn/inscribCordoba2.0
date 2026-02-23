@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, TextField, MenuItem, Grid, FormControl,
-    InputLabel, Select, IconButton, Typography, Divider, Box
+    InputLabel, Select, IconButton, Typography, Divider, Box,
+    Alert
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
+    // Determinar si el curso ya tiene un evento
+    const tieneEvento = useMemo(() => {
+        return record?.detalle_evento != null;
+    }, [record]);
+
     const [formData, setFormData] = useState({
         // Campos del Curso
         curso: '',
@@ -41,35 +47,35 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
 
     useEffect(() => {
         if (record) {
-            const detalleCurso = record.detalle_curso || {};
+            const evento = record.detalle_evento;
             setFormData({
-                // Campos del Curso (extraídos de detalle_curso del evento)
-                curso: record.curso || '',
-                nombre: detalleCurso.nombre || '',
-                cupo: detalleCurso.cupo || '',
-                codPlataformaDictado: detalleCurso.plataforma_dictado || '',
-                codMedioInscripcion: detalleCurso.medio_inscripcion || '',
-                codTipoCapacitacion: detalleCurso.tipo_capacitacion || '',
-                cantidad_horas: detalleCurso.cantidad_horas || '',
-                codArea: detalleCurso.area || '',
-                esVigente: detalleCurso.esVigente ? 1 : 0,
-                tiene_evento_creado: detalleCurso.tiene_evento_creado ? 1 : 0,
-                numero_evento: detalleCurso.numero_evento || '',
-                esta_maquetado: detalleCurso.esta_maquetado ? 1 : 0,
-                esta_configurado: detalleCurso.esta_configurado ? 1 : 0,
-                aplica_sincronizacion_certificados: detalleCurso.aplica_sincronizacion_certificados ? 1 : 0,
-                url_curso: detalleCurso.url_curso || '',
-                esta_autorizado: detalleCurso.esta_autorizado ? 1 : 0,
-                // Campos del Evento
-                perfil: record.detalle_perfil?.cod || record.perfil || '',
-                area_tematica: record.detalle_areaTematica?.cod || record.area_tematica || '',
-                tipo_certificacion: record.detalle_tipoCertificacion?.cod || record.tipo_certificacion || '',
-                presentacion: record.presentacion || '',
-                objetivos: record.objetivos || '',
-                requisitos_aprobacion: record.requisitos_aprobacion || '',
-                ejes_tematicos: record.ejes_tematicos || '',
-                certifica_en_cc: Number(record.certifica_en_cc) === 0 ? 0 : 1,
-                disenio_a_cargo_cc: Number(record.disenio_a_cargo_cc) === 0 ? 0 : 1
+                // Campos del Curso (ahora directamente desde el record, que ES un curso)
+                curso: record.cod || '',
+                nombre: record.nombre || '',
+                cupo: record.cupo || '',
+                codPlataformaDictado: record.plataforma_dictado || '',
+                codMedioInscripcion: record.medio_inscripcion || '',
+                codTipoCapacitacion: record.tipo_capacitacion || '',
+                cantidad_horas: record.cantidad_horas || '',
+                codArea: record.area || '',
+                esVigente: record.esVigente ? 1 : 0,
+                tiene_evento_creado: record.tiene_evento_creado ? 1 : 0,
+                numero_evento: record.numero_evento || '',
+                esta_maquetado: record.esta_maquetado ? 1 : 0,
+                esta_configurado: record.esta_configurado ? 1 : 0,
+                aplica_sincronizacion_certificados: record.aplica_sincronizacion_certificados ? 1 : 0,
+                url_curso: record.url_curso || '',
+                esta_autorizado: record.esta_autorizado ? 1 : 0,
+                // Campos del Evento (pueden ser null si no tiene evento)
+                perfil: evento?.detalle_perfil?.cod || evento?.perfil || '',
+                area_tematica: evento?.detalle_areaTematica?.cod || evento?.area_tematica || '',
+                tipo_certificacion: evento?.detalle_tipoCertificacion?.cod || evento?.tipo_certificacion || '',
+                presentacion: evento?.presentacion || '',
+                objetivos: evento?.objetivos || '',
+                requisitos_aprobacion: evento?.requisitos_aprobacion || '',
+                ejes_tematicos: evento?.ejes_tematicos || '',
+                certifica_en_cc: evento ? (Number(evento.certifica_en_cc) === 0 ? 0 : 1) : 1,
+                disenio_a_cargo_cc: evento ? (Number(evento.disenio_a_cargo_cc) === 0 ? 0 : 1) : 1
             });
         } else {
             setFormData({
@@ -99,10 +105,26 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
         }
     };
 
+    /**
+     * Determina si el usuario completó algún campo del evento.
+     * Si no completó ninguno, solo se guardará el curso.
+     */
+    const hayDatosDeEvento = useMemo(() => {
+        return !!(
+            formData.perfil ||
+            formData.area_tematica ||
+            formData.tipo_certificacion ||
+            formData.presentacion?.trim() ||
+            formData.objetivos?.trim() ||
+            formData.requisitos_aprobacion?.trim() ||
+            formData.ejes_tematicos?.trim()
+        );
+    }, [formData]);
+
     const validate = () => {
         const newErrors = {};
 
-        // --- Validaciones del Curso ---
+        // --- Validaciones del Curso (siempre obligatorias) ---
         if (!formData.nombre) newErrors.nombre = 'El nombre es obligatorio';
         if (formData.nombre && formData.nombre.length > 250) newErrors.nombre = 'Máximo 250 caracteres';
         if (!formData.cupo) newErrors.cupo = 'El cupo es obligatorio';
@@ -115,20 +137,23 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
         if (!formData.codArea) newErrors.codArea = 'Requerido';
 
         // --- Validaciones del Evento ---
-        if (!formData.perfil) newErrors.perfil = 'El perfil es obligatorio';
-        if (!formData.area_tematica) newErrors.area_tematica = 'El área temática es obligatoria';
-        if (!formData.tipo_certificacion) newErrors.tipo_certificacion = 'El tipo de certificación es obligatorio';
-        if (!formData.presentacion || formData.presentacion.trim() === '') {
-            newErrors.presentacion = 'La presentación es obligatoria';
-        }
-        if (!formData.objetivos || formData.objetivos.trim() === '') {
-            newErrors.objetivos = 'Los objetivos son obligatorios';
-        }
-        if (!formData.requisitos_aprobacion || formData.requisitos_aprobacion.trim() === '') {
-            newErrors.requisitos_aprobacion = 'Los requisitos de aprobación son obligatorios';
-        }
-        if (!formData.ejes_tematicos || formData.ejes_tematicos.trim() === '') {
-            newErrors.ejes_tematicos = 'Los ejes temáticos son obligatorios';
+        // Solo se validan si: (a) ya tiene evento, o (b) el usuario empezó a completar datos de evento
+        if (tieneEvento || hayDatosDeEvento) {
+            if (!formData.perfil) newErrors.perfil = 'El perfil es obligatorio';
+            if (!formData.area_tematica) newErrors.area_tematica = 'El área temática es obligatoria';
+            if (!formData.tipo_certificacion) newErrors.tipo_certificacion = 'El tipo de certificación es obligatorio';
+            if (!formData.presentacion || formData.presentacion.trim() === '') {
+                newErrors.presentacion = 'La presentación es obligatoria';
+            }
+            if (!formData.objetivos || formData.objetivos.trim() === '') {
+                newErrors.objetivos = 'Los objetivos son obligatorios';
+            }
+            if (!formData.requisitos_aprobacion || formData.requisitos_aprobacion.trim() === '') {
+                newErrors.requisitos_aprobacion = 'Los requisitos de aprobación son obligatorios';
+            }
+            if (!formData.ejes_tematicos || formData.ejes_tematicos.trim() === '') {
+                newErrors.ejes_tematicos = 'Los ejes temáticos son obligatorios';
+            }
         }
 
         setErrors(newErrors);
@@ -137,18 +162,22 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
 
     const handleSubmit = () => {
         if (validate()) {
-            onSave(formData);
+            onSave({
+                ...formData,
+                tieneEvento // Indica al hook si debe crear o actualizar evento
+            });
         }
     };
 
-    const cursoNombre = record?.detalle_curso?.nombre || record?.curso || '';
+    const cursoNombre = record?.nombre || record?.cod || '';
+    const modalTitle = tieneEvento ? 'Editar Evento y Curso' : 'Editar Curso / Crear Evento';
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
             <DialogTitle sx={{ m: 0, p: 2 }}>
-                Editar Evento
+                {modalTitle}
                 <Typography variant="subtitle2" color="text.secondary">
-                    Curso: {cursoNombre} ({record?.curso})
+                    Curso: {cursoNombre} ({record?.cod})
                 </Typography>
                 <IconButton
                     aria-label="close"
@@ -164,6 +193,14 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                 </IconButton>
             </DialogTitle>
             <DialogContent dividers>
+                {/* Mensaje informativo para cursos sin evento */}
+                {!tieneEvento && (
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                        Este curso aún no tiene un evento asociado. Puede modificar los datos del curso y, opcionalmente,
+                        completar los datos del evento para crearlo. Si deja los campos de evento vacíos, solo se actualizará el curso.
+                    </Alert>
+                )}
+
                 {/* ============================== */}
                 {/* SECCIÓN: Datos del Curso       */}
                 {/* ============================== */}
@@ -306,6 +343,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                                 value={formData.tiene_evento_creado}
                                 label="¿Tiene evento creado?"
                                 onChange={handleChange}
+                                disabled={tieneEvento}
                             >
                                 <MenuItem value={1}>Sí</MenuItem>
                                 <MenuItem value={0}>No</MenuItem>
@@ -398,13 +436,20 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                 {/* ============================== */}
                 <Box sx={{ mt: 3 }}>
                     <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>
-                        Datos del Evento en Victorius
+                        {tieneEvento ? 'Datos del Evento en Victorius' : 'Crear Evento en Victorius (opcional)'}
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
+
+                    {!tieneEvento && !hayDatosDeEvento && (
+                        <Alert severity="warning" sx={{ mb: 2 }}>
+                            Si completa los campos de evento, se creará un evento nuevo para este curso al guardar.
+                        </Alert>
+                    )}
+
                     <Grid container spacing={2}>
                         {/* Dropdowns del Evento */}
                         <Grid item xs={12} sm={4}>
-                            <FormControl fullWidth required error={!!errors.perfil}>
+                            <FormControl fullWidth required={tieneEvento || hayDatosDeEvento} error={!!errors.perfil}>
                                 <InputLabel>Perfil</InputLabel>
                                 <Select
                                     name="perfil"
@@ -412,6 +457,9 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                                     label="Perfil"
                                     onChange={handleChange}
                                 >
+                                    <MenuItem value="">
+                                        <em>Sin seleccionar</em>
+                                    </MenuItem>
                                     {auxiliaryData.perfiles.map((item) => (
                                         <MenuItem key={item.cod} value={item.cod}>{item.descripcion}</MenuItem>
                                     ))}
@@ -420,7 +468,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <FormControl fullWidth required error={!!errors.area_tematica}>
+                            <FormControl fullWidth required={tieneEvento || hayDatosDeEvento} error={!!errors.area_tematica}>
                                 <InputLabel>Área Temática</InputLabel>
                                 <Select
                                     name="area_tematica"
@@ -428,6 +476,9 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                                     label="Área Temática"
                                     onChange={handleChange}
                                 >
+                                    <MenuItem value="">
+                                        <em>Sin seleccionar</em>
+                                    </MenuItem>
                                     {auxiliaryData.areasTematicas.map((item) => (
                                         <MenuItem key={item.cod} value={item.cod}>{item.descripcion}</MenuItem>
                                     ))}
@@ -436,7 +487,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <FormControl fullWidth required error={!!errors.tipo_certificacion}>
+                            <FormControl fullWidth required={tieneEvento || hayDatosDeEvento} error={!!errors.tipo_certificacion}>
                                 <InputLabel>Tipo de Certificación</InputLabel>
                                 <Select
                                     name="tipo_certificacion"
@@ -444,6 +495,9 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                                     label="Tipo de Certificación"
                                     onChange={handleChange}
                                 >
+                                    <MenuItem value="">
+                                        <em>Sin seleccionar</em>
+                                    </MenuItem>
                                     {auxiliaryData.tiposCertificacion.map((item) => (
                                         <MenuItem key={item.cod} value={item.cod}>{item.descripcion}</MenuItem>
                                     ))}
@@ -462,7 +516,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                                 rows={4}
                                 value={formData.presentacion}
                                 onChange={handleChange}
-                                required
+                                required={tieneEvento || hayDatosDeEvento}
                                 error={!!errors.presentacion}
                                 helperText={errors.presentacion}
                             />
@@ -476,7 +530,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                                 rows={4}
                                 value={formData.objetivos}
                                 onChange={handleChange}
-                                required
+                                required={tieneEvento || hayDatosDeEvento}
                                 error={!!errors.objetivos}
                                 helperText={errors.objetivos}
                             />
@@ -490,7 +544,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                                 rows={4}
                                 value={formData.ejes_tematicos}
                                 onChange={handleChange}
-                                required
+                                required={tieneEvento || hayDatosDeEvento}
                                 error={!!errors.ejes_tematicos}
                                 helperText={errors.ejes_tematicos}
                             />
@@ -504,7 +558,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                                 rows={3}
                                 value={formData.requisitos_aprobacion}
                                 onChange={handleChange}
-                                required
+                                required={tieneEvento || hayDatosDeEvento}
                                 error={!!errors.requisitos_aprobacion}
                                 helperText={errors.requisitos_aprobacion}
                             />
@@ -547,7 +601,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                     Cancelar
                 </Button>
                 <Button onClick={handleSubmit} variant="contained" color="primary">
-                    Guardar
+                    {tieneEvento ? 'Guardar Cambios' : (hayDatosDeEvento ? 'Crear Evento y Guardar' : 'Guardar Curso')}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -3,18 +3,20 @@ import {
     Box, Alert, CircularProgress, Snackbar,
     TextField, InputAdornment, Dialog, DialogTitle,
     DialogContent, DialogContentText, DialogActions,
-    Typography, Button
+    Typography, Button, ToggleButton, ToggleButtonGroup
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
 import useEventoYCurso from './hooks/useEventoYCurso';
 import EventoYCursoTable from './components/EventoYCursoTable';
 import EventoYCursoModal from './components/EventoYCursoModal';
+import ModalCrearCurso from '../../components/NotaDeAutorizacion/Modals/ModalCrearCurso';
 
 const GestionEventoYCurso = () => {
     const {
         data, loading, error,
         updateItem, deleteItem,
-        auxiliaryData
+        refreshData, auxiliaryData
     } = useEventoYCurso();
 
     const [modalOpen, setModalOpen] = useState(false);
@@ -23,16 +25,31 @@ const GestionEventoYCurso = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [recordToDelete, setRecordToDelete] = useState(null);
+    const [filter, setFilter] = useState('todos');
+    const [crearCursoModalOpen, setCrearCursoModalOpen] = useState(false);
 
     const filteredData = useMemo(() => {
-        if (!searchTerm) return data;
-        const lowerSearch = searchTerm.toLowerCase();
-        return data.filter(item =>
-            (item.curso && item.curso.toLowerCase().includes(lowerSearch)) ||
-            (item.detalle_curso?.nombre && item.detalle_curso.nombre.toLowerCase().includes(lowerSearch)) ||
-            (item.presentacion && item.presentacion.toLowerCase().includes(lowerSearch))
-        );
-    }, [data, searchTerm]);
+        let result = data;
+
+        // Filtrar por estado de evento
+        if (filter === 'conEvento') {
+            result = result.filter(item => item.detalle_evento != null);
+        } else if (filter === 'sinEvento') {
+            result = result.filter(item => item.detalle_evento == null);
+        }
+
+        // Filtrar por búsqueda de texto
+        if (searchTerm) {
+            const lowerSearch = searchTerm.toLowerCase();
+            result = result.filter(item =>
+                (item.cod && item.cod.toLowerCase().includes(lowerSearch)) ||
+                (item.nombre && item.nombre.toLowerCase().includes(lowerSearch)) ||
+                (item.detalle_evento?.presentacion && item.detalle_evento.presentacion.toLowerCase().includes(lowerSearch))
+            );
+        }
+
+        return result;
+    }, [data, searchTerm, filter]);
 
     const handleEdit = (record) => {
         setCurrentRecord(record);
@@ -46,7 +63,7 @@ const GestionEventoYCurso = () => {
 
     const handleConfirmDelete = async () => {
         if (recordToDelete) {
-            const result = await deleteItem(recordToDelete.curso);
+            const result = await deleteItem(recordToDelete.cod);
             if (result.success) {
                 setNotification({
                     open: true,
@@ -70,9 +87,15 @@ const GestionEventoYCurso = () => {
         const result = await updateItem(formData);
 
         if (result.success) {
+            const message = formData.tieneEvento
+                ? 'Evento y curso actualizados correctamente'
+                : (formData.perfil && formData.area_tematica && formData.tipo_certificacion)
+                    ? 'Evento creado y curso actualizado correctamente'
+                    : 'Curso actualizado correctamente';
+
             setNotification({
                 open: true,
-                message: 'Evento y curso actualizados correctamente',
+                message,
                 severity: 'success'
             });
             setModalOpen(false);
@@ -92,12 +115,12 @@ const GestionEventoYCurso = () => {
     return (
         <Box sx={{ mt: 2 }}>
             <Typography variant="h5" gutterBottom>
-                Gestión de Eventos
+                Gestión de Eventos y Cursos
             </Typography>
 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                 <TextField
                     placeholder="Buscar por código, nombre o presentación..."
                     variant="outlined"
@@ -113,6 +136,28 @@ const GestionEventoYCurso = () => {
                         ),
                     }}
                 />
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <ToggleButtonGroup
+                        value={filter}
+                        exclusive
+                        onChange={(e, newFilter) => {
+                            if (newFilter !== null) setFilter(newFilter);
+                        }}
+                        size="small"
+                    >
+                        <ToggleButton value="todos">Todos</ToggleButton>
+                        <ToggleButton value="conEvento">Con Evento</ToggleButton>
+                        <ToggleButton value="sinEvento">Sin Evento</ToggleButton>
+                    </ToggleButtonGroup>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddIcon />}
+                        onClick={() => setCrearCursoModalOpen(true)}
+                    >
+                        Nuevo Curso
+                    </Button>
+                </Box>
             </Box>
 
             <EventoYCursoTable
@@ -129,6 +174,16 @@ const GestionEventoYCurso = () => {
                 auxiliaryData={auxiliaryData}
             />
 
+            <ModalCrearCurso
+                open={crearCursoModalOpen}
+                onClose={() => setCrearCursoModalOpen(false)}
+                onSuccess={(msg) => {
+                    setNotification({ open: true, message: msg, severity: 'success' });
+                    refreshData();
+                }}
+                areas={auxiliaryData.areas}
+            />
+
             {/* Delete Confirmation Dialog */}
             <Dialog
                 open={deleteDialogOpen}
@@ -137,8 +192,8 @@ const GestionEventoYCurso = () => {
                 <DialogTitle>Confirmar Eliminación</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        ¿Está seguro que desea eliminar el evento del curso <strong>{recordToDelete?.detalle_curso?.nombre || recordToDelete?.curso}</strong>?
-                        Esta acción no se puede deshacer.
+                        ¿Está seguro que desea eliminar el evento del curso <strong>{recordToDelete?.nombre || recordToDelete?.cod}</strong>?
+                        Esta acción no se puede deshacer. El curso se mantendrá pero sin evento asociado.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

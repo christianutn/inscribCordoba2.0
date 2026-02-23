@@ -4,6 +4,10 @@ import AreaTematica from '../models/areaTematica.models.js';
 import TipoCertificacion from '../models/tipoCertificacion.models.js';
 import AppError from "../../../../utils/appError.js"
 import Curso from '../models/curso.models.js';
+import MedioInscripcion from '../models/medioInscripcion.models.js';
+import TipoCapacitacion from '../models/tipoCapacitacion.models.js';
+import PlataformaDictado from '../models/plataformaDictado.models.js';
+import Area from '../models/area.models.js';
 import { actualizarCursoDB, buildCursoData } from './curso.controllers.js';
 import enviarCorreo from '../../../../utils/enviarCorreo.js';
 import sequelize from '../../../../config/database.js';
@@ -11,6 +15,54 @@ import Persona from '../models/persona.models.js';
 import Usuario from '../models/usuario.models.js';
 import { DateTime } from "luxon"
 import logger from '../../../../utils/logger.js';
+
+
+/**
+ * Obtiene TODOS los cursos, incluyendo su evento asociado (si existe) mediante LEFT JOIN.
+ * Los cursos sin evento tendrán detalle_evento: null.
+ * Esto permite gestionar cursos con y sin evento desde una misma vista.
+ */
+export const getCursosConEventos = async (req, res, next) => {
+    try {
+        logger.info('📋 Iniciando consulta de cursos con eventos (LEFT JOIN)');
+
+        const cursos = await Curso.findAll({
+            order: [['cod', 'ASC']],
+            include: [
+                {
+                    model: Evento,
+                    as: 'detalle_evento',
+                    required: false, // LEFT JOIN: incluye cursos sin evento
+                    include: [
+                        { model: Perfil, as: 'detalle_perfil' },
+                        { model: AreaTematica, as: 'detalle_areaTematica' },
+                        { model: TipoCertificacion, as: 'detalle_tipoCertificacion' },
+                        {
+                            model: Usuario,
+                            as: 'detalle_usuario',
+                            attributes: { exclude: ['contrasenia'] },
+                            include: [
+                                { model: Persona, as: 'detalle_persona' }
+                            ]
+                        }
+                    ]
+                },
+                { model: MedioInscripcion, as: 'detalle_medioInscripcion' },
+                { model: TipoCapacitacion, as: 'detalle_tipoCapacitacion' },
+                { model: PlataformaDictado, as: 'detalle_plataformaDictado' },
+                { model: Area, as: 'detalle_area' }
+            ]
+        });
+
+        logger.info(`✅ Cursos con eventos obtenidos - Total: ${cursos.length} registros`);
+        res.status(200).json(cursos);
+    } catch (error) {
+        logger.error(`❌ Error al obtener cursos con eventos: ${error.message}`, {
+            stack: error.stack
+        });
+        next(error);
+    }
+};
 
 
 export const getEventos = async (req, res, next) => {
@@ -104,12 +156,13 @@ export const postEvento = async (req, res, next) => {
             throw new AppError("El curso ya tiene un evento creado", 400);;
         }
 
-
-        const existeEvento = await Evento.findOne({ where: { curso } });
-        if (existeEvento) {
-            logger.warn(`⚠️ Evento ya existe en la base de datos - Curso: ${curso}`);
-            throw new AppError("Ya eviste el evento", 400);;
-        }
+        // Se eliminó la validación de que el evento no exista en la base de datos ya que ahi eventos que estan
+        // marcados como existentes pero no se encuentran en la base de datos
+        // const existeEvento = await Evento.findOne({ where: { curso } });
+        // if (existeEvento) {
+        //     logger.warn(`⚠️ Evento ya existe en la base de datos - Curso: ${curso}`);
+        //     throw new AppError("Ya eviste el evento", 400);;
+        // }
 
 
         const fecha_desde = DateTime.now().setZone('America/Argentina/Buenos_Aires').toFormat("yyyy-MM-dd HH:mm:ss")
