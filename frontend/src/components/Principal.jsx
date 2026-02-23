@@ -209,6 +209,14 @@ export default function Principal() {
     };
   }, [navigate]);
 
+  // Asegura que al cambiar de sección el scroll se resetee al inicio de la página
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Comportamiento instantáneo para evitar mostrar contenido desplazado
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, [opcionSeleccionada]);
+
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
