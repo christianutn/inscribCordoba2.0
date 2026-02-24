@@ -31,3 +31,6 @@ uploads/*
 !uploads/.gitkeep
 !uploads/*/.gitkeep
 !uploads/**/.gitkeep
+
+cuils_con_emails.xlsx
+cuils.xlsx
