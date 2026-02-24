@@ -5,112 +5,112 @@ import Instancia from "../../Inscribcordoba/api/models/instancia.models.js";
 
 
 
-const enviarCorreoDiarioContolDeCursos =  () => {
-    cron.schedule('0 0 8 * * * *', async () => { // Añadido async
-        const timestamp = new Date().toISOString();
-        console.log(`[${timestamp}] CRON TAREA: Iniciando revisión de cursos para alerta de 5 o 6 días.`);
-    
+const enviarCorreoDiarioContolDeCursos = () => {
+  cron.schedule('0 0 8 * * * *', async () => { // Añadido async
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] CRON TAREA: Iniciando revisión de cursos para alerta de 5 o 6 días.`);
+
+    try {
+      // 1. Obtener los cursos
+      const cursosARevisar = await Instancia.findAll();
+
+      console.log(`[${timestamp}] CRON TAREA: Se obtuvieron ${cursosARevisar ? cursosARevisar.length : 0} cursos.`);
+
+
+      if (!Array.isArray(cursosARevisar) || cursosARevisar.length === 0) {
+        console.log(`[${timestamp}] CRON TAREA: No hay cursos válidos para revisar o la obtención falló. No se enviará correo.`);
+        return;
+      }
+
+      // 2. Calcular fechas
+      const fechaActual = new Date();
+      fechaActual.setHours(0, 0, 0, 0);
+
+      const fechaObjetivo5Dias = new Date(fechaActual);
+      fechaObjetivo5Dias.setDate(fechaActual.getDate() + 5);
+
+
+
+      console.log(`[${timestamp}] CRON TAREA: Fecha Actual (normalizada): ${fechaActual.toISOString().split('T')[0]}`);
+      console.log(`[${timestamp}] CRON TAREA: Fecha Objetivo (+5 días): ${fechaObjetivo5Dias.toISOString().split('T')[0]}`);
+
+
+      let tableRowsHtml = '';
+      let coursesFoundCount = 0;
+
+      cursosARevisar.forEach(curso => {
+        if (!curso || typeof curso !== 'object') {
+          console.warn(`[${timestamp}] CRON TAREA: Elemento inválido encontrado en la lista de cursos.`);
+          return;
+        }
+
+        const fechaInicioCursoStr = curso['Fecha inicio del curso'];
+        const nombreCurso = curso['Nombre del curso'] || 'Nombre no disponible';
+        const codigoCurso = curso['Código del curso'] || 'Código no disponible';
+
+        if (!fechaInicioCursoStr) {
+          // console.warn(`[${timestamp}] CRON TAREA: Fecha de inicio ausente en curso: "${nombreCurso}" (${codigoCurso})`); // Optional: Log missing dates
+          return; // Skip if no date
+        }
+
         try {
-            // 1. Obtener los cursos
-            const cursosARevisar = await Instancia.findAll();
-            
-            console.log(`[${timestamp}] CRON TAREA: Se obtuvieron ${cursosARevisar ? cursosARevisar.length : 0} cursos.`);
-    
-    
-            if (!Array.isArray(cursosARevisar) || cursosARevisar.length === 0) {
-                console.log(`[${timestamp}] CRON TAREA: No hay cursos válidos para revisar o la obtención falló. No se enviará correo.`);
-                return;
+          // Basic validation for YYYY-MM-DD format
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaInicioCursoStr)) {
+            console.warn(`[${timestamp}] CRON TAREA: Formato de fecha inválido ('${fechaInicioCursoStr}') en curso: "${nombreCurso}" (${codigoCurso})`);
+            return; // Skip invalid formats
+          }
+
+          // Parse the date string
+          const [year, month, day] = fechaInicioCursoStr.split('-').map(Number);
+          // IMPORTANT: Month is 0-indexed in JavaScript Date constructor (0 = January)
+          const fechaInicioCurso = new Date(year, month - 1, day);
+          fechaInicioCurso.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
+
+          // Check if the date conversion was successful
+          if (isNaN(fechaInicioCurso.getTime())) {
+            console.warn(`[${timestamp}] CRON TAREA: Fecha inválida ('${fechaInicioCursoStr}') tras conversión en curso: "${nombreCurso}" (${codigoCurso})`);
+            return; // Skip if date is invalid after parsing
+          }
+
+          // --- MODIFICACIÓN CLAVE: Comparar con +5 O +6 días ---
+          if (fechaInicioCurso.getTime() === fechaObjetivo5Dias.getTime()) {
+            coursesFoundCount++;
+            console.log(`[${timestamp}] CRON TAREA: ¡COINCIDENCIA! Curso "${nombreCurso}" (${codigoCurso}) inicia en 5 días (${fechaInicioCursoStr}).`);
+
+            // Sanitize potentially malicious HTML input from sheet data
+            const escapeHtml = (unsafe) => {
+              if (typeof unsafe !== 'string') return '';
+              return unsafe
+                .replace(/&/g, "&")
+                .replace(/</g, "<")
+                .replace(/>/g, ">")
+                .replace(/"/g, "")
+                .replace(/'/g, "'");
             }
-    
-            // 2. Calcular fechas
-            const fechaActual = new Date();
-            fechaActual.setHours(0, 0, 0, 0);
-    
-            const fechaObjetivo5Dias = new Date(fechaActual);
-            fechaObjetivo5Dias.setDate(fechaActual.getDate() + 5);
-    
-    
-    
-            console.log(`[${timestamp}] CRON TAREA: Fecha Actual (normalizada): ${fechaActual.toISOString().split('T')[0]}`);
-            console.log(`[${timestamp}] CRON TAREA: Fecha Objetivo (+5 días): ${fechaObjetivo5Dias.toISOString().split('T')[0]}`);
-    
-    
-            let tableRowsHtml = '';
-            let coursesFoundCount = 0;
-    
-            cursosARevisar.forEach(curso => {
-                if (!curso || typeof curso !== 'object') {
-                    console.warn(`[${timestamp}] CRON TAREA: Elemento inválido encontrado en la lista de cursos.`);
-                    return;
-                }
-    
-                const fechaInicioCursoStr = curso['Fecha inicio del curso'];
-                const nombreCurso = curso['Nombre del curso'] || 'Nombre no disponible';
-                const codigoCurso = curso['Código del curso'] || 'Código no disponible';
-    
-                if (!fechaInicioCursoStr) {
-                    // console.warn(`[${timestamp}] CRON TAREA: Fecha de inicio ausente en curso: "${nombreCurso}" (${codigoCurso})`); // Optional: Log missing dates
-                    return; // Skip if no date
-                }
-    
-                try {
-                    // Basic validation for YYYY-MM-DD format
-                    if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaInicioCursoStr)) {
-                        console.warn(`[${timestamp}] CRON TAREA: Formato de fecha inválido ('${fechaInicioCursoStr}') en curso: "${nombreCurso}" (${codigoCurso})`);
-                        return; // Skip invalid formats
-                    }
-    
-                    // Parse the date string
-                    const [year, month, day] = fechaInicioCursoStr.split('-').map(Number);
-                    // IMPORTANT: Month is 0-indexed in JavaScript Date constructor (0 = January)
-                    const fechaInicioCurso = new Date(year, month - 1, day);
-                    fechaInicioCurso.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
-    
-                    // Check if the date conversion was successful
-                    if (isNaN(fechaInicioCurso.getTime())) {
-                        console.warn(`[${timestamp}] CRON TAREA: Fecha inválida ('${fechaInicioCursoStr}') tras conversión en curso: "${nombreCurso}" (${codigoCurso})`);
-                        return; // Skip if date is invalid after parsing
-                    }
-    
-                    // --- MODIFICACIÓN CLAVE: Comparar con +5 O +6 días ---
-                    if (fechaInicioCurso.getTime() === fechaObjetivo5Dias.getTime()) {
-                        coursesFoundCount++;
-                        console.log(`[${timestamp}] CRON TAREA: ¡COINCIDENCIA! Curso "${nombreCurso}" (${codigoCurso}) inicia en 5 días (${fechaInicioCursoStr}).`);
-    
-                        // Sanitize potentially malicious HTML input from sheet data
-                        const escapeHtml = (unsafe) => {
-                            if (typeof unsafe !== 'string') return '';
-                            return unsafe
-                                .replace(/&/g, "&")
-                                .replace(/</g, "<")
-                                .replace(/>/g, ">")
-                                .replace(/"/g, "")
-                                .replace(/'/g, "'");
-                        }
-    
-                        tableRowsHtml += `
+
+            tableRowsHtml += `
                             <tr>
                                 <td>${escapeHtml(codigoCurso)}</td>
                                 <td>${escapeHtml(nombreCurso)}</td>
                                 <td>${escapeHtml(fechaInicioCursoStr)}</td>
                             </tr>
                         `;
-                    }
-                } catch (error) {
-                    console.error(`[${timestamp}] CRON TAREA: Error procesando fecha '${fechaInicioCursoStr}' para curso "${nombreCurso}" (${codigoCurso}):`, error);
-                    // Continue to the next curso even if one fails
-                }
-            }); // End forEach loop
-    
-            if (coursesFoundCount > 0) {
-                console.log(`[${timestamp}] CRON TAREA: Se encontraron ${coursesFoundCount} cursos que inician en 5 o 6 días. Construyendo y enviando correo.`);
-    
-                const fechaObjetivoStr5 = fechaObjetivo5Dias.toLocaleDateString('es-AR', {
-                    day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires'
-                });
-    
-    
-                const htmlEmailBody = `<!DOCTYPE html>
+          }
+        } catch (error) {
+          console.error(`[${timestamp}] CRON TAREA: Error procesando fecha '${fechaInicioCursoStr}' para curso "${nombreCurso}" (${codigoCurso}):`, error);
+          // Continue to the next curso even if one fails
+        }
+      }); // End forEach loop
+
+      if (coursesFoundCount > 0) {
+        console.log(`[${timestamp}] CRON TAREA: Se encontraron ${coursesFoundCount} cursos que inician en 5 o 6 días. Construyendo y enviando correo.`);
+
+        const fechaObjetivoStr5 = fechaObjetivo5Dias.toLocaleDateString('es-AR', {
+          day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires'
+        });
+
+
+        const htmlEmailBody = `<!DOCTYPE html>
     <html lang="es">
     <head>
       <meta charset="UTF-8" />
@@ -225,30 +225,31 @@ const enviarCorreoDiarioContolDeCursos =  () => {
     </body>
     </html>
     `;
-    
-                const emailSubject = `Alerta: ${coursesFoundCount} Curso${coursesFoundCount > 1 ? 's' : ''} inicia${coursesFoundCount > 1 ? 'n' : ''} en 5 días (${fechaObjetivoStr5} )`;
-    
-                //Toma la lista de correos del .env sino por defecto manda a soporte
-                const emailRecipients = "rnicolascarballo@gmail.com"; // Update default if needed
-    
-                if (!emailRecipients) {
-                    console.error(`[${timestamp}] CRON TAREA: No se configuraron destinatarios de correo (la variable de entorno EMAIL_RECIPIENTS está vacía). No se puede enviar el correo.`);
-                    return; // Don't proceed if no recipients
-                }
-    
-                await envioCorreo(htmlEmailBody, emailSubject, emailRecipients);
-                console.log(`[${timestamp}] CRON TAREA: Correo enviado exitosamente a: ${emailRecipients}`);
-            } else {
-                console.log(`[${timestamp}] CRON TAREA: No se encontraron cursos que inicien en 5 o 6 días (${fechaObjetivo5Dias.toISOString().split('T')[0]} ). No se envió correo.`);
-            }
-        } catch (error) {
-            console.error(`[${timestamp}] CRON TAREA: Error general durante la ejecución:`, error);
+
+        const emailSubject = `Alerta: ${coursesFoundCount} Curso${coursesFoundCount > 1 ? 's' : ''} inicia${coursesFoundCount > 1 ? 'n' : ''} en 5 días (${fechaObjetivoStr5} )`;
+
+        //Toma la lista de correos del .env sino por defecto manda a soporte
+        const emailRecipients = "christian.bergero.cba@gmail.com"; // Update default if needed
+
+        if (!emailRecipients) {
+          console.error(`[${timestamp}] CRON TAREA: No se configuraron destinatarios de correo (la variable de entorno EMAIL_RECIPIENTS está vacía). No se puede enviar el correo.`);
+          return; // Don't proceed if no recipients
         }
-    
-    }, {
-        scheduled: true,
-        timezone: "America/Argentina/Buenos_Aires"
-    });
+
+
+        await envioCorreo(htmlEmailBody, emailSubject, emailRecipients);
+        console.log(`[${timestamp}] CRON TAREA: Correo enviado exitosamente a: ${emailRecipients}`);
+      } else {
+        console.log(`[${timestamp}] CRON TAREA: No se encontraron cursos que inicien en 5 o 6 días (${fechaObjetivo5Dias.toISOString().split('T')[0]} ). No se envió correo.`);
+      }
+    } catch (error) {
+      console.error(`[${timestamp}] CRON TAREA: Error general durante la ejecución:`, error);
+    }
+
+  }, {
+    scheduled: true,
+    timezone: "America/Argentina/Buenos_Aires"
+  });
 }
 
 

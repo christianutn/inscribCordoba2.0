@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => {
+const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filter }) => {
     // Determinar si el curso ya tiene un evento
     const tieneEvento = useMemo(() => {
         return record?.detalle_evento != null;
@@ -343,7 +343,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData }) => 
                                 value={formData.tiene_evento_creado}
                                 label="¿Tiene evento creado?"
                                 onChange={handleChange}
-                                disabled={tieneEvento}
+
                             >
                                 <MenuItem value={1}>Sí</MenuItem>
                                 <MenuItem value={0}>No</MenuItem>

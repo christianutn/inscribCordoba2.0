@@ -35,10 +35,10 @@ const EventoYCursoTable = ({ data, onEdit, onDelete }) => {
             width: 120,
             renderCell: (params) => (
                 <Chip
-                    label={params.row.detalle_evento ? 'Con Evento' : 'Sin Evento'}
-                    color={params.row.detalle_evento ? 'success' : 'warning'}
+                    label={params.row.tiene_evento_creado ? 'Con Evento' : 'Sin Evento'}
+                    color={params.row.tiene_evento_creado ? 'success' : 'warning'}
                     size="small"
-                    variant={params.row.detalle_evento ? 'filled' : 'outlined'}
+                    variant={params.row.tiene_evento_creado ? 'filled' : 'outlined'}
                 />
             )
         },

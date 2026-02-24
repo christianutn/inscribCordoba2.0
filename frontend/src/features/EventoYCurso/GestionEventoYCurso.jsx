@@ -31,11 +31,11 @@ const GestionEventoYCurso = () => {
     const filteredData = useMemo(() => {
         let result = data;
 
-        // Filtrar por estado de evento
+        // Filtrar por estado de evento basado en el atributo tiene_evento_creado de la tabla cursos
         if (filter === 'conEvento') {
-            result = result.filter(item => item.detalle_evento != null);
+            result = result.filter(item => item.tiene_evento_creado == 1);
         } else if (filter === 'sinEvento') {
-            result = result.filter(item => item.detalle_evento == null);
+            result = result.filter(item => !item.tiene_evento_creado || item.tiene_evento_creado == 0);
         }
 
         // Filtrar por búsqueda de texto
@@ -172,6 +172,7 @@ const GestionEventoYCurso = () => {
                 onSave={handleSave}
                 record={currentRecord}
                 auxiliaryData={auxiliaryData}
+                filter={filter}
             />
 
             <ModalCrearCurso

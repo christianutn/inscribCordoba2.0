@@ -150,12 +150,6 @@ export const postEvento = async (req, res, next) => {
             throw new AppError("Curso no existe", 400);;
         }
 
-        // si cursiEvento.tiene_evento_Creado es 1, entonces no se puede crear el evento
-        if (cursoEvento.tiene_evento_creado === 1) {
-            logger.warn(`⚠️ Intento de crear evento duplicado - Curso: ${curso} ya tiene evento creado`);
-            throw new AppError("El curso ya tiene un evento creado", 400);;
-        }
-
         // Se eliminó la validación de que el evento no exista en la base de datos ya que ahi eventos que estan
         // marcados como existentes pero no se encuentran en la base de datos
         // const existeEvento = await Evento.findOne({ where: { curso } });
@@ -184,8 +178,7 @@ export const postEvento = async (req, res, next) => {
             usuario
         });
 
-        //  Modificar el atributo tiene_evento_Creado de cursoEvento a 1
-        cursoEvento.tiene_evento_creado = 1;
+
         await cursoEvento.save();
 
         logger.info(`✅ Evento creado exitosamente - Curso: ${curso} - Nombre: ${cursoEvento.nombre}`);
@@ -243,7 +236,7 @@ export const postEvento = async (req, res, next) => {
     </div>
   </body>
 </html>`
-        enviarCorreo(htmlBodyCorreo, "Nuevo Formulario - Creación de Evento", "rnicolascarballo@gmail.com");
+        enviarCorreo(htmlBodyCorreo, "Nuevo Formulario - Creación de Evento", "christian.bergero.cba@gmail.com");
 
         logger.info(`📧 Correo de notificación enviado - Curso: ${cursoEvento.nombre}`);
 

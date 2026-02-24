@@ -141,7 +141,7 @@ const useEventoYCurso = () => {
                     tipo_capacitacion: item.codTipoCapacitacion,
                     area: item.codArea || null,
                     esVigente: item.esVigente,
-                    tiene_evento_creado: 1,
+                    tiene_evento_creado: item.tiene_evento_creado,
                     numero_evento: item.numero_evento ? parseInt(item.numero_evento) : null,
                     esta_maquetado: item.esta_maquetado,
                     esta_configurado: item.esta_configurado,
