@@ -209,6 +209,14 @@ export default function Principal() {
     };
   }, [navigate]);
 
+  // Asegura que al cambiar de sección el scroll se resetee al inicio de la página
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Comportamiento instantáneo para evitar mostrar contenido desplazado
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, [opcionSeleccionada]);
+
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
@@ -245,7 +253,7 @@ export default function Principal() {
       case "AsistenciasMain": return <AsistenciasMain />;
       case "VersionReducidaGa": return <VersionReducidaGa />;
       case "VersionReducidaAdministradores": return <VersionReducidaAdministradores />;
-      case "SubaNotaDeAutorizacion": return <SubaNotaDeAutorizacion />;
+      case "SubaNotaDeAutorizacion": return <SubaNotaDeAutorizacion setOpcionSeleccionada={setOpcionSeleccionada} />;
       case "Autorizaciones": return <Autorizaciones />;
       case "MisNotasAutorizacionIdentifier": return <VisualizacionMisNotasRefentes />;
       case "Home":
