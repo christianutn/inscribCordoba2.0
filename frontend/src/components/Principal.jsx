@@ -253,7 +253,7 @@ export default function Principal() {
       case "AsistenciasMain": return <AsistenciasMain />;
       case "VersionReducidaGa": return <VersionReducidaGa />;
       case "VersionReducidaAdministradores": return <VersionReducidaAdministradores />;
-      case "SubaNotaDeAutorizacion": return <SubaNotaDeAutorizacion />;
+      case "SubaNotaDeAutorizacion": return <SubaNotaDeAutorizacion setOpcionSeleccionada={setOpcionSeleccionada} />;
       case "Autorizaciones": return <Autorizaciones />;
       case "MisNotasAutorizacionIdentifier": return <VisualizacionMisNotasRefentes />;
       case "Home":
