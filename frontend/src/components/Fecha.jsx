@@ -12,6 +12,7 @@ import { getFechasInvalidas } from '../services/instancias.service.js';
 import CircularProgress from '@mui/material/CircularProgress'; // Importar CircularProgress
 import Box from '@mui/material/Box';
 import { getFechasInhabilitadas } from '../services/fechas_inhabilitadas.service.js';
+import { getFechasInhabilitadasFin } from '../services/fechas_inhabilitadas_fin.service.js';
 
 const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -19,6 +20,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [fechasInvalidas, setFechasInvalidas] = useState([]) // fechas que no cumplen con las restricciones
   const [fechasInhabilitadas, setFechasInhabilitadas] = useState([]) // fechas inhabilitadas manualmente
+  const [fechasInhabilitadasFin, setFechasInhabilitadasFin] = useState([]) // fechas inhabilitadas de fin de cursada
 
 
   useEffect(() => {
@@ -37,6 +39,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
         const fechasInvalidas2025 = await getFechasInvalidas(anioActual)
         const fechasInvalidas2026 = await getFechasInvalidas(anioSiguiente)
         const fechasInhabilitadas = await getFechasInhabilitadas()
+        const fechasInhabilitadasFinData = await getFechasInhabilitadasFin()
 
 
         const feriados = await getFeriadosDelAnio();
@@ -45,6 +48,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
         setFechasInvalidas([...fechasInvalidas2025, ...fechasInvalidas2026])
         setFechasInhabilitadas(fechasInhabilitadas)
+        setFechasInhabilitadasFin(fechasInhabilitadasFinData)
 
       } catch (error) {
         console.error('Error al obtener la matriz de fechas:', error);
@@ -82,7 +86,13 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
     }
 
+    if (fieldFecha === "fechaCursadaHasta") {
+      const fechaAValidar = dayjs(date).format('YYYY-MM-DD');
 
+      if (feriados.map(element => element.fecha).includes(fechaAValidar)) return true;
+
+      if (fechasInhabilitadasFin.map(element => element.fecha).includes(fechaAValidar)) return true;
+    }
 
     return false;
   };

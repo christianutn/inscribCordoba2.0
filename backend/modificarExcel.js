@@ -60,21 +60,30 @@ async function obtenerEmailPorCuil(cuil) {
 
         if (!response.ok) {
             console.error(`  ✖ HTTP ${response.status} para CUIL ${cuil}`);
-            return null;
+            return { email: null, error: `HTTP ${response.status}` };
         }
 
         const data = await response.json();
 
-        // Verificar que el usuario existe
-        if (data?.Respuesta?.ExisteUsuario === 'S' && data.Email) {
-            return data.Email;
+        // Caso 1: El usuario no existe en CiDi
+        if (data?.Respuesta?.ExisteUsuario === 'N') {
+            console.warn(`  ⚠ CUIL ${cuil}: usuario no existe en CiDi.`);
+            return { email: null, error: 'NO ENCONTRADO' };
         }
 
-        console.warn(`  ⚠ CUIL ${cuil}: usuario no encontrado o sin email.`);
-        return null;
+        // Caso 2: El usuario existe y tiene email → éxito
+        if (data?.Respuesta?.ExisteUsuario === 'S' && data.Email) {
+            return { email: data.Email, error: null };
+        }
+
+        // Caso 3: El usuario existe pero hubo un error o no tiene email
+        // Se devuelve el mensaje de Respuesta.Resultado como error
+        const mensajeError = data?.Respuesta?.Resultado || 'Sin email disponible';
+        console.warn(`  ⚠ CUIL ${cuil}: ${mensajeError}`);
+        return { email: null, error: mensajeError };
     } catch (error) {
         console.error(`  ✖ Error consultando CUIL ${cuil}:`, error.message);
-        return null;
+        return { email: null, error: error.message };
     }
 }
 
@@ -114,16 +123,16 @@ async function procesarExcel() {
 
         console.log(`  [${i}/${rows.length - 1}] Consultando CUIL: ${cuil}...`);
 
-        const email = await obtenerEmailPorCuil(cuil);
+        const resultado = await obtenerEmailPorCuil(cuil);
 
-        // Escribir el email en la columna B de la misma fila
+        // Escribir el resultado en la columna B de la misma fila
         const cellRef = `B${i + 1}`; // i+1 porque las filas en xlsx son 1-indexed
-        if (email) {
-            worksheet[cellRef] = { t: 's', v: email };
-            console.log(`    ✔ Email encontrado: ${email}`);
+        if (resultado.email) {
+            worksheet[cellRef] = { t: 's', v: resultado.email };
+            console.log(`    ✔ Email encontrado: ${resultado.email}`);
         } else {
-            worksheet[cellRef] = { t: 's', v: 'NO ENCONTRADO' };
-            console.log(`    ✖ Email no encontrado.`);
+            worksheet[cellRef] = { t: 's', v: resultado.error };
+            console.log(`    ✖ ${resultado.error}`);
         }
 
         // Pequeña pausa para no saturar la API (300ms)

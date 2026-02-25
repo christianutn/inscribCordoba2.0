@@ -436,7 +436,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                 {/* ============================== */}
                 <Box sx={{ mt: 3 }}>
                     <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>
-                        {tieneEvento ? 'Datos del Evento en Victorius' : 'Crear Evento en Victorius (opcional)'}
+                        {tieneEvento ? 'Datos del Evento en Victorius' : 'Datos del Evento en Victorius'}
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
 

@@ -33,6 +33,7 @@ import CoordinadorRouter from "./coordinador.routes.js";
 import HistoricoTutoresEnCursoRouter from "../domains/Inscribcordoba/api/routes/historico_tutores_en_cursos.routes.js";
 
 import FechasInhabilitadasRouter from "./fechas_inhabilitadas.routes.js";
+import FechasInhabilitadasFinRouter from "./fechas_inhabilitadas_fin.routes.js";
 
 
 const router = Router();
@@ -68,6 +69,7 @@ router.use("/cambios-estados-notas-autorizacion", CambiosEstadosNotasDeAutorizac
 router.use("/coordinadores", CoordinadorRouter)
 router.use("/historico-tutores-en-cursos", HistoricoTutoresEnCursoRouter)
 router.use("/fechas-inhabilitadas", FechasInhabilitadasRouter)
+router.use("/fechas-inhabilitadas-fin", FechasInhabilitadasFinRouter)
 router.use("/asistencias", AsistenciaRouter)
 
 

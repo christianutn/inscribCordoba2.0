@@ -13,6 +13,7 @@ import { DateTime } from 'luxon';
 import Departamento from '../../domains/Inscribcordoba/api/models/departamentos.models.js';
 import Usuario from '../../domains/Inscribcordoba/api/models/usuario.models.js';
 import FechasInhabilitadas from '../../domains/Inscribcordoba/api/models/fechas_inhabilitadas.models.js';
+import FechasInhabilitadasFin from '../../domains/Inscribcordoba/api/models/fechas_inhabilitadas_fin.models.js';
 
 // Middleware de validación para una ruta de creación/actualización de Curso/Evento
 const validarDatosCursoConCohortes = [
@@ -228,7 +229,12 @@ const validarDatosCursoConCohortes = [
 
             // Verifica que no este incluida la fecha en las fechas inhabilitadas
             const fechaInhabilitada = await FechasInhabilitadas.findOne({ where: { fecha: fechaCursadaDesdeString } });
-            if (fechaInhabilitada) throw new AppError(`La fecha ${fechaCursadaDesdeString} esta inhabilitada`, 400);
+            if (fechaInhabilitada) throw new AppError(`La fecha ${fechaCursadaDesdeString} esta inhabilitada como fecha de inicio de cursada`, 400);
+
+            // Verifica que la fecha de fin de cursada no esté inhabilitada
+            const fechaCursadaHastaString = fcHasta.toFormat('yyyy-MM-dd');
+            const fechaInhabilitadaFin = await FechasInhabilitadasFin.findOne({ where: { fecha: fechaCursadaHastaString } });
+            if (fechaInhabilitadaFin) throw new AppError(`La fecha ${fechaCursadaHastaString} esta inhabilitada como fecha de fin de cursada`, 400);
 
         }
 
