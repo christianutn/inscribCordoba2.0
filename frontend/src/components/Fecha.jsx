@@ -97,6 +97,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
     return false;
   };
 
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en">
       {/* Contenedor principal para posicionar el spinner encima */}
