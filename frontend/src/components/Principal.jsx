@@ -58,7 +58,7 @@ const drawerWidth = 260;
 const menuConfigByRole = {
   ADM: [
     { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
-    { label: "Reportes de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
+    { label: "Tablero ", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
     { label: "Versión Reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon /> },
     { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
