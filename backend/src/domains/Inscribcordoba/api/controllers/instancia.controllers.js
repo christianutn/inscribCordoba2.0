@@ -410,12 +410,12 @@ export const get_fechas_invalidas = async (req, res, next) => {
                     COALESCE(COUNT(fi.curso), 0) AS total_acumulado_dia_calc
                 FROM DatesCTE d
                 LEFT JOIN instancias fi ON fi.fecha_inicio_curso <= d.calendario_fecha 
-                                       AND fi.fecha_fin_curso > d.calendario_fecha
+                                       AND fi.fecha_fin_curso >= d.calendario_fecha
                                        AND fi.estado_instancia NOT IN ('CANC')
                 GROUP BY d.calendario_fecha
             )
             SELECT DISTINCT
-                d.calendario_fecha,
+                DATE_FORMAT(d.calendario_fecha, '%Y-%m-%d') AS calendario_fecha,
                 dm.total_cursos_dia_calc AS totalCursosPorDia,
                 ctrl.maximoCursosXDia AS limiteCursosPorDia,
                 dm.total_cupos_dia_calc AS totalCuposPorDia,
@@ -429,11 +429,11 @@ export const get_fechas_invalidas = async (req, res, next) => {
                 MONTH(d.calendario_fecha) AS mesCalendario,
                 ctrl.mesBloqueado,
                 CASE
-                    WHEN dm.total_cursos_dia_calc > ctrl.maximoCursosXDia THEN 'Supera cursos por día'
-                    WHEN dm.total_cupos_dia_calc > ctrl.maximoCuposXDia THEN 'Supera cupos por día'
-                    WHEN COALESCE(mm.total_cupos_mes_calc, 0) > ctrl.maximoCuposXMes THEN 'Supera cupos por mes'
-                    WHEN COALESCE(mm.total_cursos_mes_calc, 0) > ctrl.maximoCursosXMes THEN 'Supera cursos por mes'
-                    WHEN ac.total_acumulado_dia_calc > ctrl.maximoAcumulado THEN 'Supera acumulado'
+                    WHEN dm.total_cursos_dia_calc >= ctrl.maximoCursosXDia THEN 'Supera cursos por día'
+                    WHEN dm.total_cupos_dia_calc >= ctrl.maximoCuposXDia THEN 'Supera cupos por día'
+                    WHEN COALESCE(mm.total_cupos_mes_calc, 0) >= ctrl.maximoCuposXMes THEN 'Supera cupos por mes'
+                    WHEN COALESCE(mm.total_cursos_mes_calc, 0) >= ctrl.maximoCursosXMes THEN 'Supera cursos por mes'
+                    WHEN ac.total_acumulado_dia_calc >= ctrl.maximoAcumulado THEN 'Supera acumulado'
                     WHEN MONTH(d.calendario_fecha) = ctrl.mesBloqueado THEN 'Mes bloqueado'
                     ELSE 'Válida'
                 END AS motivo_invalidez
@@ -445,14 +445,14 @@ export const get_fechas_invalidas = async (req, res, next) => {
             WHERE
                 (:target_year IS NOT NULL)
                 AND (
-                    dm.total_cursos_dia_calc > ctrl.maximoCursosXDia
-                    OR dm.total_cupos_dia_calc > ctrl.maximoCuposXDia
-                    OR COALESCE(mm.total_cupos_mes_calc, 0) > ctrl.maximoCuposXMes
-                    OR COALESCE(mm.total_cursos_mes_calc, 0) > ctrl.maximoCursosXMes
-                    OR ac.total_acumulado_dia_calc > ctrl.maximoAcumulado
+                    dm.total_cursos_dia_calc >= ctrl.maximoCursosXDia
+                    OR dm.total_cupos_dia_calc >= ctrl.maximoCuposXDia
+                    OR COALESCE(mm.total_cupos_mes_calc, 0) >= ctrl.maximoCuposXMes
+                    OR COALESCE(mm.total_cursos_mes_calc, 0) >= ctrl.maximoCursosXMes
+                    OR ac.total_acumulado_dia_calc >= ctrl.maximoAcumulado
                     OR MONTH(d.calendario_fecha) = ctrl.mesBloqueado
                 )
-            ORDER BY d.calendario_fecha;
+            ORDER BY calendario_fecha;
         `;
 
             results = await sequelize.query(sqlQuery, {

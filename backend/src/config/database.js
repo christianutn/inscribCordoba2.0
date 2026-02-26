@@ -33,11 +33,16 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   host: DB_HOST,
   dialect: 'mysql',
   port: DB_PORT,
+  timezone: '-03:00', // Zona horaria de Argentina (ART)
   dialectOptions: {
     ssl: {
       require: true, // Requiere SSL para la conexión
       rejectUnauthorized: false // Permitir conexiones SSL no autorizadas
-    }
+    },
+    // Evitar que mysql2 convierta DATE/DATETIME a objetos Date de JS
+    // Esto previene problemas de timezone donde '2026-03-15' se convierte
+    // a '2026-03-14T21:00:00.000Z' por diferencia horaria
+    dateStrings: true
   },
   define: {
     freezeTableName: true // Evitar la pluralización automática del nombre de la tabla
