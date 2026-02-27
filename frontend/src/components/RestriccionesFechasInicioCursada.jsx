@@ -15,7 +15,7 @@ import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import DetalleFechasPorDia from "./DetalleFechas.jsx";
-
+import { Button as MuiButton } from '@mui/material';
 import DetalleMes from "./DetalleMes.jsx";
 import ModalInhabilitarFechas from "./ModalInhabilitarFechas.jsx";
 import ModalHabilitarFechas from "./ModalHabilitarFechas.jsx";
@@ -35,6 +35,15 @@ const RestriccionesFechasInicioCursada = () => {
     const [maximoAcumulado, setMaximoAcumulado] = useState("");
     const [openModalInhabilitar, setOpenModalInhabilitar] = useState(false);
     const [openModalHabilitar, setOpenModalHabilitar] = useState(false);
+    const [initialValues, setInitialValues] = useState({
+        maximoCursosMensual: '',
+        maximoCursosDiario: '',
+        maximoCuposMensual: '',
+        maximoCuposDiario: '',
+        maximoAcumulado: '',
+        selectedMes: null
+    });
+    const [isEdited, setIsEdited] = useState(false);
     const listaMeses = ["Sin Bloqueo", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
     useEffect(() => {
@@ -50,13 +59,23 @@ const RestriccionesFechasInicioCursada = () => {
 
                 const rest = await getRestricciones();
 
+                const newVals = {
+                    maximoCursosMensual: String(rest.restriccion.maximoCursosXMes ?? ""),
+                    maximoCursosDiario: String(rest.restriccion.maximoCursosXDia ?? ""),
+                    maximoCuposMensual: String(rest.restriccion.maximoCuposXMes ?? ""),
+                    maximoCuposDiario: String(rest.restriccion.maximoCuposXDia ?? ""),
+                    maximoAcumulado: String(rest.restriccion.maximoAcumulado ?? ""),
+                    selectedMes: listaMeses[rest.restriccion.mesBloqueado ?? 0]
+                };
 
-                setSelectedMes(listaMeses[rest.restriccion.mesBloqueado ?? 0]);
-                setMaximoCuposDiario(String(rest.restriccion.maximoCuposXDia ?? ""));
-                setMaximoCuposMensual(String(rest.restriccion.maximoCuposXMes ?? ""));
-                setMaximoCursosDiario(String(rest.restriccion.maximoCursosXDia ?? ""));
-                setMaximoCursosMensual(String(rest.restriccion.maximoCursosXMes ?? ""));
-                setMaximoAcumulado(String(rest.restriccion.maximoAcumulado ?? ""));
+                setInitialValues(newVals);
+                setMaximoCursosMensual(newVals.maximoCursosMensual);
+                setMaximoCursosDiario(newVals.maximoCursosDiario);
+                setMaximoCuposMensual(newVals.maximoCuposMensual);
+                setMaximoCuposDiario(newVals.maximoCuposDiario);
+                setMaximoAcumulado(newVals.maximoAcumulado);
+                setSelectedMes(newVals.selectedMes);
+                setIsEdited(false);
 
             } catch (error) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -67,6 +86,21 @@ const RestriccionesFechasInicioCursada = () => {
             }
         })();
     }, [navigate]);
+
+    useEffect(() => {
+        if (
+            maximoCursosMensual !== initialValues.maximoCursosMensual ||
+            maximoCursosDiario !== initialValues.maximoCursosDiario ||
+            maximoCuposMensual !== initialValues.maximoCuposMensual ||
+            maximoCuposDiario !== initialValues.maximoCuposDiario ||
+            maximoAcumulado !== initialValues.maximoAcumulado ||
+            selectedMes !== initialValues.selectedMes
+        ) {
+            setIsEdited(true);
+        } else {
+            setIsEdited(false);
+        }
+    }, [maximoCursosMensual, maximoCursosDiario, maximoCuposMensual, maximoCuposDiario, maximoAcumulado, selectedMes, initialValues]);
 
     const limpiarFormulario = () => {
     }
@@ -145,6 +179,28 @@ const RestriccionesFechasInicioCursada = () => {
         }
     }
 
+    const btnSecondaryStyle = {
+        textTransform: 'none',
+        fontWeight: 500,
+        fontSize: '0.95rem',
+        borderRadius: 1.5,
+        px: 2.5,
+        py: 1,
+        borderColor: '#bdbdbd',
+        color: '#444',
+    };
+
+    const btnPrimaryStyle = {
+        textTransform: 'none',
+        fontWeight: 600,
+        fontSize: '0.95rem',
+        borderRadius: 1.5,
+        px: 3,
+        py: 1,
+        bgcolor: '#00519C',
+        '&:hover': { bgcolor: '#003f7a' },
+    };
+
     return (
         <>
             {error && (
@@ -178,46 +234,49 @@ const RestriccionesFechasInicioCursada = () => {
                         <Subtitulo texto="Establecer Límites y Bloqueo Mensual" />
                         <Grid container spacing={2} sx={{ mt: 0.5 }}>
                             <Grid item xs={12} sm={6} md={4}>
-                                <TextField label={"Límite de cursos por mes"} type={"number"} value={maximoCursosMensual} getValue={(value) => setMaximoCursosMensual(value)} fullWidth inputProps={{ min: "0" }} />
+                                <TextField label={"Límite de cursos por mes"} type={"number"} value={maximoCursosMensual} getValue={setMaximoCursosMensual} fullWidth inputProps={{ min: "0" }} />
                             </Grid>
                             <Grid item xs={12} sm={6} md={4}>
-                                <TextField label={"Límite de cursos por día"} type={"number"} value={maximoCursosDiario} getValue={(value) => setMaximoCursosDiario(value)} fullWidth inputProps={{ min: "0" }} />
+                                <TextField label={"Límite de cursos por día"} type={"number"} value={maximoCursosDiario} getValue={setMaximoCursosDiario} fullWidth inputProps={{ min: "0" }} />
                             </Grid>
                             <Grid item xs={12} sm={6} md={4}>
-                                <TextField label={"Límite de cupos por mes"} type={"number"} value={maximoCuposMensual} getValue={(value) => setMaximoCuposMensual(value)} fullWidth inputProps={{ min: "0" }} />
+                                <TextField label={"Límite de cupos por mes"} type={"number"} value={maximoCuposMensual} getValue={setMaximoCuposMensual} fullWidth inputProps={{ min: "0" }} />
                             </Grid>
                             <Grid item xs={12} sm={6} md={4}>
-                                <TextField label={"Límite de cupos por día"} type={"number"} value={maximoCuposDiario} getValue={(value) => setMaximoCuposDiario(value)} fullWidth inputProps={{ min: "0" }} />
+                                <TextField label={"Límite de cupos por día"} type={"number"} value={maximoCuposDiario} getValue={setMaximoCuposDiario} fullWidth inputProps={{ min: "0" }} />
                             </Grid>
                             <Grid item xs={12} sm={6} md={4}>
-                                <TextField label={"Máximo acumulado de cursos"} type={"number"} value={maximoAcumulado} getValue={(value) => setMaximoAcumulado(value)} fullWidth inputProps={{ min: "0" }} />
+                                <TextField label={"Máximo acumulado de cursos"} type={"number"} value={maximoAcumulado} getValue={setMaximoAcumulado} fullWidth inputProps={{ min: "0" }} />
                             </Grid>
                             <Grid item xs={12} sm={6} md={4}>
                                 <Autocomplete
                                     label={"Mes bloqueado para nuevos inicios"}
                                     options={listaMeses}
                                     value={selectedMes}
-                                    getValue={(value) => setSelectedMes(value)}
+                                    getValue={setSelectedMes}
                                     fullWidth
                                 />
                             </Grid>
                         </Grid>
                     </Grid>
 
-                    <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 3, gap: 2, alignItems: 'center' }}>
-                        <Button type="button" mensaje={"Guardar Cambios"} hanldeOnClick={handleEnviar} disabled={cargando} />
-                        <Tooltip title="Inhabilitar Fechas">
-                            <IconButton onClick={() => setOpenModalInhabilitar(true)} disabled={cargando} color="primary" size="small">
-                                <EventBusyIcon />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Habilitar Fechas">
-                            <IconButton onClick={() => setOpenModalHabilitar(true)} disabled={cargando} color="success" size="small">
-                                <EventAvailableIcon />
-                            </IconButton>
-                        </Tooltip>
-                    </Grid>
+                    <Grid item xs={12}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 2, mb: 3, flexWrap: 'wrap' }}>
+                            <MuiButton variant="contained" onClick={handleEnviar} disabled={cargando || !isEdited} disableElevation sx={btnPrimaryStyle}>
+                                Guardar Cambios
+                            </MuiButton>
 
+                            <MuiButton variant="outlined" startIcon={<EventBusyIcon />} onClick={() => setOpenModalInhabilitar(true)} disabled={cargando}
+                                sx={{ ...btnSecondaryStyle, '&:hover': { borderColor: '#00519C', color: '#00519C', bgcolor: '#f0f7ff' } }}>
+                                Inhabilitar Fechas
+                            </MuiButton>
+
+                            <MuiButton variant="outlined" startIcon={<EventAvailableIcon />} onClick={() => setOpenModalHabilitar(true)} disabled={cargando}
+                                sx={{ ...btnSecondaryStyle, '&:hover': { borderColor: '#2e7d32', color: '#2e7d32', bgcolor: '#f0fff4' } }}>
+                                Habilitar Fechas
+                            </MuiButton>
+                        </Box>
+                    </Grid>
                     <Grid item xs={12}>
                         <Divider sx={{ mb: 2, borderBottomWidth: 1, borderColor: 'rgba(0, 0, 0, 0.12)', mt: 1 }} />
                     </Grid>
