@@ -106,7 +106,13 @@ export default function Formulario() {
 
   const tiene_el_curso_evento_creado = (codCurso) => {
     const curso = cursos.find((curso) => curso.cod === codCurso);
-    return curso ? Boolean(curso.tiene_evento_creado) : false;
+    if (!curso) return false;
+
+    const tieneEventoCreado = Number(curso.tiene_evento_creado) === 1;
+    const tieneFormularioEventoCreado = Number(curso.tiene_formulario_evento_creado) === 1;
+
+    // Si alguno de los dos flags es 1, el curso se considera con evento/formulario creado
+    return tieneEventoCreado || tieneFormularioEventoCreado;
   };
 
   const handleEventoCreado = (codCurso) => {

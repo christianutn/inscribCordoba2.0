@@ -86,8 +86,8 @@ const validarDatosCursoConCohortes = [
                 throw new AppError(`El curso con código ${value} no está vigente.`, 400);
             }
 
-            if (!curso.tiene_evento_creado) { // Validación de negocio: ¿tiene evento creado?
-                throw new AppError(`El curso con código ${value} no tiene evento creado.`, 400);
+            if (curso.tiene_evento_creado == 0 && curso.tiene_formulario_evento_creado == 0) { // Validación de negocio: ¿tiene evento creado?
+                throw new AppError(`El curso con código ${value} no tiene evento creado ni formulario de evento enviado.`, 400);
             }
         }),
 

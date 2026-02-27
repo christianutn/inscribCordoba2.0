@@ -98,6 +98,10 @@ const Curso = sequelize.define("cursos", {
     esta_autorizado: {
         type: DataTypes.TINYINT(0),
         allowNull: true
+    },
+    tiene_formulario_evento_creado: {
+        type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
+        allowNull: true
     }
 }, {
     timestamps: false,

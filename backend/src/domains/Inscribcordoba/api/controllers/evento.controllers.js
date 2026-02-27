@@ -133,37 +133,12 @@ export const getEventoByCod = async (req, res, next) => {
 
 
 export const postEvento = async (req, res, next) => {
+    const t = await sequelize.transaction();
 
-    // Datos del usuario
     try {
         logger.info('🎆 Iniciando creación de evento');
 
-        const { curso, perfil, area_tematica, tipo_certificacion, presentacion, objetivos, requisitos_aprobacion, ejes_tematicos, certifica_en_cc, disenio_a_cargo_cc } = req.body;
-        const usuarioCuil = req.user.user.cuil;
-
-        logger.info(`📚 Curso: ${curso} - Usuario: ${usuarioCuil}`);
-
-        // obtener curso
-        const cursoEvento = await Curso.findOne({ where: { cod: curso } });
-        if (!cursoEvento) {
-            logger.warn(`⚠️ Intento de crear evento con curso inexistente - Curso: ${curso}`);
-            throw new AppError("Curso no existe", 400);;
-        }
-
-        // Se eliminó la validación de que el evento no exista en la base de datos ya que ahi eventos que estan
-        // marcados como existentes pero no se encuentran en la base de datos
-        // const existeEvento = await Evento.findOne({ where: { curso } });
-        // if (existeEvento) {
-        //     logger.warn(`⚠️ Evento ya existe en la base de datos - Curso: ${curso}`);
-        //     throw new AppError("Ya eviste el evento", 400);;
-        // }
-
-
-        const fecha_desde = DateTime.now().setZone('America/Argentina/Buenos_Aires').toFormat("yyyy-MM-dd HH:mm:ss")
-
-        const usuario = req.user.user.cuil;
-
-        const evento = await Evento.create({
+        const {
             curso,
             perfil,
             area_tematica,
@@ -173,16 +148,71 @@ export const postEvento = async (req, res, next) => {
             requisitos_aprobacion,
             ejes_tematicos,
             certifica_en_cc,
-            disenio_a_cargo_cc,
-            fecha_desde,
-            usuario
+            disenio_a_cargo_cc
+        } = req.body;
+
+        const usuarioCuil = req.user.user.cuil;
+
+        logger.info(`📚 Curso: ${curso} - Usuario: ${usuarioCuil}`);
+
+        // obtener curso dentro de la transacción
+        const cursoEvento = await Curso.findOne({
+            where: { cod: curso },
+            transaction: t
         });
 
+        if (!cursoEvento) {
+            logger.warn(`⚠️ Intento de crear evento con curso inexistente - Curso: ${curso}`);
+            throw new AppError("Curso no existe", 400);
+        }
 
-        await cursoEvento.save();
+        // Actualizar tiene_formulario_evento_creado de curso dentro de la transacción
+        await Curso.update(
+            {
+                tiene_formulario_evento_creado: 1
+            },
+            {
+                where: { cod: curso },
+                transaction: t
+            }
+        );
+
+        // Se eliminó la validación de que el evento no exista en la base de datos ya que hay eventos que están
+        // marcados como existentes pero no se encuentran en la base de datos
+        // const existeEvento = await Evento.findOne({ where: { curso } });
+        // if (existeEvento) {
+        //     logger.warn(`⚠️ Evento ya existe en la base de datos - Curso: ${curso}`);
+        //     throw new AppError("Ya existe el evento", 400);
+        // }
+
+        const fecha_desde = DateTime.now()
+            .setZone('America/Argentina/Buenos_Aires')
+            .toFormat("yyyy-MM-dd HH:mm:ss");
+
+        const usuario = req.user.user.cuil;
+
+        const evento = await Evento.create(
+            {
+                curso,
+                perfil,
+                area_tematica,
+                tipo_certificacion,
+                presentacion,
+                objetivos,
+                requisitos_aprobacion,
+                ejes_tematicos,
+                certifica_en_cc,
+                disenio_a_cargo_cc,
+                fecha_desde,
+                usuario
+            },
+            { transaction: t }
+        );
+
+        // Commit de la transacción: cambios en Curso y creación de Evento quedan confirmados
+        await t.commit();
 
         logger.info(`✅ Evento creado exitosamente - Curso: ${curso} - Nombre: ${cursoEvento.nombre}`);
-
 
         const htmlBodyCorreo = `<!DOCTYPE html>
 <html lang="es">
@@ -242,6 +272,17 @@ export const postEvento = async (req, res, next) => {
 
         res.status(201).json(evento);
     } catch (error) {
+        if (t && !t.finished) {
+            try {
+                await t.rollback();
+                logger.info(`🔄 Rollback ejecutado exitosamente - Curso: ${req.body.curso}`);
+            } catch (rollbackError) {
+                logger.error(`❌ Error en rollback al crear evento - Curso: ${req.body.curso} - Error: ${rollbackError.message}`, {
+                    stack: rollbackError.stack
+                });
+            }
+        }
+
         logger.error(`❌ Error al crear evento - Curso: ${req.body.curso} - Usuario: ${req.user?.user?.cuil || 'N/A'} - Error: ${error.message}`, {
             stack: error.stack,
             curso: req.body.curso,
@@ -278,10 +319,10 @@ export const deleteEvento = async (req, res, next) => {
             throw new AppError("Evento no existe", 400);
         }
 
-        // 2. Actualizar el campo 'tiene_evento_creado' en el modelo Curso, dentro de la transacción
+        // 2. Actualizar el campo 'tiene_formulario_evento_creado' en el modelo Curso, dentro de la transacción
         await Curso.update(
             {
-                tiene_evento_creado: 0 // Solo pasamos el campo que queremos actualizar
+                tiene_formulario_evento_creado: 0 // Solo pasamos el campo que queremos actualizar
             },
             {
                 where: {
