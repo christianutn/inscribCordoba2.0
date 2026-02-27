@@ -293,6 +293,7 @@ const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth }) => {
             type: 'bar',
             height: 450,
             toolbar: { show: true },
+            zoom: { enabled: false},
         },
         plotOptions: { bar: { columnWidth: '50%', borderRadius: 2 } },
         dataLabels: { enabled: false },
@@ -415,7 +416,7 @@ const ReporteCursosCC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [umbralValue, setUmbralValue] = useState(10);
+    const [umbralValue, setUmbralValue] = useState(80);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -681,7 +682,17 @@ const ReporteCursosCC = () => {
                     <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Cancelados" value={kpiData.cancelados} icon={<CancelIcon />} color="error" description={selectedMonth === 'all' ? `Iniciaban ${selectedYear}` : `Iniciaban en ${mesesFull[selectedMonth]}`} /> </Grid>
                     <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Máx. Cursos Simultáneos" value={kpiData.maxCursos} icon={<ShowChartIcon />} color="success" description={kpiData.maxCursosDesc} /> </Grid>
                     <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Máx. Cupos Simultáneos" value={kpiData.maxCupos} icon={<BarChartIcon />} color="info" description={kpiData.maxCuposDesc} /> </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title={selectedMonth === 'all' ? "Prom. Var. Intermensual" : "Variación Intermensual"} value={kpiData.varDesc} icon={<TrendingUpIcon />} color={kpiData.varVal < 0 ? 'error' : 'success'} /> </Grid>
+                    {selectedMonth !== 'all' && (
+                        <Grid item xs={12} sm={6} md={3} lg={3}>
+                            <KpiCard
+                                title="Variación Intermensual"
+                                value={kpiData.varDesc}
+                                icon={<TrendingUpIcon />}
+                                color={kpiData.varVal < 0 ? 'error' : 'success'}
+                                description={`Pico Máx. Cursos Simultáneos vs ${mesesFull[parseInt(selectedMonth) === 0 ? 11 : parseInt(selectedMonth) - 1]}`}
+                            />
+                        </Grid>
+                    )}
                 </Grid>
             )}
 
