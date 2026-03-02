@@ -266,7 +266,7 @@ export const postEvento = async (req, res, next) => {
     </div>
   </body>
 </html>`
-        enviarCorreo(htmlBodyCorreo, "Nuevo Formulario - Creación de Evento", "christian.bergero.cba@gmail.com");
+        enviarCorreo(htmlBodyCorreo, "Nuevo Formulario - Creación de Evento", "soportecampuscordoba@gmail.com");
 
         logger.info(`📧 Correo de notificación enviado - Curso: ${cursoEvento.nombre}`);
 
