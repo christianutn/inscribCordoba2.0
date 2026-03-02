@@ -64,9 +64,15 @@ const isAutogestionado = (inst) => {
     return false;
 };
 
+const isInstanciaCancelada = (inst) => {
+    if (!inst) return false;
+    const estadoInst = inst.estado_instancia ? String(inst.estado_instancia).trim().toUpperCase() : '';
+    return estadoInst === 'CANC'
+};
+
 const preProcessInstancias = (instancias) => {
     return instancias.map(c => {
-        const isCANC = c.estado_instancia === 'CANC';
+        const isCANC = isInstanciaCancelada(c);
         const plat = getPlataforma(c);
         let inicioStrJs = null;
         if (c.fecha_inicio_curso && c.fecha_inicio_curso.length >= 10) {
@@ -486,7 +492,7 @@ const ReporteCursosCC = () => {
             const start = parseDateString(inst.fecha_inicio_curso);
             if (!start) return;
 
-            const isCANC = inst.estado_instancia === 'CANC';
+            const isCANC = isInstanciaCancelada(inst);
             const plat = getPlataforma(inst);
 
             let inPeriod = (selectedMonth === 'all')
