@@ -64,109 +64,106 @@ const isAutogestionado = (inst) => {
     return false;
 };
 
-const calculateMaxSimultaneous = (instancias, targetYear, targetMonthIndex = null) => {
-    let startDate = dayjs(new Date(targetYear, targetMonthIndex !== null ? targetMonthIndex : 0, 1));
-    let endDate = targetMonthIndex !== null
-        ? startDate.endOf('month')
-        : dayjs(new Date(targetYear, 11, 31));
+const preProcessInstancias = (instancias) => {
+    return instancias.map(c => {
+        const isCANC = c.estado_instancia === 'CANC';
+        const plat = getPlataforma(c);
+        let inicioStrJs = null;
+        if (c.fecha_inicio_curso && c.fecha_inicio_curso.length >= 10) {
+            inicioStrJs = c.fecha_inicio_curso.substring(0, 10);
+        }
+        let finStrJs = null;
+        if (c.fecha_fin_curso && c.fecha_fin_curso.length >= 10) {
+            finStrJs = c.fecha_fin_curso.substring(0, 10);
+        } else {
+            finStrJs = inicioStrJs;
+        }
+        return { ...c, isCANC, plat, inicioStrJs, finStrJs, cupoInt: Number(c.cupo) || 0 };
+    }).filter(c => c.inicioStrJs !== null);
+};
 
-    let daysToEvaluate = [];
-    let curr = startDate;
-    while (curr.isSameOrBefore(endDate, 'day')) {
-        daysToEvaluate.push(curr.format('YYYY-MM-DD'));
-        curr = curr.add(1, 'day');
-    }
-
-    let activeCourses = instancias.filter(c => c.estado_instancia !== 'CANC' && getPlataforma(c) !== 'EXT');
+const calculateMaxSimultaneous = (preProcessedActiveCourses, targetYear, targetMonthIndex = null) => {
+    const sm = targetMonthIndex !== null ? targetMonthIndex + 1 : 1;
+    const em = targetMonthIndex !== null ? targetMonthIndex + 1 : 12;
+    const lastDay = new Date(targetYear, em, 0).getDate();
 
     let maxCursos = 0;
     let maxCursosDay = null;
     let maxCupos = 0;
     let maxCuposDay = null;
 
-    for (let day of daysToEvaluate) {
+    let currentDate = new Date(targetYear, targetMonthIndex !== null ? targetMonthIndex : 0, 1);
+    const endDate = new Date(targetYear, targetMonthIndex !== null ? targetMonthIndex : 11, lastDay);
+
+    while (currentDate <= endDate) {
+        const y = currentDate.getFullYear();
+        const m = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const d = String(currentDate.getDate()).padStart(2, '0');
+        const loopDayStr = `${y}-${m}-${d}`;
+
         let currentCursos = 0;
         let currentCupos = 0;
-        let dayObj = dayjs(day);
 
-        for (let c of activeCourses) {
-            let inicio = dayjs(c.fecha_inicio_curso);
-            if (!inicio.isValid()) continue;
-            let fin = c.fecha_fin_curso ? dayjs(c.fecha_fin_curso) : inicio;
-            let esActivo = dayObj.isSameOrAfter(inicio, 'day') && dayObj.isSameOrBefore(fin, 'day');
-
-            if (esActivo) {
+        for (let i = 0; i < preProcessedActiveCourses.length; i++) {
+            const c = preProcessedActiveCourses[i];
+            if (loopDayStr >= c.inicioStrJs && loopDayStr <= c.finStrJs) {
                 currentCursos++;
-                currentCupos += (parseInt(c.cupo) || 0);
+                currentCupos += c.cupoInt;
             }
         }
 
-        if (currentCursos > maxCursos) {
-            maxCursos = currentCursos;
-            maxCursosDay = day;
-        }
+        if (currentCursos > maxCursos) { maxCursos = currentCursos; maxCursosDay = loopDayStr; }
+        if (currentCupos > maxCupos) { maxCupos = currentCupos; maxCuposDay = loopDayStr; }
 
-        if (currentCupos > maxCupos) {
-            maxCupos = currentCupos;
-            maxCuposDay = day;
-        }
+        currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    return {
-        maxCursos,
-        maxCursosDay: maxCursosDay ? dayjs(maxCursosDay).format('D [de] MMMM') : 'N/A',
-        maxCupos,
-        maxCuposDay: maxCuposDay ? dayjs(maxCuposDay).format('D [de] MMMM') : 'N/A'
+    const formatDay = (dayStr) => {
+        if (!dayStr) return 'N/A';
+        const parts = dayStr.split('-');
+        if (parts.length === 3) return `${parseInt(parts[2])} de ${mesesFull[parseInt(parts[1]) - 1]}`;
+        return 'N/A';
     };
+
+    return { maxCursos, maxCursosDay: formatDay(maxCursosDay), maxCupos, maxCuposDay: formatDay(maxCuposDay) };
 };
 
-const calculateMonthlyPeaksAllPlataformas = (instancias, targetYear) => {
+const calculateMonthlyPeaksAllPlataformas = (preProcessedActiveCourses, targetYear) => {
     let CC_peaks = Array(12).fill(0);
     let EXT_peaks = Array(12).fill(0);
-
-    let activeCourses = instancias.filter(c => c.estado_instancia !== 'CANC');
 
     for (let month = 0; month < 12; month++) {
         let maxCCForMonth = 0;
         let maxEXTForMonth = 0;
+        const lastDay = new Date(targetYear, month + 1, 0).getDate();
+        let currentDate = new Date(targetYear, month, 1);
+        const endDate = new Date(targetYear, month, lastDay);
 
-        let startDate = dayjs(new Date(targetYear, month, 1));
-        let endDate = startDate.endOf('month');
+        while (currentDate <= endDate) {
+            const y = currentDate.getFullYear();
+            const m = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const d = String(currentDate.getDate()).padStart(2, '0');
+            const loopDayStr = `${y}-${m}-${d}`;
 
-        let daysToEvaluate = [];
-        let curr = startDate;
-        while (curr.isSameOrBefore(endDate, 'day')) {
-            daysToEvaluate.push(curr.format('YYYY-MM-DD'));
-            curr = curr.add(1, 'day');
-        }
-
-        for (let day of daysToEvaluate) {
             let currentCC = 0;
             let currentEXT = 0;
-            let dayObj = dayjs(day);
 
-            for (let c of activeCourses) {
-                let inicio = dayjs(c.fecha_inicio_curso);
-                if (!inicio.isValid()) continue;
-                let fin = c.fecha_fin_curso ? dayjs(c.fecha_fin_curso) : inicio;
-
-                if (dayObj.isSameOrAfter(inicio, 'day') && dayObj.isSameOrBefore(fin, 'day')) {
-                    if (getPlataforma(c) === 'EXT') {
-                        currentEXT++;
-                    } else {
-                        currentCC++;
-                    }
+            for (let i = 0; i < preProcessedActiveCourses.length; i++) {
+                const c = preProcessedActiveCourses[i];
+                if (loopDayStr >= c.inicioStrJs && loopDayStr <= c.finStrJs) {
+                    if (c.plat === 'EXT') currentEXT++;
+                    else currentCC++;
                 }
             }
 
             if (currentCC > maxCCForMonth) maxCCForMonth = currentCC;
             if (currentEXT > maxEXTForMonth) maxEXTForMonth = currentEXT;
-        }
 
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
         CC_peaks[month] = maxCCForMonth;
         EXT_peaks[month] = maxEXTForMonth;
     }
-
     return { CC_peaks, EXT_peaks };
 };
 
@@ -231,40 +228,33 @@ const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth }) => {
     }, [globalSelectedMonth]);
 
     useEffect(() => {
-        const date = dayjs(new Date(year, localMonth, 1));
-        const diasDelMes = date.daysInMonth();
         const currentLabels = [];
         const currentDataCupo = [];
         const currentDataCursosInician = [];
         const currentDataCursosActivos = [];
 
-        const act = instancias.filter(inst => inst.estado_instancia !== 'CANC' && getPlataforma(inst) !== 'EXT');
+        const act = preProcessInstancias(instancias).filter(c => !c.isCANC && c.plat !== 'EXT');
+        const diasDelMes = new Date(year, localMonth + 1, 0).getDate();
 
         for (let d = 1; d <= diasDelMes; d++) {
-            const currentDate = dayjs(`${year}-${String(localMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-            const currentDateStr = currentDate.format('YYYY-MM-DD');
-            const fechaLabel = currentDate.format('DD-MM-YYYY');
+            const loopDayStr = `${year}-${String(localMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const fechaLabel = `${String(d).padStart(2, '0')}-${String(localMonth + 1).padStart(2, '0')}-${year}`;
             currentLabels.push(fechaLabel);
 
             let cupoDelDia = 0;
             let cursosInicianDelDia = 0;
             let cursosActivosDelDia = 0;
 
-            act.forEach(instancia => {
-                const fechaInicio = dayjs(instancia.fecha_inicio_curso);
-                const fechaFin = instancia.fecha_fin_curso ? dayjs(instancia.fecha_fin_curso) : null;
-
-                if (fechaInicio.isValid() && fechaInicio.format('YYYY-MM-DD') === currentDateStr) {
+            for (let i = 0; i < act.length; i++) {
+                const c = act[i];
+                if (c.inicioStrJs === loopDayStr) {
                     cursosInicianDelDia++;
-                    cupoDelDia += Number(instancia.cupo) || 0;
+                    cupoDelDia += c.cupoInt;
                 }
-
-                if (fechaInicio.isValid() && fechaFin && fechaFin.isValid()) {
-                    if (currentDate.isSameOrAfter(fechaInicio, 'day') && currentDate.isSameOrBefore(fechaFin, 'day')) {
-                        cursosActivosDelDia++;
-                    }
+                if (loopDayStr >= c.inicioStrJs && loopDayStr <= c.finStrJs) {
+                    cursosActivosDelDia++;
                 }
-            });
+            }
 
             currentDataCupo.push(cupoDelDia);
             currentDataCursosInician.push(cursosInicianDelDia);
@@ -293,7 +283,7 @@ const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth }) => {
             type: 'bar',
             height: 450,
             toolbar: { show: true },
-            zoom: { enabled: false},
+            zoom: { enabled: false },
         },
         plotOptions: { bar: { columnWidth: '50%', borderRadius: 2 } },
         dataLabels: { enabled: false },
@@ -485,6 +475,8 @@ const ReporteCursosCC = () => {
             setKpiData(null); setChartData(null); return;
         }
 
+        const preProcessedData = preProcessInstancias(filteredCronogramaData);
+
         let totalCursos = 0, totalCupos = 0, totalHoras = 0, cursosCC = 0, cursosExt = 0, autogestionados = 0, cancelados = 0;
 
         const startsPerMonthCC = Array(12).fill(0);
@@ -528,12 +520,13 @@ const ReporteCursosCC = () => {
         const porcAuto = cursosCC > 0 ? (autogestionados / cursosCC) * 100 : 0;
 
         // --- Calcular Variación Intermensual de Picos ---
+        const activeCCFiltered = preProcessedData.filter(c => !c.isCANC && c.plat !== 'EXT');
         const monthPeaks = Array(12).fill(0);
         const preYearPeaks = Array(12).fill(0);
 
         for (let i = 0; i < 12; i++) {
-            monthPeaks[i] = calculateMaxSimultaneous(filteredCronogramaData, selectedYear, i).maxCursos;
-            preYearPeaks[i] = calculateMaxSimultaneous(filteredCronogramaData, selectedYear - 1, i).maxCursos;
+            monthPeaks[i] = calculateMaxSimultaneous(activeCCFiltered, selectedYear, i).maxCursos;
+            preYearPeaks[i] = calculateMaxSimultaneous(activeCCFiltered, selectedYear - 1, i).maxCursos;
         }
 
         let sumVars = 0;
@@ -567,12 +560,13 @@ const ReporteCursosCC = () => {
         const finalVar = selectedMonth === 'all' ? (numVars > 0 ? sumVars / numVars : 0) : singleVar;
         // ------------------------------------------------
 
-        const maxData = calculateMaxSimultaneous(filteredCronogramaData, selectedYear, selectedMonth === 'all' ? null : parseInt(selectedMonth));
+        const maxData = calculateMaxSimultaneous(activeCCFiltered, selectedYear, selectedMonth === 'all' ? null : parseInt(selectedMonth));
 
         let peaksCC = [];
         let peaksEXT = [];
         if (selectedMonth === 'all') {
-            const monthlyPeakData = calculateMonthlyPeaksAllPlataformas(filteredCronogramaData, selectedYear);
+            const activeAllFiltered = preProcessedData.filter(c => !c.isCANC);
+            const monthlyPeakData = calculateMonthlyPeaksAllPlataformas(activeAllFiltered, selectedYear);
             peaksCC = monthlyPeakData.CC_peaks;
             peaksEXT = monthlyPeakData.EXT_peaks;
         }
