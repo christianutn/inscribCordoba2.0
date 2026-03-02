@@ -123,9 +123,6 @@ const Cronograma = () => {
           const detalle = instance.detalle_curso || {};
           const areaDetalle = detalle.detalle_area || {};
           const ministerioDetalle = areaDetalle.detalle_ministerio || {};
-          const medioInscripcionDetalle = detalle.detalle_medioInscripcion || {};
-          const plataformaDictadoDetalle = detalle.detalle_plataformaDictado || {};
-          const tipoCapacitacionDetalle = detalle.detalle_tipoCapacitacion || {};
 
           const obj = {
             id: `${instance.curso}-${instance.fecha_inicio_curso}-${idx}`, // ID más robusto
@@ -142,9 +139,9 @@ const Cronograma = () => {
             "Publica PCC": instance.es_publicada_portal_cc ?? detalle.publica_pcc,
             "Es Autogestionado": instance.es_autogestionado ?? detalle.es_autogestionado,
             "Estado de Instancia": formatValue(instance.estado_instancia),
-            "Medio de inscripción": formatValue(medioInscripcionDetalle.nombre || instance.medio_inscripcion),
-            "Plataforma de dictado": formatValue(plataformaDictadoDetalle.nombre || instance.plataforma_dictado),
-            "Tipo de capacitación": formatValue(tipoCapacitacionDetalle.nombre || instance.tipo_capacitacion),
+            "Medio de inscripción": formatValue(instance.medio_inscripcion),
+            "Plataforma de dictado": formatValue(instance.plataforma_dictado),
+            "Tipo de capacitación": formatValue(instance.tipo_capacitacion),
             "Comentario": formatValue(instance.comentario),
             "Datos de solicitud": formatValue(instance.datos_solictud),
             "Cantidad de inscriptos": instance.cantidad_inscriptos || 0,
@@ -237,9 +234,9 @@ const Cronograma = () => {
           "Cantidad de horas": raw.cantidad_horas,
           "Publica en Portal": formatBooleanToSiNo(raw.es_publicada_portal_cc ?? det.publica_pcc),
           "Es Autogestionado": formatBooleanToSiNo(raw.es_autogestionado ?? det.es_autogestionado),
-          "Medio de inscripción": det.detalle_medioInscripcion?.nombre || raw.medio_inscripcion,
-          "Plataforma de dictado": det.detalle_plataformaDictado?.nombre || raw.plataforma_dictado,
-          "Tipo de capacitación": det.detalle_tipoCapacitacion?.nombre || raw.tipo_capacitacion,
+          "Medio de inscripción": raw.medio_inscripcion,
+          "Plataforma de dictado": raw.plataforma_dictado,
+          "Tipo de capacitación": raw.tipo_capacitacion,
           "Tiene correlatividad": formatBooleanToSiNo(raw.tiene_correlatividad),
           "Tiene restricción edad": formatBooleanToSiNo(raw.tiene_restriccion_edad ?? det.tiene_restriccion_edad),
           "Restricción Edad Desde": raw.restriccion_edad_desde,
