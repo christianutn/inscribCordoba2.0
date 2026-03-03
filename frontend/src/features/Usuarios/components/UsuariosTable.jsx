@@ -3,7 +3,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 
-const UsuariosTable = ({ data, onEdit }) => {
+const UsuariosTable = ({ data, onEdit, readOnly = false }) => {
     const columns = [
         { field: 'cuil', headerName: 'CUIL', width: 120 },
         {
@@ -59,8 +59,11 @@ const UsuariosTable = ({ data, onEdit }) => {
             headerName: 'Activo',
             width: 150,
             valueGetter: (value, row) => row.activo == 1 ? 'Si' : 'No'
-        },
-        {
+        }
+    ];
+
+    if (!readOnly) {
+        columns.push({
             field: 'actions',
             headerName: 'Acciones',
             width: 120,
@@ -73,11 +76,10 @@ const UsuariosTable = ({ data, onEdit }) => {
                             <EditIcon />
                         </IconButton>
                     </Tooltip>
-
                 </Box>
             )
-        }
-    ];
+        });
+    }
 
     return (
         <Box sx={{ height: 600, width: '100%' }}>

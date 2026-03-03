@@ -6,7 +6,7 @@ import useUsuarios from './hooks/useUsuarios';
 import UsuariosTable from './components/UsuariosTable';
 import UsuarioModal from './components/UsuarioModal';
 
-const GestionUsuarios = () => {
+const GestionUsuarios = ({ readOnly = false }) => {
     const {
         data, loading, error,
         createItem, updateItem, deleteItem,
@@ -30,16 +30,19 @@ const GestionUsuarios = () => {
     }, [data, searchTerm]);
 
     const handleCreate = () => {
+        if (readOnly) return;
         setCurrentRecord(null);
         setModalOpen(true);
     };
 
     const handleEdit = (record) => {
+        if (readOnly) return;
         setCurrentRecord(record);
         setModalOpen(true);
     };
 
     const handleDelete = async (record) => {
+        if (readOnly) return;
         if (window.confirm(`¿Está seguro de eliminar el usuario ${record.cuil}?`)) {
             const result = await deleteItem(record.cuil);
             if (result.success) {
@@ -51,6 +54,7 @@ const GestionUsuarios = () => {
     };
 
     const handleSave = async (formData) => {
+        if (readOnly) return;
         let result;
         if (currentRecord) {
             result = await updateItem(formData);
@@ -98,19 +102,22 @@ const GestionUsuarios = () => {
                         ),
                     }}
                 />
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={handleCreate}
-                >
-                    Nuevo Usuario
-                </Button>
+                {!readOnly && (
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={handleCreate}
+                    >
+                        Nuevo Usuario
+                    </Button>
+                )}
             </Box>
 
             <UsuariosTable
                 data={filteredData}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                readOnly={readOnly}
             />
 
             <UsuarioModal

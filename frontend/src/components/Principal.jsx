@@ -85,7 +85,7 @@ const menuConfigByRole = {
     { label: "Reportes de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
     { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
-    { label: "Gestión de Eventos", identifier: "GestionEventoYCurso", icon: <SettingsSuggestIcon /> },
+    { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon /> },
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
     { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
   ],
@@ -244,7 +244,7 @@ export default function Principal() {
     switch (opcionSeleccionada) {
       case "Formulario": return <Formulario />;
       case "Calendario": return <Cronograma />;
-      case "Gestion": return <MainGestion />;
+      case "Gestion": return <MainGestion user={user} />;
       case "RestriccionesFechasInicioCursada": return <RestriccionesFechasInicioCursada />;
       case "Eventos": return <NuevoEvento />;
       case "GestionEventoYCurso": return <GestionEventoYCurso />;

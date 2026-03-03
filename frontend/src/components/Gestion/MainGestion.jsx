@@ -13,24 +13,28 @@ import GestionTiposCapacitacion from '../../features/TiposDeCapacitacion/Gestion
 import GestionRolesTutores from '../../features/RolTutores/GestionRolTutores';
 import GestionTutores from '../../features/Tutores/GestionTutores';
 
-const MainGestion = () => {
-    const [selectedOption, setSelectedOption] = useState(null);
+const MainGestion = ({ user }) => {
+    const userRole = user?.rol;
 
-    const options = [
-        "Eventos",
-        "Usuarios",
-        "Áreas",
-        "Asignaciones Áreas",
-        "Ministerios",
-        "Medios de Inscripción",
-        "Plataformas de Dictado",
-        "Tipos de Capacitación",
-        "Roles Tutores",
-        "Tutores",
-        // Add other options as features are implemented
-        // "Ministerios", "Áreas", "Personas", "Tutores", "Medios de Inscripción", 
-        // "Plataformas de Dictado", "Tipos de Capacitación", "Asignar areas a usuarios"
+    const allOptions = [
+        { label: "Eventos", roles: ['ADM', 'GA'] },
+        { label: "Usuarios", roles: ['ADM', 'GA'] },
+        { label: "Áreas", roles: ['ADM'] },
+        { label: "Asignaciones Áreas", roles: ['ADM'] },
+        { label: "Ministerios", roles: ['ADM'] },
+        { label: "Medios de Inscripción", roles: ['ADM'] },
+        { label: "Plataformas de Dictado", roles: ['ADM'] },
+        { label: "Tipos de Capacitación", roles: ['ADM'] },
+        { label: "Roles Tutores", roles: ['ADM'] },
+        { label: "Tutores", roles: ['ADM'] },
     ];
+
+    // Filtrar opciones por rol
+    const filteredOptions = allOptions
+        .filter(opt => opt.roles.includes(userRole))
+        .map(opt => opt.label);
+
+    const [selectedOption, setSelectedOption] = useState(userRole === 'GA' ? 'Eventos' : null);
 
     const handleSelectOption = (value) => {
         setSelectedOption(value);
@@ -41,7 +45,7 @@ const MainGestion = () => {
             case 'Eventos':
                 return <GestionEventoYCurso />;
             case 'Usuarios':
-                return <GestionUsuarios />;
+                return <GestionUsuarios readOnly={userRole === 'GA'} />;
             case 'Áreas':
                 return <GestionAreas />;
             case 'Asignaciones Áreas':
@@ -70,12 +74,12 @@ const MainGestion = () => {
 
     return (
         <Box sx={{ p: 3 }}>
-            <Titulo texto="Gestión de Entidades" />
+            <Titulo texto={userRole === 'GA' ? "Gestión de Entidades" : "Gestión de Entidades"} />
             <Divider sx={{ my: 2 }} />
 
             <Box sx={{ mb: 4, maxWidth: 400 }}>
                 <Autocomplete
-                    options={options}
+                    options={filteredOptions}
                     label="Seleccione una Entidad"
                     value={selectedOption}
                     getValue={handleSelectOption}
