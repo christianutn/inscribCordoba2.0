@@ -130,7 +130,7 @@ const DetalleFechasChart = () => {
 
     // Filtrar instancias activas (no CANC)
     const instanciasActivas = allInstancias.filter(inst =>
-      inst.estado_instancia !== 'CANC'
+      inst.estado_instancia !== 'CANC' && inst.plataforma_dictado === 'CC'
     );
 
     for (let d = 1; d <= diasDelMes; d++) {

@@ -131,7 +131,7 @@ const DetalleMesChart = () => {
 
         // Filtrar instancias activas (no CANC )
         const instanciasActivas = todasInstancias.filter(inst =>
-          inst.estado_instancia !== 'CANC'
+          inst.estado_instancia !== 'CANC' && inst.plataforma_dictado === 'CC'
         );
 
         // Agrupar por mes
