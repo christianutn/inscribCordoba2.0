@@ -11,7 +11,7 @@ import { getMyUser } from "../services/usuarios.service.js";
 import Alert from '@mui/material/Alert';
 import Cohortes from "./Cohortes.jsx";
 import validarFecha from '../services/validarFechas.js';
-import { postInstancias } from "../services/instancias.service.js";
+import { postInstancias, getInstanciasByCurso } from "../services/instancias.service.js";
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
@@ -55,6 +55,8 @@ export default function Formulario() {
   const [departamentosSeleccionados, setDepartamentosSeleccionados] = useState([]);
   const [cursosCorrelativosSeleccionados, setCursosCorrelativosSeleccionados] = useState([]);
 
+  const [instanciasExistentes, setInstanciasExistentes] = useState([]);
+
   const [opciones, setOpciones] = useState({
     autogestionado: false,
     edad: false,
@@ -62,6 +64,8 @@ export default function Formulario() {
     publicaPCC: false,
     correlatividad: false
   });
+
+  const [esCampusCordoba, setEsCampusCordoba] = useState(false);
 
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
   const [tituloAlerta, setTituloAlerta] = useState('');
@@ -78,6 +82,13 @@ export default function Formulario() {
     if (!nuevaOpciones.departamento) { setDepartamentosSeleccionados([]); }
     if (!nuevaOpciones.correlatividad) { setCursosCorrelativosSeleccionados([]); }
   };
+
+  useEffect(() => {
+    const cursoObj = cursos.find(c => c.nombre === selectCurso);
+    const plataformaObj = plataformasDictado.find(p => p.nombre === selectPlataformaDictado);
+    const esCC = (cursoObj?.cod?.startsWith('C-')) || (plataformaObj?.cod === 'CC');
+    setEsCampusCordoba(esCC);
+  }, [selectCurso, selectPlataformaDictado, cursos, plataformasDictado]);
 
   useEffect(() => {
     (async () => {
@@ -97,7 +108,7 @@ export default function Formulario() {
     setSelectMinisterio(""); setSelectArea(""); setSelectCurso(""); setSelectMedioInscripcion("");
     setSelectPlataformaDictado(""); setSelectTipoCapacitacion(""); setCupo(""); setHoras("");
     setCohortes([]); setEdadDesde(16); setEdadHasta("Sin Restricción"); setDepartamentosSeleccionados([]);
-    setCursosCorrelativosSeleccionados([]); setRowSelectionModel([]); setTutores([]);
+    setCursosCorrelativosSeleccionados([]); setRowSelectionModel([]); setTutores([]); setInstanciasExistentes([]);
     setOpciones({ autogestionado: false, edad: false, departamento: false, publicaPCC: false, correlatividad: false });
     setAreas([]); setCursos([]);
     setResetCohortesKey(prevKey => prevKey + 1);
@@ -209,13 +220,41 @@ export default function Formulario() {
               <div className='info-curso'>
                 <div className='select-ministerio'><Autocomplete options={ministerios.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione un ministerio"} value={selectMinisterio} getValue={(value) => { setSelectMinisterio(value); setSelectArea(""); setSelectCurso(""); const ministerioSeleccionado = ministerios.find(m => m.nombre === value); if (ministerioSeleccionado) { setAreas(ministerioSeleccionado.detalle_areas); setCursos([]); } else { setAreas([]); setCursos([]); } }} /></div>
                 <div className='select-area'><Autocomplete options={areas.filter(a => a.esVigente === 1).map(a => a.nombre)} label={"Seleccione un área"} value={selectArea} getValue={(value) => { setSelectArea(value); setSelectCurso(""); const areaSeleccionada = areas.find(a => a.nombre === value); if (areaSeleccionada) { setCursos(areaSeleccionada.detalle_cursos); } else { setCursos([]); } }} /></div>
-                <div className='select-curso'><Autocomplete options={cursos.filter(c => c.esVigente === 1 && c.esta_autorizado === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso} getValue={async (value) => { setSelectCurso(value); const codCurso = cursos.find(c => c.nombre === value)?.cod; if (codCurso) { try { const tutoresData = await getHistoricoTutoresVigentesPorCurso(codCurso); setTutores(tutoresData); } catch (e) { console.error(e); setTutores([]); } if (!tiene_el_curso_evento_creado(codCurso)) { setTituloAlerta("El curso no tiene un evento creado"); setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${value}'. Por favor, complete este formulario.`); setOpenAlertDialog(true); setNuevoEvento(true); } } else { setTutores([]); } }} /></div>
+                <div className='select-curso'><Autocomplete options={cursos.filter(c => c.esVigente === 1 && c.esta_autorizado === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso} getValue={async (value) => {
+                  setSelectCurso(value);
+                  const codCurso = cursos.find(c => c.nombre === value)?.cod;
+                  if (codCurso) {
+                    try {
+                      const tutoresData = await getHistoricoTutoresVigentesPorCurso(codCurso);
+                      setTutores(tutoresData);
+                      const instanciasData = await getInstanciasByCurso(codCurso);
+                      setInstanciasExistentes(instanciasData.filter(i => i.estado_instancia !== 'CANC'));
+                    } catch (e) {
+                      console.error(e);
+                      setTutores([]);
+                      setInstanciasExistentes([]);
+                    }
+                    if (!tiene_el_curso_evento_creado(codCurso)) {
+                      setTituloAlerta("El curso no tiene un evento creado");
+                      setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${value}'. Por favor, complete este formulario.`);
+                      setOpenAlertDialog(true);
+                      setNuevoEvento(true);
+                    }
+                  } else {
+                    setTutores([]);
+                    setInstanciasExistentes([]);
+                  }
+                }} /></div>
                 <div className='select-medio-inscripcion'><Autocomplete options={mediosInscripcion.filter(m => m.esVigente === 1).map(m => m.nombre)} label={"Seleccione medio de inscripción"} value={selectMedioInscripcion} getValue={(value) => setSelectMedioInscripcion(value)} /></div>
                 <div className='select-plataforma-dictado'><Autocomplete options={plataformasDictado.filter(p => p.esVigente === 1).map(p => p.nombre)} label={"Seleccione plataforma de dictado"} value={selectPlataformaDictado} getValue={(value) => setSelectPlataformaDictado(value)} /></div>
                 <div className='select-tipo-capacitacion'><Autocomplete options={tiposCapacitaciones.filter(t => t.esVigente === 1).map(t => t.nombre)} label={"Seleccione tipo de capacitación"} value={selectTipoCapacitacion} getValue={(value) => setSelectTipoCapacitacion(value)} /></div>
                 <div className='input'>
                   <TextField label={"Cupo"} getValue={(value) => setCupo(value)} value={cupo} />
-                  <TextField label={"Cantidad de horas"} getValue={(value) => setHoras(value)} value={horas} />
+                  <TextField
+                    label={"Cantidad de horas"}
+                    getValue={(value) => setHoras(value)}
+                    value={horas}
+                  />
                 </div>
               </div>
               <div className='opciones-evento'><OpcionesEvento opciones={opciones} onOpcionesChange={manejarCambioOpciones} /></div>
@@ -277,7 +316,7 @@ export default function Formulario() {
                 </div>
               </div>
               <div className='cohortes'>
-                <Cohortes getCohortes={handleCohortes} key={resetCohortesKey} />
+                <Cohortes getCohortes={handleCohortes} key={resetCohortesKey} esCampusCordoba={esCampusCordoba} instanciasExistentes={instanciasExistentes} />
               </div>
               <div className='submit'>
                 <Button mensaje={"Registrar"} type="button" hanldeOnClick={handleEnviarFormulario} />

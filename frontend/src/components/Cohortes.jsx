@@ -8,7 +8,7 @@ import BtnEliminar from '../components/UIElements/BotonCircular';
 import { Divider, Typography } from '@mui/material';
 
 // Renombrado a Cohortes (con mayúscula)
-const Cohortes = ({ getCohortes }) => {
+const Cohortes = ({ getCohortes, esCampusCordoba, instanciasExistentes }) => {
 
     const titulo = "Cohortes";
     const mensajeDesdeInscripcion = "Fecha de Inscripción desde";
@@ -55,29 +55,51 @@ const Cohortes = ({ getCohortes }) => {
                 <div className='titulo'><SubtituloPrincipal texto={titulo} /></div>
                 <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black' }} />
 
-                {cohortes.map((cohorte, index) => (
-                    <div className='cohortes' key={cohorte.id}> {/* Usar un ID estable como key */}
-                        <div className='label'>
-                            <Typography variant="body1">{`Cohorte N° ${index + 1}: `}</Typography>
+                {cohortes.map((cohorte, index) => {
+                    const cohorteAnterior = index > 0 ? cohortes[index - 1] : null;
+
+                    return (
+                        <div className='cohortes' key={cohorte.id}> {/* Usar un ID estable como key */}
+                            <div className='label'>
+                                <Typography variant="body1">{`Cohorte N° ${index + 1}: `}</Typography>
+                            </div>
+                            <div className="insc-desde">
+                                <Fecha mensaje={mensajeDesdeInscripcion} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaInscripcionDesde" value={cohorte.fechaInscripcionDesde} />
+                            </div>
+                            <div className="insc-hasta">
+                                <Fecha mensaje={mensajeHastaInscripcion} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaInscripcionHasta" value={cohorte.fechaInscripcionHasta} />
+                            </div>
+                            <div className="curso-desde">
+                                <Fecha
+                                    mensaje={mensajeDesdeCursada}
+                                    getFecha={handleFechas}
+                                    id={cohorte.id}
+                                    fieldFecha="fechaCursadaDesde"
+                                    value={cohorte.fechaCursadaDesde}
+                                    esCampusCordoba={esCampusCordoba}
+                                    fechaHastaAnterior={cohorteAnterior?.fechaCursadaHasta}
+                                    instanciasExistentes={instanciasExistentes}
+                                />
+                            </div>
+                            <div className="curso-hasta">
+                                <Fecha
+                                    mensaje={mensajeHastaCursada}
+                                    getFecha={handleFechas}
+                                    id={cohorte.id}
+                                    fieldFecha="fechaCursadaHasta"
+                                    value={cohorte.fechaCursadaHasta}
+                                    esCampusCordoba={esCampusCordoba}
+                                    fechaDesdeActual={cohorte.fechaCursadaDesde}
+                                    instanciasExistentes={instanciasExistentes}
+                                />
+                            </div>
+                            <div className="icon">
+                                <BtnEliminar icon={"borrar"} width={50} height={50} justifyContent={"flex-start"} alignItems={"flex-end"} onClick={() => eliminarCohorte(cohorte.id)} />
+                            </div>
+                            <div className='diver'><Divider /></div>
                         </div>
-                        <div className="insc-desde">
-                            <Fecha mensaje={mensajeDesdeInscripcion} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaInscripcionDesde" value={cohorte.fechaInscripcionDesde} />
-                        </div>
-                        <div className="insc-hasta">
-                            <Fecha mensaje={mensajeHastaInscripcion} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaInscripcionHasta" value={cohorte.fechaInscripcionHasta} />
-                        </div>
-                        <div className="curso-desde">
-                            <Fecha mensaje={mensajeDesdeCursada} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaCursadaDesde" value={cohorte.fechaCursadaDesde} />
-                        </div>
-                        <div className="curso-hasta">
-                            <Fecha mensaje={mensajeHastaCursada} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaCursadaHasta" value={cohorte.fechaCursadaHasta} />
-                        </div>
-                        <div className="icon">
-                            <BtnEliminar icon={"borrar"} width={50} height={50} justifyContent={"flex-start"} alignItems={"flex-end"} onClick={() => eliminarCohorte(cohorte.id)} />
-                        </div>
-                        <div className='diver'><Divider /></div>
-                    </div>
-                ))}
+                    );
+                })}
 
                 <div className='btnEnviar'>
                     <Button mensaje={"Agregar Cohorte"} icon={"signoMas"} onClick={agregarCohorte} justifyContent={"flex-start"}></Button>

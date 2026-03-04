@@ -14,7 +14,7 @@ import Box from '@mui/material/Box';
 import { getFechasInhabilitadas } from '../services/fechas_inhabilitadas.service.js';
 import { getFechasInhabilitadasFin } from '../services/fechas_inhabilitadas_fin.service.js';
 
-const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
+const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, esCampusCordoba, fechaHastaAnterior, fechaDesdeActual, instanciasExistentes, ...props }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [feriados, setFeriados] = useState([]);
   const [isLoading, setIsLoading] = useState(false)
@@ -84,6 +84,32 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
 
       if (fechasInhabilitadas.map(element => element.fecha).includes(stringFecha)) return true;
 
+      // Validación Campus Córdoba: 7 días después de la anterior
+      if (esCampusCordoba && fechaHastaAnterior) {
+        const minFecha = dayjs(fechaHastaAnterior).add(8, 'day');
+        if (date.isBefore(minFecha, 'day')) return true;
+      }
+
+      // Validación Campus Córdoba contra la Base de Datos (huecos y margen)
+      if (esCampusCordoba && instanciasExistentes && instanciasExistentes.length > 0) {
+        for (const inst of instanciasExistentes) {
+          if (!inst.fecha_inicio_curso || !inst.fecha_fin_curso) continue;
+
+          const dbInicio = dayjs(inst.fecha_inicio_curso);
+          const dbFin = dayjs(inst.fecha_fin_curso);
+
+          const dbInicioMargin = dbInicio.subtract(7, 'day');
+          const dbFinMargin = dbFin.add(7, 'day');
+
+          if (
+            (date.isAfter(dbInicioMargin, 'day') || date.isSame(dbInicioMargin, 'day')) &&
+            (date.isBefore(dbFinMargin, 'day') || date.isSame(dbFinMargin, 'day'))
+          ) {
+            return true;
+          }
+        }
+      }
+
     }
 
     if (fieldFecha === "fechaCursadaHasta") {
@@ -92,6 +118,32 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, ...props }) => {
       if (feriados.map(element => element.fecha).includes(fechaAValidar)) return true;
 
       if (fechasInhabilitadasFin.map(element => element.fecha).includes(fechaAValidar)) return true;
+
+      // Validación Campus Córdoba: Máximo 90 días desde el inicio y margen BD
+      if (esCampusCordoba && fechaDesdeActual) {
+        const startDate = dayjs(fechaDesdeActual);
+        let maxAllowedDate = startDate.add(90, 'day');
+
+        if (instanciasExistentes && instanciasExistentes.length > 0) {
+          let instSiguienteDb = null;
+          // Buscar la instancia futura más próxima
+          for (const inst of instanciasExistentes) {
+            if (!inst.fecha_inicio_curso || !inst.fecha_fin_curso) continue;
+
+            const dbInicio = dayjs(inst.fecha_inicio_curso);
+            // Si el inicio de la de BD es futuro respecto a nuestro startDate
+            if (dbInicio.isAfter(startDate, 'day')) {
+              const prevMargin = dbInicio.subtract(8, 'day');
+              if (prevMargin.isBefore(maxAllowedDate, 'day')) {
+                maxAllowedDate = prevMargin;
+              }
+            }
+          }
+        }
+
+        if (date.isAfter(maxAllowedDate, 'day')) return true;
+        if (date.isBefore(startDate, 'day')) return true;
+      }
     }
 
     return false;

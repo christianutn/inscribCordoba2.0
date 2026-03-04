@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
-const Input = ({ label, getValue, type, value, width }) => {
+const Input = ({ label, getValue, type, value, width, error, helperText }) => {
   return (
     <Box
       sx={{
@@ -21,6 +21,8 @@ const Input = ({ label, getValue, type, value, width }) => {
           }}
           onChange={(event) => getValue(event.target.value)}
           value={value}
+          error={error}
+          helperText={helperText}
           autoComplete="off"
           inputProps={{
             autoComplete: 'off',

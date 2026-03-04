@@ -163,24 +163,17 @@ const validarDatosCursoConCohortes = [
 
 
 
+        const cod_curso = req.body.curso;
+        const cod_plataforma = req.body.plataforma_dictado;
+        const esCampusCordoba = (cod_curso && cod_curso.startsWith('C-')) || cod_plataforma === 'CC';
+
+        const instanciasDB = await Instancia.findAll({
+            where: { curso: cod_curso }
+        });
+
         for (let i = 0; i < cohortes.length; i++) {
             const cohorte = cohortes[i];
             const { fechaInscripcionDesde, fechaInscripcionHasta, fechaCursadaDesde, fechaCursadaHasta } = cohorte;
-
-            //Validamos que la instancia no exista
-
-            const cod_curso = req.body.curso;
-
-            const instancia = await Instancia.findOne({
-                where: {
-                    curso: cod_curso,
-                    fecha_inicio_curso: fechaCursadaDesde
-                }
-            });
-
-            if (instancia) {
-                throw new AppError(`Ya existe una instancia con el mismo curso y fecha de cursada.`, 400);
-            }
 
             // Verificaciones defensivas: Asegurar que las fechas son objetos Date válidos antes de comparar.
             // Validar con Luxon si las fechas son válidas
@@ -205,6 +198,51 @@ const validarDatosCursoConCohortes = [
                 throw new AppError(`La 'fechaCursadaDesde' debe ser estrictamente anterior a 'fechaCursadaHasta' para la cohorte ${i + 1}.`, 400);
             }
 
+
+            // --- Validaciones de Campus Córdoba ---
+            if (esCampusCordoba) {
+                // Duración de Cohorte: Máximo 90 días corridos
+                const duracion = fcHasta.diff(fcDesde, 'days').days;
+                if (duracion > 90) {
+                    throw new AppError(`Para cursos de Campus Córdoba, una cohorte no puede durar más de 90 días corridos (Cohorte ${i + 1}).`, 400);
+                }
+
+                // Validar solapamiento y margen de 7 días con TODAS las instancias en BD
+                for (const instDB of instanciasDB) {
+                    if (instDB.estado_instancia === 'CANC') continue;
+                    if (!instDB.fecha_inicio_curso || !instDB.fecha_fin_curso) continue;
+
+                    const dbInicio = DateTime.fromISO(instDB.fecha_inicio_curso, { zone: 'America/Argentina/Buenos_Aires' });
+                    const dbFin = DateTime.fromISO(instDB.fecha_fin_curso, { zone: 'America/Argentina/Buenos_Aires' });
+
+                    const diffPos = fcDesde.diff(dbFin, 'days').days;
+                    const diffNeg = dbInicio.diff(fcHasta, 'days').days;
+
+                    if (diffPos < 8 && diffNeg < 8) {
+                        throw new AppError(`La fecha seleccionada se solapa con una cohorte existente o no respeta el margen de 7 días.`, 400);
+                    }
+                }
+
+                // Validar solapamiento y margen de 7 días con las otras cohortes en el mismo array (las ya insertadas antes)
+                for (let j = 0; j < i; j++) {
+                    const cohorteAnterior = cohortes[j];
+                    const fcDesdeAnt = DateTime.fromISO(cohorteAnterior.fechaCursadaDesde, { zone: 'America/Argentina/Buenos_Aires' });
+                    const fcHastaAnt = DateTime.fromISO(cohorteAnterior.fechaCursadaHasta, { zone: 'America/Argentina/Buenos_Aires' });
+
+                    const diffPos = fcDesde.diff(fcHastaAnt, 'days').days;
+                    const diffNeg = fcDesdeAnt.diff(fcHasta, 'days').days;
+
+                    if (diffPos < 8 && diffNeg < 8) {
+                        throw new AppError(`La fecha seleccionada se solapa con una cohorte existente o no respeta el margen de 7 días.`, 400);
+                    }
+                }
+            } else {
+                const instanciaDuplicada = instanciasDB.find(inst => inst.fecha_inicio_curso === fechaCursadaDesde);
+                if (instanciaDuplicada) {
+                    throw new AppError(`Ya existe una instancia con el mismo curso y fecha de cursada.`, 400);
+                }
+            }
+            // --------------------------------------
 
             // Reglas de validación
 
