@@ -83,7 +83,7 @@ const Instancia = sequelize.define("instancias", {
         type: DataTypes.INTEGER,
         allowNull: true
     },
-    cantidad_certificados:{
+    cantidad_certificados: {
         type: DataTypes.INTEGER,
         allowNull: true
     },
@@ -99,7 +99,7 @@ const Instancia = sequelize.define("instancias", {
         type: DataTypes.INTEGER,
         allowNull: true
     }
-    
+
 
     // ... Otras columnas si las tienes, asegúrate de añadir 'field' si son snake_case
 }, {
@@ -148,7 +148,8 @@ Object.assign(Instancia, {
                 },
                 estado_instancia: {
                     [Op.notIn]: ['CANC', 'REPR']
-                }
+                },
+                plataforma_dictado: 'CC'
             }
         });
     },
@@ -183,7 +184,8 @@ Object.assign(Instancia, {
                 },
                 estado_instancia: {
                     [Op.notIn]: ['CANC', 'REPR']
-                }
+                },
+                plataforma_dictado: 'CC'
             }
         });
     },
@@ -217,7 +219,8 @@ Object.assign(Instancia, {
                 },
                 estado_instancia: {
                     [Op.notIn]: ['CANC', 'REPR']
-                }
+                },
+                plataforma_dictado: 'CC'
             }
         });
     },
@@ -252,7 +255,8 @@ Object.assign(Instancia, {
                 },
                 estado_instancia: {
                     [Op.notIn]: ['CANC', 'REPR']
-                }
+                },
+                plataforma_dictado: 'CC'
             }
         });
     },
@@ -287,7 +291,8 @@ Object.assign(Instancia, {
                 },
                 estado_instancia: {
                     [Op.notIn]: ['CANC', 'REPR']
-                }
+                },
+                plataforma_dictado: 'CC'
             }
         });
     },

@@ -165,7 +165,7 @@ const validarDatosCursoConCohortes = [
 
         const cod_curso = req.body.curso;
         const cod_plataforma = req.body.plataforma_dictado;
-        const esCampusCordoba = (cod_curso && cod_curso.startsWith('C-')) || cod_plataforma === 'CC';
+        const esCampusCordoba = cod_plataforma === 'CC';
 
         const instanciasDB = await Instancia.findAll({
             where: { curso: cod_curso }
