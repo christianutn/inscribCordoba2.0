@@ -10,7 +10,8 @@ import ReactApexChart from 'react-apexcharts';
 import {
     Box, CircularProgress, Typography, Alert, Paper, Grid,
     Card, CardContent, FormControl, InputLabel, Select, MenuItem, Button,
-    Tab, Tabs, TextField
+    Tab, Tabs, TextField, Tooltip, IconButton, Dialog, DialogTitle,
+    DialogContent, DialogActions, Radio, RadioGroup, FormControlLabel, Checkbox, FormLabel
 } from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -21,6 +22,9 @@ import ShowChartIcon from '@mui/icons-material/ShowChart';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PeopleIcon from '@mui/icons-material/People';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import BotonCircular from "./UIElements/BotonCircular.jsx";
+import { descargarExcelCronograma as descargarExcel } from "../services/excel.service.js";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -174,11 +178,25 @@ const calculateMonthlyPeaksAllPlataformas = (preProcessedActiveCourses, targetYe
 };
 
 
-function KpiCard({ title, value, icon, color = 'primary', description }) {
+function KpiCard({ title, value, icon, color = 'primary', description, tooltipText }) {
     const IconComponent = icon;
     return (
-        <Card elevation={3} sx={{ display: 'flex', flexDirection: 'column', height: '100%', borderRadius: 3, transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 } }}>
-            <CardContent sx={{ flexGrow: 1, p: 3 }}>
+        <Card elevation={3} sx={{ display: 'flex', flexDirection: 'column', height: '100%', borderRadius: 3, position: 'relative', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 } }}>
+            {tooltipText && (
+                <Tooltip
+                    title={tooltipText}
+                    arrow
+                    placement="top"
+                    componentsProps={{
+                        tooltip: { sx: { fontSize: '0.95rem', padding: '10px' } }
+                    }}
+                >
+                    <IconButton size="small" sx={{ position: 'absolute', top: 8, right: 8, color: 'text.secondary', '&:hover': { color: 'primary.main' } }}>
+                        <InfoOutlinedIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            )}
+            <CardContent sx={{ flexGrow: 1, p: 3, pt: tooltipText ? 4 : 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     {IconComponent && (
                         <Box component="span" sx={{ mr: 2, p: 1, borderRadius: '12px', bgcolor: theme => theme.palette[color]?.light ? `${theme.palette[color].light}30` : 'action.hover', color: theme => theme.palette[color]?.main ?? theme.palette.primary.main, display: 'flex', alignItems: 'center' }}>
@@ -193,7 +211,7 @@ function KpiCard({ title, value, icon, color = 'primary', description }) {
                     {value}
                 </Typography>
                 {description && (
-                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem', fontWeight: 500 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.95rem', fontWeight: 500, mt: 1 }}>
                         {description}
                     </Typography>
                 )}
@@ -296,7 +314,16 @@ const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth }) => {
         stroke: { width: 2, colors: ['transparent'] },
         xaxis: {
             categories: chartData.labels,
-            labels: { rotate: -45, trim: false, maxHeight: 120 },
+            labels: {
+                rotate: 0,
+                trim: false,
+                formatter: function (value) {
+                    if (typeof value === 'string' && value.includes('-')) {
+                        return value.split('-')[0]; // Muestra solo el día
+                    }
+                    return value;
+                }
+            },
             tickPlacement: 'on'
         },
         yaxis: { title: { text: '' } },
@@ -314,7 +341,10 @@ const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth }) => {
 
     return (
         <Paper elevation={2} sx={{ mt: 2, p: 2 }}>
-            <Typography variant="h5" gutterBottom sx={{ mb: 2, fontWeight: 500, textAlign: 'center' }}>Detalle Diario por Mes en Campus Córdoba</Typography>
+            <Typography variant="h5" sx={{ mb: 0.5, fontWeight: 500, textAlign: 'center' }}>Detalle Diario por Mes</Typography>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 3, textAlign: 'center' }}>
+                Refleja la actividad exclusiva de <strong>Cursos en Moodle Campus Córdoba</strong> (excluye plataformas externas y cursos cancelados).
+            </Typography>
 
             <FormControl fullWidth sx={{ mb: 3 }} disabled={globalSelectedMonth !== 'all'}>
                 <InputLabel id="select-local-mes-label">Mes de Detalle</InputLabel>
@@ -399,6 +429,11 @@ const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth }) => {
 const ReporteCursosCC = () => {
     const [rawCronogramaData, setRawCronogramaData] = useState([]);
     const [filteredCronogramaData, setFilteredCronogramaData] = useState([]);
+
+    // Modal para Configurar la Descarga a Excel
+    const [openExcelModal, setOpenExcelModal] = useState(false);
+    const [excelFilterPlataforma, setExcelFilterPlataforma] = useState('ALL'); // 'ALL', 'CC', 'EXT'
+    const [excelFilterIncluirCancelados, setExcelFilterIncluirCancelados] = useState(false);
     const [allMinisterios, setAllMinisterios] = useState([]);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedMonth, setSelectedMonth] = useState('all');
@@ -579,8 +614,8 @@ const ReporteCursosCC = () => {
 
         setKpiData({
             totalCursos, cursosCC, cursosExt, cancelados, totalCupos, totalHoras, porcAuto,
-            maxCursos: maxData.maxCursos, maxCursosDesc: `${maxData.maxCursosDay} - Campus Córdoba`,
-            maxCupos: maxData.maxCupos, maxCuposDesc: `${maxData.maxCuposDay} - Campus Córdoba`,
+            maxCursos: maxData.maxCursos, maxCursosDesc: `${maxData.maxCursosDay} - Cursos en Moodle Campus Córdoba`,
+            maxCupos: maxData.maxCupos, maxCuposDesc: `${maxData.maxCuposDay} - Cursos en Moodle Campus Córdoba`,
             varVal: finalVar, varDesc: finalVar > 0 ? `+${finalVar.toFixed(1)}%` : `${finalVar.toFixed(1)}%`
         });
 
@@ -595,7 +630,7 @@ const ReporteCursosCC = () => {
 
     const yearsOptions = useMemo(() => {
         const y = [];
-        for (let i = 2022; i <= new Date().getFullYear() + 1; i++) y.push(i);
+        for (let i = 2021; i <= new Date().getFullYear() + 1; i++) y.push(i);
         return y;
     }, []);
 
@@ -608,11 +643,128 @@ const ReporteCursosCC = () => {
 
     const isFilterActive = selectedYear !== new Date().getFullYear() || selectedMonth !== 'all' || selectedMinisterio !== 'all' || selectedArea !== 'all';
 
+    const handleOpenExcelModal = () => setOpenExcelModal(true);
+    const handleCloseExcelModal = () => setOpenExcelModal(false);
+
+    const procesarDescargaExcel = async () => {
+        if (!filteredCronogramaData || filteredCronogramaData.length === 0) return;
+        try {
+            const dataFilteredParaExcel = filteredCronogramaData.filter(inst => {
+                const start = parseDateString(inst.fecha_inicio_curso);
+                if (!start) return false;
+
+                let anioMesOk = false;
+                if (selectedMonth === 'all') {
+                    anioMesOk = start.year === selectedYear;
+                } else {
+                    anioMesOk = start.year === selectedYear && start.month === parseInt(selectedMonth);
+                }
+                if (!anioMesOk) return false;
+
+                const plat = getPlataforma(inst);
+                if (excelFilterPlataforma !== 'ALL' && plat !== excelFilterPlataforma) {
+                    return false;
+                }
+
+                const estado = String(inst.estado_instancia || "").toUpperCase().trim();
+                const isCANC = estado === 'CANC'
+                if (!excelFilterIncluirCancelados && isCANC) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            if (dataFilteredParaExcel.length === 0) {
+                setError("No hay datos para exportar con los filtros seleccionados.");
+                setOpenExcelModal(false);
+                return;
+            }
+
+            const dataParaExcel = dataFilteredParaExcel.map(inst => {
+                const det = inst.detalle_curso || {};
+                const min = det.detalle_area?.detalle_ministerio?.nombre || "";
+                const area = det.detalle_area?.nombre || "";
+                const plat = getPlataforma(inst);
+
+                return {
+                    "Curso": inst.curso,
+                    "Nombre del curso": det.nombre,
+                    "Ministerio": min,
+                    "Área": area,
+                    "Plataforma de dictado": plat,
+                    "Fecha inicio curso": inst.fecha_inicio_curso,
+                    "Fecha fin curso": inst.fecha_fin_curso,
+                    "Estado Instancia": inst.estado_instancia,
+                    "Medio de inscripción": inst.medio_inscripcion,
+                    "Cupo": inst.cupo,
+                    "Cantidad de horas": inst.cantidad_horas,
+                    "Es Autogestionado": isAutogestionado(inst) ? "Sí" : "No",
+                };
+            });
+
+            const COLUMNAS_EXCEL = [
+                "Curso", "Nombre del curso", "Ministerio", "Área",
+                "Plataforma de dictado", "Fecha inicio curso", "Fecha fin curso",
+                "Estado Instancia", "Medio de inscripción", "Cupo",
+                "Cantidad de horas", "Es Autogestionado"
+            ];
+
+            const fileName = `Reporte_Cursos_${selectedYear}${selectedMonth !== 'all' ? `_${mesesFull[selectedMonth]}` : ''}_${excelFilterPlataforma}`;
+            await descargarExcel(dataParaExcel, COLUMNAS_EXCEL, fileName);
+            setOpenExcelModal(false);
+        } catch (e) {
+            console.error("Error al generar Excel: ", e);
+            setError("Error al generar el archivo Excel.");
+            setOpenExcelModal(false);
+        }
+    };
+
     return (
         <Box sx={{ width: '100%', boxSizing: 'border-box', p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Typography variant="h4" gutterBottom component="h1" sx={{ textAlign: 'center', mb: 0, fontWeight: 'bold' }}>
-                Reporte Cursos {selectedYear} {selectedMonth !== 'all' ? ` - ${mesesFull[selectedMonth]}` : ' - Anual'}
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                <Typography variant="h4" gutterBottom component="h1" sx={{ textAlign: 'center', mb: 0, fontWeight: 'bold' }}>
+                    Reporte Cursos {selectedYear} {selectedMonth !== 'all' ? ` - ${mesesFull[selectedMonth]}` : ' - Anual'}
+                </Typography>
+                <Box sx={{ position: 'absolute', right: 0 }}>
+                    <BotonCircular icon="descargar" onClick={handleOpenExcelModal} tooltip="Descargar Reporte Excel" disabled={loading || filteredCronogramaData.length === 0} />
+                </Box>
+            </Box>
+
+            <Dialog open={openExcelModal} onClose={handleCloseExcelModal} maxWidth="sm" fullWidth>
+                <DialogTitle sx={{ fontWeight: 'bold' }}>Configurar Descarga Excel</DialogTitle>
+                <DialogContent dividers>
+                    <Alert severity="info" sx={{ mb: 3 }}>
+                        Los filtros de fecha (Año y Mes) y las selecciones de Ministerio y Área activos en la pantalla ya están siendo aplicados a esta descarga.
+                    </Alert>
+
+                    <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
+                        <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1 }}>Filtro de Plataforma</FormLabel>
+                        <RadioGroup
+                            value={excelFilterPlataforma}
+                            onChange={(e) => setExcelFilterPlataforma(e.target.value)}
+                        >
+                            <FormControlLabel value="ALL" control={<Radio color="primary" />} label="Todas las plataformas" />
+                            <FormControlLabel value="CC" control={<Radio color="primary" />} label="Solo Moodle Campus Córdoba (CC)" />
+                            <FormControlLabel value="EXT" control={<Radio color="primary" />} label="Solo Plataforma Externa (EXT)" />
+                        </RadioGroup>
+                    </FormControl>
+
+                    <FormControl component="fieldset" sx={{ width: '100%' }}>
+                        <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1 }}>Cursos Cancelados</FormLabel>
+                        <FormControlLabel
+                            control={<Checkbox checked={excelFilterIncluirCancelados} onChange={(e) => setExcelFilterIncluirCancelados(e.target.checked)} color="primary" />}
+                            label="Incluir cursos que figuran como Cancelados"
+                        />
+                    </FormControl>
+                </DialogContent>
+                <DialogActions sx={{ p: 2 }}>
+                    <Button onClick={handleCloseExcelModal} color="inherit" sx={{ textTransform: 'none', fontWeight: 500 }}>Cancelar</Button>
+                    <Button onClick={procesarDescargaExcel} variant="contained" color="primary" sx={{ textTransform: 'none', px: 3 }}>
+                        Descargar Archivo
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Paper elevation={1} sx={{ p: 2 }}>
                 <Grid container spacing={2} alignItems="center">
@@ -673,27 +825,38 @@ const ReporteCursosCC = () => {
             {!loading && error && <Alert severity="error">{error}</Alert>}
 
             {!loading && kpiData && (
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Total de Cursos" value={kpiData.totalCursos} icon={<AddCircleOutlineIcon />} color="primary" description={`Campus Córdoba: ${kpiData.cursosCC} | Externos: ${kpiData.cursosExt}`} /> </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Total de Cupos" value={kpiData.totalCupos} icon={<PeopleIcon />} color="info" description={selectedMonth === 'all' ? `Total ${selectedYear} - Campus Córdoba` : `En ${mesesFull[selectedMonth]} - Campus Córdoba`} /> </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Total Horas de Capacitación" value={kpiData.totalHoras} icon={<AccessTimeIcon />} color="secondary" description={selectedMonth === 'all' ? `Total ${selectedYear} - Campus Córdoba` : `En ${mesesFull[selectedMonth]} - Campus Córdoba`} /> </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="% Autogestionados" value={typeof kpiData.porcAuto === 'number' ? kpiData.porcAuto.toFixed(1) + '%' : kpiData.porcAuto} icon={<SettingsSuggestIcon />} color="warning" description={selectedMonth === 'all' ? `Anual - Campus Córdoba` : `En ${mesesFull[selectedMonth]} - Campus Córdoba`} /> </Grid>
+                <>
+                    <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
+                        <Typography variant="body1" sx={{ color: 'text.primary' }}>
+                            <strong>Moodle Campus Córdoba:</strong> Cursos con gestión integral (Inscripción, Cursada y Certificación).
+                        </Typography>
+                        <Typography variant="body1" sx={{ mt: 0.5, color: 'text.primary' }}>
+                            <strong>Externos:</strong> Cursos con seguimiento en Victorius, se le da visibilidad y difusión en el Portal Institucional. Estos no tienen aula en Moodle de Campus Córdoba.
+                        </Typography>
+                    </Alert>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Total de Cursos Planificados" value={kpiData.totalCursos} icon={<AddCircleOutlineIcon />} color="primary" description={`Cursos en Moodle Campus Córdoba: ${kpiData.cursosCC} | Externos: ${kpiData.cursosExt}`} tooltipText="Total de cursos nuevos que inician en el periodo. Incluye Cursos en Moodle Campus Córdoba y plataformas externas. Excluye cancelados." /> </Grid>
+                        <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Total de Cupos" value={kpiData.totalCupos} icon={<PeopleIcon />} color="info" description={selectedMonth === 'all' ? `Total ${selectedYear} - Cursos en Moodle Campus Córdoba` : `En ${mesesFull[selectedMonth]} - Cursos en Moodle Campus Córdoba`} tooltipText="Suma acumulada de cupos de los cursos que INICIAN en el periodo. Aplica SOLO a Cursos en Moodle Campus Córdoba. Excluye cancelados y externos." /> </Grid>
+                        <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Total Horas de Capacitación" value={kpiData.totalHoras} icon={<AccessTimeIcon />} color="secondary" description={selectedMonth === 'all' ? `Total ${selectedYear} - Cursos en Moodle Campus Córdoba` : `En ${mesesFull[selectedMonth]} - Cursos en Moodle Campus Córdoba`} tooltipText="Suma de las horas de todos los cursos que INICIAN en el periodo. Aplica SOLO a Cursos en Moodle Campus Córdoba. Excluye cancelados y externos." /> </Grid>
+                        <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="% Autogestionados" value={typeof kpiData.porcAuto === 'number' ? kpiData.porcAuto.toFixed(1) + '%' : kpiData.porcAuto} icon={<SettingsSuggestIcon />} color="warning" description={selectedMonth === 'all' ? `Anual - Cursos en Moodle Campus Córdoba` : `En ${mesesFull[selectedMonth]} - Cursos en Moodle Campus Córdoba`} tooltipText="Porcentaje de cursos autogestionados respecto al total del periodo. Aplica SOLO a Cursos en Moodle Campus Córdoba. Excluye cancelados y externos." /> </Grid>
 
-                    <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Cancelados" value={kpiData.cancelados} icon={<CancelIcon />} color="error" description={selectedMonth === 'all' ? `Iniciaban ${selectedYear}` : `Iniciaban en ${mesesFull[selectedMonth]}`} /> </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Máx. Cursos Simultáneos" value={kpiData.maxCursos} icon={<ShowChartIcon />} color="success" description={kpiData.maxCursosDesc} /> </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Máx. Cupos Simultáneos" value={kpiData.maxCupos} icon={<BarChartIcon />} color="info" description={kpiData.maxCuposDesc} /> </Grid>
-                    {selectedMonth !== 'all' && (
-                        <Grid item xs={12} sm={6} md={3} lg={3}>
-                            <KpiCard
-                                title="Variación Intermensual"
-                                value={kpiData.varDesc}
-                                icon={<TrendingUpIcon />}
-                                color={kpiData.varVal < 0 ? 'error' : 'success'}
-                                description={`Pico Máx. Cursos Simultáneos vs ${mesesFull[parseInt(selectedMonth) === 0 ? 11 : parseInt(selectedMonth) - 1]}`}
-                            />
-                        </Grid>
-                    )}
-                </Grid>
+                        <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Cancelados" value={kpiData.cancelados} icon={<CancelIcon />} color="error" description={selectedMonth === 'all' ? `Iniciaban ${selectedYear}` : `Iniciaban en ${mesesFull[selectedMonth]}`} tooltipText="Total de cursos en estado 'Cancelado' cuyo inicio estaba previsto en este periodo. Incluye TODAS las plataformas." /> </Grid>
+                        <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Máx. Cursos Simultáneos" value={kpiData.maxCursos} icon={<ShowChartIcon />} color="success" description={kpiData.maxCursosDesc} tooltipText="Pico de mayor cantidad de cursos activos AL MISMO TIEMPO (según fechas de inicio y fin). Aplica SOLO a Cursos en Moodle Campus Córdoba. Excluye cancelados." /> </Grid>
+                        <Grid item xs={12} sm={6} md={3} lg={3}> <KpiCard title="Máx. Cupos Simultáneos" value={kpiData.maxCupos} icon={<BarChartIcon />} color="info" description={kpiData.maxCuposDesc} tooltipText="Suma máxima simultánea de cupos de todos los cursos activos en el día pico. Aplica SOLO a Cursos en Moodle Campus Córdoba. Excluye cancelados." /> </Grid>
+                        {selectedMonth !== 'all' && (
+                            <Grid item xs={12} sm={6} md={3} lg={3}>
+                                <KpiCard
+                                    title="Variación Intermensual"
+                                    value={kpiData.varDesc}
+                                    icon={<TrendingUpIcon />}
+                                    color={kpiData.varVal < 0 ? 'error' : 'success'}
+                                    description={`Pico Máx. Cursos Simultáneos vs ${mesesFull[parseInt(selectedMonth) === 0 ? 11 : parseInt(selectedMonth) - 1]}`}
+                                    tooltipText="Variación del pico de saturación del mes actual respecto al anterior. Aplica SOLO a Cursos en Moodle Campus Córdoba."
+                                />
+                            </Grid>
+                        )}
+                    </Grid>
+                </>
             )}
 
             {!loading && chartData && selectedMonth === 'all' && (
@@ -705,7 +868,7 @@ const ReporteCursosCC = () => {
                                     Picos Máximos de Cursos Activos por Mes
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
-                                    Indica en qué valores ocurrieron los picos de saturación del servidor separando plataforma de la provincia vs externos.
+                                    Indica en qué valores ocurrieron los picos de saturación observando los cursos activos en simultáneo. Se diferencia la plataforma propia (Campus) vs externas. Excluye cancelados.
                                 </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, bgcolor: '#f5f5f5', p: 1.5, borderRadius: 2 }}>
@@ -755,8 +918,11 @@ const ReporteCursosCC = () => {
                     </Paper>
 
                     <Paper elevation={2} sx={{ p: 4, borderRadius: 2 }}>
-                        <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+                        <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                             Cantidad de Cursos Iniciados por Mes
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                            Total de nuevos cursos que comienzan cada mes, discriminado por plataforma. Excluye cancelados.
                         </Typography>
                         <Box sx={{ width: '100%', height: 380 }}>
                             <ReactApexChart
