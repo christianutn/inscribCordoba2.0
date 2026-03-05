@@ -3,15 +3,29 @@ import dayjs from 'dayjs';
 import { parseDate } from '../components/Cronograma/utils';
 
 export const useCronogramaFilters = (cursosData, loading) => {
+    const currentYear = dayjs().year().toString();
     const [filteredData, setFilteredData] = useState([]);
     const [ministerioFilter, setMinisterioFilter] = useState('all');
     const [areaFilter, setAreaFilter] = useState('all');
     const [nombreFilter, setNombreFilter] = useState('');
+    const [yearFilter, setYearFilter] = useState(currentYear);
     const [monthFilter, setMonthFilter] = useState('all');
     const [activosFilterActive, setActivosFilterActive] = useState(false);
     const [asignadoFilter, setAsignadoFilter] = useState('');
     const [omitirCancelados, setOmitirCancelados] = useState(false);
     const [areaOptions, setAreaOptions] = useState(['all']);
+
+    const availableYears = useMemo(() => {
+        if (!cursosData || cursosData.length === 0) return [currentYear];
+        const years = new Set();
+        cursosData.forEach(c => {
+            const d = parseDate(c["Fecha inicio del curso"]);
+            if (d && d.isValid()) years.add(d.year().toString());
+        });
+        const arr = Array.from(years).sort((a, b) => b.localeCompare(a));
+        if (!arr.includes(currentYear)) arr.unshift(currentYear);
+        return arr;
+    }, [cursosData, currentYear]);
 
     useEffect(() => {
         if (loading || !cursosData.length) {
@@ -49,6 +63,12 @@ export const useCronogramaFilters = (cursosData, loading) => {
             const term = nombreFilter.trim().toLowerCase();
             data = data.filter(c => c["Nombre del curso"]?.toLowerCase().includes(term) || c["Código del curso"]?.toLowerCase().includes(term));
         }
+        if (yearFilter !== 'all') {
+            data = data.filter(c => {
+                const parsedDate = parseDate(c["Fecha inicio del curso"]);
+                return parsedDate && parsedDate.isValid() && parsedDate.year().toString() === yearFilter;
+            });
+        }
         if (monthFilter !== 'all') {
             const targetMonth = parseInt(monthFilter, 10);
             data = data.filter(c => {
@@ -71,12 +91,13 @@ export const useCronogramaFilters = (cursosData, loading) => {
             data = data.filter(c => c["Asignado"]?.toLowerCase().includes(term));
         }
         setFilteredData(data);
-    }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, asignadoFilter, omitirCancelados, loading]);
+    }, [cursosData, ministerioFilter, areaFilter, nombreFilter, yearFilter, monthFilter, activosFilterActive, asignadoFilter, omitirCancelados, loading]);
 
     const handleClearFilters = () => {
         setMinisterioFilter('all');
         setAreaFilter('all');
         setNombreFilter('');
+        setYearFilter(currentYear);
         setMonthFilter('all');
         setActivosFilterActive(false);
         setAsignadoFilter('');
@@ -84,8 +105,8 @@ export const useCronogramaFilters = (cursosData, loading) => {
     };
 
     const isFilterActive = useMemo(() =>
-        nombreFilter || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive || asignadoFilter || omitirCancelados,
-        [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive, asignadoFilter, omitirCancelados]
+        nombreFilter || ministerioFilter !== 'all' || areaFilter !== 'all' || yearFilter !== currentYear || monthFilter !== 'all' || activosFilterActive || asignadoFilter || omitirCancelados,
+        [nombreFilter, ministerioFilter, areaFilter, yearFilter, currentYear, monthFilter, activosFilterActive, asignadoFilter, omitirCancelados]
     );
 
     return {
@@ -94,6 +115,7 @@ export const useCronogramaFilters = (cursosData, loading) => {
             ministerioFilter,
             areaFilter,
             nombreFilter,
+            yearFilter,
             monthFilter,
             activosFilterActive,
             asignadoFilter,
@@ -103,11 +125,13 @@ export const useCronogramaFilters = (cursosData, loading) => {
             setMinisterioFilter,
             setAreaFilter,
             setNombreFilter,
+            setYearFilter,
             setMonthFilter,
             setActivosFilterActive,
             setAsignadoFilter,
             setOmitirCancelados,
         },
+        availableYears,
         areaOptions,
         handleClearFilters,
         isFilterActive,

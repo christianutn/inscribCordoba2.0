@@ -243,7 +243,7 @@ export default function Principal() {
     }
     switch (opcionSeleccionada) {
       case "Formulario": return <Formulario />;
-      case "Calendario": return <Cronograma />;
+      case "Calendario": return <Cronograma user={user} />;
       case "Gestion": return <MainGestion user={user} />;
       case "RestriccionesFechasInicioCursada": return <RestriccionesFechasInicioCursada />;
       case "Eventos": return <NuevoEvento />;

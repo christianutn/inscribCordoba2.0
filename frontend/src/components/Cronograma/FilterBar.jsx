@@ -7,6 +7,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
@@ -18,12 +19,13 @@ const FilterBar = ({
     setFilters,
     ministerioOptions,
     areaOptions,
+    availableYears,
     handleClearFilters,
     isFilterActive,
     loading
 }) => {
-    const { ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, asignadoFilter, omitirCancelados } = filters;
-    const { setMinisterioFilter, setAreaFilter, setNombreFilter, setMonthFilter, setActivosFilterActive, setAsignadoFilter, setOmitirCancelados } = setFilters;
+    const { ministerioFilter, areaFilter, nombreFilter, yearFilter, monthFilter, activosFilterActive, asignadoFilter, omitirCancelados } = filters;
+    const { setMinisterioFilter, setAreaFilter, setNombreFilter, setYearFilter, setMonthFilter, setActivosFilterActive, setAsignadoFilter, setOmitirCancelados } = setFilters;
 
     return (
         <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
@@ -53,10 +55,19 @@ const FilterBar = ({
                         </Select>
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={6} md={2}>
+                <Grid item xs={12} sm={6} md={1.5}>
                     <FormControl fullWidth size="small" variant="outlined" disabled={loading}>
-                        <InputLabel id="mes-filter-label">Mes Inicio Curso</InputLabel>
-                        <Select labelId="mes-filter-label" value={monthFilter} label="Mes Inicio Curso" onChange={(e) => setMonthFilter(e.target.value)} startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><CalendarMonthIcon color="action" fontSize='small' /></InputAdornment>} sx={{ '& .MuiSelect-select': { pl: 1 } }}>
+                        <InputLabel id="year-filter-label">Año</InputLabel>
+                        <Select labelId="year-filter-label" value={yearFilter} label="Año" onChange={(e) => setYearFilter(e.target.value)} startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><CalendarTodayIcon color="action" fontSize='small' /></InputAdornment>} sx={{ '& .MuiSelect-select': { pl: 1 } }}>
+                            <MenuItem value="all"><em>Todos</em></MenuItem>
+                            {(availableYears || []).map((y) => (<MenuItem key={y} value={y}>{y}</MenuItem>))}
+                        </Select>
+                    </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={1.5}>
+                    <FormControl fullWidth size="small" variant="outlined" disabled={loading}>
+                        <InputLabel id="mes-filter-label">Mes</InputLabel>
+                        <Select labelId="mes-filter-label" value={monthFilter} label="Mes" onChange={(e) => setMonthFilter(e.target.value)} startAdornment={<InputAdornment position="start" sx={{ ml: '-6px', mr: '4px' }}><CalendarMonthIcon color="action" fontSize='small' /></InputAdornment>} sx={{ '& .MuiSelect-select': { pl: 1 } }}>
                             <MenuItem value="all"><em>Todos</em></MenuItem>
                             {MONTH_NAMES.map((m, i) => (<MenuItem key={i} value={i.toString()}>{m}</MenuItem>))}
                         </Select>

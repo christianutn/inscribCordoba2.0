@@ -24,6 +24,7 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Titulo from "../components/fonts/TituloPrincipal.jsx";
 import { getInstancias } from "../services/instancias.service.js";
+import ExcelDownloadModal from "./Cronograma/Modals/ExcelDownloadModal.jsx";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
@@ -69,7 +70,7 @@ const gridContainerStyle = {
     `,
 };
 
-const Cronograma = () => {
+const Cronograma = ({ user }) => {
   const [cursosData, setCursosData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,9 +82,27 @@ const Cronograma = () => {
   const [ministerioFilter, setMinisterioFilter] = useState('all');
   const [areaFilter, setAreaFilter] = useState('all');
   const [nombreFilter, setNombreFilter] = useState('');
+  const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
   const [monthFilter, setMonthFilter] = useState('all');
   const [activosFilterActive, setActivosFilterActive] = useState(false);
   const [omitirCancelados, setOmitirCancelados] = useState(false);
+  const [excelModalOpen, setExcelModalOpen] = useState(false);
+
+  const isREF = user?.rol === 'REF';
+
+  const availableYears = useMemo(() => {
+    if (!cursosData.length) return [new Date().getFullYear()];
+    const yearsSet = new Set();
+    cursosData.forEach(c => {
+      const d = parseDate(c["Fecha inicio del curso"]);
+      if (d) yearsSet.add(d.year());
+    });
+    const years = Array.from(yearsSet).sort((a, b) => a - b);
+    // Asegurar que el año actual esté siempre presente
+    const currentYear = new Date().getFullYear();
+    if (!years.includes(currentYear)) years.push(currentYear);
+    return years.sort((a, b) => a - b);
+  }, [cursosData]);
 
   const COLUMNAS_VISIBLES = useMemo(() => ["Ministerio", "Area", "Nombre del curso", "Fecha inicio de inscripción", "Fecha fin de inscripción", "Fecha inicio del curso", "Fecha fin del curso", "Estado de Instancia"], []);
 
@@ -182,6 +201,13 @@ const Cronograma = () => {
     if (loading && cursosData.length === 0) return;
     let data = [...cursosData];
     const today = dayjs().startOf('day');
+    // Filtro por año
+    if (yearFilter) {
+      data = data.filter(c => {
+        const parsedDate = parseDate(c["Fecha inicio del curso"]);
+        return parsedDate && parsedDate.year() === yearFilter;
+      });
+    }
     if (ministerioFilter !== 'all') data = data.filter(c => c["Ministerio"] === ministerioFilter);
     if (areaFilter !== 'all') data = data.filter(c => c["Area"] === areaFilter);
     if (nombreFilter.trim()) {
@@ -202,7 +228,7 @@ const Cronograma = () => {
       data = data.filter(c => c["Estado de Instancia"] !== 'CANC');
     }
     setFilteredData(data);
-  }, [cursosData, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, omitirCancelados, loading]);
+  }, [cursosData, yearFilter, ministerioFilter, areaFilter, nombreFilter, monthFilter, activosFilterActive, omitirCancelados, loading]);
 
   const handleRowClick = useCallback(params => { setSelectedRowData(params.row); setModalOpen(true); }, []);
   const handleCloseModal = useCallback(() => { setModalOpen(false); setSelectedRowData(null); }, []);
@@ -269,14 +295,109 @@ const Cronograma = () => {
       console.error(e);
     }
   }, [filteredData]);
+
+  const handleDescargarExcelConModal = useCallback(async ({ plataforma, incluirCancelados }) => {
+    if (!filteredData.length) return;
+    try {
+      let dataToProcess = filteredData;
+
+      if (plataforma !== 'ALL') {
+        dataToProcess = dataToProcess.filter(item => {
+          const plat = String(item._raw?.plataforma_dictado || '').toUpperCase().trim();
+          if (plataforma === 'EXT') return plat === 'EXT';
+          return plat !== 'EXT';
+        });
+      }
+
+      if (!incluirCancelados) {
+        dataToProcess = dataToProcess.filter(item => {
+          const estado = String(item._raw?.estado_instancia || '').toUpperCase().trim();
+          return estado !== 'CANC';
+        });
+      }
+
+      if (!dataToProcess.length) {
+        setError("No hay datos para exportar con los filtros seleccionados.");
+        return;
+      }
+
+      const dataParaExcel = dataToProcess.map(item => {
+        const raw = item._raw || {};
+        const det = raw.detalle_curso || {};
+        const asig = raw.detalle_asignado || {};
+        const pers = asig.detalle_persona || {};
+        const rol = asig.detalle_rol || {};
+        const areaAsig = asig.detalle_area || {};
+
+        return {
+          "Curso": raw.curso,
+          "Nombre del curso": det.nombre,
+          "Area del curso": raw.detalle_curso?.detalle_area?.nombre || "",
+          "Ministerio": raw.detalle_curso?.detalle_area?.detalle_ministerio?.nombre || "",
+          "Fecha inicio curso": raw.fecha_inicio_curso,
+          "Fecha fin curso": raw.fecha_fin_curso,
+          "Fecha inicio inscripción": raw.fecha_inicio_inscripcion,
+          "Fecha fin inscripción": raw.fecha_fin_inscripcion,
+          "Estado Instancia": raw.estado_instancia,
+          "Cupo": raw.cupo,
+          "Inscriptos": raw.cantidad_inscriptos || 0,
+          "Certificados": raw.cantidad_certificados || 0,
+          "Cantidad de horas": raw.cantidad_horas,
+          "Publica en Portal": formatBooleanToSiNo(raw.es_publicada_portal_cc ?? det.publica_pcc),
+          "Es Autogestionado": formatBooleanToSiNo(raw.es_autogestionado ?? det.es_autogestionado),
+          "Medio de inscripción": raw.medio_inscripcion,
+          "Plataforma de dictado": raw.plataforma_dictado,
+          "Tipo de capacitación": raw.tipo_capacitacion,
+          "Tiene correlatividad": formatBooleanToSiNo(raw.tiene_correlatividad),
+          "Tiene restricción edad": formatBooleanToSiNo(raw.tiene_restriccion_edad ?? det.tiene_restriccion_edad),
+          "Restricción Edad Desde": raw.restriccion_edad_desde,
+          "Restricción Edad Hasta": raw.restriccion_edad_hasta,
+          "Comentario": raw.comentario,
+          "Asignado CUIL": asig.cuil,
+          "Asignado Nombre": pers.nombre ? `${pers.nombre} ${pers.apellido}` : "",
+          "Asignado Mail": pers.mail,
+          "Asignado Rol": rol.nombre,
+          "Asignado Area": areaAsig.nombre,
+        };
+      });
+
+      const COLUMNAS_EXCEL = [
+        "Curso", "Nombre del curso", "Area del curso", "Ministerio",
+        "Fecha inicio curso", "Fecha fin curso", "Fecha inicio inscripción", "Fecha fin inscripción",
+        "Estado Instancia", "Cupo", "Inscriptos", "Certificados", "Cantidad de horas",
+        "Publica en Portal", "Es Autogestionado", "Medio de inscripción",
+        "Plataforma de dictado", "Tipo de capacitación",
+        "Tiene correlatividad", "Tiene restricción edad", "Restricción Edad Desde", "Restricción Edad Hasta",
+        "Comentario",
+        "Asignado CUIL", "Asignado Nombre", "Asignado Mail", "Asignado Rol", "Asignado Area"
+      ];
+
+      await descargarExcel(dataParaExcel, COLUMNAS_EXCEL, "Cronograma_Completo");
+      setExcelModalOpen(false);
+    } catch (e) {
+      setError("Error al generar el archivo Excel.");
+      console.error(e);
+    }
+  }, [filteredData]);
+
+  const handleClickDescargar = useCallback(() => {
+    const userRol = user?.rol;
+    if (userRol === 'GA' || userRol === 'ADM') {
+      setExcelModalOpen(true);
+    } else {
+      // REF u otros roles: descarga directa sin modal
+      handleDescargarExcel();
+    }
+  }, [user, handleDescargarExcel]);
   const handleMinisterioChange = useCallback(e => setMinisterioFilter(e.target.value), []);
   const handleAreaChange = useCallback(e => setAreaFilter(e.target.value), []);
   const handleNombreChange = useCallback(e => setNombreFilter(e.target.value), []);
+  const handleYearChange = useCallback(e => setYearFilter(e.target.value), []);
   const handleMonthChange = useCallback(e => setMonthFilter(e.target.value), []);
   const handleToggleActivosFilter = useCallback(() => setActivosFilterActive(prev => !prev), []);
   const handleToggleOmitirCancelados = useCallback(() => setOmitirCancelados(prev => !prev), []);
-  const handleClearFilters = useCallback(() => { setNombreFilter(''); setMinisterioFilter('all'); setAreaFilter('all'); setMonthFilter('all'); setActivosFilterActive(false); setOmitirCancelados(false); }, []);
-  const isFilterActive = useMemo(() => nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || monthFilter !== 'all' || activosFilterActive || omitirCancelados, [nombreFilter, ministerioFilter, areaFilter, monthFilter, activosFilterActive, omitirCancelados]);
+  const handleClearFilters = useCallback(() => { setNombreFilter(''); setMinisterioFilter('all'); setAreaFilter('all'); setYearFilter(new Date().getFullYear()); setMonthFilter('all'); setActivosFilterActive(false); setOmitirCancelados(false); }, []);
+  const isFilterActive = useMemo(() => nombreFilter.trim() !== '' || ministerioFilter !== 'all' || areaFilter !== 'all' || yearFilter !== new Date().getFullYear() || monthFilter !== 'all' || activosFilterActive || omitirCancelados, [nombreFilter, ministerioFilter, areaFilter, yearFilter, monthFilter, activosFilterActive, omitirCancelados]);
 
   const getRowClassName = useCallback((params) => {
     const estado = params.row["Estado de Instancia"];
@@ -318,7 +439,7 @@ const Cronograma = () => {
         <div style={{ gridArea: 'titulo' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <Titulo texto="Cronograma" />
-            <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={loading || !filteredData.length} />
+            <BotonCircular icon="descargar" onClick={handleClickDescargar} tooltip="Descargar Vista Actual" disabled={loading || !filteredData.length} />
           </Box>
         </div>
 
@@ -329,9 +450,10 @@ const Cronograma = () => {
         <div style={{ gridArea: 'filtros-cronograma' }}>
           <Paper elevation={1} sx={{ p: 2, width: '100%' }}>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={6} md={3}><TextField fullWidth label="Buscar por Nombre" variant="outlined" size="small" value={nombreFilter} onChange={handleNombreChange} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>), }} /></Grid>
+              <Grid item xs={12} sm={6} md={2.5}><TextField fullWidth label="Buscar por Nombre" variant="outlined" size="small" value={nombreFilter} onChange={handleNombreChange} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>), }} /></Grid>
               <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={ministerioOptions.length <= 1}><InputLabel>Ministerio</InputLabel><Select value={ministerioFilter} label="Ministerio" onChange={handleMinisterioChange}><MenuItem value="all"><em>Todos</em></MenuItem>{ministerioOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}</Select></FormControl></Grid>
-              <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined" disabled={areaOptions.length <= 1}><InputLabel>Área</InputLabel><Select value={areaFilter} label="Área" onChange={handleAreaChange}><MenuItem value="all"><em>Todas</em></MenuItem>{areaOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}{ministerioFilter !== 'all' && areaOptions.length <= 1 && (<MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>)}</Select></FormControl></Grid>
+              <Grid item xs={12} sm={6} md={1.5}><FormControl fullWidth size="small" variant="outlined" disabled={areaOptions.length <= 1}><InputLabel>Área</InputLabel><Select value={areaFilter} label="Área" onChange={handleAreaChange}><MenuItem value="all"><em>Todas</em></MenuItem>{areaOptions.filter(opt => opt !== 'all').map((opt, i) => (<MenuItem key={i} value={opt}>{opt}</MenuItem>))}{ministerioFilter !== 'all' && areaOptions.length <= 1 && (<MenuItem value="all" disabled><em>(Sin áreas)</em></MenuItem>)}</Select></FormControl></Grid>
+              <Grid item xs={12} sm={6} md={1}><FormControl fullWidth size="small" variant="outlined" disabled={isREF}><InputLabel>Año</InputLabel><Select value={yearFilter} label="Año" onChange={handleYearChange}>{availableYears.map(y => (<MenuItem key={y} value={y}>{y}</MenuItem>))}</Select></FormControl></Grid>
               <Grid item xs={12} sm={6} md={2}><FormControl fullWidth size="small" variant="outlined"><InputLabel>Mes Inicio Curso</InputLabel><Select value={monthFilter} label="Mes Inicio Curso" onChange={handleMonthChange}><MenuItem value="all"><em>Todos</em></MenuItem>{MONTH_NAMES.map((m, i) => (<MenuItem key={i} value={i.toString()}>{m}</MenuItem>))}</Select></FormControl></Grid>
               <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Tooltip title={activosFilterActive ? "Mostrar todos" : "Mostrar solo activos"}><Button fullWidth variant={activosFilterActive ? "contained" : "outlined"} size="medium" onClick={handleToggleActivosFilter} startIcon={<AccessTimeIcon />} sx={{ height: '40px' }}>Activos</Button></Tooltip></Grid>
               <Grid item xs={12} sm={6} md={1.5} sx={{ display: 'flex' }}><Button fullWidth variant="outlined" size="medium" onClick={handleClearFilters} disabled={!isFilterActive} startIcon={<ClearAllIcon />} sx={{ height: '40px' }}>Limpiar</Button></Grid>
@@ -481,6 +603,12 @@ const Cronograma = () => {
           )}
         </Box>
       </Modal>
+
+      <ExcelDownloadModal
+        open={excelModalOpen}
+        onClose={() => setExcelModalOpen(false)}
+        onDownload={handleDescargarExcelConModal}
+      />
     </>
   );
 };

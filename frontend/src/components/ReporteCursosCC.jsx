@@ -10,8 +10,7 @@ import ReactApexChart from 'react-apexcharts';
 import {
     Box, CircularProgress, Typography, Alert, Paper, Grid,
     Card, CardContent, FormControl, InputLabel, Select, MenuItem, Button,
-    Tab, Tabs, TextField, Tooltip, IconButton, Dialog, DialogTitle,
-    DialogContent, DialogActions, Radio, RadioGroup, FormControlLabel, Checkbox, FormLabel
+    Tab, Tabs, TextField, Tooltip, IconButton
 } from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -25,6 +24,7 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import { descargarExcelCronograma as descargarExcel } from "../services/excel.service.js";
+import ExcelDownloadModal from "./Cronograma/Modals/ExcelDownloadModal.jsx";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -432,8 +432,6 @@ const ReporteCursosCC = () => {
 
     // Modal para Configurar la Descarga a Excel
     const [openExcelModal, setOpenExcelModal] = useState(false);
-    const [excelFilterPlataforma, setExcelFilterPlataforma] = useState('ALL'); // 'ALL', 'CC', 'EXT'
-    const [excelFilterIncluirCancelados, setExcelFilterIncluirCancelados] = useState(false);
     const [allMinisterios, setAllMinisterios] = useState([]);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedMonth, setSelectedMonth] = useState('all');
@@ -646,7 +644,7 @@ const ReporteCursosCC = () => {
     const handleOpenExcelModal = () => setOpenExcelModal(true);
     const handleCloseExcelModal = () => setOpenExcelModal(false);
 
-    const procesarDescargaExcel = async () => {
+    const procesarDescargaExcel = async ({ plataforma, incluirCancelados }) => {
         if (!filteredCronogramaData || filteredCronogramaData.length === 0) return;
         try {
             const dataFilteredParaExcel = filteredCronogramaData.filter(inst => {
@@ -662,13 +660,13 @@ const ReporteCursosCC = () => {
                 if (!anioMesOk) return false;
 
                 const plat = getPlataforma(inst);
-                if (excelFilterPlataforma !== 'ALL' && plat !== excelFilterPlataforma) {
+                if (plataforma !== 'ALL' && plat !== plataforma) {
                     return false;
                 }
 
                 const estado = String(inst.estado_instancia || "").toUpperCase().trim();
                 const isCANC = estado === 'CANC'
-                if (!excelFilterIncluirCancelados && isCANC) {
+                if (!incluirCancelados && isCANC) {
                     return false;
                 }
 
@@ -710,7 +708,7 @@ const ReporteCursosCC = () => {
                 "Cantidad de horas", "Es Autogestionado"
             ];
 
-            const fileName = `Reporte_Cursos_${selectedYear}${selectedMonth !== 'all' ? `_${mesesFull[selectedMonth]}` : ''}_${excelFilterPlataforma}`;
+            const fileName = `Reporte_Cursos_${selectedYear}${selectedMonth !== 'all' ? `_${mesesFull[selectedMonth]}` : ''}_${plataforma}`;
             await descargarExcel(dataParaExcel, COLUMNAS_EXCEL, fileName);
             setOpenExcelModal(false);
         } catch (e) {
@@ -731,40 +729,12 @@ const ReporteCursosCC = () => {
                 </Box>
             </Box>
 
-            <Dialog open={openExcelModal} onClose={handleCloseExcelModal} maxWidth="sm" fullWidth>
-                <DialogTitle sx={{ fontWeight: 'bold' }}>Configurar Descarga Excel</DialogTitle>
-                <DialogContent dividers>
-                    <Alert severity="info" sx={{ mb: 3 }}>
-                        Los filtros de fecha (Año y Mes) y las selecciones de Ministerio y Área activos en la pantalla ya están siendo aplicados a esta descarga.
-                    </Alert>
-
-                    <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
-                        <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1 }}>Filtro de Plataforma</FormLabel>
-                        <RadioGroup
-                            value={excelFilterPlataforma}
-                            onChange={(e) => setExcelFilterPlataforma(e.target.value)}
-                        >
-                            <FormControlLabel value="ALL" control={<Radio color="primary" />} label="Todas las plataformas" />
-                            <FormControlLabel value="CC" control={<Radio color="primary" />} label="Solo Moodle Campus Córdoba (CC)" />
-                            <FormControlLabel value="EXT" control={<Radio color="primary" />} label="Solo Plataforma Externa (EXT)" />
-                        </RadioGroup>
-                    </FormControl>
-
-                    <FormControl component="fieldset" sx={{ width: '100%' }}>
-                        <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1 }}>Cursos Cancelados</FormLabel>
-                        <FormControlLabel
-                            control={<Checkbox checked={excelFilterIncluirCancelados} onChange={(e) => setExcelFilterIncluirCancelados(e.target.checked)} color="primary" />}
-                            label="Incluir cursos que figuran como Cancelados"
-                        />
-                    </FormControl>
-                </DialogContent>
-                <DialogActions sx={{ p: 2 }}>
-                    <Button onClick={handleCloseExcelModal} color="inherit" sx={{ textTransform: 'none', fontWeight: 500 }}>Cancelar</Button>
-                    <Button onClick={procesarDescargaExcel} variant="contained" color="primary" sx={{ textTransform: 'none', px: 3 }}>
-                        Descargar Archivo
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <ExcelDownloadModal
+                open={openExcelModal}
+                onClose={handleCloseExcelModal}
+                onDownload={procesarDescargaExcel}
+                infoMessage="Los filtros de fecha (Año y Mes) y las selecciones de Ministerio y Área activos en la pantalla ya están siendo aplicados a esta descarga."
+            />
 
             <Paper elevation={1} sx={{ p: 2 }}>
                 <Grid container spacing={2} alignItems="center">

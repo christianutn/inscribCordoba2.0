@@ -34,6 +34,7 @@ import GestionarRestriccionesModal from './Cronograma/Modals/GestionarRestriccio
 import CambiarComentariosModal from './Cronograma/Modals/CambiarComentariosModal';
 import CambiarCupoModal from './Cronograma/Modals/CambiarCupoModal.jsx';
 import CambiarMedioInscripcionModal from './Cronograma/Modals/CambiarMedioInscripcionModal.jsx';
+import ExcelDownloadModal from './Cronograma/Modals/ExcelDownloadModal.jsx';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
@@ -48,7 +49,7 @@ const CronogramaAdminReducido = () => {
     } = useCronogramaData();
 
     const {
-        filteredData, filters, setFilters, areaOptions, handleClearFilters, isFilterActive
+        filteredData, filters, setFilters, areaOptions, availableYears, handleClearFilters, isFilterActive
     } = useCronogramaFilters(cursosData, dataLoading);
 
     const [modalOpen, setModalOpen] = useState(false);
@@ -65,6 +66,7 @@ const CronogramaAdminReducido = () => {
     const [publicadaModalOpen, setPublicadaModalOpen] = useState(false);
     const [cupoModalOpen, setCupoModalOpen] = useState(false)
     const [medioInscripcionModalOpen, setMedioInscripcionModalOpen] = useState(false);
+    const [excelModalOpen, setExcelModalOpen] = useState(false);
 
 
     // Loading states for modal actions
@@ -220,10 +222,33 @@ const CronogramaAdminReducido = () => {
 
 
 
-    const handleDescargarExcel = useCallback(async () => {
+    const handleDescargarExcel = useCallback(async ({ plataforma, incluirCancelados }) => {
         if (!filteredData.length) return;
         try {
-            await descargarExcel(filteredData, COLUMNAS_VISIBLES, "Cronograma_Admin_Reducido");
+            let dataToExport = filteredData;
+
+            if (plataforma !== 'ALL') {
+                dataToExport = dataToExport.filter(row => {
+                    const plat = row.originalInstancia?.plataforma_dictado?.toUpperCase()?.trim();
+                    if (plataforma === 'EXT') return plat === 'EXT';
+                    return plat !== 'EXT';
+                });
+            }
+
+            if (!incluirCancelados) {
+                dataToExport = dataToExport.filter(row => {
+                    const estado = String(row.originalInstancia?.estado_instancia || '').toUpperCase().trim();
+                    return estado !== 'CANC';
+                });
+            }
+
+            if (!dataToExport.length) {
+                setError("No hay datos para exportar con los filtros seleccionados.");
+                return;
+            }
+
+            await descargarExcel(dataToExport, COLUMNAS_VISIBLES, "Cronograma_Admin_Reducido");
+            setExcelModalOpen(false);
         } catch (error) {
             setError("Error al generar el archivo Excel.");
             console.error(error);
@@ -248,7 +273,7 @@ const CronogramaAdminReducido = () => {
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
                     <Titulo texto="Cronograma Administradores" />
-                    <BotonCircular icon="descargar" onClick={handleDescargarExcel} tooltip="Descargar Vista Actual" disabled={dataLoading || !filteredData.length} />
+                    <BotonCircular icon="descargar" onClick={() => setExcelModalOpen(true)} tooltip="Descargar Vista Actual" disabled={dataLoading || !filteredData.length} />
                 </Box>
                 <Divider sx={{ mb: 3, borderBottomWidth: 2 }} />
 
@@ -257,6 +282,7 @@ const CronogramaAdminReducido = () => {
                     setFilters={setFilters}
                     ministerioOptions={ministerioOptions}
                     areaOptions={areaOptions}
+                    availableYears={availableYears}
                     handleClearFilters={handleClearFilters}
                     isFilterActive={isFilterActive}
                     loading={dataLoading}
@@ -403,6 +429,12 @@ const CronogramaAdminReducido = () => {
                     loading={loadingAction}
                     selectedRowData={selectedRowData}
                     allMedios={allMediosInscripcion}
+                />
+
+                <ExcelDownloadModal
+                    open={excelModalOpen}
+                    onClose={() => setExcelModalOpen(false)}
+                    onDownload={handleDescargarExcel}
                 />
 
             </div>
