@@ -245,10 +245,10 @@ export default function Principal() {
       case "Formulario": return <Formulario />;
       case "Calendario": return <Cronograma user={user} />;
       case "Gestion": return <MainGestion user={user} />;
-      case "RestriccionesFechasInicioCursada": return <RestriccionesFechasInicioCursada />;
+      case "RestriccionesFechasInicioCursada": return <RestriccionesFechasInicioCursada sidebarOpen={open} />;
       case "Eventos": return <NuevoEvento />;
       case "GestionEventoYCurso": return <GestionEventoYCurso />;
-      case "ReporteCursosIdentifier": return <ReporteCursos />;
+      case "ReporteCursosIdentifier": return <ReporteCursos sidebarOpen={open} />;
       case "CrearAviso": return <CrearAviso />;
       case "AsistenciasMain": return <AsistenciasMain />;
       case "VersionReducidaGa": return <VersionReducidaGa />;

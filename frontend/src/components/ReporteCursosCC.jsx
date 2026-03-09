@@ -239,7 +239,7 @@ function TabPanel(props) {
     );
 }
 
-const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth }) => {
+const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth, sidebarOpen }) => {
     const defaultLocal = (globalSelectedMonth !== 'all' && globalSelectedMonth !== null) ? parseInt(globalSelectedMonth) : new Date().getMonth();
     const [localMonth, setLocalMonth] = useState(defaultLocal);
     const [activeTab, setActiveTab] = useState(0);
@@ -308,6 +308,7 @@ const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth }) => {
             height: 450,
             toolbar: { show: true },
             zoom: { enabled: false },
+            redrawOnParentResize: true,
         },
         plotOptions: { bar: { columnWidth: '50%', borderRadius: 2 } },
         dataLabels: { enabled: false },
@@ -340,7 +341,7 @@ const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth }) => {
     };
 
     return (
-        <Paper elevation={2} sx={{ mt: 2, p: 2 }}>
+        <Paper elevation={2} sx={{ mt: 2, p: 2, width: '100%' }}>
             <Typography variant="h5" sx={{ mb: 0.5, fontWeight: 500, textAlign: 'center' }}>Detalle Diario por Mes</Typography>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 3, textAlign: 'center' }}>
                 Refleja la actividad exclusiva de <strong>Cursos en Moodle Campus Córdoba</strong> (excluye plataformas externas y cursos cancelados).
@@ -426,7 +427,7 @@ const DetalleDiarioSection = ({ instancias, year, globalSelectedMonth }) => {
     );
 };
 
-const ReporteCursosCC = () => {
+const ReporteCursosCC = ({ sidebarOpen }) => {
     const [rawCronogramaData, setRawCronogramaData] = useState([]);
     const [filteredCronogramaData, setFilteredCronogramaData] = useState([]);
 
@@ -441,6 +442,15 @@ const ReporteCursosCC = () => {
 
     const [kpiData, setKpiData] = useState(null);
     const [chartData, setChartData] = useState(null);
+
+    // Trigger de Resize Manual para corregir el ancho de los gráficos de ApexCharts
+    // cuando el sidebar cambia de estado (abierto/cerrado).
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+        }, 300); // Pequeño delay para esperar el fin de la animación del sidebar
+        return () => clearTimeout(timer);
+    }, [sidebarOpen]);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -831,7 +841,7 @@ const ReporteCursosCC = () => {
 
             {!loading && chartData && selectedMonth === 'all' && (
                 <>
-                    <Paper elevation={2} sx={{ p: 4, display: 'flex', flexDirection: 'column', gap: 2, borderRadius: 2 }}>
+                    <Paper elevation={2} sx={{ p: 4, display: 'flex', flexDirection: 'column', gap: 2, borderRadius: 2, width: '100%' }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
                             <Box>
                                 <Typography variant="h5" sx={{ fontWeight: 600 }}>
@@ -857,7 +867,7 @@ const ReporteCursosCC = () => {
                         <Box sx={{ width: '100%', height: 380 }}>
                             <ReactApexChart
                                 options={{
-                                    chart: { type: 'line', toolbar: { show: true }, zoom: { enabled: false } },
+                                    chart: { type: 'line', toolbar: { show: true }, zoom: { enabled: false }, redrawOnParentResize: true },
                                     stroke: { curve: 'smooth', width: 3 },
                                     colors: ['#00E396', '#FEB019'],
                                     xaxis: { categories: mesesAbrev },
@@ -887,7 +897,7 @@ const ReporteCursosCC = () => {
                         </Box>
                     </Paper>
 
-                    <Paper elevation={2} sx={{ p: 4, borderRadius: 2 }}>
+                    <Paper elevation={2} sx={{ p: 4, borderRadius: 2, width: '100%' }}>
                         <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                             Cantidad de Cursos Iniciados por Mes
                         </Typography>
@@ -897,7 +907,7 @@ const ReporteCursosCC = () => {
                         <Box sx={{ width: '100%', height: 380 }}>
                             <ReactApexChart
                                 options={{
-                                    chart: { type: 'line', toolbar: { show: true }, zoom: { enabled: false } },
+                                    chart: { type: 'line', toolbar: { show: true }, zoom: { enabled: false }, redrawOnParentResize: true },
                                     stroke: { curve: 'straight', width: 3 },
                                     colors: ['#008FFB', '#FF4560'],
                                     xaxis: { categories: mesesAbrev },
@@ -922,6 +932,7 @@ const ReporteCursosCC = () => {
                     instancias={filteredCronogramaData}
                     year={selectedYear}
                     globalSelectedMonth={selectedMonth}
+                    sidebarOpen={sidebarOpen}
                 />
             )}
         </Box>

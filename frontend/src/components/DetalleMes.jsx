@@ -6,7 +6,11 @@ import {
   Tabs,
   Tab,
   Typography,
-  CircularProgress
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
@@ -34,7 +38,10 @@ function TabPanel(props) {
   );
 }
 
-const DetalleMesChart = () => {
+const DetalleMesChart = ({ sidebarOpen }) => {
+  const [allInstancias, setAllInstancias] = useState([]);
+  const [availableYears, setAvailableYears] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [dataCupo, setDataCupo] = useState([]);
   const [dataCursosInician, setDataCursosInician] = useState([]); // Renombrado para claridad
@@ -45,7 +52,8 @@ const DetalleMesChart = () => {
     chart: {
       type: 'bar',
       height: 400,
-      toolbar: { show: true } // Añadido toolbar por si acaso
+      toolbar: { show: true },
+      redrawOnParentResize: true,
     },
     plotOptions: {
       bar: {
@@ -128,78 +136,91 @@ const DetalleMesChart = () => {
         if (!Array.isArray(todasInstancias)) {
           throw new Error("La respuesta de getInstancias no es un array");
         }
+        setAllInstancias(todasInstancias);
 
-        // Filtrar instancias activas (no CANC )
-        const instanciasActivas = todasInstancias.filter(inst =>
-          inst.estado_instancia !== 'CANC' && inst.plataforma_dictado === 'CC'
-        );
-
-        // Agrupar por mes
-        const datosPorMes = {};
-
-        instanciasActivas.forEach(instancia => {
-          if (instancia.fecha_inicio_curso) {
-            const fechaInicio = dayjs(instancia.fecha_inicio_curso);
-            if (fechaInicio.isValid()) {
-              const mesClave = fechaInicio.format('YYYY-MM');
-
-              if (!datosPorMes[mesClave]) {
-                datosPorMes[mesClave] = {
-                  cantidadCupoMensual: 0,
-                  cantidadCursosMensual: 0,
-                };
-              }
-              datosPorMes[mesClave].cantidadCursosMensual += 1;
-              datosPorMes[mesClave].cantidadCupoMensual += Number(instancia.cupo) || 0;
-            }
+        // Extraer años únicos disponibles
+        const yearsSet = new Set();
+        todasInstancias.forEach(inst => {
+          if (inst.fecha_inicio_curso) {
+            const y = dayjs(inst.fecha_inicio_curso).year();
+            if (y) yearsSet.add(y);
           }
         });
-
-        const mesesClaves = Object.keys(datosPorMes).sort();
-
-        if (mesesClaves.length === 0) {
-          setDataCupo([]);
-          setDataCursosInician([]);
-          setLabels([]);
-          setBaseOptions(prev => ({ ...prev, xaxis: { ...prev.xaxis, categories: [] } }));
-          setLoading(false);
-          return;
-        }
-
-        const currentLabels = mesesClaves.map(m =>
-          dayjs(m + '-01').format('MMMM YYYY') // Formato completo del mes y año
-        );
-
-        const currentDatosCupo = mesesClaves.map(m => datosPorMes[m].cantidadCupoMensual);
-        const currentDatosCursosInician = mesesClaves.map(m => datosPorMes[m].cantidadCursosMensual);
-
-        setDataCupo(currentDatosCupo);
-        setDataCursosInician(currentDatosCursosInician);
-        setLabels(currentLabels); // Guardar los labels para el tooltip
-
-        setBaseOptions(prevOptions => ({
-          ...prevOptions,
-          xaxis: {
-            ...prevOptions.xaxis,
-            categories: currentLabels, // Usar los labels formateados para el eje X
-          },
-          title: {
-            ...prevOptions.title,
-            text: 'Resumen Mensual de Cupo y Cursos Iniciados',
-          }
-        }));
+        const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
+        setAvailableYears(sortedYears);
 
       } catch (error) {
-        console.error('Error procesando datos de instancias:', error);
-        setDataCupo([]);
-        setDataCursosInician([]);
-        setLabels([]);
-        setBaseOptions(prev => ({ ...prev, xaxis: { ...prev.xaxis, categories: [] } }));
+        console.error('Error fetching instances:', error);
       } finally {
         setLoading(false);
       }
     })();
-  }, []); // Cargar una sola vez al montar el componente
+  }, []);
+
+  useEffect(() => {
+    if (allInstancias.length === 0) return;
+
+    // Filtrar instancias activas (no CANC) de la plataforma CC y del año seleccionado
+    let instanciasFiltradas = allInstancias.filter(inst =>
+      inst.estado_instancia !== 'CANC' &&
+      inst.plataforma_dictado === 'CC'
+    );
+
+    if (selectedYear !== 'all') {
+      instanciasFiltradas = instanciasFiltradas.filter(inst =>
+        inst.fecha_inicio_curso && dayjs(inst.fecha_inicio_curso).year() === Number(selectedYear)
+      );
+    }
+
+    // Agrupar por mes
+    const datosPorMes = {};
+
+    instanciasFiltradas.forEach(instancia => {
+      if (instancia.fecha_inicio_curso) {
+        const fechaInicio = dayjs(instancia.fecha_inicio_curso);
+        const mesClave = fechaInicio.format('YYYY-MM');
+
+        if (!datosPorMes[mesClave]) {
+          datosPorMes[mesClave] = {
+            cantidadCupoMensual: 0,
+            cantidadCursosMensual: 0,
+          };
+        }
+        datosPorMes[mesClave].cantidadCursosMensual += 1;
+        datosPorMes[mesClave].cantidadCupoMensual += Number(instancia.cupo) || 0;
+      }
+    });
+
+    const mesesClaves = Object.keys(datosPorMes).sort();
+
+    if (mesesClaves.length === 0) {
+      setDataCupo([]);
+      setDataCursosInician([]);
+      setLabels([]);
+      setBaseOptions(prev => ({ ...prev, xaxis: { ...prev.xaxis, categories: [] } }));
+      return;
+    }
+
+    const currentLabels = mesesClaves.map(m => dayjs(m + '-01').format('MMMM YYYY'));
+    const currentDatosCupo = mesesClaves.map(m => datosPorMes[m].cantidadCupoMensual);
+    const currentDatosCursosInician = mesesClaves.map(m => datosPorMes[m].cantidadCursosMensual);
+
+    setDataCupo(currentDatosCupo);
+    setDataCursosInician(currentDatosCursosInician);
+    setLabels(currentLabels);
+
+    setBaseOptions(prevOptions => ({
+      ...prevOptions,
+      xaxis: {
+        ...prevOptions.xaxis,
+        categories: currentLabels,
+      },
+      title: {
+        ...prevOptions.title,
+        text: `Resumen Mensual ${selectedYear === 'all' ? '(Histórico)' : selectedYear}`,
+      }
+    }));
+  }, [allInstancias, selectedYear]);
 
   const handleChangeTab = (event, newValue) => {
     setActiveTab(newValue);
@@ -234,6 +255,20 @@ const DetalleMesChart = () => {
 
   return (
     <Box sx={{ width: '100%', p: 2 }}>
+      <FormControl fullWidth sx={{ mb: 3 }} disabled={loading}>
+        <InputLabel id="select-anio-mensual-label">Año de Visualización</InputLabel>
+        <Select
+          labelId="select-anio-mensual-label"
+          value={selectedYear}
+          label="Año de Visualización"
+          onChange={(e) => setSelectedYear(e.target.value)}
+        >
+          <MenuItem value="all"><em>Todos los años (Histórico)</em></MenuItem>
+          {availableYears.map(year => (
+            <MenuItem key={year} value={year}>{year}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: chartHeight + 50 }}>
           <CircularProgress />

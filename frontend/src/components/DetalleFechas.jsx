@@ -39,7 +39,7 @@ function TabPanel(props) {
   );
 }
 
-const DetalleFechasChart = () => {
+const DetalleFechasChart = ({ sidebarOpen }) => {
   const [allInstancias, setAllInstancias] = useState([]); // Almacenará todas las instancias
   const [meses, setMeses] = useState([]);
   const [mesSeleccionado, setMesSeleccionado] = useState('');
@@ -50,7 +50,39 @@ const DetalleFechasChart = () => {
   const [dataCursosActivos, setDataCursosActivos] = useState([]); // Renombrado para claridad
   const [labels, setLabels] = useState([]);
 
-  const [baseOptions, setBaseOptions] = useState({ /* ... (sin cambios) ... */ });
+  const [baseOptions, setBaseOptions] = useState({
+    chart: {
+      type: 'bar',
+      height: 450,
+      toolbar: { show: true },
+      zoom: { enabled: false },
+      redrawOnParentResize: true,
+    },
+    plotOptions: { bar: { columnWidth: '50%', borderRadius: 2 } },
+    dataLabels: { enabled: false },
+    stroke: { width: 2, colors: ['transparent'] },
+    xaxis: {
+      categories: [],
+      labels: {
+        formatter: function (val) {
+          if (typeof val === 'string' && val.includes('-')) {
+            return val.split('-')[0]; // Muestra solo el día (ej: '01')
+          }
+          return val;
+        }
+      }
+    },
+    yaxis: { title: { text: '' } },
+    fill: { opacity: 1 },
+    tooltip: {
+      y: { formatter: (val) => val },
+    },
+    title: {
+      text: 'Estadísticas por día',
+      align: 'center',
+      style: { fontSize: '18px', fontWeight: 'bold' }
+    }
+  });
   const [averages, setAverages] = useState({ cupo: 0, cursosInician: 0, cursosActivos: 0 });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);

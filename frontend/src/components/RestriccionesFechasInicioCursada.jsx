@@ -21,7 +21,7 @@ import ModalInhabilitarFechas from "./ModalInhabilitarFechas.jsx";
 import ModalHabilitarFechas from "./ModalHabilitarFechas.jsx";
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 
-const RestriccionesFechasInicioCursada = () => {
+const RestriccionesFechasInicioCursada = ({ sidebarOpen }) => {
     const navigate = useNavigate();
 
     const [error, setError] = useState(null);
@@ -44,6 +44,15 @@ const RestriccionesFechasInicioCursada = () => {
         selectedMes: null
     });
     const [isEdited, setIsEdited] = useState(false);
+
+    // Trigger de Resize Manual para corregir el ancho de los gráficos de ApexCharts
+    // cuando el sidebar cambia de estado (abierto/cerrado).
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+        }, 300); // Pequeño delay para esperar el fin de la animación del sidebar
+        return () => clearTimeout(timer);
+    }, [sidebarOpen]);
     const listaMeses = ["Sin Bloqueo", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
     useEffect(() => {
@@ -292,6 +301,7 @@ const RestriccionesFechasInicioCursada = () => {
                                 maximoCuposDiario={maximoCuposDiario}
                                 maximoCursosDiario={maximoCursosDiario}
                                 maximoAcumulado={maximoAcumulado}
+                                sidebarOpen={sidebarOpen}
                             />
                         </Box>
                     </Grid>
@@ -302,6 +312,7 @@ const RestriccionesFechasInicioCursada = () => {
                             <DetalleMes
                                 maximoCuposMensual={maximoCuposMensual}
                                 maximoCursosMensual={maximoCursosMensual}
+                                sidebarOpen={sidebarOpen}
                             />
                         </Box>
                     </Grid>
