@@ -57,11 +57,9 @@ export const postUsuario = async (req, res, next) => {
             cuil,
             nombre,
             apellido,
-            celular,
-            mail
+            celular: celular || null,
+            mail: mail || null
         }
-
-
 
         const persona = await Persona.findByPk(cuil)
 
