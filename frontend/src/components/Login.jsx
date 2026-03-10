@@ -338,7 +338,16 @@ const Login = () => {
                             Hemos enviado las instrucciones para restablecer tu contraseña al siguiente correo:
                         </Typography>
                         {maskedEmail && (
-                            <Typography variant="h6" sx={{ color: '#1976d2', mb: 2, fontWeight: 'medium' }}>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    color: '#1976d2',
+                                    mb: 2,
+                                    fontWeight: 'medium',
+                                    wordBreak: 'break-all',
+                                    overflowWrap: 'anywhere'
+                                }}
+                            >
                                 {maskedEmail}
                             </Typography>
                         )}
