@@ -13,7 +13,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import InfoIcon from '@mui/icons-material/Info';
 
 import { descargarExcelCronograma as descargarExcel } from "../services/excel.service.js";
-import { putInstancia } from "../services/instancias.service.js";
+import { putInstancia, putInstanciasMasivo } from "../services/instancias.service.js";
 
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Titulo from "./fonts/TituloPrincipal.jsx";
@@ -35,6 +35,7 @@ import CambiarComentariosModal from './Cronograma/Modals/CambiarComentariosModal
 import CambiarCupoModal from './Cronograma/Modals/CambiarCupoModal.jsx';
 import CambiarMedioInscripcionModal from './Cronograma/Modals/CambiarMedioInscripcionModal.jsx';
 import ExcelDownloadModal from './Cronograma/Modals/ExcelDownloadModal.jsx';
+import ModificacionMasivaModal from './Cronograma/Modals/ModificacionMasivaModal.jsx';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
@@ -54,6 +55,7 @@ const CronogramaAdminReducido = () => {
 
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRowData, setSelectedRowData] = useState(null);
+    const [rowSelectionModel, setRowSelectionModel] = useState([]);
 
     // States for modals
     const [reasignModalOpen, setReasignModalOpen] = useState(false);
@@ -71,6 +73,7 @@ const CronogramaAdminReducido = () => {
 
     // Loading states for modal actions
     const [loadingAction, setLoadingAction] = useState(false);
+    const [masivoModalOpen, setMasivoModalOpen] = useState(false);
 
     const columnsForGrid = useMemo(() => {
         return COLUMNAS_VISIBLES.map(headerKey => {
@@ -255,6 +258,34 @@ const CronogramaAdminReducido = () => {
         }
     }, [filteredData, COLUMNAS_VISIBLES, setError]);
 
+    const handleActualizacionMasiva = async (datos) => {
+        if (!rowSelectionModel.length) return;
+        setLoadingAction(true);
+        setError(null);
+        setSuccessMessage('');
+
+        const instanciasIds = rowSelectionModel.map(id => {
+            const row = filteredData.find(r => r.id === id);
+            return {
+                curso: row.originalInstancia.curso,
+                fecha_inicio_curso: row.originalInstancia.fecha_inicio_curso
+            };
+        });
+
+        try {
+            await putInstanciasMasivo({ instanciasIds, datos });
+            setSuccessMessage(`Se actualizaron exitosamente ${instanciasIds.length} instancias.`);
+            setMasivoModalOpen(false);
+            setRowSelectionModel([]);
+            fetchData();
+        } catch (err) {
+            console.error("Error en putInstanciasMasivo:", err);
+            setError(err.message || "Error al actualizar las instancias masivamente.");
+        } finally {
+            setLoadingAction(false);
+        }
+    };
+
     const getRowClassName = useCallback((params) => {
         const estado = params.row["Estado"];
         if (estado === 'CANC') return 'row-cancelado';
@@ -288,6 +319,26 @@ const CronogramaAdminReducido = () => {
                     loading={dataLoading}
                 />
 
+                {rowSelectionModel.length > 0 && (
+                    <Alert
+                        severity="info"
+                        sx={{ mb: 2, display: 'flex', alignItems: 'center', p: 1.5, fontSize: '1.05rem', '& .MuiAlert-icon': { fontSize: '1.8rem' } }}
+                        action={
+                            <Button
+                                color="primary"
+                                variant="contained"
+                                size="medium"
+                                onClick={() => setMasivoModalOpen(true)}
+                                sx={{ textTransform: 'none', px: 3, py: 1, fontSize: '0.95rem', borderRadius: 1.5, fontWeight: 'medium' }}
+                            >
+                                Actualizar Masivamente
+                            </Button>
+                        }
+                    >
+                        Ha seleccionado <strong>{rowSelectionModel.length}</strong> instancia(s) para actualizar masivamente.
+                    </Alert>
+                )}
+
                 {dataLoading && (<Box sx={{ display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}><CircularProgress size={20} sx={{ mr: 1 }} /><Typography variant="body2" color="text.secondary">Actualizando tabla...</Typography></Box>)}
 
                 <Paper elevation={3} sx={{ height: 600, width: '100%' }}>
@@ -299,6 +350,11 @@ const CronogramaAdminReducido = () => {
                         loading={dataLoading}
                         density="compact"
                         disableRowSelectionOnClick
+                        checkboxSelection
+                        onRowSelectionModelChange={(newRowSelectionModel) => {
+                            setRowSelectionModel(newRowSelectionModel);
+                        }}
+                        rowSelectionModel={rowSelectionModel}
                         getRowClassName={getRowClassName}
                         initialState={{ sorting: { sortModel: [{ field: 'Fecha inicio del curso', sort: 'asc' }] } }}
                         sx={{
@@ -435,6 +491,17 @@ const CronogramaAdminReducido = () => {
                     open={excelModalOpen}
                     onClose={() => setExcelModalOpen(false)}
                     onDownload={handleDescargarExcel}
+                />
+
+                <ModificacionMasivaModal
+                    open={masivoModalOpen}
+                    onClose={() => setMasivoModalOpen(false)}
+                    onConfirm={handleActualizacionMasiva}
+                    loading={loadingAction}
+                    selectedRowsCount={rowSelectionModel.length}
+                    allEstados={allEstados}
+                    adminUsers={adminUsers}
+                    allMediosInscripcion={allMediosInscripcion}
                 />
 
             </div>
