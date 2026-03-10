@@ -573,3 +573,45 @@ const tratar_restriccion_por_edad = (restriccion_edad_desde, restriccion_edad_ha
     if (restriccion_edad_desde > 16 || (restriccion_edad_hasta > 16)) return 1
     return 0
 }
+
+export const putInstanciasMasivo = async (req, res, next) => {
+    const usuario = req.user.user;
+    const t = await sequelize.transaction();
+
+    try {
+        logger.info('✏️ Iniciando actualización masiva de instancias');
+        const { instanciasIds, datos } = req.body;
+
+        if (!instanciasIds || instanciasIds.length === 0) {
+            throw new AppError("No se enviaron instancias a modificar", 400);
+        }
+
+        logger.info(`📝 Usuario: ${usuario.cuil} - Actualización masiva de ${instanciasIds.length} instancias`);
+
+        const where = buildUpdateQuery(datos);
+
+        let totalUpdated = 0;
+        for (const id of instanciasIds) {
+            const [updatedCount] = await instanciaModel.update(where, {
+                where: {
+                    curso: id.curso,
+                    fecha_inicio_curso: id.fecha_inicio_curso
+                },
+                transaction: t
+            });
+            totalUpdated += updatedCount;
+        }
+
+        await t.commit();
+        logger.info(`✅ Instancias actualizadas masivamente exitosamente - Usuario: ${usuario.cuil} - Filas afectadas: ${totalUpdated}`);
+        res.status(200).send({ message: "Instancias actualizadas exitosamente", affectedRows: totalUpdated });
+
+    } catch (error) {
+        await t.rollback();
+        logger.error(`❌ Error al actualizar masivamente instancias - Usuario: ${usuario?.cuil || 'N/A'} - Error: ${error.message}`, {
+            stack: error.stack,
+            usuario: usuario?.cuil
+        });
+        next(new AppError("Error al actualizar las instancias masivamente", 500));
+    }
+};

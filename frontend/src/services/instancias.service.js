@@ -121,3 +121,23 @@ export const putInstancia = async (curso_params, fecha_inicio_curso_params, newI
         throw error
     }
 }
+
+export const putInstanciasMasivo = async (payload) => {
+    try {
+        const response = await fetch(`${URL}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify(payload)
+        })
+        const data = await response.json();
+        if (response.status !== 200) {
+            throw new Error(data.message || "Error al actualizar instancias masivamente")
+        }
+        return data
+    } catch (error) {
+        throw error
+    }
+}

@@ -1,4 +1,4 @@
-import { getInstancias, postInstancia, deleteInstancia, get_fechas_invalidas, putInstancia } from "../domains/Inscribcordoba/api/controllers/instancia.controllers.js";
+import { getInstancias, postInstancia, deleteInstancia, get_fechas_invalidas, putInstancia, putInstanciasMasivo } from "../domains/Inscribcordoba/api/controllers/instancia.controllers.js";
 import { Router } from "express";
 import autorizar from "../utils/autorizar.js"
 import manejerValidacionErrores from "../utils/manejarValidacionErrores.js";
@@ -32,6 +32,12 @@ instanciaRouter.put("/:curso_params/:fecha_inicio_curso_params",
     autorizar(['ADM', 'GA']),
 
     putInstancia
+)
+
+instanciaRouter.put("/",
+    passport.authenticate('jwt', { session: false }),
+    autorizar(['ADM']),
+    putInstanciasMasivo
 )
 
 export default instanciaRouter
