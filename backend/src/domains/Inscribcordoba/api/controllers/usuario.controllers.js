@@ -116,12 +116,23 @@ export const putUsuario = async (req, res, next) => {
             transaction: t
         });
 
+
+        const usuario = await Usuario.findByPk(cuil)
+        if (!usuario) {
+            const error = new Error("El usuario no existe");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const token_version = usuario.token_version
+
         const dataUsuario = {
             cuil,
             rol,
             area,
             esExcepcionParaFechas: parseEsExcepcionParaFechas(esExcepcionParaFechas),
-            activo
+            activo,
+            token_version: token_version + 1
         }
 
         await Usuario.update(dataUsuario, { where: { cuil }, transaction: t })

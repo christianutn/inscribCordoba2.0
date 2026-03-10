@@ -40,6 +40,11 @@ const Usuario = sequelize.define("usuarios", {
         validate: {
             isIn: [["0", "1"]]
         }
+    },
+    token_version: {
+        type: DataTypes.INTEGER,
+        allowNull: null,
+        defaultValue: 0
     }
 }, {
     timestamps: false,

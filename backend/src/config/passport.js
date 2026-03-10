@@ -36,6 +36,24 @@ const inicializarPassport = () => {
         secretOrKey: process.env.JWT_SECRET
     }, async (jwt_payload, done) => { //jwt_payload = info del token (en este caso, datos del cliente)
         try {
+
+            const usuario = await Usuario.findOne({ where: { cuil: jwt_payload.user.cuil } });
+
+            if (!usuario) {
+                logger.warn(`⚠️ Token JWT inválido - Usuario no encontrado - CUIL: ${jwt_payload.user?.cuil}`);
+                return done(null, false, { message: 'Usuario no encontrado' });
+            }
+
+            if (usuario.activo == 0) {
+                logger.warn(`⚠️ Token JWT inválido - Usuario inactivo - CUIL: ${jwt_payload.user?.cuil}`);
+                return done(null, false, { message: 'Usuario inactivo' });
+            }
+
+            if (usuario.token_version !== jwt_payload.user.token_version) {
+                logger.warn(`⚠️ Token JWT inválido - Versiones de token no coinciden - CUIL: ${jwt_payload.user?.cuil}`);
+                return done(null, false, { message: 'Token obsoleto. Vuelva a iniciar sesión.' });
+            }
+
             logger.info(`🔐 Token JWT válido - Usuario: ${jwt_payload.user?.cuil || 'N/A'} - Rol: ${jwt_payload.user?.id_rol || 'N/A'}`);
             return done(null, jwt_payload)
         } catch (error) {
@@ -57,6 +75,11 @@ const inicializarPassport = () => {
             const usuario = await Usuario.findOne({ where: { cuil: cuil } });
             if (!usuario) {
                 logger.warn(`⚠️ Login fallido - Usuario no existe - CUIL: ${cuil}`);
+                return done(null, false);
+            }
+
+            if (usuario.activo == 0) {
+                logger.warn(`⚠️ Login fallido - Usuario inactivo - CUIL: ${cuil}`);
                 return done(null, false);
             }
 
