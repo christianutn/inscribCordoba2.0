@@ -24,6 +24,7 @@ import { recuperoContrasenia } from '../services/usuarios.service.js';
 import Paper from '@mui/material/Paper';
 import Avatar from '@mui/material/Avatar';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Footer from './layout/footer';
 
 
 
@@ -176,6 +177,10 @@ const Login = () => {
                 variant="outlined"
                 value={cuil}
                 onChange={(e) => setCuil(e.target.value)}
+                sx={{
+                    '& .MuiInputLabel-root': { fontSize: '1.1rem' },
+                    '& .MuiOutlinedInput-root': { fontSize: '1.15rem' }
+                }}
             />
             <TextField
                 margin="normal"
@@ -188,6 +193,10 @@ const Login = () => {
                 variant="outlined"
                 value={contrasenia}
                 onChange={(e) => setContrasenia(e.target.value)}
+                sx={{
+                    '& .MuiInputLabel-root': { fontSize: '1.1rem' },
+                    '& .MuiOutlinedInput-root': { fontSize: '1.15rem' }
+                }}
                 InputProps={{
                     endAdornment: (
                         <InputAdornment position="end">
@@ -196,8 +205,9 @@ const Login = () => {
                                 onClick={() => setShowPassword(!showPassword)}
                                 onMouseDown={(e) => e.preventDefault()}
                                 edge="end"
+                                size="large"
                             >
-                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                {showPassword ? <VisibilityOff fontSize="medium" /> : <Visibility fontSize="medium" />}
                             </IconButton>
                         </InputAdornment>
                     ),
@@ -205,26 +215,43 @@ const Login = () => {
             />
             <FormControlLabel
                 control={<Checkbox value="remember" color="primary" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}
-                label="Recordar mi usuario y contraseña"
+                label={<Typography variant="body1" sx={{ fontSize: '1.05rem' }}>Recordar mi usuario y contraseña</Typography>}
+                sx={{ mt: 1 }}
             />
             <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 sx={{
-                    mt: 3,
-                    mb: 2,
+                    mt: 4,
+                    mb: 3,
                     borderRadius: '50px',
-                    padding: '10px 0',
+                    padding: '14px 0',
                     fontWeight: 'bold',
+                    fontSize: '1.2rem',
+                    letterSpacing: '0.5px'
                 }}
                 disabled={open}
             >
                 Iniciar Sesión
             </Button>
-            <Grid container>
-                <Grid item xs>
-                    <Link href="#" variant="body2" onClick={toggleFormView} sx={{ cursor: 'pointer' }}>
+            <Grid container justifyContent="center">
+                <Grid item>
+                    <Link
+                        href="#"
+                        variant="body1"
+                        onClick={toggleFormView}
+                        sx={{
+                            cursor: 'pointer',
+                            textDecoration: 'none',
+                            color: 'primary.dark', // High contrast blue
+                            fontWeight: 'medium',
+                            fontSize: '1.1rem',
+                            '&:hover': {
+                                textDecoration: 'underline'
+                            }
+                        }}
+                    >
                         ¿Olvidaste tu contraseña?
                     </Link>
                 </Grid>
@@ -236,7 +263,7 @@ const Login = () => {
         <Box component="form" onSubmit={handleForgotPasswordSubmit} noValidate sx={{ mt: 1 }}>
             {!emailSent ? (
                 <>
-                    <Typography variant="body2" align="center" sx={{ mb: 2 }}>
+                    <Typography variant="body1" align="center" sx={{ mb: 3, fontSize: '1.1rem' }}>
                         Ingresa tu CUIL para recibir instrucciones de recuperación.
                     </Typography>
                     <TextField
@@ -251,17 +278,23 @@ const Login = () => {
                         variant="outlined"
                         value={cuilRecovery}
                         onChange={(e) => setCuilRecovery(e.target.value)}
+                        sx={{
+                            '& .MuiInputLabel-root': { fontSize: '1.1rem' },
+                            '& .MuiOutlinedInput-root': { fontSize: '1.15rem' }
+                        }}
                     />
                     <Button
                         type="submit"
                         fullWidth
                         variant="contained"
                         sx={{
-                            mt: 3,
-                            mb: 2,
+                            mt: 4,
+                            mb: 3,
                             borderRadius: '50px',
-                            padding: '10px 0',
+                            padding: '14px 0',
                             fontWeight: 'bold',
+                            fontSize: '1.2rem',
+                            letterSpacing: '0.5px'
                         }}
                         disabled={open || !cuilRecovery.trim()}
                     >
@@ -269,7 +302,21 @@ const Login = () => {
                     </Button>
                     <Grid container justifyContent="center">
                         <Grid item>
-                            <Link href="#" variant="body2" onClick={toggleFormView} sx={{ cursor: 'pointer' }}>
+                            <Link
+                                href="#"
+                                variant="body1"
+                                onClick={toggleFormView}
+                                sx={{
+                                    cursor: 'pointer',
+                                    textDecoration: 'none',
+                                    color: 'primary.dark',
+                                    fontWeight: 'medium',
+                                    fontSize: '1.1rem',
+                                    '&:hover': {
+                                        textDecoration: 'underline'
+                                    }
+                                }}
+                            >
                                 Volver a Iniciar Sesión
                             </Link>
                         </Grid>
@@ -301,7 +348,21 @@ const Login = () => {
                     </Box>
                     <Grid container justifyContent="center">
                         <Grid item>
-                            <Link href="#" variant="body2" onClick={toggleFormView} sx={{ cursor: 'pointer' }}>
+                            <Link
+                                href="#"
+                                variant="body1"
+                                onClick={toggleFormView}
+                                sx={{
+                                    cursor: 'pointer',
+                                    textDecoration: 'none',
+                                    color: 'primary.dark',
+                                    fontWeight: 'medium',
+                                    fontSize: '1.1rem',
+                                    '&:hover': {
+                                        textDecoration: 'underline'
+                                    }
+                                }}
+                            >
                                 Volver a Iniciar Sesión
                             </Link>
                         </Grid>
@@ -323,38 +384,48 @@ const Login = () => {
             <Box
                 sx={{
                     display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    flexDirection: 'column',
                     minHeight: '100vh',
-                    background: '#f0f2f5',
+                    background: '#f4f6f8',
                 }}
             >
-                <Container component="main" maxWidth="xs">
-                    <CssBaseline />
-                    <Paper
-                        elevation={6}
-                        sx={{
-                            padding: '40px 30px',
-                            borderRadius: '15px',
-                            textAlign: 'center',
-                        }}
-                    >
-                        <Avatar
+                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
+                    <Container component="main" maxWidth="xs">
+                        <CssBaseline />
+                        <Paper
+                            elevation={6}
                             sx={{
-                                margin: '0 auto 15px auto',
-                                backgroundColor: 'primary.main',
-                                width: 60,
-                                height: 60,
+                                padding: '48px 32px',
+                                borderRadius: '16px',
+                                textAlign: 'center',
                             }}
                         >
-                            <LockOutlinedIcon fontSize="large" />
-                        </Avatar>
-                        <Typography component="h1" variant="h5">
-                            {showForgotPassword ? 'Recuperar Contraseña' : 'Iniciar Sesión'}
-                        </Typography>
-                        {showForgotPassword ? renderForgotPasswordForm() : renderLoginForm()}
-                    </Paper>
-                </Container>
+                            <Avatar
+                                sx={{
+                                    margin: '0 auto 20px auto',
+                                    backgroundColor: 'primary.main',
+                                    width: 80,
+                                    height: 80,
+                                }}
+                            >
+                                <LockOutlinedIcon sx={{ fontSize: 45 }} />
+                            </Avatar>
+                            <Typography
+                                component="h1"
+                                variant="h4"
+                                sx={{
+                                    fontWeight: 'bold',
+                                    mb: 3,
+                                    fontSize: { xs: '1.75rem', sm: '2rem' }
+                                }}
+                            >
+                                {showForgotPassword ? 'Recuperar Contraseña' : 'Iniciar Sesión'}
+                            </Typography>
+                            {showForgotPassword ? renderForgotPasswordForm() : renderLoginForm()}
+                        </Paper>
+                    </Container>
+                </Box>
+                <Footer />
             </Box>
         </>
     );

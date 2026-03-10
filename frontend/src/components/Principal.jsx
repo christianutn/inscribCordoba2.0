@@ -52,6 +52,7 @@ import MainGestion from './Gestion/MainGestion.jsx';
 import VisualizacionMisNotasRefentes from './NotaDeAutorizacion/VisualizacionMisNotasRefentes.jsx';
 import GestionEventoYCurso from '../features/EventoYCurso/GestionEventoYCurso.jsx'
 import { getMyUser } from "../services/usuarios.service.js";
+import Footer from './layout/footer';
 
 const drawerWidth = 260;
 
@@ -77,12 +78,12 @@ const menuConfigByRole = {
     { label: "Cargar Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon /> },
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
-    { label: "Reportes", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
+    { label: "Tablero", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon /> },
   ],
   GA: [
     { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
-    { label: "Reportes de Cursos", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
+    { label: "Tablero", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
     { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
     { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon /> },
@@ -372,8 +373,11 @@ export default function Principal() {
         </Box>
       </Drawer>
 
-      <Main open={open}>
-        {mostrarOpcion()}
+      <Main open={open} sx={{ display: 'flex', flexDirection: 'column', p: 0 }}>
+        <Box sx={{ flexGrow: 1, p: { xs: 2, sm: 3 } }}>
+          {mostrarOpcion()}
+        </Box>
+        <Footer />
       </Main>
     </Box>
   );
