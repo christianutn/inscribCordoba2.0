@@ -328,8 +328,15 @@ export const recuperoContrasenia = async (req, res, next) => {
             return res.status(200).json({ message: "Correo de recuperación enviado" });
         }
 
+        const usuario = await Usuario.findByPk(cuil)
+        if (!usuario) {
+            const error = new Error("El usuario no existe");
+            error.statusCode = 404;
+            throw error;
+        }
 
-        const token = generarToken({ cuil: cuil, mail: persona.mail });
+
+        const token = generarToken({ cuil: cuil, mail: persona.mail, token_version: usuario.token_version });
         //armamamos la url de la peticion para el frontend
         const urlPeticion = url + "/cambiarContrasenia?token=" + token;
         await enviarCorreo(generarHtmlRecuperarContraseña(urlPeticion), "Recupero de contraseña", persona.mail);
