@@ -5,7 +5,7 @@ import Fecha from './Fecha';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal';
 import Button from '../components/UIElements/FabAlargado';
 import BtnEliminar from '../components/UIElements/BotonCircular';
-import { Divider, Typography } from '@mui/material';
+import { Divider, Typography, Box } from '@mui/material';
 
 // Renombrado a Cohortes (con mayúscula)
 const Cohortes = ({ getCohortes, esCampusCordoba, instanciasExistentes }) => {
@@ -59,17 +59,17 @@ const Cohortes = ({ getCohortes, esCampusCordoba, instanciasExistentes }) => {
                     const cohorteAnterior = index > 0 ? cohortes[index - 1] : null;
 
                     return (
-                        <div className='cohortes' key={cohorte.id}> {/* Usar un ID estable como key */}
+                        <Box className='cohortes' key={cohorte.id} sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: { xs: 'wrap', md: 'nowrap' }, mb: 2, '& > div': { mb: 0 } }}>
                             <div className='label'>
-                                <Typography variant="body1">{`Cohorte N° ${index + 1}: `}</Typography>
+                                <Typography variant="body1" sx={{ mt: 1 }}>{`Cohorte N° ${index + 1}: `}</Typography>
                             </div>
-                            <div className="insc-desde">
+                            <div className="insc-desde" style={{ flex: 1 }}>
                                 <Fecha mensaje={mensajeDesdeInscripcion} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaInscripcionDesde" value={cohorte.fechaInscripcionDesde} />
                             </div>
-                            <div className="insc-hasta">
+                            <div className="insc-hasta" style={{ flex: 1 }}>
                                 <Fecha mensaje={mensajeHastaInscripcion} getFecha={handleFechas} id={cohorte.id} fieldFecha="fechaInscripcionHasta" value={cohorte.fechaInscripcionHasta} />
                             </div>
-                            <div className="curso-desde">
+                            <div className="curso-desde" style={{ flex: 1 }}>
                                 <Fecha
                                     mensaje={mensajeDesdeCursada}
                                     getFecha={handleFechas}
@@ -81,7 +81,7 @@ const Cohortes = ({ getCohortes, esCampusCordoba, instanciasExistentes }) => {
                                     instanciasExistentes={instanciasExistentes}
                                 />
                             </div>
-                            <div className="curso-hasta">
+                            <div className="curso-hasta" style={{ flex: 1 }}>
                                 <Fecha
                                     mensaje={mensajeHastaCursada}
                                     getFecha={handleFechas}
@@ -93,11 +93,10 @@ const Cohortes = ({ getCohortes, esCampusCordoba, instanciasExistentes }) => {
                                     instanciasExistentes={instanciasExistentes}
                                 />
                             </div>
-                            <div className="icon">
-                                <BtnEliminar icon={"borrar"} width={50} height={50} justifyContent={"flex-start"} alignItems={"flex-end"} onClick={() => eliminarCohorte(cohorte.id)} />
-                            </div>
-                            <div className='diver'><Divider /></div>
-                        </div>
+                            <Box className="icon" sx={{ display: 'flex', alignItems: 'center', mt: 3 }}>
+                                <BtnEliminar icon={"borrar"} width={40} height={40} justifyContent={"center"} alignItems={"center"} onClick={() => eliminarCohorte(cohorte.id)} />
+                            </Box>
+                        </Box>
                     );
                 })}
 

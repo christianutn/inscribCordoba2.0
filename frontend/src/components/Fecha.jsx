@@ -3,6 +3,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
+import 'dayjs/locale/es';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import TextField from '@mui/material/TextField';
@@ -151,7 +152,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, esCampusCordoba, fech
 
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en">
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
       {/* Contenedor principal para posicionar el spinner encima */}
       <Box sx={{ position: 'relative', width: '100%' }}>
         <div className='fecha-container'>
