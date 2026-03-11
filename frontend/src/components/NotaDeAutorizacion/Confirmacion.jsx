@@ -43,7 +43,7 @@ import ModalCrearCoordinador from "./Modals/ModalCrearCoordinador";
 // Custom styles to match the design
 const styles = {
     pageBackground: {
-        bgcolor: "#f5f7f8", // background-light
+        bgcolor: "custom.CBA_Grey11",
         minHeight: "100vh",
         p: { xs: 2, sm: 3, lg: 4 },
         display: "flex",
@@ -52,10 +52,11 @@ const styles = {
     },
     mainCard: {
         width: "100%",
-        maxWidth: "1280px", // max-w-7xl
-        borderRadius: "0.75rem", // rounded-xl
-        boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)", // shadow-lg
-        border: "1px solid #F1F3F5", // border-neutral-gray
+        maxWidth: "1280px",
+        borderRadius: "0.75rem",
+        boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        border: "1px solid",
+        borderColor: "custom.CBA_Grey7",
         overflow: "hidden"
     },
     header: {
@@ -66,20 +67,21 @@ const styles = {
         justifyContent: "space-between"
     },
     sectionTitle: {
-        color: "#343A40", // text-dark-gray
-        fontWeight: 900, // font-black
-        fontSize: "1.875rem", // text-3xl
+        color: "grey.600",
+        fontWeight: "bold",
+        fontSize: "1.875rem",
         lineHeight: 1.25,
         letterSpacing: "-0.025em"
     },
     sectionSubtitle: {
-        color: "#64748b", // text-slate-500
+        color: "grey.500",
         fontSize: "1rem",
-        fontWeight: 400,
+        fontWeight: "regular",
         mt: 1
     },
     columnLeft: {
-        borderRight: { md: "1px solid #F1F3F5" },
+        borderRight: { md: "1px solid" },
+        borderColor: { md: "custom.CBA_Grey7" },
         p: { xs: 3, sm: 4 },
         pt: { xs: 3, sm: 4 }
     },
@@ -89,41 +91,41 @@ const styles = {
         flex: 1
     },
     label: {
-        color: "#343A40",
-        fontWeight: 700,
+        color: "grey.600",
+        fontWeight: "bold",
         fontSize: "1rem",
         mb: 0.5,
         display: "block"
     },
     helperText: {
-        color: "#64748b",
+        color: "grey.500",
         fontSize: "0.875rem",
         mb: 1
     },
     createButton: {
         mt: 1,
-        bgcolor: "rgba(0, 81, 156, 0.1)", // bg-primary/10
-        color: "#00519c", // text-primary
-        fontWeight: 700,
+        bgcolor: "rgba(0, 154, 218, 0.1)", // alpha CBA_Blue
+        color: "primary.main",
+        fontWeight: "bold",
         textTransform: "none",
         borderRadius: "0.5rem",
         height: "40px",
         "&:hover": {
-            bgcolor: "rgba(0, 81, 156, 0.2)"
+            bgcolor: "rgba(0, 154, 218, 0.2)"
         }
     },
     inputBase: {
         "& .MuiOutlinedInput-root": {
             borderRadius: "0.5rem",
-            bgcolor: "#fff",
+            bgcolor: "common.white",
             "& fieldset": {
-                borderColor: "#cbd5e1" // border-slate-300
+                borderColor: "grey.400"
             },
             "&:hover fieldset": {
-                borderColor: "#94a3b8"
+                borderColor: "grey.500"
             },
             "&.Mui-focused fieldset": {
-                borderColor: "#00519c", // focus:border-primary
+                borderColor: "primary.main",
                 borderWidth: "2px"
             }
         }
@@ -131,7 +133,7 @@ const styles = {
     courseSearchContainer: {
         display: "flex",
         alignItems: "center",
-        bgcolor: "#F1F3F5", // bg-neutral-gray
+        bgcolor: "custom.CBA_Grey7",
         borderRadius: "0.5rem",
         height: "48px",
         px: 2
@@ -142,9 +144,9 @@ const styles = {
         bgcolor: "transparent",
         outline: "none",
         fontSize: "1rem",
-        color: "#343A40",
+        color: "grey.600",
         "&::placeholder": {
-            color: "#64748b"
+            color: "grey.500"
         }
     },
     courseList: {
@@ -157,17 +159,17 @@ const styles = {
         borderRadius: "0.5rem",
         mb: 0.5,
         "&:hover": {
-            bgcolor: "#F1F3F5"
+            bgcolor: "custom.CBA_Grey7"
         }
     },
     selectedCourseCard: {
-        bgcolor: "rgba(241, 243, 245, 0.7)", // bg-neutral-gray/70
+        bgcolor: "custom.CBA_Grey11",
         borderRadius: "0.5rem",
         p: 2,
         mb: 2
     },
     tutorChip: {
-        bgcolor: "rgba(0, 81, 156, 0.1)",
+        bgcolor: "rgba(0, 154, 218, 0.1)",
         borderRadius: "0.5rem",
         p: 1,
         display: "flex",
@@ -176,9 +178,9 @@ const styles = {
         mt: 1
     },
     confirmButton: {
-        bgcolor: "#00519c",
-        color: "#fff",
-        fontWeight: 700,
+        bgcolor: "primary.main",
+        color: "common.white",
+        fontWeight: "bold",
         fontSize: "1rem",
         textTransform: "none",
         borderRadius: "0.5rem",
@@ -186,7 +188,7 @@ const styles = {
         px: 3,
         minWidth: "150px",
         "&:hover": {
-            bgcolor: "rgba(0, 81, 156, 0.9)"
+            bgcolor: "primary.dark"
         }
     }
 };
@@ -418,7 +420,7 @@ const Confirmacion = () => {
                 value={value}
                 onChange={(_, newValue) => onChange(newValue)}
                 isOptionEqualToValue={(option, value) => (option.cod || option.cuil || option.id) === (value.cod || value.cuil || value.id)}
-                popupIcon={<ExpandMoreIcon sx={{ color: "#64748b" }} />}
+                popupIcon={<ExpandMoreIcon sx={{ color: "grey.500" }} />}
             />
             <Button
                 startIcon={<AddIcon />}
@@ -438,8 +440,8 @@ const Confirmacion = () => {
                 <Typography sx={{ ...styles.label, fontSize: "0.875rem" }}>{label}</Typography>
 
                 {/* Tutor Search Input - Mimicking the design */}
-                <Box sx={{ ...styles.courseSearchContainer, bgcolor: "#fff", border: "1px solid #cbd5e1", mb: 1 }}>
-                    <Box sx={{ color: "#64748b", display: "flex", alignItems: "center", pr: 1 }}>
+                <Box sx={{ ...styles.courseSearchContainer, bgcolor: "common.white", border: "1px solid", borderColor: "grey.400", mb: 1 }}>
+                    <Box sx={{ color: "grey.500", display: "flex", alignItems: "center", pr: 1 }}>
                         <SearchIcon />
                     </Box>
                     <Autocomplete
@@ -473,17 +475,17 @@ const Confirmacion = () => {
                     {assignments.map(({ tutor }) => (
                         <Box key={tutor.cuil || tutor.detalle_persona?.cuil} sx={styles.tutorChip}>
                             <Box>
-                                <Typography sx={{ color: "#00519c", fontWeight: 700, fontSize: "0.875rem" }}>
+                                <Typography sx={{ color: "primary.main", fontWeight: "bold", fontSize: "0.875rem" }}>
                                     {tutor.detalle_persona ? `${tutor.detalle_persona.nombre} ${tutor.detalle_persona.apellido}` : tutor.nombre}
                                 </Typography>
-                                <Typography sx={{ color: "#64748b", fontSize: "0.75rem" }}>
+                                <Typography sx={{ color: "grey.500", fontSize: "0.75rem" }}>
                                     CUIL: {tutor.cuil || tutor.detalle_persona?.cuil}
                                 </Typography>
                             </Box>
                             <IconButton
                                 size="small"
                                 onClick={() => handleRemoveTutor(curso.cod, tutor.cuil || tutor.detalle_persona?.cuil, rol)}
-                                sx={{ color: "#64748b", "&:hover": { color: "#ef4444" } }}
+                                sx={{ color: "grey.500", "&:hover": { color: "error.main" } }}
                             >
                                 <CloseIcon fontSize="small" />
                             </IconButton>
@@ -522,7 +524,7 @@ const Confirmacion = () => {
                                 fetchAreas,
                                 "Área"
                             )}
-                            <Divider sx={{ my: 3, borderColor: "#F1F3F5" }} />
+                            <Divider sx={{ my: 3, borderColor: "custom.CBA_Grey7" }} />
                             {renderSelector(
                                 "Director/a",
                                 "Seleccioná un director o directora para la nota de autorización.",
@@ -532,7 +534,7 @@ const Confirmacion = () => {
                                 fetchDirectores,
                                 "Director"
                             )}
-                            <Divider sx={{ my: 3, borderColor: "#F1F3F5" }} />
+                            <Divider sx={{ my: 3, borderColor: "custom.CBA_Grey7" }} />
                             {renderSelector(
                                 "Coordinador/a",
                                 "Seleccioná un coordinador o coordinadora para la nota de autorización.",
@@ -551,9 +553,10 @@ const Confirmacion = () => {
                                 <Typography sx={styles.helperText}>Buscá y seleccioná los cursos que querés asignar.</Typography>
 
                                 <Box sx={styles.courseSearchContainer}>
-                                    <SearchIcon sx={{ color: "#64748b", mr: 1 }} />
-                                    <input
-                                        style={styles.courseSearchInput}
+                                    <SearchIcon sx={{ color: "grey.500", mr: 1 }} />
+                                    <Box
+                                        component="input"
+                                        sx={styles.courseSearchInput}
                                         placeholder="Buscar cursos por nombre"
                                         value={cursoSearch}
                                         onChange={(e) => {
@@ -585,14 +588,14 @@ const Confirmacion = () => {
                                                     checked={isSelected}
                                                     disableRipple
                                                     sx={{
-                                                        color: "#cbd5e1",
-                                                        "&.Mui-checked": { color: "#00519c" }
+                                                        color: "grey.400",
+                                                        "&.Mui-checked": { color: "primary.main" }
                                                     }}
                                                 />
                                                 <ListItemText
                                                     primary={curso.nombre}
                                                     primaryTypographyProps={{
-                                                        sx: { color: "#343A40", fontWeight: 400 }
+                                                        sx: { color: "grey.600", fontWeight: "regular" }
                                                     }}
                                                 />
                                             </ListItem>
@@ -601,7 +604,7 @@ const Confirmacion = () => {
                                 </List>
                             </Box>
 
-                            <Divider sx={{ my: 4, borderColor: "#F1F3F5" }} />
+                            <Divider sx={{ my: 4, borderColor: "custom.CBA_Grey7" }} />
 
                             <Box>
                                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
@@ -625,7 +628,7 @@ const Confirmacion = () => {
                                 <Stack spacing={2}>
                                     {selectedCursos.map((curso) => (
                                         <Box key={curso.cod} sx={styles.selectedCourseCard}>
-                                            <Typography sx={{ color: "#343A40", fontWeight: 700, mb: 2 }}>
+                                            <Typography sx={{ color: "grey.600", fontWeight: "bold", mb: 2 }}>
                                                 {curso.nombre}
                                             </Typography>
                                             <Stack spacing={2}>
@@ -639,7 +642,28 @@ const Confirmacion = () => {
                         </Grid>
                     </Grid>
 
-                    <Box sx={{ p: 4, borderTop: "1px solid #F1F3F5", display: "flex", justifyContent: "flex-end" }}>
+                    <Box sx={{ p: 4, borderTop: "1px solid", borderColor: "custom.CBA_Grey7", display: "flex", justifyContent: "flex-end", gap: 2 }}>
+                        <Button
+                            onClick={() => navigate("/principal")}
+                            variant="outlined"
+                            sx={{
+                                fontWeight: "bold",
+                                fontSize: "1rem",
+                                textTransform: "none",
+                                borderRadius: "0.5rem",
+                                height: "48px",
+                                px: 3,
+                                minWidth: "150px",
+                                borderColor: "grey.400",
+                                color: "grey.600",
+                                "&:hover": {
+                                    borderColor: "grey.600",
+                                    bgcolor: "grey.50"
+                                }
+                            }}
+                        >
+                            Cancelar
+                        </Button>
                         <Button
                             onClick={handleConfirm}
                             sx={styles.confirmButton}
@@ -647,7 +671,7 @@ const Confirmacion = () => {
                             Confirmar
                         </Button>
                     </Box>
-                </Paper>
+                </Paper >
 
                 <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
                     <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
@@ -667,10 +691,10 @@ const Confirmacion = () => {
                     titulo="Éxito"
                     mensaje="Nota de Autorización confirmada con Exito, presione continuar para salir"
                 />
-            </Box>
+            </Box >
             {
                 cargando && <Backdrop
-                    sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    sx={{ color: 'primary.main', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                     open={cargando}
                 >
                     <CircularProgress color="inherit" />
