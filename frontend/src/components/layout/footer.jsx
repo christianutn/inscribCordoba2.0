@@ -1,7 +1,8 @@
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import logoCba from '../../components/imagenes/gobierno_blanco.png';
 
 /**
- * Footer component refactored for 100% width and no padding as requested.
+ * Footer component refactored for balanced UI: max-width 1200px, flexbox layout, and centered perfectly.
  */
 export default function Footer() {
   return (
@@ -11,84 +12,93 @@ export default function Footer() {
         backgroundColor: "primary.main",
         color: "common.white",
         width: "100%",
-        p: 0, // No padding
-        mt: 'auto',
+        position: 'relative', // always at bottom or relative to flow
+        bottom: 0,
+        mt: 'auto', // Pushes footer to end when in flex container
       }}
     >
-      <Grid
-        container
-        alignItems="center"
-        justifyContent="center"
-        sx={{ m: 0, width: '100%' }}
+      {/* Inner container with max-width */}
+      <Box
+        sx={{
+          maxWidth: '1200px',
+          mx: 'auto',
+          py: 2, // moderate vertical padding
+          px: 4, // lateral padding
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: { xs: 4, md: 15 }, // 8 to 10 MUI units gap
+        }}
       >
         {/* Logo Section */}
-        <Grid item xs={12} md={6} sx={{ p: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: { xs: "center", md: "flex-end" },
+            alignItems: "center",
+            flex: 1,
+          }}
+        >
           <Box
+            component="img"
+            src={logoCba}
+            alt="Gobierno de Córdoba"
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              width: "100%",
+              maxWidth: "260px",
+              height: "auto",
+              display: "block",
+              mt: 4.5, // baja el logo
+
             }}
-          >
-            <Box
-              component="img"
-              src="https://campuscordoba.cba.gov.ar/plataforma/pluginfile.php/4217561/mod_folder/content/0/gobierno_blanco.png"
-              alt="Gobierno de Córdoba"
-              sx={{
-                width: "100%",
-                maxWidth: "300px",
-                height: "auto",
-                display: "block",
-              }}
-            />
-          </Box>
-        </Grid>
+          />
+        </Box>
 
         {/* Info Section */}
-        <Grid item xs={12} md={6} sx={{ p: 2 }}>
-          <Box
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: { xs: "center", md: "flex-start" },
+            textAlign: { xs: "center", md: "left" },
+            flex: 1,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              textAlign: "center",
+              fontWeight: 'bold',
+              mb: 1,
+              fontSize: '1.08rem',
+              letterSpacing: '0.01em'
             }}
           >
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 'bold',
-                mb: 1,
-                fontSize: '1rem',
-                letterSpacing: '0.01em'
-              }}
-            >
-              Secretaría General de la Gobernación
+            Secretaría General de la Gobernación
+          </Typography>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '1rem' }}>
+              Secretaría de Capital Humano
             </Typography>
-
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Secretaría de Capital Humano
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Subdirección de Capacitación y Formación
-              </Typography>
-            </Box>
-
-            <Typography
-              variant="body2"
-              sx={{
-                mt: 1,
-                fontWeight: 'medium',
-                opacity: 0.9
-              }}
-            >
-              soportecampuscordoba@cba.gov.ar
+            <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '1rem' }}>
+              Subdirección de Capacitación y Formación
             </Typography>
           </Box>
-        </Grid>
-      </Grid>
+
+          <Typography
+            variant="body2"
+            sx={{
+              mt: 1,
+              fontWeight: 'medium',
+              opacity: 0.9, fontSize: '1rem'
+            }}
+          >
+            soportecampuscordoba@cba.gov.ar
+          </Typography>
+        </Box>
+      </Box>
     </Box>
   );
 }

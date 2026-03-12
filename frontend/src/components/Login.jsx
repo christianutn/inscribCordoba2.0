@@ -401,8 +401,8 @@ const Login = () => {
                     background: '#f4f6f8',
                 }}
             >
-                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2, pb: { xs: 4, md: 8 } }}>
-                    <Container component="main" maxWidth="xs">
+                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
+                    <Container component="main" maxWidth="xs" sx={{ mt: 8, mb: 8 }}>
                         <CssBaseline />
                         <Paper
                             elevation={6}
