@@ -25,6 +25,7 @@ import Paper from '@mui/material/Paper';
 import Avatar from '@mui/material/Avatar';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Footer from './layout/footer';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 
 
@@ -41,6 +42,8 @@ const Login = () => {
     const [cuilRecovery, setCuilRecovery] = useState('');
     const [emailSent, setEmailSent] = useState(false);
     const [maskedEmail, setMaskedEmail] = useState('');
+
+    useDocumentTitle(showForgotPassword ? 'Recuperar Contraseña' : 'Iniciar Sesión');
 
     useEffect(() => {
         const token = localStorage.getItem('jwt');
@@ -398,7 +401,7 @@ const Login = () => {
                     background: '#f4f6f8',
                 }}
             >
-                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
+                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2, pb: { xs: 4, md: 8 } }}>
                     <Container component="main" maxWidth="xs">
                         <CssBaseline />
                         <Paper

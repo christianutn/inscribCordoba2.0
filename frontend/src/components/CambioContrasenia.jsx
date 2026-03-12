@@ -25,9 +25,11 @@ import InputAdornment from '@mui/material/InputAdornment';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 const CambioContrasenia = () => {
     const navigate = useNavigate();
+    useDocumentTitle('Cambiar Contraseña');
 
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
@@ -131,7 +133,7 @@ const CambioContrasenia = () => {
                 <CircularProgress color="inherit" />
             </Backdrop>
 
-            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
+            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2, pb: { xs: 4, md: 8 } }}>
                 <Container component="main" maxWidth="xs">
                     <Paper
                         elevation={6}

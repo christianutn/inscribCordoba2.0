@@ -53,6 +53,7 @@ import VisualizacionMisNotasRefentes from './NotaDeAutorizacion/VisualizacionMis
 import GestionEventoYCurso from '../features/EventoYCurso/GestionEventoYCurso.jsx'
 import { getMyUser } from "../services/usuarios.service.js";
 import Footer from './layout/footer';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 const drawerWidth = 260;
 
@@ -159,6 +160,26 @@ export default function Principal() {
   const [open, setOpen] = useState(true);
   const [opcionSeleccionada, setOpcionSeleccionada] = useState("Home");
   const [opcionesAMostrar, setOpcionesAMostrar] = useState([]);
+
+  const titulosSeccion = {
+    Home: 'Inicio',
+    ReporteCursosIdentifier: 'Reporte de Cursos',
+    Calendario: 'Cronograma',
+    VersionReducidaAdministradores: 'Versión Reducida Adm.',
+    VersionReducidaGa: 'Versión Reducida GA',
+    Autorizaciones: 'Gestionar Autorizaciones',
+    Gestion: 'Gestión',
+    RestriccionesFechasInicioCursada: 'Restricciones Fechas',
+    SubaNotaDeAutorizacion: 'Cargar Nota',
+    Eventos: 'Crear Evento',
+    Formulario: 'Crear Cohorte',
+    CrearAviso: 'Crear Aviso',
+    AsistenciasMain: 'Registro de Asistencias',
+    MisNotasAutorizacionIdentifier: 'Mis Notas',
+    GestionEventoYCurso: 'Gestión Evento/Curso'
+  };
+
+  useDocumentTitle(titulosSeccion[opcionSeleccionada] || 'Inicio');
 
   useEffect(() => {
     let isMounted = true;
