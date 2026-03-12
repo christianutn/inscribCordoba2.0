@@ -163,7 +163,7 @@ export default function Principal() {
 
   const titulosSeccion = {
     Home: 'Inicio',
-    ReporteCursosIdentifier: 'Reporte de Cursos',
+    ReporteCursosIdentifier: 'Tablero',
     Calendario: 'Cronograma',
     VersionReducidaAdministradores: 'Versión Reducida Adm.',
     VersionReducidaGa: 'Versión Reducida GA',
