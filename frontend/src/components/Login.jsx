@@ -16,7 +16,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Typography from '@mui/material/Typography';
@@ -26,15 +26,19 @@ import Avatar from '@mui/material/Avatar';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Footer from './layout/footer';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
+import { useAuth } from '../context/AuthContext';
 
 
 
 const Login = () => {
+    const { checkAuth, user } = useAuth();
     const [mensajeDeError, setMensajeDeError] = useState(null);
     const [mensajeDeExito, setMensajeDeExito] = useState(null);
     const [open, setOpen] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/principal";
     const [cuil, setCuil] = useState('');
     const [contrasenia, setContrasenia] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
@@ -46,9 +50,8 @@ const Login = () => {
     useDocumentTitle(showForgotPassword ? 'Recuperar Contraseña' : 'Iniciar Sesión');
 
     useEffect(() => {
-        const token = localStorage.getItem('jwt');
-        if (token) {
-            navigate("/principal");
+        if (user) {
+            navigate(from, { replace: true });
         }
 
         const rememberedCuil = localStorage.getItem('rememberedCuil');
@@ -58,7 +61,7 @@ const Login = () => {
             setContrasenia(rememberedContrasenia);
             setRememberMe(true);
         }
-    }, [navigate]);
+    }, [user, navigate]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -76,7 +79,8 @@ const Login = () => {
                 localStorage.removeItem('rememberedCuil');
                 localStorage.removeItem('rememberedContrasenia');
             }
-            navigate("/principal");
+            await checkAuth(); // Actualiza el estado global antes de navegar
+            navigate(from, { replace: true });
         } catch (error) {
             if (error.statusCode === 429) {
                 setMensajeDeError(error.message);

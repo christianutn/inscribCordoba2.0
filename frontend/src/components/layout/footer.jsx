@@ -28,7 +28,7 @@ export default function Footer() {
           flexDirection: { xs: 'column', md: 'row' },
           alignItems: 'center',
           justifyContent: 'center',
-          gap: { xs: 4, md: 15 }, // 8 to 10 MUI units gap
+          gap: { xs: 4, md: 15 },
         }}
       >
         {/* Logo Section */}
