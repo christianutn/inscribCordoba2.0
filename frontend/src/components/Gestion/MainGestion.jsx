@@ -12,6 +12,7 @@ import GestionPlataformasDictado from '../../features/PlataformasDeDictado/Gesti
 import GestionTiposCapacitacion from '../../features/TiposDeCapacitacion/GestionTiposCapacitacion';
 import GestionRolesTutores from '../../features/RolTutores/GestionRolTutores';
 import GestionTutores from '../../features/Tutores/GestionTutores';
+import GestionEfemerides from '../../features/Efemerides/GestionEfemerides';
 
 const MainGestion = ({ user }) => {
     const userRole = user?.rol;
@@ -27,6 +28,7 @@ const MainGestion = ({ user }) => {
         { label: "Tipos de Capacitación", roles: ['ADM'] },
         { label: "Roles Tutores", roles: ['ADM'] },
         { label: "Tutores", roles: ['ADM'] },
+        { label: "Efemérides", roles: ['ADM', 'REF', 'GA'] },
     ];
 
     // Filtrar opciones por rol
@@ -63,6 +65,8 @@ const MainGestion = ({ user }) => {
                 return <GestionRolesTutores />;
             case 'Tutores':
                 return <GestionTutores />;
+            case 'Efemérides':
+                return <GestionEfemerides modo="gestion" user={user} />;
             default:
                 return (
                     <Box sx={{ mt: 4, textAlign: 'center' }}>

@@ -31,3 +31,11 @@ Las credenciales de API se encuentran gestionadas centralmente en:
 1. **Analizar Backlog:** `GET /lists/68c17b67719c6c401962ed6b/cards`
 2. **Ver Sprint Actual:** `GET /lists/69b18d7dc10ef532b2adce60/cards`
 3. **Mover a Producción:** `PUT /cards/{id}?idList=68c1835102ee116b60a2122f`
+
+## Cuando te pida actualizar el tablero de trello debes hacer lo siguiente:
+
+- En el titulo busca la parte donde dice por ejemplo [Est: 12h] y le pongas por ejemplo la hora real "[Real: 8h]"correcta, lo demás del titulo debe quedar igual. 
+
+- Al final de la descripción de la tarjeta debes colocar: tiempo que llevó aplicar los cambios, espeficación de los cambios realizados, pruebas necesarias para el personal de QA. 
+
+- En comentario debes agregar el commit que la vincula. 

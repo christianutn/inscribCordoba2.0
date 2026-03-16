@@ -26,6 +26,7 @@ import Estados_notas_autorizacion from './estado_nota_autorizacion.models.js';
 import Cambios_estados_notas_autorizacion from './cambios_estados_notas_autorizacion.models.js';
 import RolTutor from './roles_tutor.models.js'
 import Historico_tutores_en_curso from './historico_tutores_en_curso.models.js';
+import Efemeride from './efemeride.models.js';
 
 const associateInscribModels = () => {
 
@@ -174,6 +175,10 @@ const associateInscribModels = () => {
         targetKey: 'cuil',
         as: 'detalle_usuario'
     });
+
+    // Efemérides: Un curso puede tener muchas efemérides
+    Efemeride.belongsTo(Curso, { foreignKey: 'curso', targetKey: 'cod', as: 'detalle_curso' });
+    Curso.hasMany(Efemeride, { foreignKey: 'curso', sourceKey: 'cod', as: 'detalle_efemerides' });
 };
 
 export default associateInscribModels;

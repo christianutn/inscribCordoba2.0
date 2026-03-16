@@ -35,6 +35,7 @@ import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import TaskIcon from '@mui/icons-material/Task';
 import DifferenceIcon from '@mui/icons-material/Difference';
+import EventNoteIcon from '@mui/icons-material/EventNote';
 
 import Formulario from './Formulario';
 import Cronograma from "./Cronograma.jsx";
@@ -51,6 +52,7 @@ import Autorizaciones from './NotaDeAutorizacion/Autorizaciones.jsx';
 import MainGestion from './Gestion/MainGestion.jsx';
 import VisualizacionMisNotasRefentes from './NotaDeAutorizacion/VisualizacionMisNotasRefentes.jsx';
 import GestionEventoYCurso from '../features/EventoYCurso/GestionEventoYCurso.jsx'
+import GestionEfemerides from '../features/Efemerides/GestionEfemerides.jsx';
 import { getMyUser } from "../services/usuarios.service.js";
 import Footer from './layout/footer';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
@@ -73,6 +75,7 @@ const menuConfigByRole = {
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
     { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon /> },
     { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
+    { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
   REF: [
     { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
@@ -82,6 +85,7 @@ const menuConfigByRole = {
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
     { label: "Tablero", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon /> },
+    { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
   GA: [
     { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
@@ -91,6 +95,7 @@ const menuConfigByRole = {
     { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon /> },
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
     { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
+    { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
 };
 
@@ -193,7 +198,8 @@ export default function Principal() {
     CrearAviso: 'Crear Aviso',
     AsistenciasMain: 'Registro de Asistencias',
     MisNotasAutorizacionIdentifier: 'Mis Notas',
-    GestionEventoYCurso: 'Gestión Evento/Curso'
+    GestionEventoYCurso: 'Gestión Evento/Curso',
+    Efemerides: 'Efemérides'
   };
 
   useDocumentTitle(titulosSeccion[opcionSeleccionada] || 'Inicio');
@@ -255,6 +261,7 @@ export default function Principal() {
       case "SubaNotaDeAutorizacion": return <SubaNotaDeAutorizacion setOpcionSeleccionada={setOpcionSeleccionada} />;
       case "Autorizaciones": return <Autorizaciones />;
       case "MisNotasAutorizacionIdentifier": return <VisualizacionMisNotasRefentes />;
+      case "Efemerides": return <GestionEfemerides modo="carga" user={user} />;
       case "Home":
       default: return <Home nombre={user?.nombre} setOpcionSeleccionada={setOpcionSeleccionada} />;
     }
