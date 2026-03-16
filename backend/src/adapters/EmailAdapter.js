@@ -202,6 +202,89 @@ class EmailAdapter {
 
         return await this.enviarCorreo(destinatario, asunto, htmlMensaje, attachments);
     }
+
+    /**
+     * Genera el HTML para notificar la carga de nuevas efemérides
+     * @param {Object} datosUsuario - Datos del usuario que realizó la carga
+     * @param {Object} curso - Datos del curso (cod, nombre)
+     * @param {Array} efemerides - Lista de efemérides cargadas [{fecha, descripcion}]
+     * @returns {string} - HTML del mensaje
+     */
+    generarHtmlNotificacionEfemeride(datosUsuario, curso, efemerides) {
+        const { nombre, apellido, cuil } = datosUsuario;
+
+        // Construir filas de la tabla de efemérides
+        const filas = efemerides.map(ef => `
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${ef.fecha}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${ef.descripcion}</td>
+            </tr>
+        `).join('');
+
+        return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #004582; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background-color: #ffffff; padding: 25px; border: 1px solid #e0e0e0; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .user-info { background-color: #ECF4FB; padding: 15px; border-left: 5px solid #004582; margin-bottom: 20px; border-radius: 4px; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        .table th { background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #004582; color: #004582; }
+        .footer { margin-top: 25px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2 style="margin:0;">Nuevas Efemérides Registradas</h2>
+    </div>
+    <div class="content">
+        <p>Se han cargado satisfactoriamente nuevas efemérides en <strong>InscribCórdoba</strong>.</p>
+        
+        <div class="user-info">
+            <p style="margin:5px 0;"><strong>Usuario:</strong> ${nombre} ${apellido} (${cuil})</p>
+            <p style="margin:5px 0;"><strong>Curso:</strong> ${curso.nombre} [${curso.cod}]</p>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Efeméride / Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filas}
+            </tbody>
+        </table>
+        
+        <div class="footer">
+            <p><strong>Sistema InscribCórdoba</strong> - Gobierno de la Provincia de Córdoba</p>
+            <p>Este es un correo automático generado por el sistema. Por favor, no responda a este mensaje.</p>
+        </div>
+    </div>
+</body>
+</html>
+        `;
+    }
+
+    /**
+     * Envía una notificación sobre la carga de nuevas efemérides
+     * @param {Object} datosUsuario - Datos del usuario (del token)
+     * @param {Object} curso - Objeto del curso {cod, nombre}
+     * @param {Array} efemerides - Array de efemérides [{fecha, descripcion}]
+     * @returns {Promise<Object>} - Resultado del envío
+     */
+    async enviarNotificacionEfemerideCargada(datosUsuario, curso, efemerides) {
+        const destinatario = config.email.user;
+        const asunto = `Nuevas Efemérides - Curso: ${curso.nombre}`;
+        const htmlMensaje = this.generarHtmlNotificacionEfemeride(datosUsuario, curso, efemerides);
+
+        return await this.enviarCorreo(destinatario, asunto, htmlMensaje);
+    }
+
 }
 
 export default EmailAdapter;

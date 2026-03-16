@@ -4,6 +4,10 @@ import AppError from "../../../../utils/appError.js";
 import sequelize from '../../../../config/database.js';
 import { DateTime } from "luxon";
 import logger from '../../../../utils/logger.js';
+import EmailAdapter from '../../../../adapters/EmailAdapter.js';
+import config from '../../../../config/env.config.js';
+
+const emailAdapter = new EmailAdapter();
 
 
 /**
@@ -151,6 +155,10 @@ export const postEfemerides = async (req, res, next) => {
         await t.commit();
 
         logger.info(`✅ Efemérides creadas exitosamente - Curso: ${curso} - Cantidad: ${efemeridesCreadas.length}`);
+
+        // Enviar notificación por correo de forma asíncrona
+        emailAdapter.enviarNotificacionEfemerideCargada(req.user.user, cursoExistente, efemerides)
+            .catch(err => logger.error(`❌ Error al enviar notificación de efemérides: ${err.message}`));
 
         res.status(201).json({
             message: `Se crearon ${efemeridesCreadas.length} efeméride(s) correctamente`,
