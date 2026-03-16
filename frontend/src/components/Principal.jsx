@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import {
   Box,
@@ -54,6 +54,7 @@ import GestionEventoYCurso from '../features/EventoYCurso/GestionEventoYCurso.js
 import { getMyUser } from "../services/usuarios.service.js";
 import Footer from './layout/footer';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
+import { useAuth } from '../context/AuthContext';
 
 const drawerWidth = 260;
 
@@ -154,16 +155,32 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function Principal() {
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, logout } = useAuth();
   const [open, setOpen] = useState(true);
-  const [opcionSeleccionada, setOpcionSeleccionada] = useState("Home");
   const [opcionesAMostrar, setOpcionesAMostrar] = useState([]);
+
+  // Determina la sección inicial: primero hash de URL, luego sessionStorage, fallback Home
+  const getInitialSection = useCallback(() => {
+    const hash = location.hash?.replace('#', '');
+    if (hash) return hash;
+    return sessionStorage.getItem('opcionSeleccionada') || 'Home';
+  }, [location.hash]);
+
+  const [opcionSeleccionada, setOpcionSeleccionadaState] = useState(getInitialSection);
+
+  // Wrapper que persiste la sección activa en sessionStorage y actualiza el hash
+  const setOpcionSeleccionada = useCallback((identifier) => {
+    sessionStorage.setItem('opcionSeleccionada', identifier);
+    setOpcionSeleccionadaState(identifier);
+    // Actualiza el hash sin recargar la página
+    window.history.replaceState(null, '', `/principal#${identifier}`);
+  }, []);
 
   const titulosSeccion = {
     Home: 'Inicio',
-    ReporteCursosIdentifier: 'Reporte de Cursos',
+    ReporteCursosIdentifier: 'Tablero',
     Calendario: 'Cronograma',
     VersionReducidaAdministradores: 'Versión Reducida Adm.',
     VersionReducidaGa: 'Versión Reducida GA',
@@ -182,54 +199,22 @@ export default function Principal() {
   useDocumentTitle(titulosSeccion[opcionSeleccionada] || 'Inicio');
 
   useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-    (async () => {
-      try {
-        const res = await getMyUser();
-        if (!isMounted) return;
-
-        if (!res) {
-          localStorage.removeItem('jwt');
-          navigate('/login');
-          return;
-        }
-        setUser(res);
-        if (res.necesitaCbioContrasenia == "1") {
-          navigate('/cambiarContrasenia');
-          return;
-        }
-
-        const userRol = res.rol;
-
-        // Obtenemos las opciones directas para el rol, si existen
-        const optionsForRole = menuConfigByRole[userRol] || [];
-
-        setOpcionesAMostrar(optionsForRole);
-
-        const currentOptionIsValid = optionsForRole.some(opt => opt.identifier === opcionSeleccionada);
-        if (!currentOptionIsValid && optionsForRole.length > 0) {
-          setOpcionSeleccionada(optionsForRole.find(opt => opt.identifier === "Home") ? "Home" : optionsForRole[0].identifier);
-        } else if (optionsForRole.length === 0) {
-          console.warn("Usuario no tiene opciones de menú válidas.");
-        }
-
-      } catch (error) {
-        if (!isMounted) return;
-        console.error("Error fetching user:", error);
-        localStorage.removeItem('jwt');
-        navigate('/login');
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+    if (user) {
+      if (user.necesitaCbioContrasenia == "1") {
+        navigate('/cambiarContrasenia');
+        return;
       }
-    })();
 
-    return () => {
-      isMounted = false;
-    };
-  }, [navigate]);
+      const userRol = user.rol;
+      const optionsForRole = menuConfigByRole[userRol] || [];
+      setOpcionesAMostrar(optionsForRole);
+
+      const currentOptionIsValid = optionsForRole.some(opt => opt.identifier === opcionSeleccionada);
+      if (!currentOptionIsValid && optionsForRole.length > 0) {
+        setOpcionSeleccionada(optionsForRole.find(opt => opt.identifier === "Home") ? "Home" : optionsForRole[0].identifier);
+      }
+    }
+  }, [user, navigate]);
 
   // Asegura que al cambiar de sección el scroll se resetee al inicio de la página
   useEffect(() => {
@@ -242,7 +227,8 @@ export default function Principal() {
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
-  const handleListItemClick = (identifier) => {
+  const handleListItemClick = (e, identifier) => {
+    e.preventDefault(); // Prevenir navegación del <a>, manejar por SPA
     setOpcionSeleccionada(identifier);
     if (window.innerWidth < theme.breakpoints.values.sm) {
       handleDrawerClose();
@@ -250,19 +236,10 @@ export default function Principal() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('jwt');
-    sessionStorage.clear();
-    navigate('/login');
+    logout(true);
   };
 
   const mostrarOpcion = () => {
-    if (loading && !user) {
-      return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 128px)' }}>
-          <CircularProgress size={60} />
-        </Box>
-      );
-    }
     switch (opcionSeleccionada) {
       case "Formulario": return <Formulario />;
       case "Calendario": return <Cronograma user={user} />;
@@ -357,10 +334,13 @@ export default function Principal() {
           {opcionesAMostrar.map((item) => (
             <ListItem key={item.identifier} disablePadding sx={{ display: 'block' }}>
               <ListItemButton
-                onClick={() => handleListItemClick(item.identifier)}
+                component="a"
+                href={`/principal#${item.identifier}`}
+                onClick={(e) => handleListItemClick(e, item.identifier)}
                 selected={opcionSeleccionada === item.identifier}
                 sx={{
                   minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, py: 1.2, mb: 0.5, borderRadius: 1, mx: 1.5,
+                  textDecoration: 'none', color: 'inherit',
                   '&.Mui-selected': {
                     backgroundColor: theme.palette.action.selected, fontWeight: 'fontWeightBold',
                     '& .MuiListItemIcon-root, & .MuiListItemText-primary': { color: theme.palette.primary.main, }

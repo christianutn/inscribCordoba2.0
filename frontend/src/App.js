@@ -18,6 +18,8 @@ import Confirmaciones from './components/NotaDeAutorizacion/Confirmacion';
 import RegistroAsistencia from './components/AsistenciaQR/RegistroAsistencia';
 import VisualizacionMisNotasRefentes from './components/NotaDeAutorizacion/VisualizacionMisNotasRefentes';
 import useDocumentTitle from './hooks/useDocumentTitle';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const TitleWrapper = ({ title, children }) => {
   useDocumentTitle(title);
@@ -28,26 +30,30 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Layout><Login /></Layout>} />
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/principal" element={<Layout><Principal /></Layout>} />
-          <Route path="/cambiarContrasenia" element={<Layout><CambioContrasenia /></Layout>} />
-          <Route path='/PingTest' element={<Layout><TitleWrapper title="Ping Test"><PingTest /></TitleWrapper></Layout>} />
-          <Route path='/detalleFechas' element={<Layout><TitleWrapper title="Detalle de Fechas"><DetalleFechas /></TitleWrapper></Layout>} />
-          <Route path='/nuevoEvento' element={<Layout><TitleWrapper title="Nuevo Evento"><NuevoEvento /></TitleWrapper></Layout>} />
-          <Route path='/reportecursoscc' element={<Layout><TitleWrapper title="Reporte de Cursos"><ReporteCursosCC /></TitleWrapper></Layout>} />
-          <Route path='/crearAvisos' element={<Layout><TitleWrapper title="Crear Aviso"><CrearAviso /></TitleWrapper></Layout>} />
-          <Route path='/mostrarAvisos' element={<Layout><TitleWrapper title="Mostrar Avisos"><MostrarAvisos /></TitleWrapper></Layout>} />
-          <Route path='/cardAvisos' element={<Layout><TitleWrapper title="Avisos"><CardAvisos /></TitleWrapper></Layout>} />
-          <Route path='/version-reducida-ga' element={<Layout><TitleWrapper title="Versión Reducida GA"><VersionReducidaGA /></TitleWrapper></Layout>} />
-          <Route path='/asistencias' element={<Layout><TitleWrapper title="Registro de Asistencias"><AsistenciasMain /></TitleWrapper></Layout>} />
-          <Route path='/confirmaciones' element={<Layout><TitleWrapper title="Confirmaciones"><Confirmaciones /></TitleWrapper></Layout>} />
-          <Route path='/asistencia/registrar/:courseId' element={<Layout><TitleWrapper title="Registrar Asistencia"><RegistroAsistencia /></TitleWrapper></Layout>} />
-          <Route path='/mis-notas-autorizacion' element={<Layout><TitleWrapper title="Mis Notas"><VisualizacionMisNotasRefentes /></TitleWrapper></Layout>} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Layout><Login /></Layout>} />
+            <Route path="/" element={<Navigate to="/principal" />} />
+            
+            {/* Private Routes */}
+            <Route path="/principal" element={<ProtectedRoute><Layout><Principal /></Layout></ProtectedRoute>} />
+            <Route path="/cambiarContrasenia" element={<ProtectedRoute><Layout><CambioContrasenia /></Layout></ProtectedRoute>} />
+            <Route path='/PingTest' element={<ProtectedRoute><Layout><TitleWrapper title="Ping Test"><PingTest /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/detalleFechas' element={<ProtectedRoute><Layout><TitleWrapper title="Detalle de Fechas"><DetalleFechas /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/nuevoEvento' element={<ProtectedRoute><Layout><TitleWrapper title="Nuevo Evento"><NuevoEvento /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/reportecursoscc' element={<ProtectedRoute><Layout><TitleWrapper title="Reporte de Cursos"><ReporteCursosCC /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/crearAvisos' element={<ProtectedRoute><Layout><TitleWrapper title="Crear Aviso"><CrearAviso /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/mostrarAvisos' element={<ProtectedRoute><Layout><TitleWrapper title="Mostrar Avisos"><MostrarAvisos /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/cardAvisos' element={<ProtectedRoute><Layout><TitleWrapper title="Avisos"><CardAvisos /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/version-reducida-ga' element={<ProtectedRoute><Layout><TitleWrapper title="Versión Reducida GA"><VersionReducidaGA /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/asistencias' element={<ProtectedRoute><Layout><TitleWrapper title="Registro de Asistencias"><AsistenciasMain /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/confirmaciones' element={<ProtectedRoute><Layout><TitleWrapper title="Confirmaciones"><Confirmaciones /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/asistencia/registrar/:courseId' element={<ProtectedRoute><Layout><TitleWrapper title="Registrar Asistencia"><RegistroAsistencia /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/mis-notas-autorizacion' element={<ProtectedRoute><Layout><TitleWrapper title="Mis Notas"><VisualizacionMisNotasRefentes /></TitleWrapper></Layout></ProtectedRoute>} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
