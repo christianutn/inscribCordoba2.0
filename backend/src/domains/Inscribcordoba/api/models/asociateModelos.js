@@ -179,6 +179,10 @@ const associateInscribModels = () => {
     // Efemérides: Un curso puede tener muchas efemérides
     Efemeride.belongsTo(Curso, { foreignKey: 'curso', targetKey: 'cod', as: 'detalle_curso' });
     Curso.hasMany(Efemeride, { foreignKey: 'curso', sourceKey: 'cod', as: 'detalle_efemerides' });
+
+    // Efemérides: Un usuario puede crear muchas efemérides
+    Efemeride.belongsTo(Usuario, { foreignKey: 'usuario', targetKey: 'cuil', as: 'detalle_usuario_efemeride' });
+    Usuario.hasMany(Efemeride, { foreignKey: 'usuario', sourceKey: 'cuil', as: 'detalle_efemerides_usuario' });
 };
 
 export default associateInscribModels;
