@@ -42,18 +42,11 @@ const Efemeride = sequelize.define("efemerides", {
         allowNull: true,
         defaultValue: null,
     },
+    // En efemeride.models.js
     created_at: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATE, // Sequelize mapeará esto a DATETIME en MySQL
         allowNull: false,
-        defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
-        // Getter para devolver la fecha en hora argentina (UTC-3)
-        get() {
-            const rawValue = this.getDataValue('created_at');
-            if (!rawValue) return null;
-            const date = new Date(rawValue);
-            // Ajustar a UTC-3 (Argentina)
-            return new Date(date.getTime() - (3 * 60 * 60 * 1000)).toISOString().replace('T', ' ').substring(0, 19);
-        }
+        defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
     }
 }, {
     tableName: 'efemerides',

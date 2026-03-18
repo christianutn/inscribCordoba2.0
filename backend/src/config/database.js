@@ -42,7 +42,14 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
     // Evitar que mysql2 convierta DATE/DATETIME a objetos Date de JS
     // Esto previene problemas de timezone donde '2026-03-15' se convierte
     // a '2026-03-14T21:00:00.000Z' por diferencia horaria
-    dateStrings: true
+    dateStrings: true,
+    // Forzamos a que MySQL devuelva strings crudos para las fechas y evitar la conversión a Date de Sequelize/Javascript
+    typeCast: function (field, next) {
+      if (field.type === 'DATETIME' || field.type === 'DATE' || field.type === 'TIMESTAMP') {
+        return field.string();
+      }
+      return next();
+    }
   },
   define: {
     freezeTableName: true // Evitar la pluralización automática del nombre de la tabla
