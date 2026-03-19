@@ -35,6 +35,7 @@ import HistoricoTutoresEnCursoRouter from "../domains/Inscribcordoba/api/routes/
 import FechasInhabilitadasRouter from "./fechas_inhabilitadas.routes.js";
 import FechasInhabilitadasFinRouter from "./fechas_inhabilitadas_fin.routes.js";
 import efemerideRouter from "./efemeride.routes.js";
+import CcAsistenciaRouter from "../domains/Inscribcordoba/api/routes/cc_asistencia.routes.js";
 
 
 const router = Router();
@@ -73,6 +74,7 @@ router.use("/fechas-inhabilitadas", FechasInhabilitadasRouter)
 router.use("/fechas-inhabilitadas-fin", FechasInhabilitadasFinRouter)
 router.use("/asistencias", AsistenciaRouter);
 router.use("/efemerides", efemerideRouter);
+router.use("/cc-asistencias", CcAsistenciaRouter);
 
 
 export default router

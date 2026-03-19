@@ -47,6 +47,7 @@ import CrearAviso from './CrearAviso.jsx';
 import VersionReducidaGa from './VersionReducidaGA.jsx';
 import VersionReducidaAdministradores from './VersionReducidaAdministradores.jsx';
 import AsistenciasMain from './AsistenciaQR/AsistenciasMain.jsx';
+import CcAsistenciasMain from './CcAsistenciaQR/CcAsistenciasMain.jsx';
 import SubaNotaDeAutorizacion from './NotaDeAutorizacion/SubaNotaDeAutorizacion.jsx';
 import Autorizaciones from './NotaDeAutorizacion/Autorizaciones.jsx';
 import MainGestion from './Gestion/MainGestion.jsx';
@@ -74,7 +75,8 @@ const menuConfigByRole = {
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
     { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon /> },
-    { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
+    //{ label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
+    { label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> },
     { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
   REF: [
@@ -85,6 +87,7 @@ const menuConfigByRole = {
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
     { label: "Tablero", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon /> },
+    //{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> },
     { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
   GA: [
@@ -94,7 +97,8 @@ const menuConfigByRole = {
     { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
     { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon /> },
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
-    { label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
+    //{ label: "Registro de Asistencias viejo", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
+    //{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> },
     { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
 };
@@ -197,6 +201,7 @@ export default function Principal() {
     Formulario: 'Crear Cohorte',
     CrearAviso: 'Crear Aviso',
     AsistenciasMain: 'Registro de Asistencias',
+    CcAsistenciasMain: 'Asistencias CC',
     MisNotasAutorizacionIdentifier: 'Mis Notas',
     GestionEventoYCurso: 'Gestión Evento/Curso',
     Efemerides: 'Efemérides'
@@ -256,6 +261,7 @@ export default function Principal() {
       case "ReporteCursosIdentifier": return <ReporteCursos sidebarOpen={open} />;
       case "CrearAviso": return <CrearAviso />;
       case "AsistenciasMain": return <AsistenciasMain />;
+      case "CcAsistenciasMain": return <CcAsistenciasMain />;
       case "VersionReducidaGa": return <VersionReducidaGa />;
       case "VersionReducidaAdministradores": return <VersionReducidaAdministradores />;
       case "SubaNotaDeAutorizacion": return <SubaNotaDeAutorizacion setOpcionSeleccionada={setOpcionSeleccionada} />;

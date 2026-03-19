@@ -17,6 +17,8 @@ import Layout from './components/layout/Layout';
 import Confirmaciones from './components/NotaDeAutorizacion/Confirmacion';
 import RegistroAsistencia from './components/AsistenciaQR/RegistroAsistencia';
 import VisualizacionMisNotasRefentes from './components/NotaDeAutorizacion/VisualizacionMisNotasRefentes';
+import CcAsistenciasMain from './components/CcAsistenciaQR/CcAsistenciasMain';
+import RegistroCcAsistencia from './components/CcAsistenciaQR/RegistroCcAsistencia';
 import useDocumentTitle from './hooks/useDocumentTitle';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -51,6 +53,9 @@ function App() {
             <Route path='/confirmaciones' element={<ProtectedRoute><Layout><TitleWrapper title="Confirmaciones"><Confirmaciones /></TitleWrapper></Layout></ProtectedRoute>} />
             <Route path='/asistencia/registrar/:courseId' element={<ProtectedRoute><Layout><TitleWrapper title="Registrar Asistencia"><RegistroAsistencia /></TitleWrapper></Layout></ProtectedRoute>} />
             <Route path='/mis-notas-autorizacion' element={<ProtectedRoute><Layout><TitleWrapper title="Mis Notas"><VisualizacionMisNotasRefentes /></TitleWrapper></Layout></ProtectedRoute>} />
+            {/* Rutas para CC Asistencia */}
+            <Route path='/cc-asistencias' element={<ProtectedRoute><Layout><TitleWrapper title="Registro Asistencia CC"><CcAsistenciasMain /></TitleWrapper></Layout></ProtectedRoute>} />
+            <Route path='/cc-asistencias/registrar/:eventoId' element={<Layout><TitleWrapper title="Registrar Asistencia CC"><RegistroCcAsistencia /></TitleWrapper></Layout>} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
