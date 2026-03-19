@@ -52,7 +52,24 @@ const ReasignarModal = ({ open, onClose, onReasign, loading, selectedRowData, ad
                     InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>),}}/>
                 <Paper sx={{ maxHeight: 300, overflow: 'auto', border: '1px solid lightgrey' }}>
                     <List dense>
-                        {filteredAdminUsersForModal.length === 0 && <ListItem><ListItemText primary="No se encontraron usuarios ADM." /></ListItem>}
+                        {/* Opción de Sin Asignar */}
+                        {!userSearchTerm && (
+                           <ListItem 
+                                button 
+                                selected={selectedUserForReasign?.cuil === null} 
+                                onClick={() => setSelectedUserForReasign({ cuil: null, detalle_persona: { nombre: 'Sin', apellido: 'asignar' } })}
+                                sx={{ borderBottom: '1px solid #eee', bgcolor: 'rgba(0, 0, 0, 0.02)' }}
+                            >
+                                <ListItemText 
+                                    primary="Sin asignar" 
+                                    secondary="Dejar la instancia sin un administrador responsable"
+                                    primaryTypographyProps={{ fontWeight: 'bold', color: 'error.main' }} 
+                                />
+                                {selectedUserForReasign?.cuil === null && <Chip label="Seleccionado" color="primary" size="small" />}
+                            </ListItem>
+                        )}
+
+                        {filteredAdminUsersForModal.length === 0 && !userSearchTerm && <ListItem><ListItemText primary="No se encontraron usuarios ADM." /></ListItem>}
                         {filteredAdminUsersForModal.map(user => (
                             <ListItem key={user.cuil} button selected={selectedUserForReasign?.cuil === user.cuil} onClick={() => setSelectedUserForReasign(user)}>
                                 <ListItemText primary={`${user.detalle_persona?.nombre || ''} ${user.detalle_persona?.apellido || ''} - Cuil: ${user.cuil}`} primaryTypographyProps={{ fontWeight: 500, wordBreak: 'break-word', color: "black" }} />
@@ -64,7 +81,12 @@ const ReasignarModal = ({ open, onClose, onReasign, loading, selectedRowData, ad
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Cancelar</Button>
-                <Button onClick={handleConfirm} variant="contained" color="primary" disabled={!selectedUserForReasign || loading}>
+                <Button 
+                    onClick={handleConfirm} 
+                    variant="contained" 
+                    color="primary" 
+                    disabled={(selectedUserForReasign === null) || loading}
+                >
                     {loading ? <CircularProgress size={24} color="inherit" /> : "Confirmar Reasignación"}
                 </Button>
             </DialogActions>

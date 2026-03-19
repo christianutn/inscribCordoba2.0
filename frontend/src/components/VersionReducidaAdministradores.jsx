@@ -151,7 +151,9 @@ const CronogramaAdminReducido = () => {
     };
 
     const handleReasign = createUpdateHandler(
-        (user) => `Instancia reasignada a ${user.detalle_persona?.nombre || ''} ${user.detalle_persona?.apellido || ''} exitosamente.`,
+        (user) => user.cuil 
+            ? `Instancia reasignada a ${user.detalle_persona?.nombre || ''} ${user.detalle_persona?.apellido || ''} exitosamente.`
+            : "Instancia dejada sin asignar exitosamente.",
         (user) => ({ asignado: user.cuil })
     );
 
