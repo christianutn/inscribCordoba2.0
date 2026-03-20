@@ -541,7 +541,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
                   <LinkInteres
                     imagenSrc={link.img}
                     titulo={link.title}
-                    onClick={() => window.open(link.url, '_blank', 'noopener,noreferrer')}
+                    url={link.url}
                   />
                 </Grid>
               ))}
