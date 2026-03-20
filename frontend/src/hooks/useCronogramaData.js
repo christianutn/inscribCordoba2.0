@@ -41,7 +41,7 @@ export const useCronogramaData = () => {
             setAllDepartamentos(departamentos);
             setAllMediosInscripcion(medios);
 
-            const filteredAdminUsers = usuariosData.filter(user => user.rol === 'ADM');
+            const filteredAdminUsers = usuariosData.filter(user => user.rol === 'ADM' || user.rol === 'GA');
             setAdminUsers(filteredAdminUsers);
 
             const usersMap = new Map(usuariosData.map(u => [u.cuil, `${u.detalle_persona?.nombre || ''} ${u.detalle_persona?.apellido || ''}`.trim()]));

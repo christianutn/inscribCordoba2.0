@@ -104,7 +104,11 @@ const ModificacionMasivaModal = ({
     };
 
     const handleSubmit = () => {
-        onConfirm(formData);
+        const dataToSubmit = { ...formData };
+        if (dataToSubmit.asignado === 'NULL_SYSTEM') {
+            dataToSubmit.asignado = null;
+        }
+        onConfirm(dataToSubmit);
     };
 
     const hasChanges = Object.keys(formData).length > 0;
@@ -251,6 +255,11 @@ const ModificacionMasivaModal = ({
                                 notched
                             >
                                 <MenuItem value=""><em>(Sin cambios)</em></MenuItem>
+                                <MenuItem value="NULL_SYSTEM">
+                                    <Typography color="error.main" sx={{ fontWeight: 'bold' }}>
+                                        Sin asignar (Quitar responsable)
+                                    </Typography>
+                                </MenuItem>
                                 {adminUsers?.map((user) => (
                                     <MenuItem key={user.cuil} value={user.cuil}>
                                         {user.detalle_persona?.nombre} {user.detalle_persona?.apellido} ({user.cuil})

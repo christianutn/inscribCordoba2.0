@@ -24,6 +24,7 @@ import { useCronogramaFilters } from '../hooks/useCronogramaFilters';
 import { formatBooleanToSiNo } from './Cronograma/utils';
 import FilterBar from './Cronograma/FilterBar';
 import DetalleInstanciaModal from './Cronograma/Modals/DetalleInstanciaModal';
+import ReasignarModal from './Cronograma/Modals/ReasignarModal';
 
 import CambiarEstadoModal from './Cronograma/Modals/CambiarEstadoModal';
 import CambiarFechasModal from './Cronograma/Modals/CambiarFechasModal';
@@ -55,6 +56,7 @@ const CronogramaGAReducido = () => {
     const [selectedRowData, setSelectedRowData] = useState(null);
 
     // States for modals
+    const [reasignModalOpen, setReasignModalOpen] = useState(false);
     const [estadoModalOpen, setEstadoModalOpen] = useState(false);
     const [fechasModalOpen, setFechasModalOpen] = useState(false);
     const [otrosModalOpen, setOtrosModalOpen] = useState(false);
@@ -117,6 +119,7 @@ const CronogramaGAReducido = () => {
 
     const handleCloseAllModals = useCallback(() => {
         setModalOpen(false);
+        setReasignModalOpen(false);
         setEstadoModalOpen(false);
         setFechasModalOpen(false);
         setOtrosModalOpen(false);
@@ -161,6 +164,13 @@ const CronogramaGAReducido = () => {
         }
     };
 
+
+    const handleReasign = createUpdateHandler(
+        (user) => user.cuil 
+            ? `Instancia reasignada a ${user.detalle_persona?.nombre || ''} ${user.detalle_persona?.apellido || ''} exitosamente.`
+            : "Instancia dejada sin asignar exitosamente.",
+        (user) => ({ asignado: user.cuil })
+    );
 
     const handleUpdateEstado = createUpdateHandler(
         (estadoCod) => `Estado actualizado a "${allEstados.find(e => e.cod === estadoCod)?.descripcion || estadoCod}" exitosamente.`,
@@ -334,6 +344,7 @@ const CronogramaGAReducido = () => {
                     open={modalOpen}
                     onClose={() => setModalOpen(false)}
                     selectedRowData={selectedRowData}
+                    onOpenReasignModal={() => setReasignModalOpen(true)}
                     onOpenEstadoModal={() => setEstadoModalOpen(true)}
                     onOpenOtrosModal={() => setOtrosModalOpen(true)}
                     onOpenRestrictionsModal={() => setRestrictionsModalOpen(true)}
@@ -343,8 +354,17 @@ const CronogramaGAReducido = () => {
                     onOpenPublicadaModal={() => setPublicadaModalOpen(true)}
                     onOpenCupoModal={() => setCupoModalOpen(true)}
                     onOpenMedioInscripcionModal={() => setMedioInscripcionModalOpen(true)}
-                    showReasignar={false}
+                    showReasignar={true}
                     showCambiarFechas={false}
+                />
+
+                <ReasignarModal
+                    open={reasignModalOpen}
+                    onClose={handleCloseAllModals}
+                    onReasign={handleReasign}
+                    loading={loadingAction}
+                    selectedRowData={selectedRowData}
+                    adminUsers={adminUsers}
                 />
 
 
