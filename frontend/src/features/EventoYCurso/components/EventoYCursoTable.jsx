@@ -33,6 +33,7 @@ const EventoYCursoTable = ({ data, onEdit, onDelete }) => {
             field: 'tieneEvento',
             headerName: 'Evento',
             width: 120,
+            valueGetter: (value, row) => row.tiene_evento_creado ? 'Con Evento' : 'Sin Evento',
             renderCell: (params) => (
                 <Chip
                     label={params.row.tiene_evento_creado ? 'Con Evento' : 'Sin Evento'}
@@ -64,6 +65,10 @@ const EventoYCursoTable = ({ data, onEdit, onDelete }) => {
             field: 'certifica_en_cc',
             headerName: 'Certifica CC',
             width: 110,
+            valueGetter: (value, row) => {
+                if (!row.detalle_evento) return '-';
+                return row.detalle_evento.certifica_en_cc ? 'Sí' : 'No';
+            },
             renderCell: (params) => {
                 const evento = params.row.detalle_evento;
                 if (!evento) return <Chip label="-" size="small" variant="outlined" />;
@@ -80,6 +85,7 @@ const EventoYCursoTable = ({ data, onEdit, onDelete }) => {
             field: 'esta_autorizado',
             headerName: 'Autorizado',
             width: 100,
+            valueGetter: (value, row) => row.esta_autorizado ? 'Sí' : 'No',
             renderCell: (params) => (
                 <Chip
                     label={params.row.esta_autorizado ? 'Sí' : 'No'}
@@ -89,9 +95,23 @@ const EventoYCursoTable = ({ data, onEdit, onDelete }) => {
             )
         },
         {
+            field: 'esta_maquetado',
+            headerName: 'Maquetado',
+            width: 100,
+            valueGetter: (value, row) => row.esta_maquetado ? 'Sí' : 'No',
+            renderCell: (params) => (
+                <Chip
+                    label={params.row.esta_maquetado ? 'Sí' : 'No'}
+                    color={params.row.esta_maquetado ? 'success' : 'default'}
+                    size="small"
+                />
+            )
+        },
+        {
             field: 'esVigente',
             headerName: 'Vigente',
             width: 90,
+            valueGetter: (value, row) => row.esVigente ? 'Sí' : 'No',
             renderCell: (params) => (
                 <Chip
                     label={params.row.esVigente ? 'Sí' : 'No'}

@@ -3,7 +3,7 @@ import {
     Box, Alert, CircularProgress, Snackbar,
     TextField, InputAdornment, Dialog, DialogTitle,
     DialogContent, DialogContentText, DialogActions,
-    Typography, Button, ToggleButton, ToggleButtonGroup
+    Typography, Button, ToggleButton, ToggleButtonGroup, Badge
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
@@ -36,6 +36,11 @@ const GestionEventoYCurso = () => {
             result = result.filter(item => item.tiene_evento_creado == 1);
         } else if (filter === 'sinEvento') {
             result = result.filter(item => !item.tiene_evento_creado || item.tiene_evento_creado == 0);
+        } else if (filter === 'pendientesVictorius') {
+            result = result.filter(item => 
+                (!item.tiene_evento_creado || item.tiene_evento_creado == 0) && 
+                item.tiene_formulario_evento_creado == 1
+            );
         }
 
         // Filtrar por búsqueda de texto
@@ -108,6 +113,13 @@ const GestionEventoYCurso = () => {
         setNotification({ ...notification, open: false });
     };
 
+    const pendientesCount = useMemo(() => {
+        return data.filter(item => 
+            (!item.tiene_evento_creado || item.tiene_evento_creado == 0) && 
+            item.tiene_formulario_evento_creado == 1
+        ).length;
+    }, [data]);
+
     if (loading && data.length === 0) {
         return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
     }
@@ -136,7 +148,7 @@ const GestionEventoYCurso = () => {
                         ),
                     }}
                 />
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                     <ToggleButtonGroup
                         value={filter}
                         exclusive
@@ -144,16 +156,61 @@ const GestionEventoYCurso = () => {
                             if (newFilter !== null) setFilter(newFilter);
                         }}
                         size="small"
+                        color="primary"
+                        sx={{
+                            backgroundColor: 'white',
+                            borderRadius: '8px',
+                            '& .MuiToggleButtonGroup-grouped': {
+                                border: '1px solid #e0e0e0',
+                            }
+                        }}
                     >
-                        <ToggleButton value="todos">Todos</ToggleButton>
-                        <ToggleButton value="conEvento">Con Evento</ToggleButton>
-                        <ToggleButton value="sinEvento">Sin Evento</ToggleButton>
+                        <ToggleButton value="todos" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Todos</ToggleButton>
+                        <ToggleButton value="conEvento" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Con Evento</ToggleButton>
+                        <ToggleButton value="sinEvento" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Sin Evento</ToggleButton>
+                        <ToggleButton 
+                            value="pendientesVictorius" 
+                            color="primary"
+                            sx={{ 
+                                px: 2,
+                                textTransform: 'none',
+                                fontWeight: pendientesCount > 0 ? 700 : 500,
+                                ...(pendientesCount > 0 && {
+                                    color: 'primary.main',
+                                    '&.Mui-selected, &.Mui-selected:hover': {
+                                        backgroundColor: 'primary.main',
+                                        color: 'white',
+                                    }
+                                })
+                            }}
+                        >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                Pendientes Cargar en Victorius
+                                {pendientesCount > 0 && (
+                                    <Box 
+                                        sx={{ 
+                                            backgroundColor: 'error.main', 
+                                            color: 'white', 
+                                            borderRadius: '12px', 
+                                            px: 1, 
+                                            py: 0.3, 
+                                            fontSize: '0.75rem',
+                                            fontWeight: 'bold',
+                                            lineHeight: 1.2
+                                        }}
+                                    >
+                                        {pendientesCount}
+                                    </Box>
+                                )}
+                            </Box>
+                        </ToggleButton>
                     </ToggleButtonGroup>
                     <Button
                         variant="contained"
                         color="primary"
                         startIcon={<AddIcon />}
                         onClick={() => setCrearCursoModalOpen(true)}
+                        sx={{ borderRadius: '20px', px: 3, textTransform: 'none', fontWeight: 600 }}
                     >
                         Nuevo Curso
                     </Button>

@@ -337,11 +337,11 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <FormControl fullWidth>
-                            <InputLabel>¿Tiene evento creado?</InputLabel>
+                            <InputLabel>¿Tiene evento creado en Victorius?</InputLabel>
                             <Select
                                 name="tiene_evento_creado"
                                 value={formData.tiene_evento_creado}
-                                label="¿Tiene evento creado?"
+                                label="¿Tiene evento creado en Victorius?"
                                 onChange={handleChange}
 
                             >
