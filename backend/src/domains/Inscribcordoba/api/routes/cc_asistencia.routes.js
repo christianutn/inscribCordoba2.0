@@ -5,6 +5,8 @@ import { getEventos, getEventoById, createEvento, updateEvento, deleteEvento } f
 import { getInscriptosByEvento, confirmarAsistencia, updateNotaYAsistencia, cargarInscriptosMasivos } from "../controllers/cc_asistencia_inscriptos.controller.js";
 import { createOrUpdateParticipantesG, createOrUpdateParticipantesMasivos } from "../controllers/cc_asistencia_participantes.controller.js";
 import CidiService from '../../../../services/CidiService.js';
+import { publicApiLimiter } from "../../../../middlewares/rateLimiter.js";
+
 
 const router = Router();
 const cidiService = new CidiService();
@@ -28,7 +30,7 @@ router.get("/inscriptos/evento/:evento_id", passport.authenticate('jwt', { sessi
 router.put("/inscriptos/:id", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), updateNotaYAsistencia);
 
 // Confirm Attendance (QR or Manual lookup) -> Open for general users without auth if triggered via QR
-router.post("/inscriptos/confirmar", confirmarAsistencia);
+router.post("/inscriptos/confirmar", publicApiLimiter, confirmarAsistencia);
 
 // Carga Masiva (Excel template upload)
 router.post("/inscriptos/masivos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), cargarInscriptosMasivos);
@@ -42,7 +44,7 @@ router.post("/participantes/upsert", createOrUpdateParticipantesG);
 router.post("/participantes/masivos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), createOrUpdateParticipantesMasivos);
 
 // Look up from Cidi via CIDI service
-router.get("/participantes/cidi/:cuil", async (req, res) => {
+router.get("/participantes/cidi/:cuil", publicApiLimiter, async (req, res) => {
     try {
         const { cuil } = req.params;
         const personaCidi = await cidiService.getPersonaEnCidiPor(cuil);
@@ -52,7 +54,7 @@ router.get("/participantes/cidi/:cuil", async (req, res) => {
         } else {
             return res.status(404).json({ message: "Persona no encontrada en CIDI" });
         }
-    } catch(err) {
+    } catch (err) {
         return res.status(500).json({ message: err.message });
     }
 });
