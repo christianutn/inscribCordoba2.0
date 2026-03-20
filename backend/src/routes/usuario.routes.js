@@ -1,5 +1,5 @@
 
-import { getUsuario, postUsuario, putUsuario, deleteUsuario, getMyUser, updateContrasenia, recuperoContrasenia } from "../domains/Inscribcordoba/api/controllers/usuario.controllers.js";
+import { getUsuario, postUsuario, putUsuario, deleteUsuario, getMyUser, updateContrasenia, recuperoContrasenia, invalidarSesion } from "../domains/Inscribcordoba/api/controllers/usuario.controllers.js";
 import { Router } from "express";
 import passport from "passport";
 import autorizar from "../utils/autorizar.js"
@@ -39,6 +39,8 @@ usuarioRouter.get("/myuser", passport.authenticate('jwt', { session: false }), g
 usuarioRouter.put("/contrasenia", passport.authenticate('jwt', { session: false }), updateContrasenia)
 
 usuarioRouter.put("/recuperoContrasenia", recuperoContrasenia) //Envia correo para con el enlace para recuperar la contraseña. No neesita de jwt ya que este es enviado luego al correo del usuario
+
+usuarioRouter.put("/invalidar-sesion", passport.authenticate('jwt', { session: false }), invalidarSesion) // Invalida la sesión del usuario por inactividad
 
 
 

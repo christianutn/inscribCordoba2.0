@@ -348,3 +348,34 @@ export const recuperoContrasenia = async (req, res, next) => {
         next(error);
     }
 };
+
+export const invalidarSesion = async (req, res, next) => {
+    try {
+        const cuil = req.user.user?.cuil;
+
+        if (!cuil) {
+            const error = new Error("No se pudo identificar al usuario");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const usuario = await Usuario.findByPk(cuil);
+        if (!usuario) {
+            const error = new Error("Usuario no encontrado");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Incrementar token_version para invalidar todos los tokens existentes
+        await Usuario.update(
+            { token_version: usuario.token_version + 1 },
+            { where: { cuil } }
+        );
+
+        logger.info(`🔒 Sesión invalidada por inactividad - Usuario: ${cuil}`);
+
+        res.status(200).json({ message: "Sesión invalidada correctamente" });
+    } catch (error) {
+        next(error);
+    }
+};

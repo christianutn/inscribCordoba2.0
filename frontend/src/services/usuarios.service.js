@@ -162,3 +162,21 @@ export const recuperoContrasenia = async (cuil) => {
         throw error
     }
 }
+
+export const invalidarSesionPorInactividad = async () => {
+    try {
+        const response = await fetch(`${URL}/invalidar-sesion`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        });
+
+        // No importa si falla (token ya expirado, etc.), el frontend igualmente hará logout
+        return response.ok;
+    } catch (error) {
+        console.error("Error al invalidar sesión:", error);
+        return false;
+    }
+}

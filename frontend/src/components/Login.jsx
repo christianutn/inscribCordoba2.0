@@ -31,7 +31,7 @@ import { useAuth } from '../context/AuthContext';
 
 
 const Login = () => {
-    const { checkAuth, user } = useAuth();
+    const { checkAuth, user, showSessionExpired } = useAuth();
     const [mensajeDeError, setMensajeDeError] = useState(null);
     const [mensajeDeExito, setMensajeDeExito] = useState(null);
     const [open, setOpen] = useState(false);
@@ -52,6 +52,16 @@ const Login = () => {
     useEffect(() => {
         if (user) {
             navigate(from, { replace: true });
+        }
+
+        // Verificar si venimos de un cierre por inactividad.
+        // Solo mostrar la alerta si NO se está mostrando el diálogo premium actual (showSessionExpired = false)
+        const reason = localStorage.getItem('logout_reason');
+        if (reason === 'inactivity') {
+            if (!showSessionExpired) {
+                setMensajeDeError("Tu sesión ha expirado por inactividad. Por favor, ingresa de nuevo.");
+            }
+            localStorage.removeItem('logout_reason'); // Limpiar para que no re-aparezca (o si ya se mostró en el diálogo de esta pestaña)
         }
 
         const rememberedCuil = localStorage.getItem('rememberedCuil');
