@@ -269,7 +269,7 @@ export default function Principal() {
       case "MisNotasAutorizacionIdentifier": return <VisualizacionMisNotasRefentes />;
       case "Efemerides": return <GestionEfemerides modo="carga" user={user} />;
       case "Home":
-      default: return <Home nombre={user?.nombre} setOpcionSeleccionada={setOpcionSeleccionada} />;
+      default: return <Home nombre={user?.nombre} rol={user?.rol} setOpcionSeleccionada={setOpcionSeleccionada} />;
     }
   };
 

@@ -1,4 +1,4 @@
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, CssBaseline } from '@mui/material';
 import theme from './theme/theme';
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import Login from './components/Login';
@@ -32,6 +32,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <AuthProvider>
         <BrowserRouter>
           <Routes>

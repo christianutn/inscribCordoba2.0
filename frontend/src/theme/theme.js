@@ -70,7 +70,7 @@ const theme = createTheme({
     },
     body2: { fontFamily: typography.fontFamilySecondary },
     button: {
-      fontFamily: typography.fontFamilyPrimary,
+      fontFamily: typography.fontFamilySecondary,
       fontWeight: typography.fontWeights.bold,
       fontSize: typography.fontSizes.medium,
       color: colors.CBA_Blue,

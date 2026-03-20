@@ -1,104 +1,149 @@
-import { Box, Typography } from "@mui/material";
+import React from 'react';
+import { Box, Typography, Container, IconButton, Stack } from "@mui/material";
+import {
+  Facebook as FacebookIcon,
+  X as XIcon,
+  Instagram as InstagramIcon,
+  YouTube as YouTubeIcon
+} from "@mui/icons-material";
 import logoCba from '../../components/imagenes/gobierno_blanco.png';
 
 /**
- * Footer component refactored for balanced UI: max-width 1200px, flexbox layout, and centered perfectly.
+ * Footer component refactored to Government of Córdoba Institutional Standards.
+ * Features a 3-column layout: Identity Logo, Contact Info, and Social Media links.
  */
 export default function Footer() {
   return (
     <Box
       component="footer"
       sx={{
-        backgroundColor: "primary.main",
+        backgroundColor: "#009EE3", // Azul Institucional GBC
         color: "common.white",
         width: "100%",
-        position: 'relative', // always at bottom or relative to flow
-        bottom: 0,
-        mt: 'auto', // Pushes footer to end when in flex container
+        position: 'relative',
+        mt: 'auto',
+        py: 3,
       }}
     >
-      {/* Inner container with max-width */}
-      <Box
-        sx={{
-          maxWidth: '1200px',
-          mx: 'auto',
-          py: 2, // moderate vertical padding
-          px: 4, // lateral padding
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: { xs: 4, md: 15 },
-        }}
-      >
-        {/* Logo Section */}
+      <Container maxWidth="lg">
         <Box
           sx={{
-            display: "flex",
-            justifyContent: { xs: "center", md: "flex-end" },
-            alignItems: "center",
-            flex: 1,
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: 'center',
+            justifyContent: 'center', // Centrado compacto
+            gap: { xs: 4, md: 20 }, // Espaciado simétrico entre los 3 bloques
           }}
         >
+          {/* Columna Izquierda: Identidad */}
           <Box
-            component="img"
-            src={logoCba}
-            alt="Gobierno de Córdoba"
             sx={{
-              width: "100%",
-              maxWidth: "260px",
-              height: "auto",
-              display: "block",
-              mt: 4.5, // baja el logo
-
-            }}
-          />
-        </Box>
-
-        {/* Info Section */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: { xs: "center", md: "flex-start" },
-            textAlign: { xs: "center", md: "left" },
-            flex: 1,
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 'bold',
-              mb: 1,
-              fontSize: '1.08rem',
-              letterSpacing: '0.01em'
+              display: "flex",
+              alignItems: 'center'
             }}
           >
-            Secretaría General de la Gobernación
-          </Typography>
+            <Box
+              component="img"
+              src={logoCba}
+              alt="Gobierno de Córdoba"
+              sx={{
+                width: "250px",
+                height: "auto",
+                display: "block",
+                mt: { xs: 1, md: 3 },
+              }}
+            />
+          </Box>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '1rem' }}>
-              Secretaría de Capital Humano
+          {/* Columna Central: Información de Contacto */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center"
+            }}
+          >
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: 600,
+                opacity: 1,
+                fontSize: '1.05rem',
+                fontFamily: 'Roboto, sans-serif'
+              }}
+            >
+              Gobierno de la Provincia de Córdoba
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '1rem' }}>
-              Subdirección de Capacitación y Formación
+            <Typography variant="body1" sx={{ opacity: 0.9, mt: 0.5, fontSize: '1rem' }}>
+              República Argentina / Tel: 0800 888-1234
+            </Typography>
+            <Typography
+              variant="body1"
+              component="a"
+              href="mailto:soportecampuscordoba@cba.gov.ar"
+              sx={{
+                opacity: 1,
+                mt: 1,
+                color: 'inherit',
+                textDecoration: 'none',
+                fontWeight: 600,
+                fontSize: '1rem',
+                '&:hover': { textDecoration: 'underline' }
+              }}
+            >
+              soportecampuscordoba@cba.gov.ar
             </Typography>
           </Box>
 
-          <Typography
-            variant="body2"
+          {/* Columna Derecha: Redes Sociales */}
+          <Box
             sx={{
-              mt: 1,
-              fontWeight: 'medium',
-              opacity: 0.9, fontSize: '1rem'
+              display: "flex",
+              alignItems: "center"
             }}
           >
-            soportecampuscordoba@cba.gov.ar
-          </Typography>
+            <Stack direction="row" spacing={0.5}>
+              <IconButton
+                sx={{ color: '#FFFFFF' }}
+                component="a"
+                href="https://es-la.facebook.com/gobdecordoba/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FacebookIcon />
+              </IconButton>
+              <IconButton
+                sx={{ color: '#FFFFFF' }}
+                component="a"
+                href="https://x.com/gobdecordoba?lang=es"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <XIcon />
+              </IconButton>
+              <IconButton
+                sx={{ color: '#FFFFFF' }}
+                component="a"
+                href="https://www.instagram.com/cordobaok/?hl=es-la"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <InstagramIcon />
+              </IconButton>
+              <IconButton
+                sx={{ color: '#FFFFFF' }}
+                component="a"
+                href="https://www.youtube.com/user/gobiernodecordoba"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <YouTubeIcon />
+              </IconButton>
+            </Stack>
+          </Box>
         </Box>
-      </Box>
+      </Container>
     </Box>
   );
 }
