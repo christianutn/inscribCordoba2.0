@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 
-const LinkInteres = ({ imagenSrc, titulo, onClick }) => {
+const LinkInteres = ({ imagenSrc, titulo, url }) => {
   return (
     <Paper
       elevation={0}
@@ -65,7 +65,10 @@ const LinkInteres = ({ imagenSrc, titulo, onClick }) => {
       <Button
         variant="contained"
         fullWidth
-        onClick={onClick}
+        component="a"
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
         sx={{
           fontFamily: 'Poppins, sans-serif',
           py: 1.1,
@@ -77,6 +80,7 @@ const LinkInteres = ({ imagenSrc, titulo, onClick }) => {
           textTransform: 'none',
           letterSpacing: '0.5px',
           boxShadow: 'none',
+          textDecoration: 'none',
           transition: 'all 0.3s ease',
           '&:hover': {
             backgroundColor: '#0086C2',
