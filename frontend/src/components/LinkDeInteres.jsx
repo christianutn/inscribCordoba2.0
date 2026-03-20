@@ -47,10 +47,10 @@ const LinkInteres = ({ imagenSrc, titulo, url }) => {
       <Typography
         variant="h6"
         sx={{
-          fontFamily: 'Poppins, sans-serif',
-          fontWeight: 600,
-          fontSize: '1.3rem',
-          lineHeight: 1.3,
+          fontFamily: 'Geogrotesque Sharp, sans-serif',
+          fontWeight: 700,
+          fontSize: '1.55rem',
+          lineHeight: 1.2,
           textAlign: 'center',
           mb: 4,
           flexGrow: 1,
@@ -58,6 +58,7 @@ const LinkInteres = ({ imagenSrc, titulo, url }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          letterSpacing: '0.5px'
         }}
       >
         {titulo}

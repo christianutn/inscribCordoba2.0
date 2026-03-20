@@ -106,7 +106,7 @@ const CrearAviso = () => {
   };
 
   return (
-    <Box sx={{ py: 4, px: 2, maxWidth: '960px', margin: 'auto' }}>
+    <Box sx={{ py: 4, px: { xs: 2, md: 5 }, maxWidth: '100%' }}>
       <Card sx={{
         p: { xs: 2, sm: 3, md: 4 },
         borderRadius: 3,

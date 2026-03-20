@@ -209,7 +209,7 @@ const SubaNotaDeAutorizacion = ({ setOpcionSeleccionada }) => {
   const isInfo = alert.open && alert.severity === 'info';
 
   return (
-    <Box sx={{ padding: '20px', maxWidth: '960px', margin: 'auto' }}>
+    <Box sx={{ padding: '20px', maxWidth: '100%', px: { xs: 2, md: 5 } }}>
 
       <Alert severity="info" sx={{ mb: 3 }}>
         ¿Ya cargaste una nota hoy? Podés consultar tus envíos recientes en{' '}

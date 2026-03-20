@@ -165,7 +165,7 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
           <CircularProgress color="inherit" />
         </Backdrop>
       )}
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Container maxWidth={false} sx={{ mt: 4, mb: 4, px: { xs: 2, md: 5 } }}>
         <Box sx={{ mb: 2 }}>
           <Titulo texto="Crear Evento" />
         </Box>

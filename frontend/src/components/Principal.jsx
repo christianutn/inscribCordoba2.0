@@ -274,7 +274,7 @@ export default function Principal() {
   };
 
   return (
-    <Box sx={{ display: 'flex', maxWidth: '100vw', overflowX: 'hidden' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', maxWidth: '100vw', overflowX: 'hidden' }}>
       <CssBaseline />
       <AppBarStyled position="fixed" open={open}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -388,7 +388,7 @@ export default function Principal() {
       </Drawer>
 
       <Main open={open} sx={{ display: 'flex', flexDirection: 'column', p: 0 }}>
-        <Box sx={{ flexGrow: 1, p: { xs: 2, sm: 3 } }}>
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           {mostrarOpcion()}
         </Box>
         <Footer />

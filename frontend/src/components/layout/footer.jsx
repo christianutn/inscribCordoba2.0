@@ -25,14 +25,15 @@ export default function Footer() {
         py: 3,
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth={false} sx={{ px: { xs: 2, md: 5 } }}>
         <Box
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
             alignItems: 'center',
             justifyContent: 'center', // Centrado compacto
-            gap: { xs: 4, md: 20 }, // Espaciado simétrico entre los 3 bloques
+            gap: { xs: 4, md: 8, lg: 20 }, // Gradual bridging: compact in Surface/Tablet, wide in desktop
+            flexWrap: 'wrap' // Safety net: if it doesn't fit, it wraps instead of cutting
           }}
         >
           {/* Columna Izquierda: Identidad */}
