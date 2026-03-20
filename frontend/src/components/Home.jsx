@@ -236,7 +236,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
               {nombre ? `¡Hola ${nombre}!` : '¡Hola Valentina De Los Angeles!'}
             </Typography>
 
-            <Grid container spacing={6} alignItems="flex-start">
+            <Grid container spacing={{ xs: 0.5, md: 0.5 }} alignItems="flex-start">
               {/* Últimos Avisos (70%) */}
               <Grid item xs={12} md={8.4}>
                 <Box sx={{ pr: { md: 2 } }}>
@@ -434,17 +434,18 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
               sx={{
                 fontWeight: 600,
                 fontFamily: 'Geogrotesque Sharp, sans-serif',
-                mb: 8,
+                mb: { xs: 5, md: 8 },
                 color: '#1A202C',
                 textAlign: 'center',
-                letterSpacing: '-1.5px',
-                textTransform: 'uppercase'
+                letterSpacing: { xs: '-0.5px', md: '-1.5px' },
+                textTransform: 'uppercase',
+                fontSize: { xs: '1.6rem', md: '2.2rem' }
               }}
             >
               Ruta de Gestión
             </Typography>
 
-            <Grid container spacing={4} justifyContent="center">
+            <Grid container spacing={{ xs: 2.5, md: 4 }} justifyContent="center">
               {[
                 { step: 'Paso 1', title: 'Cargar Nota', color: '#E2464C', desc: 'Iniciá el proceso cargando la nota de autorización correspondiente.', option: 'SubaNotaDeAutorizacion' },
                 { step: 'Paso 2', title: 'Crear Evento', color: '#009EE3', desc: 'Completá el formulario del evento de tu capacitación.', option: 'Eventos' },
@@ -526,15 +527,16 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
                 fontWeight: 600,
                 fontFamily: 'Geogrotesque Sharp, sans-serif',
                 textAlign: 'center',
-                mb: 8,
+                mb: { xs: 6, md: 8 },
                 color: '#1A202C',
                 textTransform: 'uppercase',
-                letterSpacing: '-1.5px'
+                letterSpacing: { xs: '-0.5px', md: '-1.5px' },
+                fontSize: { xs: '1.6rem', md: '2.2rem' }
               }}
             >
               Accesos Rápidos
             </Typography>
-            <Grid container spacing={4} justifyContent="center" alignItems="stretch">
+            <Grid container spacing={{ xs: 2.5, md: 4 }} justifyContent="center" alignItems="stretch">
               {linksInteresData.map((link, i) => (
                 <Grid item xs={12} sm={6} md={3} key={i} sx={{ display: 'flex' }}>
                   <LinkInteres
