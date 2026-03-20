@@ -503,12 +503,12 @@ const GestionEfemerides = ({ modo = "carga", user }) => {
                                         <TableCell sx={{ color: 'black' }}>
                                             {ef.url_disenio ? (
                                                 <Tooltip title="Ver diseño" arrow>
-                                                    <IconButton 
-                                                        size="small" 
-                                                        component="a" 
-                                                        href={ef.url_disenio.startsWith('http') ? ef.url_disenio : `https://${ef.url_disenio}`} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer" 
+                                                    <IconButton
+                                                        size="small"
+                                                        component="a"
+                                                        href={ef.url_disenio.startsWith('http') ? ef.url_disenio : `https://${ef.url_disenio}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
                                                         sx={{ color: theme.palette.primary.main }}
                                                     >
                                                         <OpenInNewIcon fontSize="small" />

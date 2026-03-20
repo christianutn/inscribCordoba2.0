@@ -25,7 +25,7 @@ export default function Footer() {
         py: 3,
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth={false} sx={{ px: { xs: 2, md: 5 } }}>
         <Box
           sx={{
             display: 'flex',

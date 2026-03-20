@@ -118,7 +118,7 @@ const VisualizacionMisNotasRefentes = () => {
                     </Alert>
                 )
             }
-            <Container maxWidth="xl">
+            <Container maxWidth={false} sx={{ px: { xs: 2, md: 5 } }}>
                 <Box sx={{ mb: 4 }}>
                     <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom color="text.primary">
                         Mis Notas de Autorización

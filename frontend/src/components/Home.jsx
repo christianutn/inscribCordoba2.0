@@ -29,7 +29,8 @@ import {
   ArrowForward as ArrowForwardIcon,
   NotificationsActive as NotificationsActiveIcon,
   CalendarToday as CalendarTodayIcon,
-  AutoAwesome as AutoAwesomeIcon
+  AutoAwesome as AutoAwesomeIcon,
+  PushPin as PushPinIcon
 } from '@mui/icons-material';
 import { getAvisos, deleteAviso } from '../services/avisos.service';
 import DOMPurify from 'dompurify';
@@ -193,253 +194,257 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
         </Dialog>
       )}
 
-      <Box sx={{ backgroundColor: '#FFFFFF', minHeight: '100vh', pt: 8, pb: 8 }}>
-        <Container maxWidth="lg" sx={{ position: 'relative', px: { xs: 2, md: 4 } }}>
-          {/* Silueta sutil institucional (El Panal) */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '-40px',
-              right: 0,
-              width: { xs: '200px', sm: '300px', md: '400px' },
-              height: { xs: '200px', sm: '300px', md: '400px' },
-              backgroundSize: 'contain',
-              backgroundRepeat: 'no-repeat',
-              opacity: 0.02, // Extremadamente sutil, NASA-style
-              pointerEvents: 'none',
-              zIndex: 0,
-              filter: 'grayscale(100%)'
-            }}
-          />
+      <Box sx={{ width: '100%', flexGrow: 1, backgroundColor: '#FFFFFF' }}>
+        {/* SECCIÓN 1: Bienvenida y Avisos */}
+        <Box sx={{ py: { xs: 4, md: 6 }, backgroundColor: '#FFFFFF' }}>
+          <Container maxWidth={false} sx={{ position: 'relative', px: { xs: 2, md: 5 } }}>
+            {/* Silueta sutil institucional (El Panal) */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '-30px',
+                right: 0,
+                width: { xs: '250px', sm: '350px', md: '500px' },
+                height: { xs: '250px', sm: '350px', md: '500px' },
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                opacity: 0.02,
+                pointerEvents: 'none',
+                zIndex: 0,
+                filter: 'grayscale(100%)'
+              }}
+            />
 
-          <Typography
-            variant="h2"
-            component="h1"
-            sx={{
-              fontWeight: 800,
-              fontSize: {
-                xs: 'clamp(1.75rem, 6vw, 2.22rem)',
-                md: 'clamp(2.22rem, 4vw, 2.8rem)'
-              },
-              mb: { xs: 3, md: 4 },
-              color: 'primary.main',
-              textAlign: 'left',
-              letterSpacing: '-1.5px',
-              position: 'relative',
-              zIndex: 1,
-              transform: 'translateY(-10px)',
-            }}
-          >
-            {nombre ? `¡Hola ${nombre}!` : '¡Hola Valentina De Los Angeles!'}
-          </Typography>
+            <Typography
+              variant="h2"
+              component="h1"
+              sx={{
+                fontWeight: 600,
+                fontFamily: 'Geogrotesque Sharp, sans-serif',
+                fontSize: {
+                  xs: 'clamp(1.8rem, 6vw, 2.5rem)',
+                  md: 'clamp(2.5rem, 5vw, 3.5rem)'
+                },
+                mb: { xs: 4, md: 8 },
+                color: 'primary.main',
+                textAlign: 'left',
+                letterSpacing: '-2px',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              {nombre ? `¡Hola ${nombre}!` : '¡Hola Valentina De Los Angeles!'}
+            </Typography>
 
-          <Grid container spacing={5} alignItems="flex-start">
-            {/* Últimos Avisos (65%) */}
-            <Grid item xs={12} md={8}>
-              <Box>
-                <Box display="flex" alignItems="center" mb={1.5} px={0.5}>
+            <Grid container spacing={6} alignItems="flex-start">
+              {/* Últimos Avisos (70%) */}
+              <Grid item xs={12} md={8.4}>
+                <Box sx={{ pr: { md: 2 } }}>
+                  <Box display="flex" alignItems="center" mb={3} px={0.5}>
+                    <Typography
+                      variant="h5"
+                      component="h2"
+                      sx={{
+                        fontWeight: 700,
+                        fontFamily: 'Geogrotesque Sharp, sans-serif',
+                        color: '#5C6F82',
+                        letterSpacing: '0.5px',
+                        textTransform: 'uppercase',
+                        mb: 0,
+                        fontSize: '1.2rem'
+                      }}
+                    >
+                      Últimos Avisos
+                    </Typography>
+                    {successMessage && (
+                      <Alerta
+                        severity="success"
+                        sx={{
+                          ml: 2,
+                          flexShrink: 0,
+                          fontSize: '0.85rem',
+                          fontWeight: 500,
+                          py: 0.5, px: 2,
+                          borderRadius: '16px',
+                        }}
+                        onClose={handleCloseAlert}
+                      >
+                        {successMessage}
+                      </Alerta>
+                    )}
+                    {errorMessage && (
+                      <Alerta
+                        severity="error"
+                        sx={{
+                          ml: 2,
+                          flexShrink: 0,
+                          fontSize: '0.85rem',
+                          fontWeight: 500,
+                          py: 0.5, px: 2,
+                          borderRadius: '16px',
+                        }}
+                        onClose={handleCloseAlert}
+                      >
+                        {errorMessage}
+                      </Alerta>
+                    )}
+                  </Box>
+
+                  {/* Feed de Avisos */}
+                  <Box>
+                    {loading ? (
+                      Array.from(new Array(3)).map((_, index) => (
+                        <Box key={index} sx={{ mb: 4, p: 4, backgroundColor: 'white', borderRadius: '16px', boxShadow: 1 }}>
+                          <Skeleton variant="text" width="80%" sx={{ mb: 1 }} />
+                          <Skeleton variant="text" width="40%" sx={{ fontSize: '0.8rem', mb: 2 }} />
+                          <Skeleton variant="rectangular" height={80} sx={{ borderRadius: '16px' }} />
+                        </Box>
+                      ))
+                    ) : avisos.length === 0 ? (
+                      <Box textAlign="center" p={8} sx={{ background: 'white', borderRadius: '24px', border: '1px dashed #E2E8F0' }}>
+                        <InfoOutlinedIcon sx={{ fontSize: 64, color: '#CBD5E0', mb: 2 }} />
+                        <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          No hay noticias destacadas hoy.
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                        {avisos.map((aviso) => (
+                          <AvisoCard
+                            key={aviso.id}
+                            aviso={aviso}
+                            rol={rol}
+                            formatearFecha={formatearFecha}
+                            handleDeleteAvisoClick={handleDeleteAvisoClick}
+                            loadingDelete={loadingDelete}
+                            avisoToDelete={avisoToDelete}
+                          />
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              </Grid>
+
+              {/* Bloque Información de Interés (30%) */}
+              <Grid item xs={12} md={3.6}>
+                <Box sx={{ position: 'sticky', top: '24px', pl: { md: 2 } }}>
                   <Typography
-                    variant="h6"
+                    variant="h5"
                     component="h2"
                     sx={{
                       fontWeight: 700,
-                      color: '#4A5568',
+                      fontFamily: 'Geogrotesque Sharp, sans-serif',
+                      color: '#5C6F82',
                       letterSpacing: '0.5px',
                       textTransform: 'uppercase',
-                      fontSize: { xs: '1rem', sm: '1.1rem', md: '1.3rem' },
-                      mb: 0,
-                      pl: 1
+                      mb: 4,
+                      lineHeight: 1.2,
+                      fontSize: '1.1rem'
                     }}
                   >
-                    Avisos
+                    ¿Qué podés hacer aquí?
                   </Typography>
-                  {successMessage && (
-                    <Alerta
-                      severity="success"
-                      sx={{
-                        ml: 2,
-                        flexShrink: 0,
-                        fontSize: '0.8rem',
-                        fontFamily: 'Roboto, sans-serif',
-                        fontWeight: 500,
-                        py: 0.5, px: 1,
-                        borderRadius: '16px',
-                      }}
-                      onClose={handleCloseAlert}
-                    >
-                      {successMessage}
-                    </Alerta>
-                  )}
-                  {errorMessage && (
-                    <Alerta
-                      severity="error"
-                      sx={{
-                        ml: successMessage ? 1 : 2,
-                        flexShrink: 0,
-                        fontSize: '0.8rem',
-                        fontFamily: 'Roboto, sans-serif',
-                        fontWeight: 500,
-                        py: 0.5, px: 1,
-                        borderRadius: '16px',
-                      }}
-                      onClose={handleCloseAlert}
-                    >
-                      {errorMessage}
-                    </Alerta>
-                  )}
-                </Box>
 
-                {/* Feed de Avisos sin contenedor limitante */}
-                <Box>
-                  {loading ? (
-                    Array.from(new Array(3)).map((_, index) => (
-                      <Box key={index} sx={{ mb: 3, p: 3, backgroundColor: 'white', borderRadius: '16px', boxShadow: 1 }}>
-                        <Skeleton variant="text" width="80%" sx={{ mb: 0.5 }} />
-                        <Skeleton variant="text" width="40%" sx={{ fontSize: '0.8rem', mb: 1 }} />
-                        <Skeleton variant="rectangular" height={60} sx={{ borderRadius: '16px' }} />
-                      </Box>
-                    ))
-                  ) : avisos.length === 0 ? (
-                    <Box textAlign="center" p={6} sx={{ background: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                      <InfoOutlinedIcon sx={{ fontSize: 48, color: '#CBD5E0', mb: 2 }} />
-                      <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        No hay noticias destacadas hoy.
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                      {avisos.map((aviso) => (
-                        <AvisoCard
-                          key={aviso.id}
-                          aviso={aviso}
-                          rol={rol}
-                          formatearFecha={formatearFecha}
-                          handleDeleteAvisoClick={handleDeleteAvisoClick}
-                          loadingDelete={loadingDelete}
-                          avisoToDelete={avisoToDelete}
-                        />
-                      ))}
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            </Grid>
-
-            {/* Bloque Información de Interés (35%) */}
-            <Grid item xs={12} md={4}>
-              <Box sx={{ position: 'sticky', top: '20px' }}>
-                <Typography
-                  variant="h6"
-                  component="h2"
-                  sx={{
-                    fontWeight: 700,
-                    color: '#4A5568',
-                    letterSpacing: '0.5px',
-                    textTransform: 'uppercase',
-                    fontSize: { xs: '0.9rem', sm: '1rem', md: '1.15rem' },
-                    mb: 3,
-                    lineHeight: { xs: 1.2, sm: 1.5 }
-                  }}
-                >
-                  ¿Qué podés hacer aquí?
-                </Typography>
-
-                <List disablePadding>
-                  {[
-                    {
-                      icon: <EventAvailableIcon sx={{ fontSize: '1.8rem' }} />,
-                      title: 'Planificación Anual',
-                      desc: 'Organizá las fechas de tus capacitaciones de forma eficiente.'
-                    },
-                    {
-                      icon: <ArticleIcon sx={{ fontSize: '1.8rem' }} />,
-                      title: 'Cursos Registrados',
-                      desc: 'Consultá en tiempo real el estado de todas tus capacitaciones.'
-                    },
-                    {
-                      icon: <NotificationsActiveIcon sx={{ fontSize: '1.8rem' }} />,
-                      title: 'Avisos Importantes',
-                      desc: 'Visualizá avisos críticos y novedades al momento.'
-                    },
-                    {
-                      icon: <AutoAwesomeIcon sx={{ fontSize: '1.8rem' }} />,
-                      title: 'Gestión 100% Digital',
-                      desc: 'Para una administración ágil y sostenible.'
-                    }
-                  ].map((item, idx) => (
-                    <Box key={idx} sx={{ mb: 5, display: 'flex', alignItems: 'flex-start' }}>
-                      <Box
-                        sx={{
-                          color: '#005A87', // Azul accesible (WCAG 4.5:1)
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minHeight: '24px',
-                          mr: 2
-                        }}
-                      >
-                        {item.icon}
-                      </Box>
-                      <Box>
-                        <Typography
-                          variant="subtitle1"
+                  <List disablePadding>
+                    {[
+                      {
+                        icon: <EventAvailableIcon sx={{ fontSize: '2.5rem' }} />,
+                        title: 'Planificación Anual',
+                        desc: 'Organizá las fechas de tus capacitaciones de forma eficiente.'
+                      },
+                      {
+                        icon: <ArticleIcon sx={{ fontSize: '2.5rem' }} />,
+                        title: 'Cursos Registrados',
+                        desc: 'Consultá en tiempo real el estado de todas tus capacitaciones.'
+                      },
+                      {
+                        icon: <NotificationsActiveIcon sx={{ fontSize: '2.5rem' }} />,
+                        title: 'Avisos Importantes',
+                        desc: 'Visualizá avisos críticos y novedades al momento.'
+                      },
+                      {
+                        icon: <AutoAwesomeIcon sx={{ fontSize: '2.5rem' }} />,
+                        title: 'Gestión 100% Digital',
+                        desc: 'Para una administración ágil y sostenible.'
+                      }
+                    ].map((item, idx) => (
+                      <Box key={idx} sx={{ mb: 6, display: 'flex', alignItems: 'flex-start' }}>
+                        <Box
                           sx={{
-                            fontWeight: 600,
-                            color: '#1A1A1A',
-                            fontSize: '1.1rem', // Aumentado
-                            lineHeight: '26px'
+                            color: 'primary.main',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            mr: 3,
+                            mt: 0.5
                           }}
                         >
-                          {item.title}
-                        </Typography>
-                        <Typography
-                          variant="body1" // Aumentado
-                          sx={{
-                            mt: 0.5,
-                            fontSize: '1rem', // 16px
-                            color: 'text.secondary',
-                            lineHeight: 1.5
-                          }}
-                        >
-                          {item.desc}
-                        </Typography>
+                          {item.icon}
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 700,
+                              fontFamily: 'Geogrotesque Sharp, sans-serif',
+                              color: '#1A202C',
+                              fontSize: '1.25rem',
+                              lineHeight: 1.3
+                            }}
+                          >
+                            {item.title}
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              mt: 1,
+                              fontSize: '1.1rem',
+                              color: 'text.secondary',
+                              lineHeight: 1.6,
+                              fontFamily: 'Poppins, sans-serif'
+                            }}
+                          >
+                            {item.desc}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                  ))}
-                </List>
-              </Box>
+                    ))}
+                  </List>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </Container>
+          </Container>
+        </Box>
 
-        {/* Sección Flujo de Gestión */}
+        {/* SECCIÓN 2: Flujo de Gestión */}
         <Box
           sx={{
-            position: 'relative',
-            mt: 8,
-            mb: 0,
-            py: 8,
-            backgroundColor: '#F8F9FA', // Mantenemos el gris muy sutil para diferenciar secciones
-            borderTop: '1px solid #E9EFF2',
-            borderBottom: '1px solid #E9EFF2'
+            width: '100%',
+            py: { xs: 5, md: 8 },
+            backgroundColor: '#F4F7F9',
+            borderTop: '1px solid #E2E8F0',
+            borderBottom: '1px solid #E2E8F0'
           }}
         >
-          <Container maxWidth="lg" sx={{ px: { xs: 2, md: 4 } }}>
+          <Container maxWidth={false} sx={{ px: { xs: 2, md: 5 } }}>
             <Typography
-              variant="h4"
+              variant="h3"
               component="h2"
               sx={{
-                fontWeight: 700,
-                mb: 6,
-                color: '#1A1A1A',
+                fontWeight: 600,
+                fontFamily: 'Geogrotesque Sharp, sans-serif',
+                mb: 8,
+                color: '#1A202C',
                 textAlign: 'center',
-                letterSpacing: '-1px'
+                letterSpacing: '-1.5px',
+                textTransform: 'uppercase'
               }}
             >
-              Flujo de Gestión
+              Ruta de Gestión
             </Typography>
 
-            <Grid container spacing={3} justifyContent="center">
+            <Grid container spacing={4} justifyContent="center">
               {[
                 { step: 'Paso 1', title: 'Cargar Nota', color: '#E2464C', desc: 'Iniciá el proceso cargando la nota de autorización correspondiente.', option: 'SubaNotaDeAutorizacion' },
                 { step: 'Paso 2', title: 'Crear Evento', color: '#009EE3', desc: 'Completá el formulario del evento de tu capacitación.', option: 'Eventos' },
@@ -459,28 +464,20 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
                     role="button"
                     tabIndex={0}
                     sx={{
-                      p: { xs: 3, sm: 4 },
-                      pl: { xs: 4, sm: 5 }, // Ajuste para el borde grueso
+                      p: { xs: 4, sm: 6 },
                       borderRadius: '16px',
                       backgroundColor: '#ffffff',
-                      borderLeft: `8px solid ${item.color}`,
-                      borderTop: '1px solid #F0F0F0',
-                      borderRight: '1px solid #F0F0F0',
-                      borderBottom: '1px solid #F0F0F0',
+                      borderLeft: `10px solid ${item.color}`,
+                      borderTop: '1px solid #E2E8F0',
+                      borderRight: '1px solid #E2E8F0',
+                      borderBottom: '1px solid #E2E8F0',
                       height: '100%',
-                      position: 'relative',
-                      overflow: 'hidden',
                       cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&:hover': {
-                        borderLeftWidth: '14px',
-                        transform: 'translateY(-4px)',
-                        boxShadow: '0 6px 16px rgba(0,0,0,0.06)',
-                      },
-                      '&:focus-visible': {
-                        outline: `3px solid ${item.color}`,
-                        outlineOffset: '2px'
+                        transform: 'translateY(-12px)',
+                        boxShadow: '0 25px 30px -10px rgba(0, 0, 0, 0.15)',
                       }
                     }}
                   >
@@ -489,27 +486,27 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
                       sx={{
                         color: item.color,
                         fontWeight: 800,
-                        letterSpacing: '1px',
-                        fontSize: '0.9rem', // Aumentado
-                        opacity: 0.9
+                        fontFamily: 'Geogrotesque Sharp, sans-serif',
+                        letterSpacing: '1.5px',
+                        fontSize: '1rem',
                       }}
                     >
                       {item.step}
                     </Typography>
                     <Typography
-                      variant="h6"
+                      variant="h5"
                       sx={{
-                        fontWeight: 700,
-                        color: '#1A1A1A',
-                        mt: 1,
-                        mb: 1.5,
-                        fontSize: '1.25rem', // Aumentado
-                        lineHeight: 1.3
+                        fontWeight: 800,
+                        fontFamily: 'Geogrotesque Sharp, sans-serif',
+                        color: '#1A202C',
+                        mt: 1.5,
+                        mb: 2,
+                        lineHeight: 1.2
                       }}
                     >
                       {item.title}
                     </Typography>
-                    <Typography variant="body1" sx={{ color: '#555', lineHeight: 1.5, fontSize: '1rem' }}>
+                    <Typography variant="body1" sx={{ color: '#4A5568', lineHeight: 1.6, fontSize: '1.1rem', fontFamily: 'Poppins, sans-serif' }}>
                       {item.desc}
                     </Typography>
                   </Paper>
@@ -519,23 +516,25 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
           </Container>
         </Box>
 
-        <Box sx={{ backgroundColor: 'transparent', py: 8, mt: 0 }}>
-          <Container maxWidth="lg" sx={{ px: { xs: 2, md: 4 } }}>
+        {/* SECCIÓN 3: Accesos Rápidos */}
+        <Box sx={{ pt: { xs: 8, md: 10 }, pb: { xs: 4, md: 6 }, backgroundColor: '#FFFFFF' }}>
+          <Container maxWidth={false} sx={{ px: { xs: 2, md: 5 } }}>
             <Typography
-              variant="h4"
+              variant="h3"
               component="h2"
-              gutterBottom
               sx={{
-                fontWeight: 700,
+                fontWeight: 600,
+                fontFamily: 'Geogrotesque Sharp, sans-serif',
                 textAlign: 'center',
-                mb: 6,
-                fontSize: { xs: '1.8rem', md: '2.3rem' },
-                color: '#1A1A1A'
+                mb: 8,
+                color: '#1A202C',
+                textTransform: 'uppercase',
+                letterSpacing: '-1.5px'
               }}
             >
               Accesos Rápidos
             </Typography>
-            <Grid container spacing={3} justifyContent="center" alignItems="stretch">
+            <Grid container spacing={4} justifyContent="center" alignItems="stretch">
               {linksInteresData.map((link, i) => (
                 <Grid item xs={12} sm={6} md={3} key={i} sx={{ display: 'flex' }}>
                   <LinkInteres
@@ -548,7 +547,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
             </Grid>
           </Container>
         </Box>
-      </Box >
+      </Box>
     </>
   );
 };
@@ -602,8 +601,8 @@ const AvisoCard = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, loading
         }}
       >
         <Box display="flex" alignItems="center" sx={{ flexGrow: 1, pr: { xs: 0, sm: 2 }, width: { xs: '100%', sm: 'auto' } }}>
-          <Typography variant="h6" sx={{ fontSize: '1.15rem', fontWeight: 700, color: '#000000', lineHeight: 1.3, display: 'flex', alignItems: 'center' }}>
-            {aviso.icono || <InfoOutlinedIcon sx={{ fontSize: '1.2rem', mr: 0.8, color: 'primary.main' }} />}
+          <Typography variant="h6" sx={{ fontSize: '1.25rem', fontWeight: 800, color: '#000000', lineHeight: 1.3, display: 'flex', alignItems: 'center', fontFamily: 'Geogrotesque Sharp, sans-serif' }}>
+            {aviso.icono || <PushPinIcon sx={{ fontSize: '1.4rem', mr: 1, color: 'primary.main', transform: 'rotate(45deg)' }} />}
             <span style={{ flex: 1 }}>{aviso.titulo}</span>
           </Typography>
         </Box>
@@ -649,15 +648,16 @@ const AvisoCard = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, loading
             mt: 1,
             fontSize: '1.05rem', // Aumentado para legibilidad (16.8px)
             color: '#333',
+            fontFamily: 'Poppins, sans-serif',
             display: isExpanded ? 'block' : '-webkit-box',
             WebkitLineClamp: isExpanded ? 'none' : 5,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             lineHeight: 1.6,
-            '& p': { marginBlockStart: '0.8em', marginBlockEnd: '0.8em' },
+            '& p': { marginBlockStart: '0.8em', marginBlockEnd: '0.8em', fontFamily: 'Poppins, sans-serif' },
             '& a': { color: '#004582', fontWeight: 500, textDecoration: 'none' },
-            '& ul, & ol': { pl: 2 }
+            '& ul, & ol': { pl: 2, fontFamily: 'Poppins, sans-serif' }
           }}
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(aviso.contenido)
