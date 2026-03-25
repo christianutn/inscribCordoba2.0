@@ -53,11 +53,8 @@ export default function RegistroCcAsistencia() {
             const data = await getPersonaCidi(cuil);
             setParticipantInfo({
                 cuil: cuil,
-                nombre: data.Nombre,
-                apellido: data.Apellido,
-                correo: data.Email || '',
-                es_empleado: (data.Empleado || 'N').toUpperCase() === 'S',
-                reparticion: 'Ciudadano'
+                nombre: data.nombre,
+                apellido: data.apellido
             });
         } catch (err) {
             setError('No se pudo encontrar el participante en CIDI.');

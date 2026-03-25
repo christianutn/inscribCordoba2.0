@@ -21,12 +21,9 @@ export default function ModalConsultarCcCuil({ open, onClose, idEvento, nombreCu
         try {
             const data = await getPersonaCidi(cuil);
             setParticipantInfo({
-                cuil: cuil,
-                nombre: data.Nombre,
-                apellido: data.Apellido,
-                correo: data.Email || '',
-                es_empleado: (data.Empleado || 'N').toUpperCase() === 'S',
-                reparticion: 'Ciudadano'
+                cuil: data.cuil,
+                nombre: data.nombre,
+                apellido: data.apellido,
             });
         } catch (err) {
             setError('No se pudo obtener información del participante o no existe en CIDI.');
@@ -36,7 +33,7 @@ export default function ModalConsultarCcCuil({ open, onClose, idEvento, nombreCu
     };
 
     const handleConfirm = () => {
-        if(participantInfo) {
+        if (participantInfo) {
             onConfirmAttendance(participantInfo);
         }
     };
@@ -64,14 +61,12 @@ export default function ModalConsultarCcCuil({ open, onClose, idEvento, nombreCu
                         </Button>
                     </Box>
                     {error && <Alert severity="error">{error}</Alert>}
-                    
+
                     {participantInfo && (
                         <Box sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 2 }}>
                             <Typography variant="subtitle1" fontWeight="bold" color="primary" gutterBottom>Datos del Participante</Typography>
                             <Typography variant="body1"><strong>Nombre Completo:</strong> {participantInfo.nombre} {participantInfo.apellido}</Typography>
                             <Typography variant="body1"><strong>CUIL:</strong> {participantInfo.cuil}</Typography>
-                            <Typography variant="body1"><strong>Correo:</strong> {participantInfo.correo || 'No especificado'}</Typography>
-                            <Typography variant="body1"><strong>Es Empleado:</strong> {participantInfo.es_empleado ? 'Sí' : 'No'}</Typography>
                         </Box>
                     )}
                 </Box>

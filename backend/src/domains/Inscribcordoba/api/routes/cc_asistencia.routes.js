@@ -50,7 +50,12 @@ router.get("/participantes/cidi/:cuil", publicApiLimiter, async (req, res) => {
         const personaCidi = await cidiService.getPersonaEnCidiPor(cuil);
         const respuesta = personaCidi.respuesta || personaCidi.Respuesta;
         if (respuesta && (respuesta.resultado === 'OK' || respuesta.Resultado === 'OK')) {
-            return res.status(200).json(personaCidi);
+            // Solo devolver nombre, apellido y cuil por seguridad
+            return res.status(200).json({
+                nombre: personaCidi.Nombre,
+                apellido: personaCidi.Apellido,
+                cuil: cuil
+            });
         } else {
             return res.status(404).json({ message: "Persona no encontrada en CIDI" });
         }
