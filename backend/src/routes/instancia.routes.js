@@ -36,7 +36,7 @@ instanciaRouter.put("/:curso_params/:fecha_inicio_curso_params",
 
 instanciaRouter.put("/",
     passport.authenticate('jwt', { session: false }),
-    autorizar(['ADM']),
+    autorizar(['ADM', 'GA']),
     putInstanciasMasivo
 )
 
