@@ -1,3 +1,4 @@
+process.env.TZ = 'America/Argentina/Buenos_Aires';
 
 import morgan from 'morgan';
 import logger from './utils/logger.js';

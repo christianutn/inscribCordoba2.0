@@ -157,8 +157,8 @@ export const postEfemerides = async (req, res, next) => {
         logger.info(`✅ Efemérides creadas exitosamente - Curso: ${curso} - Cantidad: ${efemeridesCreadas.length}`);
 
         // Enviar notificación por correo de forma asíncrona
-        // emailAdapter.enviarNotificacionEfemerideCargada(req.user.user, cursoExistente, efemerides)
-        //     .catch(err => logger.error(`❌ Error al enviar notificación de efemérides: ${err.message}`));
+        emailAdapter.enviarNotificacionEfemerideCargada(req.user.user, cursoExistente, efemerides)
+            .catch(err => logger.error(`❌ Error al enviar notificación de efemérides: ${err.message}`));
 
         res.status(201).json({
             message: `Se crearon ${efemeridesCreadas.length} efeméride(s) correctamente`,

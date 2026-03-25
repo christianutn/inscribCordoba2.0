@@ -12,7 +12,8 @@ if (!fs.existsSync(logDir)) {
 }
 
 const logFormat = format.printf(({ timestamp, level, message }) => {
-  return `${timestamp} [${level.toUpperCase()}]: ${message}`;
+  const localTimestamp = new Date(timestamp).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
+  return `${localTimestamp} [${level.toUpperCase()}]: ${message}`;
 });
 
 const logger = createLogger({
