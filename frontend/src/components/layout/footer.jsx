@@ -9,74 +9,76 @@ import {
 import logoCba from '../../components/imagenes/gobierno_blanco.png';
 
 /**
- * Footer component refactored to Government of Córdoba Institutional Standards.
- * Features a 3-column layout: Identity Logo, Contact Info, and Social Media links.
+ * Footer component - Government of Córdoba Institutional Standards.
+ * Layout: 3 columns (Logo | Contact | Social), collapses to vertical on mobile.
+ * On md+ stays in a single row using space-between to avoid wrapping when the sidebar is open.
  */
 export default function Footer() {
   return (
     <Box
       component="footer"
       sx={{
-        backgroundColor: "#009EE3", // Azul Institucional GBC
+        backgroundColor: "#009EE3",
         color: "common.white",
         width: "100%",
         position: 'relative',
         mt: 'auto',
-        py: 3,
+        py: { xs: 3, md: 2.5 },
       }}
     >
-      <Container maxWidth={false} sx={{ px: { xs: 2, md: 5 } }}>
+      <Container maxWidth={false} sx={{ px: { xs: 2, md: 3, lg: 5 } }}>
         <Box
           sx={{
             display: 'flex',
+            // Columna en mobile, fila en md+ (>900px). Con sidebar (260px) en 13" queda ~760px → column, que es correcto.
             flexDirection: { xs: 'column', md: 'row' },
             alignItems: 'center',
-            justifyContent: 'center', // Centrado compacto
-            gap: { xs: 4, md: 8, lg: 20 }, // Gradual bridging: compact in Surface/Tablet, wide in desktop
-            flexWrap: 'wrap' // Safety net: if it doesn't fit, it wraps instead of cutting
+            // space-between distribuye el espacio sin necesitar gap fijo enorme
+            justifyContent: { xs: 'center', md: 'space-between' },
+            gap: { xs: 3, md: 0 },
           }}
         >
-          {/* Columna Izquierda: Identidad */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: 'center'
-            }}
-          >
+          {/* Columna Izquierda: Logo - encoge en laptops para no consumir demasiado ancho */}
+          <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <Box
               component="img"
               src={logoCba}
               alt="Gobierno de Córdoba"
               sx={{
-                width: "250px",
+                width: { xs: '200px', md: '150px', lg: '220px' },
                 height: "auto",
                 display: "block",
-                mt: { xs: 1, md: 3 },
               }}
             />
           </Box>
 
-          {/* Columna Central: Información de Contacto */}
+          {/* Columna Central: Información de Contacto - ocupa el espacio central disponible */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              textAlign: "center"
+              textAlign: "center",
+              px: { md: 2 },
+              flexShrink: 1,
+              minWidth: 0, // Permite que se comprima si es necesario
             }}
           >
             <Typography
               variant="body1"
               sx={{
                 fontWeight: 600,
-                opacity: 1,
-                fontSize: '1.05rem',
-                fontFamily: 'Roboto, sans-serif'
+                fontSize: { xs: '1rem', md: '0.85rem', lg: '1rem' },
+                fontFamily: 'Roboto, sans-serif',
+                whiteSpace: 'nowrap', // Evita el salto de línea del título
               }}
             >
               Gobierno de la Provincia de Córdoba
             </Typography>
-            <Typography variant="body1" sx={{ opacity: 0.9, mt: 0.5, fontSize: '1rem' }}>
+            <Typography
+              variant="body1"
+              sx={{ opacity: 0.9, mt: 0.5, fontSize: { xs: '0.95rem', md: '0.8rem', lg: '0.95rem' } }}
+            >
               República Argentina / Tel: 0800 888-1234
             </Typography>
             <Typography
@@ -84,12 +86,11 @@ export default function Footer() {
               component="a"
               href="mailto:soportecampuscordoba@cba.gov.ar"
               sx={{
-                opacity: 1,
-                mt: 1,
+                mt: 0.5,
                 color: 'inherit',
                 textDecoration: 'none',
                 fontWeight: 600,
-                fontSize: '1rem',
+                fontSize: { xs: '0.95rem', md: '0.8rem', lg: '0.95rem' },
                 '&:hover': { textDecoration: 'underline' }
               }}
             >
@@ -97,49 +98,44 @@ export default function Footer() {
             </Typography>
           </Box>
 
-          {/* Columna Derecha: Redes Sociales */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center"
-            }}
-          >
+          {/* Columna Derecha: Redes Sociales - tamaño fijo, siempre a la derecha */}
+          <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <Stack direction="row" spacing={0.5}>
               <IconButton
-                sx={{ color: '#FFFFFF' }}
+                sx={{ color: '#FFFFFF', p: { md: '6px' } }}
                 component="a"
                 href="https://es-la.facebook.com/gobdecordoba/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <FacebookIcon />
+                <FacebookIcon sx={{ fontSize: { md: '1.2rem', lg: '1.5rem' } }} />
               </IconButton>
               <IconButton
-                sx={{ color: '#FFFFFF' }}
+                sx={{ color: '#FFFFFF', p: { md: '6px' } }}
                 component="a"
                 href="https://x.com/gobdecordoba?lang=es"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <XIcon />
+                <XIcon sx={{ fontSize: { md: '1.2rem', lg: '1.5rem' } }} />
               </IconButton>
               <IconButton
-                sx={{ color: '#FFFFFF' }}
+                sx={{ color: '#FFFFFF', p: { md: '6px' } }}
                 component="a"
                 href="https://www.instagram.com/cordobaok/?hl=es-la"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <InstagramIcon />
+                <InstagramIcon sx={{ fontSize: { md: '1.2rem', lg: '1.5rem' } }} />
               </IconButton>
               <IconButton
-                sx={{ color: '#FFFFFF' }}
+                sx={{ color: '#FFFFFF', p: { md: '6px' } }}
                 component="a"
                 href="https://www.youtube.com/user/gobiernodecordoba"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <YouTubeIcon />
+                <YouTubeIcon sx={{ fontSize: { md: '1.2rem', lg: '1.5rem' } }} />
               </IconButton>
             </Stack>
           </Box>

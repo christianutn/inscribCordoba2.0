@@ -108,27 +108,29 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
     flexGrow: 1,
     padding: theme.spacing(3),
     backgroundColor: theme.palette.background.default,
-    marginTop: theme.mixins.toolbar.minHeight,
+    // Fix: merged duplicate sm breakpoints into one
     [theme.breakpoints.up('sm')]: {
       marginTop: '64px',
-    },
-    minHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`,
-    [theme.breakpoints.up('sm')]: {
       minHeight: 'calc(100vh - 64px)',
     },
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginLeft: `-${drawerWidth}px`,
+    marginTop: theme.mixins.toolbar.minHeight,
+    minHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`,
+    width: '100%', // Asegura ancho 100% para que se expanda/contraia de forma elástica
     minWidth: 0,
     overflowX: 'hidden',
+    marginLeft: `-${drawerWidth}px`,
+    // Cerrado: transición rápida con curva sharp (menú salió)
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
     ...(open && {
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
       marginLeft: 0,
+      // Abierto: transición suave con curva easeOut (menú entró)
+      transition: theme.transitions.create(['margin', 'width'], {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
     }),
   }),
 );
@@ -230,10 +232,18 @@ export default function Principal() {
   // Asegura que al cambiar de sección el scroll se resetee al inicio de la página
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Comportamiento instantáneo para evitar mostrar contenido desplazado
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
   }, [opcionSeleccionada]);
+
+  // Dispara resize 300ms después del cambio de sidebar para que gráficos y
+  // tablas recalculen su ancho real una vez terminada la animación.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, theme.transitions.duration.enteringScreen + 50);
+    return () => clearTimeout(timer);
+  }, [open, theme.transitions.duration.enteringScreen]);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -269,7 +279,7 @@ export default function Principal() {
       case "MisNotasAutorizacionIdentifier": return <VisualizacionMisNotasRefentes />;
       case "Efemerides": return <GestionEfemerides modo="carga" user={user} />;
       case "Home":
-      default: return <Home nombre={user?.nombre} rol={user?.rol} setOpcionSeleccionada={setOpcionSeleccionada} />;
+      default: return <Home nombre={user?.nombre} rol={user?.rol} setOpcionSeleccionada={setOpcionSeleccionada} sidebarOpen={open} />;
     }
   };
 

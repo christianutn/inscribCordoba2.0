@@ -57,7 +57,7 @@ const paperStyles = {
   height: '100%',
 };
 
-const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
+const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
   const theme = useTheme();
   const [avisos, setAvisos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +68,15 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
 
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [avisoToDelete, setAvisoToDelete] = useState(null);
+
+  // Disparar resize event tras la animación del sidebar para que los
+  // componentes internos (tablas, gráficos) recalculen su ancho real.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 300); // 300ms coincide con la duración de la transición del Drawer
+    return () => clearTimeout(timer);
+  }, [sidebarOpen]);
 
   useEffect(() => {
     setLoading(true);
@@ -194,7 +203,14 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
         </Dialog>
       )}
 
-      <Box sx={{ width: '100%', flexGrow: 1, backgroundColor: '#FFFFFF' }}>
+      <Box
+        sx={{
+          width: '100%',
+          flexGrow: 1,
+          backgroundColor: '#FFFFFF',
+          transition: 'width 0.3s ease-in-out',
+        }}
+      >
         {/* SECCIÓN 1: Bienvenida y Avisos */}
         <Box sx={{ py: { xs: 4, md: 6 }, backgroundColor: '#FFFFFF' }}>
           <Container maxWidth={false} sx={{ position: 'relative', px: { xs: 2, md: 5 } }}>
@@ -222,10 +238,12 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
                 fontWeight: 600,
                 fontFamily: 'Geogrotesque Sharp, sans-serif',
                 fontSize: {
-                  xs: 'clamp(1.8rem, 6vw, 2.5rem)',
-                  md: 'clamp(2.5rem, 5vw, 3.5rem)'
+                  xs: 'clamp(1.6rem, 5vw, 2rem)',
+                  sm: 'clamp(2rem, 4vw, 2.4rem)',
+                  md: 'clamp(2.2rem, 3.5vw, 2.8rem)',
+                  lg: 'clamp(2.6rem, 3vw, 3.5rem)',
                 },
-                mb: { xs: 4, md: 8 },
+                mb: { xs: 3, md: 5, lg: 8 },
                 color: 'primary.main',
                 textAlign: 'left',
                 letterSpacing: '-2px',
@@ -326,8 +344,8 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
                 </Box>
               </Grid>
 
-              {/* Bloque Información de Interés (30%) */}
-              <Grid item xs={12} md={3.6}>
+              {/* Bloque ¿Qué podés hacer aquí? (30%) */}
+              <Grid item xs={12} md={3.6} sx={{ mt: { xs: 6, md: 0 } }}>
                 <Box sx={{ position: 'sticky', top: '24px', pl: { md: 2 } }}>
                   <Typography
                     variant="h5"
@@ -452,7 +470,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
                 { step: 'Paso 3', title: 'Crear Cohorte', color: '#004582', desc: 'Completá el formulario de cohorte para agendar las fechas de tu capacitación.', option: 'Formulario' },
                 { step: 'Paso 4', title: 'Ver Calendario', color: '#5D717E', desc: 'Consultá las cohortes que cargaste en el calendario.', option: 'Calendario' }
               ].map((item, idx) => (
-                <Grid item xs={12} sm={6} md={3} key={idx}>
+                <Grid item xs={12} sm={6} lg={3} key={idx}>
                   <Paper
                     elevation={0}
                     onClick={() => setOpcionSeleccionada(item.option)}
@@ -465,7 +483,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
                     role="button"
                     tabIndex={0}
                     sx={{
-                      p: { xs: 4, sm: 6 },
+                      p: { xs: 3, sm: 4, lg: 5 },
                       borderRadius: '16px',
                       backgroundColor: '#ffffff',
                       borderLeft: `10px solid ${item.color}`,
@@ -473,6 +491,9 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
                       borderRight: '1px solid #E2E8F0',
                       borderBottom: '1px solid #E2E8F0',
                       height: '100%',
+                      minHeight: { sm: '200px' }, // Evita que se deformen en 2 columnas
+                      display: 'flex',
+                      flexDirection: 'column',
                       cursor: 'pointer',
                       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                       transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -538,7 +559,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada }) => {
             </Typography>
             <Grid container spacing={{ xs: 2.5, md: 4 }} justifyContent="center" alignItems="stretch">
               {linksInteresData.map((link, i) => (
-                <Grid item xs={12} sm={6} md={3} key={i} sx={{ display: 'flex' }}>
+                <Grid item xs={12} sm={6} lg={3} key={i} sx={{ display: 'flex' }}>
                   <LinkInteres
                     imagenSrc={link.img}
                     titulo={link.title}
