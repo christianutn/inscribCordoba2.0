@@ -23,10 +23,6 @@ const CcAsistenciaParticipantes = sequelize.define('cc_asistencia_participantes'
         type: DataTypes.TINYINT,
         defaultValue: 0
     },
-    reparticion: {
-        type: DataTypes.STRING(100),
-        allowNull: true
-    }
 }, {
     tableName: 'cc_asistencia_participantes',
     timestamps: false

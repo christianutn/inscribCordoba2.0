@@ -2,20 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Container, Box, Typography, Button, TextField, CircularProgress,
-    Alert, Paper, Avatar, InputAdornment, IconButton
+    Alert, Paper, Avatar, InputAdornment, IconButton, useTheme, useMediaQuery, Stack
 } from '@mui/material';
 import {
     Search as SearchIcon,
     CheckCircle as CheckCircleIcon,
     Person as PersonIcon,
     Cancel as CancelIcon,
-    AssignmentTurnedIn as AssignmentTurnedInIcon
+    AssignmentTurnedIn as AssignmentTurnedInIcon,
+    Facebook as FacebookIcon,
+    X as XIcon,
+    Instagram as InstagramIcon,
+    YouTube as YouTubeIcon
 } from '@mui/icons-material';
 import { getPersonaCidi, confirmarCcAsistencia, getCcAsistenciaEventoById, upsertParticipanteG } from '../../services/cc_asistencia.service.js';
+import logoCba from '../imagenes/gobierno_blanco.png';
 
 export default function RegistroCcAsistencia() {
     const { eventoId } = useParams();
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const [evento, setEvento] = useState(null);
     const [loadingEvento, setLoadingEvento] = useState(true);
@@ -78,9 +85,9 @@ export default function RegistroCcAsistencia() {
         }
     };
 
-    if (loadingEvento) return <Box display="flex" justifyContent="center" mt={8}><CircularProgress size={60} /></Box>;
+    if (loadingEvento) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh"><CircularProgress size={60} /></Box>;
 
-    if (!evento) return <Container maxWidth="xs" sx={{ mt: 4 }}><Alert severity="error" sx={{ fontSize: '1.1rem' }}>{error}</Alert></Container>;
+    if (!evento) return <Container maxWidth="xs" sx={{ mt: 8 }}><Alert severity="error" sx={{ borderRadius: '12px' }}>{error}</Alert></Container>;
 
     const formatearFecha = (fecha) => {
         if (!fecha) return '';
@@ -89,191 +96,301 @@ export default function RegistroCcAsistencia() {
         return fecha;
     };
 
+    const formatearHorario = (texto) => {
+        if (!texto) return '';
+        let procesado = texto.toLowerCase();
+        procesado = procesado.replace(/\bhs?\.?\b/g, '').trim();
+        procesado = procesado.replace(/\b(\d{1,2})(?::(\d{2}))?\b/g, (match, hora, min) => {
+            const h = hora.padStart(2, '0');
+            const m = min || '00';
+            return `${h}:${m}`;
+        });
+        procesado = procesado.replace(/\s+/g, ' ').trim();
+        return procesado ? `${procesado}` : '';
+    };
+
     return (
-        <Container maxWidth="xs" sx={{ mt: { xs: 2, sm: 6 }, mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Paper
-                elevation={6}
+        <Box sx={{
+            minHeight: '100vh',
+            minHeight: '100dvh', // Dynamic viewport height for modern browsers
+            display: 'flex',
+            flexDirection: 'column',
+            bgcolor: '#F8FAFC'
+        }}>
+            <Container
+                maxWidth="xs"
                 sx={{
-                    borderRadius: 4,
-                    width: '100%',
-                    overflow: 'hidden',
-                    boxShadow: '0px 10px 40px rgba(0,0,0,0.1)'
+                    flexGrow: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center', // Horizontal centering
+                    py: { xs: 2, sm: 4 }, // Slightly less padding on mobile
+                    px: 2
                 }}
             >
-                <Box sx={{ p: { xs: 3, sm: 5 }, textAlign: 'center' }}>
+                <Paper
+                    elevation={0}
+                    sx={{
+                        borderRadius: '24px',
+                        width: '100%',
+                        overflow: 'hidden',
+                        boxShadow: '0 12px 48px rgba(0,0,0,0.08)',
+                        border: '1px solid #E2E8F0',
+                        bgcolor: '#fff'
+                    }}
+                >
+                    <Box sx={{ p: { xs: 4, sm: 5 }, textAlign: 'center' }}>
 
-                    {!successMessage && !participantInfo && (
-                        <>
-                            <Avatar sx={{ mx: 'auto', mb: 2, width: { xs: 70, sm: 80 }, height: { xs: 70, sm: 80 }, bgcolor: 'primary.light', color: 'primary.main' }}>
-                                <AssignmentTurnedInIcon sx={{ fontSize: { xs: 35, sm: 40 } }} />
-                            </Avatar>
-                            <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1, fontSize: { xs: '1.5rem', sm: '1.75rem' } }}>
-                                Registro de Asistencia
-                            </Typography>
-                            <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 'bold', mb: 1, fontSize: { xs: '1.2rem', sm: '1.3rem' }, lineHeight: 1.3 }}>
-                                {evento.curso?.nombre}
-                            </Typography>
-                            <Typography variant="body1" color="text.secondary" display="block" sx={{ mb: 4, fontSize: { xs: '1.1rem', sm: '1.2rem' } }}>
-                                📅 {formatearFecha(evento.fecha)} <br /> 🕒 {evento.horario}
-                            </Typography>
+                        {!successMessage && !participantInfo && (
+                            <>
+                                <Avatar sx={{ mx: 'auto', mb: 3, width: 80, height: 80, bgcolor: 'primary.light', color: 'primary.main', boxShadow: '0 8px 16px rgba(0,0,0,0.05)' }}>
+                                    <AssignmentTurnedInIcon sx={{ fontSize: 40 }} />
+                                </Avatar>
 
-                            <Box sx={{ mb: 2 }}>
-                                <TextField
-                                    placeholder="Ingresa tu CUIL"
-                                    variant="outlined"
-                                    fullWidth
-                                    autoFocus
-                                    value={cuil}
-                                    onChange={(e) => setCuil(e.target.value.replace(/\D/g, '').slice(0, 11))}
-                                    disabled={loadingCuil}
-                                    helperText="11 dígitos, sin guiones"
-                                    FormHelperTextProps={{
-                                        sx: { fontSize: '0.95rem', mt: 1, textAlign: 'left', fontWeight: 500 }
-                                    }}
-                                    inputProps={{
-                                        sx: {
-                                            textAlign: 'left',
-                                            fontSize: '1.3rem',
-                                            fontWeight: 'bold',
-                                            letterSpacing: 2,
-                                            '&::placeholder': {
-                                                fontWeight: 'normal',
-                                                letterSpacing: 0,
-                                                opacity: 0.7
-                                            }
-                                        }
-                                    }}
-                                    InputProps={{
-                                        sx: { py: 0.5 },
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton color="primary" onClick={handleSearch} disabled={loadingCuil || cuil.length !== 11} edge="end" size="large" sx={{ mr: 0.5 }}>
-                                                    {loadingCuil ? <CircularProgress size={28} color="inherit" /> : <SearchIcon fontSize="large" />}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        )
-                                    }}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 3,
-                                            bgcolor: 'grey.50',
-                                            transition: 'all 0.2s',
-                                            '&.Mui-focused': {
-                                                bgcolor: 'white',
-                                                boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
-                                            }
-                                        }
-                                    }}
-                                />
-                            </Box>
+                                <Typography variant="h5" sx={{ fontFamily: 'Geogrotesque Sharp', fontWeight: 'bold', color: '#1A1A1A', mb: 1 }}>
+                                    Registro de Asistencia
+                                </Typography>
 
-                            {error && <Alert severity="error" sx={{ borderRadius: 2, mt: 2, textAlign: 'left', fontSize: '1rem' }}>{error}</Alert>}
+                                <Typography variant="h6" sx={{ fontFamily: 'Poppins', color: 'primary.main', fontWeight: 600, mb: 1, lineHeight: 1.3 }}>
+                                    {evento.curso?.nombre}
+                                </Typography>
 
-                            <Button
-                                variant="contained"
-                                onClick={handleSearch}
-                                disabled={loadingCuil || cuil.length !== 11}
-                                fullWidth
-                                size="large"
-                                sx={{ borderRadius: 3, py: 1.8, mt: 2, fontWeight: 'bold', fontSize: '1.15rem' }}
-                            >
-                                Buscar Datos
-                            </Button>
-                        </>
-                    )}
+                                <Typography variant="body1" sx={{ fontFamily: 'Poppins', color: '#64748B', mb: 4 }}>
+                                    📅 {formatearFecha(evento.fecha)} <br /> 🕒 {formatearHorario(evento.horario)}
+                                </Typography>
 
-                    {!successMessage && participantInfo && (
-                        <>
-                            <Avatar sx={{ mx: 'auto', mb: 2, width: { xs: 70, sm: 80 }, height: { xs: 70, sm: 80 }, bgcolor: 'primary.light', color: 'primary.main' }}>
-                                <PersonIcon sx={{ fontSize: { xs: 35, sm: 40 } }} />
-                            </Avatar>
-
-                            <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1, fontSize: { xs: '1.5rem', sm: '1.75rem' } }}>
-                                Confirmar Asistencia
-                            </Typography>
-                            <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 'bold', mb: 2, fontSize: { xs: '1.2rem', sm: '1.3rem' }, lineHeight: 1.3 }}>
-                                {evento.curso?.nombre}
-                            </Typography>
-
-                            <Typography variant="body1" color="text.secondary" sx={{ mt: 1, mb: 3, fontSize: '1.1rem' }}>
-                                Verifica tus datos antes de confirmar.
-                            </Typography>
-
-                            <Box sx={{ bgcolor: 'grey.50', p: { xs: 2.5, sm: 3 }, borderRadius: 3, mb: 1, border: 1, borderColor: 'divider', textAlign: 'left' }}>
                                 <Box sx={{ mb: 3 }}>
-                                    <Typography variant="subtitle2" color="text.secondary" display="block" gutterBottom sx={{ fontSize: '0.95rem', fontWeight: 600, letterSpacing: 0.5 }}>
+                                    <TextField
+                                        placeholder="Ingresa tu CUIL"
+                                        variant="outlined"
+                                        fullWidth
+                                        autoFocus
+                                        value={cuil}
+                                        onChange={(e) => setCuil(e.target.value.replace(/\D/g, '').slice(0, 11))}
+                                        disabled={loadingCuil}
+                                        helperText="11 dígitos, sin guiones"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <PersonIcon sx={{ color: '#94A3B8' }} />
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontFamily: 'Poppins',
+                                                borderRadius: '12px',
+                                                fontSize: '1.2rem',
+                                                fontWeight: 600,
+                                                letterSpacing: 2,
+                                                bgcolor: '#F8FAFC',
+                                                '& fieldset': { borderColor: '#E2E8F0' },
+                                                '&:hover fieldset': { borderColor: 'primary.main' }
+                                            }
+                                        }}
+                                        FormHelperTextProps={{ sx: { fontFamily: 'Poppins', mt: 1, fontWeight: 500 } }}
+                                    />
+                                </Box>
+
+                                {error && <Alert severity="error" sx={{ borderRadius: '12px', mb: 3, textAlign: 'left' }}>{error}</Alert>}
+
+                                <Button
+                                    variant="contained"
+                                    onClick={handleSearch}
+                                    disabled={loadingCuil || cuil.length !== 11}
+                                    fullWidth
+                                    sx={{
+                                        fontFamily: 'Geogrotesque Sharp',
+                                        borderRadius: '12px',
+                                        py: 2,
+                                        fontWeight: 'bold',
+                                        fontSize: '1.1rem',
+                                        boxShadow: '0 4px 12px rgba(0,123,255,0.2)'
+                                    }}
+                                >
+                                    {loadingCuil ? <CircularProgress size={24} color="inherit" /> : 'BUSCAR DATOS'}
+                                </Button>
+                            </>
+                        )}
+
+                        {!successMessage && participantInfo && (
+                            <>
+                                <Avatar sx={{ mx: 'auto', mb: 3, width: 80, height: 80, bgcolor: 'primary.light', color: 'primary.main', boxShadow: '0 8px 16px rgba(0,0,0,0.05)' }}>
+                                    <PersonIcon sx={{ fontSize: 40 }} />
+                                </Avatar>
+
+                                <Typography variant="h5" sx={{ fontFamily: 'Geogrotesque Sharp', fontWeight: 'bold', color: '#1A1A1A', mb: 1 }}>
+                                    Confirmar Datos
+                                </Typography>
+
+                                <Typography variant="body1" sx={{ fontFamily: 'Poppins', color: '#64748B', mb: 4 }}>
+                                    Verifica tu información antes de registrar la asistencia.
+                                </Typography>
+
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        bgcolor: '#F8FAFC',
+                                        p: 3,
+                                        borderRadius: '16px',
+                                        mb: 4,
+                                        border: '1px solid #E2E8F0',
+                                        textAlign: 'left'
+                                    }}
+                                >
+                                    <Typography variant="subtitle2" sx={{ fontFamily: 'Poppins', color: '#64748B', fontWeight: 600, mb: 1, letterSpacing: 0.5 }}>
                                         NOMBRE Y APELLIDO
                                     </Typography>
-                                    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '1.3rem', sm: '1.45rem' }, lineHeight: 1.2, color: 'text.primary' }}>
+                                    <Typography variant="h5" sx={{ fontFamily: 'Geogrotesque Sharp', fontWeight: 'bold', color: 'primary.main', mb: 3 }}>
                                         {participantInfo.nombre} {participantInfo.apellido}
                                     </Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="subtitle2" color="text.secondary" display="block" gutterBottom sx={{ fontSize: '0.95rem', fontWeight: 600, letterSpacing: 0.5 }}>
+
+                                    <Typography variant="subtitle2" sx={{ fontFamily: 'Poppins', color: '#64748B', fontWeight: 600, mb: 1, letterSpacing: 0.5 }}>
                                         CUIL
                                     </Typography>
-                                    <Typography variant="subtitle1" sx={{ fontFamily: 'monospace', fontSize: { xs: '1.25rem', sm: '1.35rem' }, fontWeight: 600, color: 'text.primary' }}>
+                                    <Typography variant="h6" sx={{ fontFamily: 'Poppins', fontWeight: 600, color: '#1A1A1A' }}>
                                         {participantInfo.cuil}
                                     </Typography>
+                                </Paper>
+
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    <Button
+                                        variant="contained"
+                                        onClick={handleConfirm}
+                                        disabled={loadingCuil}
+                                        fullWidth
+                                        sx={{
+                                            fontFamily: 'Geogrotesque Sharp',
+                                            borderRadius: '12px',
+                                            py: 2,
+                                            fontWeight: 'bold',
+                                            fontSize: '1.1rem',
+                                            boxShadow: '0 4px 12px rgba(0,123,255,0.2)'
+                                        }}
+                                    >
+                                        {loadingCuil ? <CircularProgress size={24} color="inherit" /> : 'CONFIRMAR ASISTENCIA'}
+                                    </Button>
+
+                                    <Button
+                                        variant="text"
+                                        onClick={() => setParticipantInfo(null)}
+                                        disabled={loadingCuil}
+                                        fullWidth
+                                        sx={{
+                                            fontFamily: 'Geogrotesque Sharp',
+                                            color: '#64748B',
+                                            fontWeight: 'bold',
+                                            fontSize: '1rem',
+                                            py: 1.5
+                                        }}
+                                    >
+                                        CANCELAR
+                                    </Button>
                                 </Box>
-                            </Box>
-                        </>
-                    )}
+                            </>
+                        )}
 
-                    {successMessage && (
-                        <>
-                            <CheckCircleIcon color="success" sx={{ mx: 'auto', fontSize: { xs: 90, sm: 110 }, mb: 2, display: 'block' }} />
-                            <Typography variant="h5" color="text.primary" fontWeight="bold" gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2rem' } }}>
-                                ¡Asistencia Exitosa!
-                            </Typography>
-                            <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold', mb: 2, fontSize: { xs: '1.4rem', sm: '1.5rem' }, lineHeight: 1.2 }}>
-                                {participantInfo?.nombre} {participantInfo?.apellido}
-                            </Typography>
-                            <Typography variant="body1" color="text.secondary" paragraph sx={{ fontSize: '1.15rem' }}>
-                                Tu asistencia ha sido registrada para <b>{evento.curso?.nombre}</b>
-                            </Typography>
-                        </>
-                    )}
-                </Box>
+                        {successMessage && (
+                            <>
+                                <CheckCircleIcon sx={{ fontSize: 100, color: 'success.main', mb: 3 }} />
 
-                {error && participantInfo && !successMessage && (
-                    <Box sx={{ px: { xs: 3, sm: 5 }, pb: 2 }}>
-                        <Alert severity="error" sx={{ fontSize: '1.05rem' }}>{error}</Alert>
+                                <Typography variant="h4" sx={{ fontFamily: 'Geogrotesque Sharp', fontWeight: 'bold', color: '#1A1A1A', mb: 2 }}>
+                                    ¡Registro Exitoso!
+                                </Typography>
+
+                                <Typography variant="h6" sx={{ fontFamily: 'Poppins', color: 'primary.main', fontWeight: 600, mb: 2 }}>
+                                    {participantInfo?.nombre} {participantInfo?.apellido}
+                                </Typography>
+
+                                <Typography variant="body1" sx={{ fontFamily: 'Poppins', color: '#64748B', mb: 4, lineHeight: 1.6 }}>
+                                    Tu asistencia ha sido registrada correctamente para:<br />
+                                    <strong>{evento.curso?.nombre}</strong>
+                                </Typography>
+                            </>
+                        )}
                     </Box>
-                )}
 
-                {/* Confirm Section Footers */}
-                {!successMessage && participantInfo && (
-                    <Box sx={{
-                        bgcolor: 'grey.50', px: { xs: 3, sm: 5 }, py: { xs: 2.5, sm: 3 }, borderTop: 1, borderColor: 'divider',
-                        display: 'flex', flexDirection: { xs: 'column-reverse', sm: 'row' }, gap: 2, justifyContent: 'space-between'
-                    }}>
-                        <Button
-                            variant="outlined"
-                            onClick={() => setParticipantInfo(null)}
-                            startIcon={<CancelIcon />}
-                            fullWidth
-                            disabled={loadingCuil}
-                            size="large"
-                            sx={{ fontWeight: 'bold', fontSize: '1.1rem', py: 1.5, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: 'text.primary', bgcolor: 'action.hover' } }}
-                        >
-                            Cancelar
-                        </Button>
+                    {error && participantInfo && !successMessage && (
+                        <Box sx={{ px: 4, pb: 4 }}>
+                            <Alert severity="error" sx={{ borderRadius: '12px' }}>{error}</Alert>
+                        </Box>
+                    )}
+                </Paper>
+            </Container>
 
-                        <Button
-                            variant="contained"
-                            onClick={handleConfirm}
-                            startIcon={loadingCuil ? <CircularProgress size={24} color="inherit" /> : <CheckCircleIcon />}
-                            fullWidth
-                            disabled={loadingCuil}
-                            size="large"
-                            sx={{ fontWeight: 'bold', fontSize: '1.1rem', py: 1.5, bgcolor: 'success.main', '&:hover': { bgcolor: 'success.dark' } }}
-                        >
-                            Confirmar
-                        </Button>
-                    </Box>
-                )}
-            </Paper>
-        </Container>
+            {/* Footer Institucional Transparente Vertical para Mobile */}
+            <Box
+                component="footer"
+                sx={{
+                    backgroundColor: "transparent",
+                    color: "#64748B",
+                    width: "100%",
+                    py: 4,
+                    mt: 'auto',
+                    textAlign: 'center'
+                }}
+            >
+                <Container maxWidth="xs">
+                    <Stack spacing={1} alignItems="center">
+                        {/* Logo solicitado: gobierno_blanco.png con filtro para gris oscuro */}
+                        <Box
+                            component="img"
+                            src={logoCba}
+                            alt="Gobierno de Córdoba"
+                            sx={{
+                                width: '220px',
+                                height: "auto",
+                                // Aplicamos brillo 0 y opacidad baja para lograr un gris institucional
+                                filter: 'brightness(0) opacity(0.6)',
+                                mb: 1 // Pequeño espacio positivo hacia abajo
+                            }}
+                        />
+
+                        {/* Redes Sociales en Gris */}
+                        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                            <IconButton
+                                size="small"
+                                sx={{ color: '#636465' }}
+                                component="a"
+                                href="https://es-la.facebook.com/gobdecordoba/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <FacebookIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                                size="small"
+                                sx={{ color: '#636465' }}
+                                component="a"
+                                href="https://x.com/gobdecordoba?lang=es"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <XIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                                size="small"
+                                sx={{ color: '#636465' }}
+                                component="a"
+                                href="https://www.instagram.com/cordobaok/?hl=es-la"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <InstagramIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                                size="small"
+                                sx={{ color: '#636465' }}
+                                component="a"
+                                href="https://www.youtube.com/user/gobiernodecordoba"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <YouTubeIcon fontSize="small" />
+                            </IconButton>
+                        </Stack>
+                    </Stack>
+                </Container>
+            </Box>
+        </Box>
     );
 }

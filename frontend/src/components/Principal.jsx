@@ -87,7 +87,7 @@ const menuConfigByRole = {
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
     { label: "Tablero", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon /> },
-    //{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> },
+    { label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> },
     { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
   GA: [
@@ -202,8 +202,8 @@ export default function Principal() {
     Eventos: 'Crear Evento',
     Formulario: 'Crear Cohorte',
     CrearAviso: 'Crear Aviso',
-    AsistenciasMain: 'Registro de Asistencias',
-    CcAsistenciasMain: 'Asistencias CC',
+    AsistenciasMain: 'Registro de Asistencia',
+    CcAsistenciasMain: 'Registro de Asistencia',
     MisNotasAutorizacionIdentifier: 'Mis Notas',
     GestionEventoYCurso: 'Gestión Evento/Curso',
     Efemerides: 'Efemérides'

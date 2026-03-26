@@ -23,7 +23,6 @@ export const getInscriptosByEvento = async (req, res) => {
                     nombre: inf.participante.nombre,
                     apellido: inf.participante.apellido,
                     correo: inf.participante.correo,
-                    reparticion: inf.participante.reparticion,
                     es_empleado: inf.participante.es_empleado
                 }
             }
@@ -36,42 +35,44 @@ export const getInscriptosByEvento = async (req, res) => {
     }
 };
 
+const upsertParticipanteFromCidi = async (cuil, trans) => {
+    let dataCidi;
+    try {
+        dataCidi = await cidiService.getPersonaEnCidiPor(cuil);
+    } catch (err) {
+        logger.error(`Error consultando CiDi para CUIL ${cuil}:`, err);
+    }
+
+    if (!dataCidi) {
+        throw new Error(`Participante no encontrado en CIDI para CUIL ${cuil}`);
+    }
+
+    const participanteData = {
+        nombre: dataCidi.Nombre || dataCidi.nombre || 'Desconocido',
+        apellido: dataCidi.Apellido || dataCidi.apellido || 'Desconocido',
+        correo: dataCidi.Email || dataCidi.email || null,
+        es_empleado: (dataCidi.Empleado || dataCidi.empleado || 'N').toLowerCase() === 's' ? 1 : 0,
+    };
+
+    const [participante, pCreated] = await CcAsistenciaParticipantes.findOrCreate({
+        where: { cuil },
+        defaults: participanteData,
+        transaction: trans
+    });
+
+    if (!pCreated) {
+        await participante.update(participanteData, { transaction: trans });
+    }
+
+    return participante;
+};
+
 export const confirmarAsistencia = async (req, res) => {
     const trans = await sequelize.transaction();
     try {
         const { cuil, evento_id } = req.body;
 
-        // 1. Consultar CIDI para crear o actualizar
-        let dataCidi;
-        try {
-            dataCidi = await cidiService.getPersonaEnCidiPor(cuil);
-        } catch (err) {
-            logger.error("Error consultando CiDi en confirmarAsistencia:", err);
-        }
-
-        if (!dataCidi) {
-            await trans.rollback();
-            return res.status(404).json({ message: "Participante no encontrado en CIDI" });
-        }
-
-        const participanteData = {
-            nombre: dataCidi.Nombre || dataCidi.nombre || 'Desconocido',
-            apellido: dataCidi.Apellido || dataCidi.apellido || 'Desconocido',
-            correo: dataCidi.Email || dataCidi.email || null,
-            es_empleado: (dataCidi.Empleado || dataCidi.empleado || 'N').toLowerCase() === 's' ? 1 : 0,
-            reparticion: dataCidi.Reparticion || dataCidi.reparticion || 'Ciudadano'
-        };
-
-        // 2. Upsert del Participante
-        const [participante, pCreated] = await CcAsistenciaParticipantes.findOrCreate({
-            where: { cuil },
-            defaults: participanteData,
-            transaction: trans
-        });
-
-        if (!pCreated) {
-            await participante.update(participanteData, { transaction: trans });
-        }
+        await upsertParticipanteFromCidi(cuil, trans);
 
         // 3. Upsert del Inscripto (Asistencia confirmada = 1)
         const [inscripto, iCreated] = await CcAsistenciaInscriptos.findOrCreate({
@@ -89,7 +90,7 @@ export const confirmarAsistencia = async (req, res) => {
     } catch (error) {
         if (trans) await trans.rollback();
         logger.error("Error en confirmarAsistencia:", error);
-        res.status(500).json({ message: error.message });
+        res.status(error.message.includes("no encontrado en CIDI") ? 404 : 500).json({ message: error.message });
     }
 };
 
@@ -117,7 +118,15 @@ export const cargarInscriptosMasivos = async (req, res) => {
         }
         for (const data of inscriptos) {
             const { cuil, evento_id, estado_asistencia } = data;
-            const inscriptoExiste = await CcAsistenciaInscriptos.findOne({ where: { cuil, evento_id } });
+
+            try {
+                await upsertParticipanteFromCidi(cuil, trans);
+            } catch (err) {
+                logger.warn(`Saltando insercion de inscripto por error en CiDi para CUIL ${cuil}: ${err.message}`);
+                continue; // Skip if we can't find them in CiDi
+            }
+
+            const inscriptoExiste = await CcAsistenciaInscriptos.findOne({ where: { cuil, evento_id }, transaction: trans });
             if (!inscriptoExiste) {
                 await CcAsistenciaInscriptos.create({
                     cuil,

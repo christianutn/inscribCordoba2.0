@@ -6,7 +6,7 @@ import CcAsistenciaParticipantes from '../../../../models/cc_asistencia_particip
 export const getEventos = async (req, res) => {
     try {
         const eventos = await CcAsistenciaEventos.findAll({
-            include: [{ model: Curso, as: 'curso', attributes: ['nombre'] }]
+            include: [{ model: Curso, as: 'curso', attributes: ['nombre', 'area'] }]
         });
         
         // Populate stats for each array
@@ -35,7 +35,7 @@ export const getEventoById = async (req, res) => {
     try {
         const { id } = req.params;
         const evento = await CcAsistenciaEventos.findByPk(id, {
-            include: [{ model: Curso, as: 'curso', attributes: ['nombre'] }]
+            include: [{ model: Curso, as: 'curso', attributes: ['nombre', 'area'] }]
         });
         if (!evento) return res.status(404).json({ message: "Evento no encontrado" });
         res.status(200).json(evento);

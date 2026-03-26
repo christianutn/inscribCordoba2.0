@@ -23,7 +23,7 @@ export default function Footer() {
         width: "100%",
         position: 'relative',
         mt: 'auto',
-        py: { xs: 3, md: 2.5 },
+        py: { xs: 8, md: 7 },
       }}
     >
       <Container maxWidth={false} sx={{ px: { xs: 2, md: 3, lg: 5 } }}>
@@ -34,8 +34,8 @@ export default function Footer() {
             flexDirection: { xs: 'column', md: 'row' },
             alignItems: 'center',
             // space-between distribuye el espacio sin necesitar gap fijo enorme
-            justifyContent: { xs: 'center', md: 'space-between' },
-            gap: { xs: 3, md: 0 },
+            justifyContent: { xs: 'center', md: 'center' },
+            gap: { xs: 3, md: 15 },
           }}
         >
           {/* Columna Izquierda: Logo - encoge en laptops para no consumir demasiado ancho */}
@@ -45,7 +45,7 @@ export default function Footer() {
               src={logoCba}
               alt="Gobierno de Córdoba"
               sx={{
-                width: { xs: '200px', md: '150px', lg: '220px' },
+                width: { xs: '220px', md: '170px', lg: '240px' },
                 height: "auto",
                 display: "block",
               }}
