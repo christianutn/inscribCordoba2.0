@@ -1,5 +1,6 @@
 import CcAsistenciaInscriptos from '../../../../models/cc_asistencia_inscriptos.models.js';
 import CcAsistenciaParticipantes from '../../../../models/cc_asistencia_participantes.models.js';
+import CcAsistenciaEventos from '../../../../models/cc_asistencia_eventos.models.js';
 import sequelize from '../../../../config/database.js';
 import CidiService from '../../../../services/CidiService.js';
 import logger from '../../../../utils/logger.js';
@@ -71,6 +72,17 @@ export const confirmarAsistencia = async (req, res) => {
     const trans = await sequelize.transaction();
     try {
         const { cuil, evento_id } = req.body;
+
+        // buscar evento por id 
+        const evento = await CcAsistenciaEventos.findByPk(evento_id, { transaction: trans });
+        if (!evento) {
+            throw new Error("Evento no encontrado");
+        }
+
+        // Si la fecha actual no coincide con la fecha del evento, no se puede confirmar la asistencia
+        if (evento.fecha !== new Date().toISOString().split('T')[0]) {
+            throw new Error("La fecha actual no coincide con la fecha del evento");
+        }
 
         await upsertParticipanteFromCidi(cuil, trans);
 

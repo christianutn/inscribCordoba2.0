@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
 import {
     Container, Box, Typography, Button, TextField, CircularProgress,
     Alert, Paper, Avatar, InputAdornment, IconButton, useTheme, useMediaQuery, Stack
@@ -10,6 +11,7 @@ import {
     Person as PersonIcon,
     Cancel as CancelIcon,
     AssignmentTurnedIn as AssignmentTurnedInIcon,
+    EventBusy as EventBusyIcon,
     Facebook as FacebookIcon,
     X as XIcon,
     Instagram as InstagramIcon,
@@ -32,11 +34,16 @@ export default function RegistroCcAsistencia() {
     const [participantInfo, setParticipantInfo] = useState(null);
     const [loadingCuil, setLoadingCuil] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [eventoValido, setEventoValido] = useState(true);
 
     useEffect(() => {
         const fetchEvento = async () => {
             try {
                 const data = await getCcAsistenciaEventoById(eventoId);
+                const today = dayjs().format('YYYY-MM-DD');
+                if (data.fecha !== today) {
+                    setEventoValido(false);
+                }
                 setEvento(data);
             } catch (err) {
                 setError('Evento no encontrado o ha ocurrido un error.');
@@ -79,7 +86,8 @@ export default function RegistroCcAsistencia() {
 
             setSuccessMessage(`¡Asistencia registrada exitosamente!`);
         } catch (err) {
-            setError('Ocurrió un error al registrar la asistencia.');
+            const backendError = err.response?.data?.message || err.message;
+            setError(backendError || 'Ocurrió un error al registrar la asistencia.');
         } finally {
             setLoadingCuil(false);
         }
@@ -142,7 +150,36 @@ export default function RegistroCcAsistencia() {
                 >
                     <Box sx={{ p: { xs: 4, sm: 5 }, textAlign: 'center' }}>
 
-                        {!successMessage && !participantInfo && (
+                        {!eventoValido && (
+                            <>
+                                <Avatar sx={{ mx: 'auto', mb: 3, width: 80, height: 80, bgcolor: '#ffebe9', color: 'error.main', boxShadow: '0 8px 16px rgba(0,0,0,0.05)' }}>
+                                    <EventBusyIcon sx={{ fontSize: 40 }} />
+                                </Avatar>
+
+                                <Typography variant="h5" sx={{ fontFamily: 'Geogrotesque Sharp', fontWeight: 'bold', color: '#1A1A1A', mb: 1 }}>
+                                    Registro no disponible
+                                </Typography>
+
+                                <Typography variant="h6" sx={{ fontFamily: 'Poppins', color: 'primary.main', fontWeight: 600, mb: 1, lineHeight: 1.3 }}>
+                                    {evento.curso?.nombre}
+                                </Typography>
+
+                                <Alert severity="error" sx={{ mt: 3, mb: 3, borderRadius: '12px', textAlign: 'left', fontFamily: 'Poppins' }}>
+                                    No es posible confirmar la asistencia en este momento. La fecha del evento <strong>({formatearFecha(evento.fecha)})</strong> no coincide con la fecha actual.
+                                </Alert>
+
+                                <Button
+                                    variant="outlined"
+                                    onClick={() => window.location.reload()}
+                                    fullWidth
+                                    sx={{ fontFamily: 'Geogrotesque Sharp', borderRadius: '12px', py: 1.5, fontWeight: 'bold', fontSize: '1rem', color: 'error.main', borderColor: 'error.main' }}
+                                >
+                                    ACTUALIZAR PÁGINA
+                                </Button>
+                            </>
+                        )}
+
+                        {eventoValido && !successMessage && !participantInfo && (
                             <>
                                 <Avatar sx={{ mx: 'auto', mb: 3, width: 80, height: 80, bgcolor: 'primary.light', color: 'primary.main', boxShadow: '0 8px 16px rgba(0,0,0,0.05)' }}>
                                     <AssignmentTurnedInIcon sx={{ fontSize: 40 }} />
@@ -212,7 +249,7 @@ export default function RegistroCcAsistencia() {
                             </>
                         )}
 
-                        {!successMessage && participantInfo && (
+                        {eventoValido && !successMessage && participantInfo && (
                             <>
                                 <Avatar sx={{ mx: 'auto', mb: 3, width: 80, height: 80, bgcolor: 'primary.light', color: 'primary.main', boxShadow: '0 8px 16px rgba(0,0,0,0.05)' }}>
                                     <PersonIcon sx={{ fontSize: 40 }} />
@@ -289,7 +326,7 @@ export default function RegistroCcAsistencia() {
                             </>
                         )}
 
-                        {successMessage && (
+                        {eventoValido && successMessage && (
                             <>
                                 <CheckCircleIcon sx={{ fontSize: 100, color: 'success.main', mb: 3 }} />
 
@@ -309,7 +346,7 @@ export default function RegistroCcAsistencia() {
                         )}
                     </Box>
 
-                    {error && participantInfo && !successMessage && (
+                    {eventoValido && error && participantInfo && !successMessage && (
                         <Box sx={{ px: 4, pb: 4 }}>
                             <Alert severity="error" sx={{ borderRadius: '12px' }}>{error}</Alert>
                         </Box>
