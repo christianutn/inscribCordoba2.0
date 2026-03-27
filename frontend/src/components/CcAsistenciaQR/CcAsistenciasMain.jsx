@@ -766,7 +766,7 @@ export default function CcAsistenciasMain() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <HelpOutlineIcon color="primary" sx={{ fontSize: '2rem' }} />
             <Typography variant="h5" sx={{ fontFamily: 'Geogrotesque Sharp', fontWeight: 'bold', color: '#1A1A1A' }}>
-              Guía rápida de Gestión de Asistencia
+              Guía rápida de Registro de Asistencia
             </Typography>
           </Box>
           <IconButton onClick={() => setShowHelpModal(false)} sx={{ color: '#94A3B8' }}><CloseIcon /></IconButton>
