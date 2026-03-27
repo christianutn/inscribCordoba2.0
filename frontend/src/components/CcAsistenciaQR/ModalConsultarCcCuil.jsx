@@ -106,7 +106,7 @@ export default function ModalConsultarCcCuil({ open, onClose, idEvento, nombreCu
 
                     {participantInfo && (
                         <Paper elevation={0} sx={{ p: 3, bgcolor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', mt: 1 }}>
-                            <Typography variant="subtitle2" sx={{ fontFamily: 'Poppins', mb: 1, color: '#64748B', fontWeight: 600 }}>DADOS ENCONTRADOS</Typography>
+                            <Typography variant="subtitle2" sx={{ fontFamily: 'Poppins', mb: 1, color: '#64748B', fontWeight: 600 }}>DATOS ENCONTRADOS</Typography>
                             <Typography variant="h5" sx={{ fontFamily: 'Geogrotesque Sharp', fontWeight: 'bold', color: 'primary.main', mb: 0.5 }}>
                                 {participantInfo.nombre} {participantInfo.apellido}
                             </Typography>
