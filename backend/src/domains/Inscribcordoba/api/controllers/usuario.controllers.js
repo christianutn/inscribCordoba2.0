@@ -128,12 +128,18 @@ export const putUsuario = async (req, res, next) => {
 
         const dataUsuario = {
             cuil,
-            rol,
-            area,
-            esExcepcionParaFechas: parseEsExcepcionParaFechas(esExcepcionParaFechas),
-            activo,
             token_version: token_version + 1
         }
+
+        if (esExcepcionParaFechas !== undefined) {
+            dataUsuario.esExcepcionParaFechas = (esExcepcionParaFechas === "" || esExcepcionParaFechas === null)
+                ? 0
+                : parseEsExcepcionParaFechas(esExcepcionParaFechas);
+        }
+        if (activo !== undefined) dataUsuario.activo = activo;
+
+        if (rol !== undefined) dataUsuario.rol = rol === "" ? null : rol;
+        if (area !== undefined) dataUsuario.area = area === "" ? null : area;
 
         await Usuario.update(dataUsuario, { where: { cuil }, transaction: t })
 

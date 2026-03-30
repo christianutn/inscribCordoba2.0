@@ -10,9 +10,12 @@ const ReasignarModal = ({ open, onClose, onReasign, loading, selectedRowData, ad
     const [selectedUserForReasign, setSelectedUserForReasign] = useState(null);
 
     const filteredAdminUsersForModal = useMemo(() => {
-        if (!userSearchTerm) return adminUsers;
+        // Filtrar usuarios para que solo sean ADM y estén activos (activo = 1 o true)
+        const validUsers = adminUsers.filter(user => user.rol === 'ADM' && (user.activo === 1 || user.activo === true));
+
+        if (!userSearchTerm) return validUsers;
         const term = userSearchTerm.toLowerCase();
-        return adminUsers.filter(user =>
+        return validUsers.filter(user =>
             (user.detalle_persona?.nombre?.toLowerCase() || '').includes(term) ||
             (user.detalle_persona?.apellido?.toLowerCase() || '').includes(term) ||
             (user.cuil?.toLowerCase() || '').includes(term)
