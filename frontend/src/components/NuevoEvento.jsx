@@ -59,7 +59,7 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
         setTiposCertificacionesOptions(tiposCertificacionesData);
 
         const cursosData = await getCursos();
-        setCursosOptions(cursosData);
+        setCursosOptions(cursosData.filter(curso => curso.esVigente === 1));
 
         if (selectCurso) {
           const cursoSeleccionado = cursosData.find((curso) => curso.nombre === selectCurso);
