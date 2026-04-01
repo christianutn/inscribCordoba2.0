@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Typography, Container, IconButton, Stack } from "@mui/material";
 import {
-  Facebook as FacebookIcon,
-  X as XIcon,
+  FacebookRounded as FacebookIcon,
+  Twitter as TwitterIcon,
   Instagram as InstagramIcon,
   YouTube as YouTubeIcon
 } from "@mui/icons-material";
@@ -67,8 +67,7 @@ export default function Footer() {
             <Typography
               variant="body1"
               sx={{
-                fontWeight: 600,
-                fontSize: { xs: '1rem', md: '0.85rem', lg: '1rem' },
+                fontSize: { xs: '1rem', md: '0.95rem', lg: '1.1rem' },
                 fontFamily: 'Roboto, sans-serif',
                 whiteSpace: 'nowrap', // Evita el salto de línea del título
               }}
@@ -77,7 +76,7 @@ export default function Footer() {
             </Typography>
             <Typography
               variant="body1"
-              sx={{ opacity: 0.9, mt: 0.5, fontSize: { xs: '0.95rem', md: '0.8rem', lg: '0.95rem' } }}
+              sx={{ mt: 0, fontSize: { xs: '1rem', md: '0.95rem', lg: '1.1rem' } }}
             >
               República Argentina / Tel: 0800 888-1234
             </Typography>
@@ -86,11 +85,10 @@ export default function Footer() {
               component="a"
               href="mailto:soportecampuscordoba@cba.gov.ar"
               sx={{
-                mt: 0.5,
+                mt: 0,
                 color: 'inherit',
                 textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: { xs: '0.95rem', md: '0.8rem', lg: '0.95rem' },
+                fontSize: { xs: '1rem', md: '0.95rem', lg: '1.1rem' },
                 '&:hover': { textDecoration: 'underline' }
               }}
             >
@@ -100,42 +98,42 @@ export default function Footer() {
 
           {/* Columna Derecha: Redes Sociales - tamaño fijo, siempre a la derecha */}
           <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            <Stack direction="row" spacing={0.5}>
+            <Stack direction="row" spacing={0}>
               <IconButton
-                sx={{ color: '#FFFFFF', p: { md: '6px' } }}
+                sx={{ color: '#FFFFFF', p: { md: '0px' } }}
                 component="a"
                 href="https://es-la.facebook.com/gobdecordoba/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <FacebookIcon sx={{ fontSize: { md: '1.2rem', lg: '1.5rem' } }} />
+                <FacebookIcon sx={{ fontSize: { md: '2rem', lg: '2rem' } }} />
               </IconButton>
               <IconButton
-                sx={{ color: '#FFFFFF', p: { md: '6px' } }}
+                sx={{ color: '#FFFFFF', p: { md: '0px' } }}
                 component="a"
                 href="https://x.com/gobdecordoba?lang=es"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <XIcon sx={{ fontSize: { md: '1.2rem', lg: '1.5rem' } }} />
+                <TwitterIcon sx={{ fontSize: { md: '2rem', lg: '2rem' } }} />
               </IconButton>
               <IconButton
-                sx={{ color: '#FFFFFF', p: { md: '6px' } }}
+                sx={{ color: '#FFFFFF', p: { md: '0px' } }}
                 component="a"
                 href="https://www.instagram.com/cordobaok/?hl=es-la"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <InstagramIcon sx={{ fontSize: { md: '1.2rem', lg: '1.5rem' } }} />
+                <InstagramIcon sx={{ fontSize: { md: '2rem', lg: '2rem' } }} />
               </IconButton>
               <IconButton
-                sx={{ color: '#FFFFFF', p: { md: '6px' } }}
+                sx={{ color: '#FFFFFF', p: { md: '0px' } }}
                 component="a"
                 href="https://www.youtube.com/user/gobiernodecordoba"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <YouTubeIcon sx={{ fontSize: { md: '1.2rem', lg: '1.5rem' } }} />
+                <YouTubeIcon sx={{ fontSize: { md: '2rem', lg: '2rem' } }} />
               </IconButton>
             </Stack>
           </Box>
