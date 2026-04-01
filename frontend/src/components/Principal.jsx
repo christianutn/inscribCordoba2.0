@@ -15,7 +15,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  CircularProgress,
   Tooltip,
   Stack,
 } from '@mui/material';
@@ -54,10 +53,10 @@ import MainGestion from './Gestion/MainGestion.jsx';
 import VisualizacionMisNotasRefentes from './NotaDeAutorizacion/VisualizacionMisNotasRefentes.jsx';
 import GestionEventoYCurso from '../features/EventoYCurso/GestionEventoYCurso.jsx'
 import GestionEfemerides from '../features/Efemerides/GestionEfemerides.jsx';
-import { getMyUser } from "../services/usuarios.service.js";
 import Footer from './layout/footer';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
 import { useAuth } from '../context/AuthContext';
+import config from '../config.js';
 
 const drawerWidth = 260;
 
@@ -75,8 +74,7 @@ const menuConfigByRole = {
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
     { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon /> },
-    //{ label: "Registro de Asistencias", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
-    { label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> },
+    ...(config.rolesPermitidosCcAsistencias.includes('ADM') ? [{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> }] : []),
     { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
   REF: [
@@ -87,7 +85,7 @@ const menuConfigByRole = {
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
     { label: "Tablero", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon /> },
-    { label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> },
+    ...(config.rolesPermitidosCcAsistencias.includes('REF') ? [{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> }] : []),
     { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
   GA: [
@@ -97,8 +95,7 @@ const menuConfigByRole = {
     { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
     { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon /> },
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
-    //{ label: "Registro de Asistencias viejo", identifier: "AsistenciasMain", icon: <QrCodeIcon /> },
-    //{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> },
+    ...(config.rolesPermitidosCcAsistencias.includes('GA') ? [{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> }] : []),
     { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
 };
@@ -213,7 +210,7 @@ export default function Principal() {
 
   useEffect(() => {
     if (user) {
-      if (user.necesitaCbioContrasenia == "1") {
+      if (user.necesitaCbioContrasenia === "1") {
         navigate('/cambiarContrasenia');
         return;
       }
@@ -227,7 +224,7 @@ export default function Principal() {
         setOpcionSeleccionada(optionsForRole.find(opt => opt.identifier === "Home") ? "Home" : optionsForRole[0].identifier);
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, opcionSeleccionada, setOpcionSeleccionada]);
 
   // Asegura que al cambiar de sección el scroll se resetee al inicio de la página
   useEffect(() => {
