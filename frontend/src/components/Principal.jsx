@@ -53,6 +53,7 @@ import MainGestion from './Gestion/MainGestion.jsx';
 import VisualizacionMisNotasRefentes from './NotaDeAutorizacion/VisualizacionMisNotasRefentes.jsx';
 import GestionEventoYCurso from '../features/EventoYCurso/GestionEventoYCurso.jsx'
 import GestionEfemerides from '../features/Efemerides/GestionEfemerides.jsx';
+import TableroProductividad from '../features/TableroProductividad/TableroProductividad.jsx';
 import Footer from './layout/footer';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
 import { useAuth } from '../context/AuthContext';
@@ -64,6 +65,7 @@ const menuConfigByRole = {
   ADM: [
     { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
     { label: "Tablero ", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
+    { label: "Productividad", identifier: "TableroProductividad", icon: <AssessmentIcon /> },
     { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
     { label: "Versión Reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon /> },
     { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
@@ -189,6 +191,7 @@ export default function Principal() {
   const titulosSeccion = {
     Home: 'Inicio',
     ReporteCursosIdentifier: 'Tablero',
+    TableroProductividad: 'Productividad',
     Calendario: 'Cronograma',
     VersionReducidaAdministradores: 'Versión Reducida Adm.',
     VersionReducidaGa: 'Versión Reducida GA',
@@ -266,6 +269,7 @@ export default function Principal() {
       case "Eventos": return <NuevoEvento />;
       case "GestionEventoYCurso": return <GestionEventoYCurso />;
       case "ReporteCursosIdentifier": return <ReporteCursos sidebarOpen={open} />;
+      case "TableroProductividad": return <TableroProductividad />;
       case "CrearAviso": return <CrearAviso />;
       case "AsistenciasMain": return <AsistenciasMain />;
       case "CcAsistenciasMain": return <CcAsistenciasMain />;

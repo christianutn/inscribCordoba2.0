@@ -141,3 +141,24 @@ export const putInstanciasMasivo = async (payload) => {
         throw error
     }
 }
+
+export const getTablaInstanciasPorUsuario = async (fecha_desde, fecha_hasta) => {
+    try {
+        const response = await fetch(`${URL}/tabla-instancias-por-usuario?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            }
+        });
+        const data = await response.json();
+
+        if (response.status !== 200) {
+            throw new Error(data.message || "Error al buscar tabla de instancias por usuario");
+        }
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
