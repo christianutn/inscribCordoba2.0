@@ -27,6 +27,7 @@ import Cambios_estados_notas_autorizacion from './cambios_estados_notas_autoriza
 import RolTutor from './roles_tutor.models.js'
 import Historico_tutores_en_curso from './historico_tutores_en_curso.models.js';
 import Efemeride from './efemeride.models.js';
+import DatosDesarrollo from "./datos_desarrollo.models.js";
 
 const associateInscribModels = () => {
 
@@ -183,6 +184,10 @@ const associateInscribModels = () => {
     // Efemérides: Un usuario puede crear muchas efemérides
     Efemeride.belongsTo(Usuario, { foreignKey: 'usuario', targetKey: 'cuil', as: 'detalle_usuario_efemeride' });
     Usuario.hasMany(Efemeride, { foreignKey: 'usuario', sourceKey: 'cuil', as: 'detalle_efemerides_usuario' });
+
+    // Datos Desarrollo
+    DatosDesarrollo.belongsTo(Usuario, { foreignKey: 'cuil', targetKey: 'cuil', as: 'detalle_usuario' });
+
 };
 
 export default associateInscribModels;
