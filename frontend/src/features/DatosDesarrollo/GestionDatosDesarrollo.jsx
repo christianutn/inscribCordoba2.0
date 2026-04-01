@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import {
     Box, Button, Alert, CircularProgress, Snackbar,
     TextField, InputAdornment, Typography, Paper,
-    FormControl, InputLabel, Select, MenuItem
+    FormControl, InputLabel, Select, MenuItem,
+    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
@@ -24,13 +25,14 @@ const GestionDatosDesarrollo = () => {
     const {
         datos, loading,
         handleCreate, handleUpdate, handleDelete,
+        alert, setAlert,
         busqueda, setBusqueda
     } = useDatosDesarrollo();
 
     const [usuarios, setUsuarios] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [editingData, setEditingData] = useState(null);
-    const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
+    const [confirmDelete, setConfirmDelete] = useState({ open: false, row: null });
     const [searchTerm, setSearchTerm] = useState('');
     const [desdeMes, setDesdeMes] = useState('');
     const [desdeAnio, setDesdeAnio] = useState('');
@@ -105,23 +107,30 @@ const GestionDatosDesarrollo = () => {
         try {
             if (editingData) {
                 await handleUpdate(editingData.id, formData);
-                setNotification({ open: true, message: 'Registro actualizado correctamente', severity: 'success' });
+                setAlert({ open: true, message: 'Registro actualizado correctamente', severity: 'success' });
             } else {
                 await handleCreate(formData);
-                setNotification({ open: true, message: 'Registro creado correctamente', severity: 'success' });
+                setAlert({ open: true, message: 'Registro creado correctamente', severity: 'success' });
             }
             setModalOpen(false);
         } catch (err) {
-            setNotification({ open: true, message: err.message || 'Error al guardar', severity: 'error' });
+            setAlert({ open: true, message: err.message || 'Error al guardar', severity: 'error' });
         }
     };
 
-    const handleDeleteRow = async (row) => {
-        await handleDelete(row.id);
+    const handleDeleteRow = (row) => {
+        setConfirmDelete({ open: true, row });
+    };
+
+    const handleConfirmDelete = async () => {
+        if (confirmDelete.row) {
+            await handleDelete(confirmDelete.row.id);
+            setConfirmDelete({ open: false, row: null });
+        }
     };
 
     const handleCloseNotification = () => {
-        setNotification(prev => ({ ...prev, open: false }));
+        setAlert(prev => ({ ...prev, open: false }));
     };
 
     if (loading && (!datos || datos.length === 0)) {
@@ -257,14 +266,45 @@ const GestionDatosDesarrollo = () => {
                 usuarios={usuarios}
             />
 
+            <Dialog
+                open={confirmDelete.open}
+                onClose={() => setConfirmDelete({ open: false, row: null })}
+                aria-labelledby="confirm-delete-title"
+                aria-describedby="confirm-delete-description"
+            >
+                <DialogTitle id="confirm-delete-title">
+                    {"¿Estás seguro?"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="confirm-delete-description">
+                        No podrás revertir esto. El registro de desarrollo será eliminado permanentemente.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button 
+                        onClick={() => setConfirmDelete({ open: false, row: null })} 
+                        color="error" // Matching original cancelButtonColor: '#d33'
+                    >
+                        Cancelar
+                    </Button>
+                    <Button 
+                        onClick={handleConfirmDelete} 
+                        color="primary" // Matching original confirmButtonColor: '#3085d6'
+                        autoFocus
+                    >
+                        Sí, borrar!
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Snackbar
-                open={notification.open}
+                open={alert.open}
                 autoHideDuration={6000}
                 onClose={handleCloseNotification}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert onClose={handleCloseNotification} severity={notification.severity} sx={{ width: '100%' }}>
-                    {notification.message}
+                <Alert onClose={handleCloseNotification} severity={alert.severity} sx={{ width: '100%' }}>
+                    {alert.message}
                 </Alert>
             </Snackbar>
         </Box>

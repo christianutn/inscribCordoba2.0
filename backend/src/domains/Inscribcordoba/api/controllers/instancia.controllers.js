@@ -615,3 +615,67 @@ export const putInstanciasMasivo = async (req, res, next) => {
         next(new AppError("Error al actualizar las instancias masivamente", 500));
     }
 };
+
+export const getTablaInstanciasPorUsuario = async (req, res, next) => {
+    try {
+        const { fecha_desde, fecha_hasta } = req.query;
+
+        logger.info(`📊 Obteniendo tabla de instancias por usuario - Desde: ${fecha_desde} - Hasta: ${fecha_hasta}`);
+
+        if (!fecha_desde || !fecha_hasta) {
+            throw new AppError("Debes proveer fecha_desde y fecha_hasta como query params", 400);
+        }
+
+        const query = `
+            SELECT  
+                COUNT(*) AS total, 
+                i.asignado AS cuil, 
+                p.nombre, 
+                p.apellido,
+
+                SUM(CASE 
+                    WHEN i.es_autogestionado = 1 THEN 1 
+                    ELSE 0 
+                END) AS cantidad_autogestionados,
+
+                SUM(CASE 
+                    WHEN i.es_autogestionado <> 1 THEN 1 
+                    ELSE 0 
+                END) AS cantidad_convencionales
+
+            FROM instancias AS i
+            JOIN personas AS p 
+                ON i.asignado = p.cuil
+
+            WHERE 
+                i.estado_instancia <> 'CANC'
+                AND i.fecha_inicio_curso BETWEEN :fechaDes AND :fechaHas
+
+            GROUP BY i.asignado, p.nombre, p.apellido;
+        `;
+
+        const results = await sequelize.query(query, {
+            type: QueryTypes.SELECT,
+            replacements: { fechaDes: fecha_desde, fechaHas: fecha_hasta }
+        });
+
+        logger.info(`✅ Tabla de instancias obtenida exitosamente - Total registros: ${results.length}`);
+
+        const formattedResults = results.map(row => ({
+            total: Number(row.total),
+            cuil: Number(row.cuil),
+            nombre: row.nombre,
+            apellido: row.apellido,
+            cantidad_autogestionados: Number(row.cantidad_autogestionados),
+            cantidad_convencionales: Number(row.cantidad_convencionales)
+        }));
+
+        res.status(200).json(formattedResults);
+
+    } catch (error) {
+        logger.error(`❌ Error en getTablaInstanciasPorUsuario - Error: ${error.message}`, {
+            stack: error.stack
+        });
+        next(error);
+    }
+};

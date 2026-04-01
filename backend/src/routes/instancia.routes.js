@@ -1,4 +1,4 @@
-import { getInstancias, postInstancia, deleteInstancia, get_fechas_invalidas, putInstancia, putInstanciasMasivo } from "../domains/Inscribcordoba/api/controllers/instancia.controllers.js";
+import { getInstancias, postInstancia, deleteInstancia, get_fechas_invalidas, putInstancia, putInstanciasMasivo, getTablaInstanciasPorUsuario } from "../domains/Inscribcordoba/api/controllers/instancia.controllers.js";
 import { Router } from "express";
 import autorizar from "../utils/autorizar.js"
 import manejerValidacionErrores from "../utils/manejarValidacionErrores.js";
@@ -25,6 +25,12 @@ instanciaRouter.get("/get-fechas-invalidas/:targetYear",
     autorizar(['ADM', 'REF', 'GA']),
     manejerValidacionErrores,
     get_fechas_invalidas
+)
+
+instanciaRouter.get("/tabla-instancias-por-usuario",
+    passport.authenticate('jwt', { session: false }),
+    autorizar(['ADM', 'GA', 'REF']),
+    getTablaInstanciasPorUsuario
 )
 
 instanciaRouter.put("/:curso_params/:fecha_inicio_curso_params",

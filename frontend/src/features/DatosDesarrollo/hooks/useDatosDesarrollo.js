@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDatosDesarrollo, postDatosDesarrollo, putDatosDesarrollo, deleteDatosDesarrollo } from '../../../services/datosDesarrollo.service';
-import Swal from 'sweetalert2';
 
 export const useDatosDesarrollo = () => {
     const [datos, setDatos] = useState([]);
@@ -8,6 +7,7 @@ export const useDatosDesarrollo = () => {
     const [busqueda, setBusqueda] = useState('');
     const [mes, setMes] = useState('');
     const [anio, setAnio] = useState('');
+    const [alert, setAlert] = useState({ open: false, message: '', severity: 'info' });
 
     const fetchDatos = useCallback(async () => {
         setLoading(true);
@@ -16,7 +16,7 @@ export const useDatosDesarrollo = () => {
             setDatos(data);
         } catch (error) {
             console.error(error);
-            Swal.fire('Error', error.message, 'error');
+            setAlert({ open: true, message: error.message || 'Error al cargar los datos', severity: 'error' });
         } finally {
             setLoading(false);
         }
@@ -45,25 +45,12 @@ export const useDatosDesarrollo = () => {
     };
 
     const handleDelete = async (id) => {
-        const result = await Swal.fire({
-            title: '¿Estás seguro?',
-            text: "No podrás revertir esto",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, borrar!',
-            cancelButtonText: 'Cancelar'
-        });
-
-        if (result.isConfirmed) {
-            try {
-                await deleteDatosDesarrollo(id);
-                await fetchDatos();
-                Swal.fire('Borrado!', 'El registro ha sido eliminado.', 'success');
-            } catch (error) {
-                Swal.fire('Error', error.message, 'error');
-            }
+        try {
+            await deleteDatosDesarrollo(id);
+            await fetchDatos();
+            setAlert({ open: true, message: 'El registro ha sido eliminado correctamente.', severity: 'success' });
+        } catch (error) {
+            setAlert({ open: true, message: error.message || 'Error al eliminar el registro', severity: 'error' });
         }
     };
 
@@ -74,6 +61,8 @@ export const useDatosDesarrollo = () => {
         handleCreate,
         handleUpdate,
         handleDelete,
+        alert,
+        setAlert,
         busqueda,
         setBusqueda,
         mes,
