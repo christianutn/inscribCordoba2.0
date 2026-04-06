@@ -266,9 +266,11 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                                 label="Plataforma de Dictado"
                                 onChange={handleChange}
                             >
-                                {auxiliaryData.plataformas.map((item) => (
-                                    <MenuItem key={item.cod} value={item.cod}>{item.nombre}</MenuItem>
-                                ))}
+                                {auxiliaryData.plataformas
+                                    .filter(item => item.esVigente === 1)
+                                    .map((item) => (
+                                        <MenuItem key={item.cod} value={item.cod}>{item.nombre}</MenuItem>
+                                    ))}
                             </Select>
                             {errors.codPlataformaDictado && <p style={{ color: '#d32f2f', fontSize: '0.75rem', margin: '3px 14px 0' }}>{errors.codPlataformaDictado}</p>}
                         </FormControl>
@@ -282,9 +284,11 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                                 label="Medio de Inscripción"
                                 onChange={handleChange}
                             >
-                                {auxiliaryData.medios.map((item) => (
-                                    <MenuItem key={item.cod} value={item.cod}>{item.nombre}</MenuItem>
-                                ))}
+                                {auxiliaryData.medios
+                                    .filter(item => item.esVigente === 1)
+                                    .map((item) => (
+                                        <MenuItem key={item.cod} value={item.cod}>{item.nombre}</MenuItem>
+                                    ))}
                             </Select>
                             {errors.codMedioInscripcion && <p style={{ color: '#d32f2f', fontSize: '0.75rem', margin: '3px 14px 0' }}>{errors.codMedioInscripcion}</p>}
                         </FormControl>
@@ -298,9 +302,11 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                                 label="Tipo de Capacitación"
                                 onChange={handleChange}
                             >
-                                {auxiliaryData.tipos.map((item) => (
-                                    <MenuItem key={item.cod} value={item.cod}>{item.nombre}</MenuItem>
-                                ))}
+                                {auxiliaryData.tipos
+                                    .filter(item => item.esVigente === 1)
+                                    .map((item) => (
+                                        <MenuItem key={item.cod} value={item.cod}>{item.nombre}</MenuItem>
+                                    ))}
                             </Select>
                             {errors.codTipoCapacitacion && <p style={{ color: '#d32f2f', fontSize: '0.75rem', margin: '3px 14px 0' }}>{errors.codTipoCapacitacion}</p>}
                         </FormControl>

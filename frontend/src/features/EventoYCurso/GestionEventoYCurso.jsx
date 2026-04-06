@@ -37,8 +37,8 @@ const GestionEventoYCurso = () => {
         } else if (filter === 'sinEvento') {
             result = result.filter(item => !item.tiene_evento_creado || item.tiene_evento_creado == 0);
         } else if (filter === 'pendientesVictorius') {
-            result = result.filter(item => 
-                (!item.tiene_evento_creado || item.tiene_evento_creado == 0) && 
+            result = result.filter(item =>
+                (!item.tiene_evento_creado || item.tiene_evento_creado == 0) &&
                 item.tiene_formulario_evento_creado == 1
             );
         }
@@ -114,8 +114,8 @@ const GestionEventoYCurso = () => {
     };
 
     const pendientesCount = useMemo(() => {
-        return data.filter(item => 
-            (!item.tiene_evento_creado || item.tiene_evento_creado == 0) && 
+        return data.filter(item =>
+            (!item.tiene_evento_creado || item.tiene_evento_creado == 0) &&
             item.tiene_formulario_evento_creado == 1
         ).length;
     }, [data]);
@@ -168,10 +168,10 @@ const GestionEventoYCurso = () => {
                         <ToggleButton value="todos" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Todos</ToggleButton>
                         <ToggleButton value="conEvento" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Con Evento</ToggleButton>
                         <ToggleButton value="sinEvento" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Sin Evento</ToggleButton>
-                        <ToggleButton 
-                            value="pendientesVictorius" 
+                        <ToggleButton
+                            value="pendientesVictorius"
                             color="primary"
-                            sx={{ 
+                            sx={{
                                 px: 2,
                                 textTransform: 'none',
                                 fontWeight: pendientesCount > 0 ? 700 : 500,
@@ -187,13 +187,13 @@ const GestionEventoYCurso = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 Pendientes Cargar en Victorius
                                 {pendientesCount > 0 && (
-                                    <Box 
-                                        sx={{ 
-                                            backgroundColor: 'error.main', 
-                                            color: 'white', 
-                                            borderRadius: '12px', 
-                                            px: 1, 
-                                            py: 0.3, 
+                                    <Box
+                                        sx={{
+                                            backgroundColor: 'error.main',
+                                            color: 'white',
+                                            borderRadius: '12px',
+                                            px: 1,
+                                            py: 0.3,
                                             fontSize: '0.75rem',
                                             fontWeight: 'bold',
                                             lineHeight: 1.2
