@@ -38,7 +38,7 @@ import { getDatosDesarrollo } from "../../services/datosDesarrollo.service";
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 
-const TableroProductividad = () => {
+const ReporteAdmin = () => {
   const theme = useTheme();
 
   // Logic for cycle Sep -> Aug
@@ -584,4 +584,4 @@ const TableroProductividad = () => {
   );
 };
 
-export default TableroProductividad;
+export default ReporteAdmin;
