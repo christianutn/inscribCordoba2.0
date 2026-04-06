@@ -632,6 +632,8 @@ export const getTablaInstanciasPorUsuario = async (req, res, next) => {
                 i.asignado AS cuil, 
                 p.nombre, 
                 p.apellido,
+                YEAR(i.fecha_inicio_curso) AS anio,
+                MONTH(i.fecha_inicio_curso) AS mes,
 
                 SUM(CASE 
                     WHEN i.es_autogestionado = 1 THEN 1 
@@ -639,7 +641,7 @@ export const getTablaInstanciasPorUsuario = async (req, res, next) => {
                 END) AS cantidad_autogestionados,
 
                 SUM(CASE 
-                    WHEN i.es_autogestionado <> 1 THEN 1 
+                    WHEN i.es_autogestionado <> 1 OR i.es_autogestionado IS NULL THEN 1 
                     ELSE 0 
                 END) AS cantidad_convencionales
 
@@ -649,9 +651,11 @@ export const getTablaInstanciasPorUsuario = async (req, res, next) => {
 
             WHERE 
                 i.estado_instancia <> 'CANC'
+                AND i.plataforma_dictado = 'CC'
                 AND i.fecha_inicio_curso BETWEEN :fechaDes AND :fechaHas
 
-            GROUP BY i.asignado, p.nombre, p.apellido;
+            GROUP BY i.asignado, p.nombre, p.apellido, YEAR(i.fecha_inicio_curso), MONTH(i.fecha_inicio_curso)
+            ORDER BY anio ASC, mes ASC;
         `;
 
         const results = await sequelize.query(query, {
@@ -666,6 +670,8 @@ export const getTablaInstanciasPorUsuario = async (req, res, next) => {
             cuil: Number(row.cuil),
             nombre: row.nombre,
             apellido: row.apellido,
+            anio: Number(row.anio),
+            mes: Number(row.mes),
             cantidad_autogestionados: Number(row.cantidad_autogestionados),
             cantidad_convencionales: Number(row.cantidad_convencionales)
         }));

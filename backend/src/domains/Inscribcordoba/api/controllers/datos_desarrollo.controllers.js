@@ -1,5 +1,6 @@
 import DatosDesarrollo from "../models/datos_desarrollo.models.js";
 import Usuario from "../models/usuario.models.js";
+import Persona from "../models/persona.models.js";
 import logger from '../../../../utils/logger.js';
 import { Op } from 'sequelize';
 
@@ -22,7 +23,14 @@ export const getDatosDesarrollo = async (req, res, next) => {
                 {
                     model: Usuario,
                     as: 'detalle_usuario',
-                    attributes: ['cuil']
+                    attributes: ['cuil'],
+                    include: [
+                        {
+                            model: Persona,
+                            as: 'detalle_persona',
+                            attributes: ['nombre', 'apellido']
+                        }
+                    ]
                 }
             ],
             order: [['anio', 'DESC'], ['mes', 'DESC']]

@@ -65,7 +65,7 @@ const menuConfigByRole = {
   ADM: [
     { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
     { label: "Tablero ", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
-    { label: "Productividad", identifier: "TableroProductividad", icon: <AssessmentIcon /> },
+    { label: "Reporte Admin", identifier: "TableroProductividad", icon: <AssessmentIcon /> },
     { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
     { label: "Versión Reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon /> },
     { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
