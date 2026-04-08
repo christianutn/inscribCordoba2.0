@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../../../../config/database.js";
 
 const Estado_curso = sequelize.define("estados_cursos", {
-    cod: {
+    codigo: {
         type: DataTypes.STRING(10),
         primaryKey: true
     },

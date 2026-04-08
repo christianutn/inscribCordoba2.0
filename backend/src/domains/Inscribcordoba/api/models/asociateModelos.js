@@ -28,7 +28,7 @@ import RolTutor from './roles_tutor.models.js'
 import Historico_tutores_en_curso from './historico_tutores_en_curso.models.js';
 import Efemeride from './efemeride.models.js';
 import DatosDesarrollo from "./datos_desarrollo.models.js";
-
+import Estado_curso from "./estado_curso.models.js";
 const associateInscribModels = () => {
 
     Ministerio.hasMany(Area, { foreignKey: 'ministerio', as: 'detalle_areas' });
@@ -40,6 +40,7 @@ const associateInscribModels = () => {
     Curso.belongsTo(TipoCapacitacion, { foreignKey: 'tipo_capacitacion', as: 'detalle_tipoCapacitacion' });
     Curso.belongsTo(PlataformaDictado, { foreignKey: 'plataforma_dictado', as: 'detalle_plataformaDictado' });
     Curso.belongsTo(Area, { foreignKey: 'area', as: 'detalle_area' });
+    Curso.belongsTo(Estado_curso, { foreignKey: 'estado', as: 'detalle_estado_curso' });
 
     //Intancia
     Instancia.belongsTo(Curso, { foreignKey: 'curso', as: 'detalle_curso' });

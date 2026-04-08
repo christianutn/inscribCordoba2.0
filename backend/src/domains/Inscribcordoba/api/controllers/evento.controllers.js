@@ -16,6 +16,8 @@ import Usuario from '../models/usuario.models.js';
 import { DateTime } from "luxon"
 import logger from '../../../../utils/logger.js';
 
+import CursoStateService from '../../core/services/CursoStateService.js';
+
 
 /**
  * Obtiene TODOS los cursos, incluyendo su evento asociado (si existe) mediante LEFT JOIN.
@@ -176,6 +178,11 @@ export const postEvento = async (req, res, next) => {
                 transaction: t
             }
         );
+
+        // Valida y avanza el estado del curso a PVICT utilizando la máquina de estados.
+        // Debe encontrarse obligatoriamente en estado 'CON' previo a crear el evento.
+        // La validación interna levantará error y hará rollback de la transacción de no ser así.
+        await CursoStateService.marcarPendienteCargaEnVictorius(curso, t);
 
         // Se eliminó la validación de que el evento no exista en la base de datos ya que hay eventos que están
         // marcados como existentes pero no se encuentran en la base de datos
