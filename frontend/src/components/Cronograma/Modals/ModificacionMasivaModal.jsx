@@ -269,6 +269,21 @@ const ModificacionMasivaModal = ({
                         </FormControl>
                     </Grid>
 
+                    {/* Comentario */}
+                    <Grid item xs={12}>
+                        <TextField
+                            fullWidth
+                            label="Comentario"
+                            name="comentario"
+                            value={formData.comentario !== undefined ? formData.comentario : ''}
+                            onChange={handleTextSelectChange}
+                            InputLabelProps={{ shrink: true }}
+                            placeholder="Dejar vacío para no modificar"
+                            multiline
+                            rows={3}
+                        />
+                    </Grid>
+
                     {/* Booleanos (requieren un checkbox para habilitar el cambio) */}
                     <Grid item xs={12} sm={6}>
                         <Box sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
