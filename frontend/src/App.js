@@ -41,7 +41,7 @@ function App() {
             
             {/* Private Routes */}
             <Route path="/principal" element={<ProtectedRoute><Layout><Principal /></Layout></ProtectedRoute>} />
-            <Route path="/cambiarContrasenia" element={<ProtectedRoute><Layout><CambioContrasenia /></Layout></ProtectedRoute>} />
+            <Route path="/cambiarContrasenia" element={<Layout><CambioContrasenia /></Layout>} />
             <Route path='/PingTest' element={<ProtectedRoute><Layout><TitleWrapper title="Ping Test"><PingTest /></TitleWrapper></Layout></ProtectedRoute>} />
             <Route path='/detalleFechas' element={<ProtectedRoute><Layout><TitleWrapper title="Detalle de Fechas"><DetalleFechas /></TitleWrapper></Layout></ProtectedRoute>} />
             <Route path='/nuevoEvento' element={<ProtectedRoute><Layout><TitleWrapper title="Nuevo Evento"><NuevoEvento /></TitleWrapper></Layout></ProtectedRoute>} />
