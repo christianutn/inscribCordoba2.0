@@ -44,6 +44,9 @@ const theme = createTheme({
       CBA_Grey10: colors.CBA_Grey10,
       CBA_Grey11: colors.CBA_Grey11,
     },
+    background: {
+      default: '#ffff',
+    },
   },
   typography: {
     fontFamily: typography.fontFamilySecondary, // Fuente por defecto para el cuerpo de texto
@@ -78,6 +81,35 @@ const theme = createTheme({
   },
   components: {
     // Sobrescribimos los estilos y props por defecto para MuiDataGrid
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: '#F8FAFC',
+          scrollbarColor: "#CBD5E1 transparent",
+          "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
+            backgroundColor: "transparent",
+            width: '6px',
+            height: '6px',
+          },
+          "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
+            borderRadius: 10,
+            backgroundColor: "rgba(0, 0, 0, 0.1)",
+            minHeight: 24,
+            border: '2px solid transparent', // Crea un efecto de padding dentro del track
+            backgroundClip: 'padding-box'
+          },
+          "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: "rgba(0, 0, 0, 0.2)",
+          },
+          "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
+            backgroundColor: "transparent",
+          },
+        },
+        '#root': {
+          backgroundColor: '#F8FAFC',
+        }
+      },
+    },
     MuiDataGrid: {
       defaultProps: {
         localeText: esES.components.MuiDataGrid.defaultProps.localeText,

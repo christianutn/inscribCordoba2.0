@@ -90,12 +90,18 @@ class RegistrarNotaDeAutorizacion {
                 nombreArea: area.nombre
             };
 
-            // Enviamos el correo. Si falla, se lanzará una excepción y se hará rollback
-            await this.emailAdapter.enviarNotificacionNotaAutorizacion(
-                datosUsuario,
-                nuevaNotaAutorizacion.id,
-                respuestaGuardadoArchivo.ruta // Ruta completa del archivo PDF guardado
-            );
+            // Enviamos el correo. Si falla, registramos el error pero permitimos que la transacción continúe
+            // ya que el registro de la nota es la operación crítica.
+            try {
+                await this.emailAdapter.enviarNotificacionNotaAutorizacion(
+                    datosUsuario,
+                    nuevaNotaAutorizacion.id,
+                    respuestaGuardadoArchivo.ruta // Ruta completa del archivo PDF guardado
+                );
+            } catch (mailError) {
+                console.error("⚠️ Error no crítico al enviar notificación por correo:", mailError.message);
+                // No relanzamos el error para no abortar el registro de la nota
+            }
 
             // 7. Si todo fue exitoso (incluyendo el envío del correo), confirmamos la transacción.
             await t.commit();

@@ -73,7 +73,6 @@ const menuConfigByRole = {
     { label: "Gestionar Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon /> },
     { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon /> },
     { label: "Restricciones Fechas", identifier: "RestriccionesFechasInicioCursada", icon: <GavelIcon /> },
-    { label: "Cargar Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon /> },
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
     { label: "Crear Aviso", identifier: "CrearAviso", icon: <CampaignIcon /> },
@@ -84,10 +83,9 @@ const menuConfigByRole = {
     { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
     { label: "Tablero", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
-    { label: "Cargar Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon /> },
+    { label: "Gestionar Nota de Autorización", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon /> },
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
-    { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon /> },
     ...(config.rolesPermitidosCcAsistencias.includes('REF') ? [{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> }] : []),
     { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
@@ -199,7 +197,7 @@ export default function Principal() {
     Calendario: 'Cronograma',
     VersionReducidaAdministradores: 'Versión Reducida Adm.',
     VersionReducidaGa: 'Versión Reducida GA',
-    Autorizaciones: 'Gestionar Autorizaciones',
+    Autorizaciones: 'Gestión Autorizaciones',
     Gestion: 'Gestión',
     RestriccionesFechasInicioCursada: 'Restricciones Fechas',
     SubaNotaDeAutorizacion: 'Cargar Nota',
@@ -350,7 +348,25 @@ export default function Principal() {
             width: drawerWidth,
             boxSizing: 'border-box',
             borderRight: 'none',
-            boxShadow: theme.shadows[2]
+            boxShadow: theme.shadows[2],
+            // Scrollbar modern refinements
+            scrollbarWidth: 'thin',
+            scrollbarColor: `#E2E8F0 transparent`,
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: 'transparent',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#E2E8F0',
+              borderRadius: '10px',
+              border: '2px solid transparent',
+              backgroundClip: 'content-box',
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              backgroundColor: '#009EE3 !important',
+            },
           },
         }}
         variant={isMobile ? "temporary" : "persistent"}

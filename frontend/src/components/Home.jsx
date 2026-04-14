@@ -21,13 +21,19 @@ import {
 import {
   InfoOutlined as InfoOutlinedIcon,
   ArrowForward as ArrowForwardIcon,
-  PushPin as PushPinIcon,
+  PushPinOutlined as PushPinIcon,
   Delete as DeleteIcon,
   NotificationsNone as NotificationsNoneIcon,
   EventNote as EventNoteIcon,
   Assignment as AssignmentIcon,
   CalendarMonth as CalendarMonthIcon,
-  NoteAdd as NoteAddIcon
+  NoteAdd as NoteAddIcon,
+  WarningAmberOutlined as WarningIcon,
+  CheckCircleOutline as SuccessIcon,
+  CampaignOutlined as CampaignIcon,
+  CelebrationOutlined as CelebrationIcon,
+  EventAvailableOutlined as EventIcon,
+  LightbulbOutlined as LightbulbIcon
 } from '@mui/icons-material';
 import { getAvisos, deleteAviso } from '../services/avisos.service';
 import DOMPurify from 'dompurify';
@@ -191,10 +197,10 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
         sx={{
           width: '100%',
           flexGrow: 1,
-          backgroundColor: '#F3F4F6',
+          background: 'radial-gradient(circle at top left, #FFFFFF, #F1F5F9)',
           transition: 'width 0.3s ease-in-out',
-          minHeight: 'auto',
-          pb: 0
+          minHeight: '100vh',
+          pb: 8
         }}
       >
         <Box sx={{ py: { xs: 4, md: 6 } }}>
@@ -203,8 +209,8 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
               variant="h2"
               component="h1"
               sx={{
-                fontWeight: 600,
-                fontFamily: 'Geogrotesque Sharp, sans-serif',
+                fontWeight: 700,
+                fontFamily: "'Geogrotesque Sharp', sans-serif",
                 fontSize: {
                   xs: 'clamp(1.6rem, 5vw, 2rem)',
                   sm: 'clamp(2rem, 4vw, 2.4rem)',
@@ -212,26 +218,26 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                   lg: 'clamp(2.6rem, 3vw, 3.5rem)',
                 },
                 mb: { xs: 4, md: 6 },
-                color: 'primary.main',
+                color: '#003d7a',
                 textAlign: 'left',
-                letterSpacing: '-2px',
+                letterSpacing: '-1.5px',
               }}
             >
               {nombre ? `¡Hola ${nombre}!` : '¡Hola Valentina De Los Angeles!'}
             </Typography>
 
-            <Grid container spacing={4}>
+            <Grid container spacing={5} alignItems="flex-start">
               {/* COLUMNA IZQUIERDA: Mi Ruta de Gestión (60%) */}
-              <Grid item xs={12} md={7.2}>
+              <Grid item xs={12} md={7}>
                 <Box>
-                  <Box display="flex" alignItems="center" mb={4}>
+                  <Box display="flex" alignItems="center" height="40px" mb={4}>
                     <Typography
                       variant="h5"
                       component="h2"
                       sx={{
                         fontWeight: 700,
-                        fontFamily: 'Geogrotesque Sharp, sans-serif',
-                        color: '#374151',
+                        fontFamily: "'Geogrotesque Sharp', sans-serif",
+                        color: '#334155',
                         fontSize: '1.5rem',
                         letterSpacing: '-0.5px'
                       }}
@@ -251,9 +257,8 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                   </Box>
 
                   <Grid container spacing={3}>
-                    {/* PASOS: Ahora navegables por teclado y con mayor accesibilidad */}
                     {[
-                      { step: 'Paso 1', title: 'Cargar Nota', color: '#009EE3', icon: <NoteAddIcon />, desc: 'Iniciá el proceso cargando la nota de autorización correspondiente.', option: 'SubaNotaDeAutorizacion' },
+                      { step: 'Paso 1', title: 'Cargar Nota', color: '#009EE3', icon: <NoteAddIcon />, desc: 'Iniciá el proceso cargando la nota de autorización correspondiente.', option: rol === 'ADM' ? 'Autorizaciones' : 'MisNotasAutorizacionIdentifier' },
                       { step: 'Paso 2', title: 'Crear Evento', color: '#009EE3', icon: <AssignmentIcon />, desc: 'Una vez autorizada la nota, completá el formulario del evento de tu capacitación.', option: 'Eventos' },
                       { step: 'Paso 3', title: 'Crear Cohorte', color: '#009EE3', icon: <EventNoteIcon />, desc: 'Completá el formulario de cohorte para agendar las fechas de tu capacitación.', option: 'Formulario' },
                       { step: 'Paso 4', title: 'Ver Calendario', color: '#009EE3', icon: <CalendarMonthIcon />, desc: 'Consultá las cohortes que cargaste en el calendario.', option: 'Calendario' }
@@ -262,60 +267,70 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                         <ButtonBase
                           component="div"
                           onClick={() => setOpcionSeleccionada(item.option)}
-                          aria-label={`${item.step}: ${item.title}. ${item.desc}`}
                           sx={{
                             width: '100%',
                             textAlign: 'left',
                             display: 'block',
-                            borderRadius: '16px',
-                            transition: 'all 0.2s',
+                            borderRadius: '20px',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '&:hover': {
+                              transform: 'translateX(8px) translateY(-2px)',
+                            }
                           }}
                         >
                           <Paper
                             elevation={0}
                             sx={{
                               p: 3,
-                              borderRadius: '16px',
-                              backgroundColor: '#FFFFFF',
-                              border: '1px solid #E5E7EB',
+                              borderRadius: '20px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                              backdropFilter: 'blur(10px)',
+                              border: '1px solid rgba(255, 255, 255, 0.4)',
+                              position: 'relative',
+                              overflow: 'hidden',
                               display: 'flex',
                               alignItems: 'center',
-                              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                              transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.02), 0 10px 20px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255, 255, 255, 0.6)',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                                borderColor: item.color
+                                transform: 'translateY(-6px)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                boxShadow: '0 20px 40px rgba(0, 158, 227, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
+                                '& .arrow-wrap': { transform: 'translateX(6px)', opacity: 1 },
+                                '& .icon-box': { transform: 'scale(1.1)', filter: 'brightness(1.1)' }
                               }
                             }}
                           >
                             <Box
+                              className="icon-box"
                               sx={{
-                                width: 56,
-                                height: 56,
-                                borderRadius: '50%',
+                                width: 52,
+                                height: 52,
+                                borderRadius: '14px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                backgroundColor: 'rgba(0, 158, 227, 0.08)',
-                                color: 'primary.main',
+                                backgroundColor: `${item.color}15`,
+                                color: item.color,
                                 mr: 3,
-                                flexShrink: 0
+                                flexShrink: 0,
+                                transition: 'all 0.3s ease'
                               }}
                             >
                               {item.icon}
                             </Box>
-                            <Box sx={{ flexGrow: 1 }}>
+                            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                               <Typography
                                 variant="overline"
                                 sx={{
-                                  color: item.color,
+                                  color: '#475569',
                                   fontWeight: 800,
-                                  fontFamily: 'Geogrotesque Sharp, sans-serif',
-                                  letterSpacing: '1px',
-                                  fontSize: '0.75rem',
+                                  fontFamily: "'Geogrotesque Sharp', sans-serif",
+                                  letterSpacing: '1.5px',
+                                  fontSize: '0.9rem',
                                   display: 'block',
-                                  lineHeight: 1.5
+                                  lineHeight: 1.2,
+                                  mb: 0.5
                                 }}
                               >
                                 {item.step}
@@ -324,19 +339,23 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                                 variant="h6"
                                 sx={{
                                   fontWeight: 700,
-                                  fontFamily: 'Geogrotesque Sharp, sans-serif',
-                                  color: '#1A202C',
+                                  fontFamily: 'Poppins, sans-serif',
+                                  color: '#0F172A',
                                   lineHeight: 1.2,
-                                  fontSize: '1.15rem'
+                                  fontSize: '1.25rem',
+                                  letterSpacing: '-0.3px',
+                                  mb: 0.8
                                 }}
                               >
                                 {item.title}
                               </Typography>
-                              <Typography variant="body2" sx={{ color: '#6B7280', mt: 0.5, fontFamily: 'Poppins, sans-serif', fontSize: '1rem' }}>
+                              <Typography variant="body2" sx={{ color: '#334155', fontFamily: 'Poppins, sans-serif', fontSize: '1rem', lineHeight: 1.5 }}>
                                 {item.desc}
                               </Typography>
                             </Box>
-                            <ArrowForwardIcon sx={{ color: '#D1D5DB', ml: 2 }} />
+                            <Box className="arrow-wrap" sx={{ transition: 'transform 0.3s', ml: 2, color: '#CBD5E1' }}>
+                              <ArrowForwardIcon fontSize="small" />
+                            </Box>
                           </Paper>
                         </ButtonBase>
                       </Grid>
@@ -346,29 +365,18 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
               </Grid>
 
               {/* COLUMNA DERECHA: Panel de Avisos (40%) */}
-              <Grid item xs={12} md={4.8}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '16px',
-                    p: 3,
-                    border: '1px solid #E5E7EB',
-                    height: '100%',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                  }}
-                >
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+              <Grid item xs={12} md={5}>
+                <Box sx={{ height: '100%', pl: { md: 2 } }}>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" height="40px" mb={4}>
                     <Typography
                       variant="h6"
                       component="h2"
                       sx={{
                         fontWeight: 700,
-                        fontFamily: 'Geogrotesque Sharp, sans-serif',
-                        color: '#374151',
-                        letterSpacing: '0.5px',
-                        textTransform: 'uppercase',
-                        fontSize: '1.1rem'
+                        fontFamily: "'Geogrotesque Sharp', sans-serif",
+                        color: '#334155',
+                        letterSpacing: '-0.5px',
+                        fontSize: '1.5rem'
                       }}
                     >
                       Avisos y Novedades
@@ -376,59 +384,70 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                   </Box>
 
                   {loading ? (
-                    Array.from(new Array(5)).map((_, index) => (
-                      <Box key={index} sx={{ mb: 2 }}>
-                        <Skeleton variant="text" width="70%" />
-                        <Skeleton variant="text" width="30%" height={15} />
-                        <Divider sx={{ my: 2, opacity: 0.5 }} />
+                    Array.from(new Array(3)).map((_, index) => (
+                      <Box key={index} sx={{ mb: 4, pl: 2, borderLeft: '2px solid #E2E8F0' }}>
+                        <Skeleton variant="text" width="60%" height={30} />
+                        <Skeleton variant="text" width="90%" />
                       </Box>
                     ))
                   ) : (
-                    <List disablePadding>
-                      {avisos.map((aviso, index) => (
-                        <React.Fragment key={aviso.id}>
-                          <AvisoCompacto
-                            aviso={aviso}
-                            rol={rol}
-                            formatearFecha={formatearFecha}
-                            handleDeleteAvisoClick={handleDeleteAvisoClick}
-                          />
-                          {index < avisos.length - 1 && <Divider sx={{ my: 2, opacity: 0.6 }} />}
-                        </React.Fragment>
+                    <Box sx={{ position: 'relative' }}>
+                      {/* Línea de tiempo sutil con gradiente */}
+                      <Box sx={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: '1px',
+                        background: 'linear-gradient(to bottom, #CBD5E1, transparent)',
+                        zIndex: 0
+                      }} />
+
+                      {avisos.map((aviso) => (
+                        <AvisoCompacto
+                          key={aviso.id}
+                          aviso={aviso}
+                          rol={rol}
+                          formatearFecha={formatearFecha}
+                          handleDeleteAvisoClick={handleDeleteAvisoClick}
+                          // Lógica UX: Hasta 3 avisos mostramos casi todo (12 líneas). 
+                          // A partir del 4to aviso, compactamos a 3 líneas para cuidar el scroll.
+                          lineLimit={avisos.length <= 3 ? 12 : 3}
+                        />
                       ))}
                       {avisos.length === 0 && (
-                        <Box textAlign="center" py={6}>
-                          <NotificationsNoneIcon sx={{ fontSize: 48, color: '#D1D5DB', mb: 2 }} />
-                          <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'Poppins, sans-serif' }}>
-                            No hay noticias destacadas hoy.
+                        <Paper elevation={0} sx={{ p: 6, textAlign: 'center', borderRadius: '20px', backgroundColor: 'rgba(255, 255, 255, 0.4)', border: '1px dashed #CBD5E1' }}>
+                          <NotificationsNoneIcon sx={{ fontSize: 48, color: '#CBD5E1', mb: 2 }} />
+                          <Typography variant="body2" color="#64748B" sx={{ fontFamily: 'Poppins, sans-serif' }}>
+                            Mantente al tanto de las novedades próximamente.
                           </Typography>
-                        </Box>
+                        </Paper>
                       )}
-                    </List>
+                    </Box>
                   )}
-                </Paper>
+                </Box>
               </Grid>
 
               {/* SECCIÓN INFERIOR: Accesos Rápidos */}
               <Grid item xs={12}>
-                <Box sx={{ mt: 6, pt: 6, borderTop: '1px solid #E5E7EB' }}>
+                <Box sx={{ mt: 5, pt: 4, borderTop: '1px solid rgba(0,0,0,0.03)' }}>
                   <Typography
                     variant="h3"
                     component="h2"
                     sx={{
-                      fontWeight: 600,
-                      fontFamily: 'Geogrotesque Sharp, sans-serif',
+                      fontWeight: 700,
+                      fontFamily: "'Geogrotesque Sharp', sans-serif",
                       textAlign: 'center',
                       mb: 6,
-                      color: '#1A202C',
-                      textTransform: 'uppercase',
-                      letterSpacing: '-1px',
+                      mt: 1,
+                      color: '#0F172A',
+                      letterSpacing: '-0.5px',
                       fontSize: { xs: '1.4rem', md: '1.8rem' }
                     }}
                   >
-                    Accesos Rápidos
+                    Recursos de Interés
                   </Typography>
-                  <Grid container spacing={3}>
+                  <Grid container spacing={4}>
                     {linksInteresData.map((link, i) => (
                       <Grid item xs={12} sm={6} md={3} key={i}>
                         <LinkInteres
@@ -450,80 +469,112 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
   );
 };
 
-const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick }) => {
+const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, lineLimit = 3 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [canExpand, setCanExpand] = useState(false);
   const textRef = useRef(null);
 
-  // Detectar si el texto está truncado físicamente después del renderizado
   useLayoutEffect(() => {
-    if (textRef.current && !isExpanded) {
-      // Usamos un pequeño margen de 5px para evitar falsos positivos por saltos de línea vacíos o redondeo de fuentes
-      const isTruncated = textRef.current.scrollHeight > (textRef.current.clientHeight + 5);
-      setCanExpand(isTruncated);
-    }
-  }, [aviso.contenido, isExpanded]);
+    const checkOverflow = () => {
+      if (textRef.current && !isExpanded) {
+        // Tolerancia de 5px para evitar falsos positivos
+        const isTruncated = textRef.current.scrollHeight > (textRef.current.clientHeight + 5);
+        setCanExpand(isTruncated);
+      }
+    };
 
-  const renderIcon = () => {
-    return (
-      <Typography sx={{ fontSize: '1.2rem', lineHeight: 1 }}>
-        {aviso.icono || '📌'}
-      </Typography>
-    );
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [aviso.contenido, isExpanded, lineLimit]);
+
+  const getAvisoIcon = (iconoRaw) => {
+    const iconStyle = { fontSize: '1.4rem' };
+    const icono = iconoRaw ? iconoRaw.trim().toLowerCase() : '';
+
+    // Mapeo por palabras clave (Nueva DB) o por contenido de emoji (Vieja DB)
+    if (icono === 'pin' || icono.includes('📌')) return <PushPinIcon sx={iconStyle} />;
+    if (icono === 'warning' || icono.includes('⚠️')) return <WarningIcon sx={iconStyle} />;
+    if (icono === 'info' || icono.includes('ℹ️')) return <InfoOutlinedIcon sx={iconStyle} />;
+    if (icono === 'success' || icono.includes('✅')) return <SuccessIcon sx={iconStyle} />;
+    if (icono === 'announcement' || icono.includes('📢')) return <CampaignIcon sx={iconStyle} />;
+    if (icono === 'celebration' || icono.includes('🎉')) return <CelebrationIcon sx={iconStyle} />;
+    if (icono === 'calendar' || icono.includes('📅')) return <EventIcon sx={iconStyle} />;
+    if (icono === 'tip' || icono.includes('💡')) return <LightbulbIcon sx={iconStyle} />;
+
+    // Fallback por defecto si no hay coincidencia
+    return <InfoOutlinedIcon sx={iconStyle} />;
   };
 
   return (
-    <ListItem
-      alignItems="flex-start"
-      disableGutters
+    <Box
       sx={{
-        flexDirection: 'column',
+        pl: 3,
+        pb: 6,
         position: 'relative',
-        '&:hover .delete-btn': { opacity: 1 },
-        py: 1
+        '&:last-child': { pb: 0 },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          left: '-4px',
+          top: '22px', // Centrado con el contenedor de 52px
+          width: '9px',
+          height: '9px',
+          borderRadius: '50%',
+          backgroundColor: '#009EE3',
+          border: '2px solid #FFF',
+          zIndex: 2,
+          boxShadow: '0 0 0 4px rgba(0, 158, 227, 0.1)'
+        }
       }}
     >
-      <Box sx={{ display: 'flex', width: '100%', mb: 0.5, alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', width: '100%', mb: 1.5, alignItems: 'flex-start' }}>
         <Box
           sx={{
-            minWidth: 40,
-            height: 40,
-            borderRadius: '50%',
+            width: 48,
+            height: 48,
+            borderRadius: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0, 158, 227, 0.05)',
-            mr: 2,
-            flexShrink: 0
+            backgroundColor: 'rgba(0, 158, 227, 0.12)',
+            color: '#007bb1',
+            mr: 3,
+            flexShrink: 0,
+            transition: 'all 0.3s ease'
           }}
         >
-          {renderIcon()}
+          {getAvisoIcon(aviso.icono)}
         </Box>
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: '#64748B',
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              display: 'block',
+              mb: 0.3,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}
+          >
+            {formatearFecha(aviso.created_at)}
+          </Typography>
           <Typography
             variant="subtitle1"
             sx={{
               fontWeight: 700,
-              fontFamily: 'Poppins, sans-serif',
-              color: '#1F2937',
-              lineHeight: 1.3,
-              fontSize: '0.95rem',
-              wordBreak: 'break-word'
+              fontFamily: "'Geogrotesque Sharp', sans-serif",
+              color: '#0F172A',
+              lineHeight: 1.2,
+              fontSize: '1.25rem',
+              wordBreak: 'break-word',
+              letterSpacing: '-0.3px'
             }}
           >
             {aviso.titulo}
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              color: '#9CA3AF',
-              fontFamily: 'Poppins, sans-serif',
-              fontSize: '0.8rem',
-              display: 'block',
-              mt: 0.1
-            }}
-          >
-            {formatearFecha(aviso.created_at)}
           </Typography>
         </Box>
         {rol === 'ADM' && (
@@ -532,32 +583,28 @@ const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick }) =
             aria-label="eliminar"
             onClick={() => handleDeleteAvisoClick(aviso)}
             size="small"
-            sx={{
-              opacity: 0,
-              transition: 'opacity 0.2s',
-              color: 'error.light',
-              ml: 1
-            }}
+            sx={{ color: '#E2E8F0', '&:hover': { color: 'error.light' }, ml: 1 }}
           >
-            <DeleteIcon fontSize="small" />
+            <DeleteIcon fontSize="small" style={{ fontSize: '1rem' }} />
           </IconButton>
         )}
       </Box>
-      <Box sx={{ pl: 7, width: '100%' }}>
+      <Box sx={{ pl: 9.5, width: '100%' }}>
         <Typography
           ref={textRef}
           variant="body2"
           sx={{
-            color: '#4B5563',
+            color: '#1E293B',
             fontFamily: 'Poppins, sans-serif',
-            fontSize: '0.98rem',
+            fontSize: '1rem',
             lineHeight: 1.6,
             display: isExpanded ? 'block' : '-webkit-box',
-            WebkitLineClamp: isExpanded ? 'none' : 3,
+            WebkitLineClamp: isExpanded ? 'none' : lineLimit,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            wordBreak: 'break-word'
+            wordBreak: 'break-word',
+            fontWeight: 400
           }}
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(aviso.contenido)
@@ -569,24 +616,36 @@ const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick }) =
             variant="text"
             onClick={() => setIsExpanded(!isExpanded)}
             sx={{
-              mt: 0.5,
+              mt: 1.5,
               textTransform: 'none',
               p: 0,
+              px: 2,
+              py: 0.5,
               minWidth: 'auto',
-              fontWeight: 600,
-              color: 'primary.main',
+              fontWeight: 700,
+              color: '#009EE3',
               display: 'inline-flex',
+              alignItems: 'center',
+              fontSize: '0.95rem',
+              borderRadius: '50px',
+              border: '1px solid rgba(0, 158, 227, 0.2)',
               '&:hover': {
-                backgroundColor: 'transparent',
-                textDecoration: 'underline'
+                backgroundColor: 'rgba(0, 158, 227, 0.05)',
+                borderColor: '#009EE3',
+                '& .btn-arrow': { transform: 'translateX(4px)', opacity: 1, width: 'auto', ml: 0.5 }
               }
             }}
           >
-            {isExpanded ? 'Ver menos' : 'Ver más'}
+            {isExpanded ? 'Leer menos' : 'Seguir leyendo...'}
+            {!isExpanded && (
+              <Box component="span" className="btn-arrow" sx={{ opacity: 0, width: 0, transition: 'all 0.2s ease', display: 'inline-block' }}>
+                →
+              </Box>
+            )}
           </Button>
         )}
       </Box>
-    </ListItem>
+    </Box>
   );
 };
 

@@ -1,6 +1,7 @@
 export const typography = {
   fontFamilyPrimary: "'Poppins', sans-serif",
   fontFamilySecondary: "'Roboto', sans-serif",
+  fontFamilyGeogrotesque: "'Geogrotesque Sharp', sans-serif",
   fontWeights: {
     regular: 400,
     bold: 700,

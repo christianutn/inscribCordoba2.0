@@ -6,7 +6,7 @@ export const subirNotaDeAutorizacion = async (archivo) => {
   const formData = new FormData();
   formData.append("nota_autorizacion", archivo);
   try {
-    const response = await fetch(`${URL}/subir-nota-de-autorizacion`, {
+    const response = await fetch(`${URL}`, {
       method: "POST",
       body: formData,
       headers: {
