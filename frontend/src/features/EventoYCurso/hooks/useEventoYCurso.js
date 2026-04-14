@@ -7,7 +7,7 @@ import { getPlataformasDictado } from '../../../services/plataformasDictado.serv
 import { getMediosInscripcion } from '../../../services/mediosInscripcion.service';
 import { getTiposCapacitacion } from '../../../services/tiposCapacitacion.service';
 import { getAreas } from '../../../services/areas.service';
-import { putCurso } from '../../../services/cursos.service';
+import { putCurso, patchEstadoCurso } from '../../../services/cursos.service';
 
 const useEventoYCurso = () => {
     const [data, setData] = useState([]);
@@ -195,12 +195,32 @@ const useEventoYCurso = () => {
         }
     };
 
+    /**
+     * Cambia el estado de un curso usando la máquina de estados del backend.
+     * @param {string} cod - Código del curso
+     * @param {string} accion - 'avanzar' | 'retroceder' | 'darDeBaja' | 'restaurar'
+     * @param {string|null} estadoDestino - Solo para acción 'restaurar'
+     */
+    const changeEstado = async (cod, accion, estadoDestino = null) => {
+        setLoading(true);
+        try {
+            await patchEstadoCurso(cod, accion, estadoDestino);
+            await fetchData();
+            return { success: true };
+        } catch (err) {
+            return { success: false, error: err.message };
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         data,
         loading,
         error,
         updateItem,
         deleteItem,
+        changeEstado,
         refreshData: fetchData,
         auxiliaryData: {
             // Evento

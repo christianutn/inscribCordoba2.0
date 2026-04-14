@@ -97,3 +97,27 @@ export const deleteCurso = async (cuil) => {
 }
 
 
+export const patchEstadoCurso = async (cod, accion, estadoDestino = null) => {
+    try {
+        const body = { accion };
+        if (estadoDestino) body.estadoDestino = estadoDestino;
+
+        const response = await fetch(`${URL}/${cod}/estado`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+        if (response.status !== 200) {
+            throw new Error(data.message || "Error al cambiar el estado del curso");
+        }
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}

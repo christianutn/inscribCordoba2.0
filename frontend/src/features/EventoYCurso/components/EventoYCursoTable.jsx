@@ -82,40 +82,14 @@ const EventoYCursoTable = ({ data, onEdit, onDelete }) => {
             }
         },
         {
-            field: 'esta_autorizado',
-            headerName: 'Autorizado',
-            width: 100,
-            valueGetter: (value, row) => row.esta_autorizado ? 'Sí' : 'No',
+            field: 'estado',
+            headerName: 'Estado',
+            width: 150,
+            valueGetter: (value, row) => row.detalle_estado_curso?.descripcion || '-',
             renderCell: (params) => (
                 <Chip
-                    label={params.row.esta_autorizado ? 'Sí' : 'No'}
-                    color={params.row.esta_autorizado ? 'success' : 'default'}
-                    size="small"
-                />
-            )
-        },
-        {
-            field: 'esta_maquetado',
-            headerName: 'Maquetado',
-            width: 100,
-            valueGetter: (value, row) => row.esta_maquetado ? 'Sí' : 'No',
-            renderCell: (params) => (
-                <Chip
-                    label={params.row.esta_maquetado ? 'Sí' : 'No'}
-                    color={params.row.esta_maquetado ? 'success' : 'default'}
-                    size="small"
-                />
-            )
-        },
-        {
-            field: 'esVigente',
-            headerName: 'Vigente',
-            width: 90,
-            valueGetter: (value, row) => row.esVigente ? 'Sí' : 'No',
-            renderCell: (params) => (
-                <Chip
-                    label={params.row.esVigente ? 'Sí' : 'No'}
-                    color={params.row.esVigente ? 'success' : 'default'}
+                    label={params.row.detalle_estado_curso?.descripcion || '-'}
+                    color="primary"
                     size="small"
                 />
             )

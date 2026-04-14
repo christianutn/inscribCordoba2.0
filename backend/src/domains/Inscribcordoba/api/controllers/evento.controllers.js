@@ -15,6 +15,7 @@ import Persona from '../models/persona.models.js';
 import Usuario from '../models/usuario.models.js';
 import { DateTime } from "luxon"
 import logger from '../../../../utils/logger.js';
+import EstadoCursoModel from '../models/estado_curso.models.js';
 
 import CursoStateService from '../../core/services/CursoStateService.js';
 
@@ -52,7 +53,8 @@ export const getCursosConEventos = async (req, res, next) => {
                 { model: MedioInscripcion, as: 'detalle_medioInscripcion' },
                 { model: TipoCapacitacion, as: 'detalle_tipoCapacitacion' },
                 { model: PlataformaDictado, as: 'detalle_plataformaDictado' },
-                { model: Area, as: 'detalle_area' }
+                { model: Area, as: 'detalle_area' },
+                { model: EstadoCursoModel, as: 'detalle_estado_curso' }
             ]
         });
 
