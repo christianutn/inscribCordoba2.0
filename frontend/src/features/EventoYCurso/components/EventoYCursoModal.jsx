@@ -230,8 +230,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
     const [errors, setErrors] = useState({});
     const [estadoLoading, setEstadoLoading] = useState(false);
     const [estadoFeedback, setEstadoFeedback] = useState(null); // { type: 'success'|'error', msg }
-
-    const estadoActual = record?.estado ?? record?.detalle_estado_curso?.cod ?? 'AUT';
+    const [estadoActual, setEstadoActual] = useState('AUT');
 
     useEffect(() => {
         if (record) {
@@ -271,6 +270,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
         }
         setErrors({});
         setEstadoFeedback(null);
+        setEstadoActual(record?.estado ?? record?.detalle_estado_curso?.cod ?? 'AUT');
     }, [record, open]);
 
     const handleChange = (e) => {
@@ -318,13 +318,25 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
         }
     };
 
+    const calcularNuevoEstado = (estadoCurrent, accion, estadoDestino) => {
+        const stepActual = ESTADOS[estadoCurrent]?.step ?? -1;
+        switch (accion) {
+            case 'avanzar':    return FLUJO_NORMAL[stepActual + 1] ?? estadoCurrent;
+            case 'retroceder': return FLUJO_NORMAL[stepActual - 1] ?? estadoCurrent;
+            case 'darDeBaja':  return 'NVIG';
+            case 'restaurar':  return estadoDestino ?? estadoCurrent;
+            default:           return estadoCurrent;
+        }
+    };
+
     const handleCambioEstado = async (accion, estadoDestino = null) => {
         if (!record?.cod || !onChangeEstado) return;
         setEstadoLoading(true);
         setEstadoFeedback(null);
-        const result = await onChangeEstado(record.cod, accion, estadoDestino);
+        const result = await onChangeEstado(record, accion, estadoDestino);
         setEstadoLoading(false);
         if (result.success) {
+            setEstadoActual(prev => calcularNuevoEstado(prev, accion, estadoDestino));
             setEstadoFeedback({ type: 'success', msg: 'Estado actualizado correctamente.' });
         } else {
             setEstadoFeedback({ type: 'error', msg: result.error || 'Error al cambiar el estado.' });

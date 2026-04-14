@@ -7,7 +7,7 @@ import { getPlataformasDictado } from '../../../services/plataformasDictado.serv
 import { getMediosInscripcion } from '../../../services/mediosInscripcion.service';
 import { getTiposCapacitacion } from '../../../services/tiposCapacitacion.service';
 import { getAreas } from '../../../services/areas.service';
-import { putCurso, patchEstadoCurso } from '../../../services/cursos.service';
+import { putCurso } from '../../../services/cursos.service';
 
 const useEventoYCurso = () => {
     const [data, setData] = useState([]);
@@ -196,15 +196,31 @@ const useEventoYCurso = () => {
     };
 
     /**
-     * Cambia el estado de un curso usando la máquina de estados del backend.
-     * @param {string} cod - Código del curso
+     * Cambia el estado de un curso usando el endpoint PUT /cursos,
+     * que actualiza datos y estado en una sola transacción atómica.
+     * @param {Object} record - Registro completo del curso
      * @param {string} accion - 'avanzar' | 'retroceder' | 'darDeBaja' | 'restaurar'
      * @param {string|null} estadoDestino - Solo para acción 'restaurar'
      */
-    const changeEstado = async (cod, accion, estadoDestino = null) => {
+    const changeEstado = async (record, accion, estadoDestino = null) => {
         setLoading(true);
         try {
-            await patchEstadoCurso(cod, accion, estadoDestino);
+            const payload = {
+                cod: record.cod,
+                nombre: record.nombre,
+                cupo: record.cupo,
+                cantidad_horas: record.cantidad_horas,
+                medio_inscripcion: record.medio_inscripcion,
+                plataforma_dictado: record.plataforma_dictado,
+                tipo_capacitacion: record.tipo_capacitacion,
+                area: record.area,
+                aplica_sincronizacion_certificados: record.aplica_sincronizacion_certificados,
+                url_curso: record.url_curso || null,
+                numero_evento: record.numero_evento || null,
+                accion,
+                ...(estadoDestino ? { estadoDestino } : {})
+            };
+            await putCurso(payload);
             await fetchData();
             return { success: true };
         } catch (err) {

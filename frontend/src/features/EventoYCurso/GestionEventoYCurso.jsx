@@ -111,7 +111,7 @@ const GestionEventoYCurso = () => {
     };
 
     const pendientesCount = useMemo(() => {
-        return data.filter(item => item.estado_curso === 'PVICT').length;
+        return data.filter(item => item.estado === 'PVICT').length;
     }, [data]);
 
     if (loading && data.length === 0) {
