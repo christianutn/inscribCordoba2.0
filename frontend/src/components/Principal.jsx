@@ -17,6 +17,7 @@ import {
   ListItemText,
   Tooltip,
   Stack,
+  useMediaQuery,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -81,11 +82,11 @@ const menuConfigByRole = {
   ],
   REF: [
     { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
+    { label: "Tablero", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
     { label: "Cargar Nota de Autorización", identifier: "SubaNotaDeAutorizacion", icon: <TaskIcon /> },
     { label: "Crear Evento", identifier: "Eventos", icon: <AddCircleOutlineIcon /> },
     { label: "Crear Cohorte", identifier: "Formulario", icon: <EditCalendarIcon /> },
-    { label: "Tablero", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Mis Notas", identifier: "MisNotasAutorizacionIdentifier", icon: <TaskIcon /> },
     ...(config.rolesPermitidosCcAsistencias.includes('REF') ? [{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> }] : []),
     { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
@@ -111,26 +112,28 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
     [theme.breakpoints.up('sm')]: {
       marginTop: '64px',
       minHeight: 'calc(100vh - 64px)',
+      marginLeft: `-${drawerWidth}px`,
+      // Abierto: transición suave con curva easeOut (menú entró)
+      transition: theme.transitions.create(['margin', 'width'], {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+      ...(open && {
+        marginLeft: 0,
+      }),
+      ...(!open && {
+        marginLeft: `-${drawerWidth}px`,
+        transition: theme.transitions.create(['margin', 'width'], {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
+        }),
+      }),
     },
     marginTop: theme.mixins.toolbar.minHeight,
     minHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`,
     width: '100%', // Asegura ancho 100% para que se expanda/contraia de forma elástica
     minWidth: 0,
     overflowX: 'hidden',
-    marginLeft: `-${drawerWidth}px`,
-    // Cerrado: transición rápida con curva sharp (menú salió)
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    ...(open && {
-      marginLeft: 0,
-      // Abierto: transición suave con curva easeOut (menú entró)
-      transition: theme.transitions.create(['margin', 'width'], {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    }),
   }),
 );
 
@@ -167,6 +170,7 @@ export default function Principal() {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(true);
   const [opcionesAMostrar, setOpcionesAMostrar] = useState([]);
@@ -228,6 +232,13 @@ export default function Principal() {
       }
     }
   }, [user, navigate, opcionSeleccionada, setOpcionSeleccionada]);
+
+  // En mobile, cerrar el drawer al cambiar el breakpoint
+  useEffect(() => {
+    if (isMobile && open) {
+      setOpen(false);
+    }
+  }, [isMobile]);
 
   // Asegura que al cambiar de sección el scroll se resetee al inicio de la página
   useEffect(() => {
@@ -342,9 +353,10 @@ export default function Principal() {
             boxShadow: theme.shadows[2]
           },
         }}
-        variant="persistent"
+        variant={isMobile ? "temporary" : "persistent"}
         anchor="left"
         open={open}
+        onClose={handleDrawerClose}
       >
         <DrawerHeader>
           <Typography variant="h6" sx={{ ml: 1, flexGrow: 1, fontWeight: 600 }}>Menú</Typography>

@@ -89,7 +89,7 @@ export default function Footer() {
                 color: 'inherit',
                 textDecoration: 'none',
                 fontSize: { xs: '1rem', md: '0.95rem', lg: '1.1rem' },
-                '&:hover': { textDecoration: 'underline' }
+                '&:hover': { color: 'primary.dark', transition: 'all 0.2s' }
               }}
             >
               soportecampuscordoba@cba.gov.ar
@@ -100,7 +100,7 @@ export default function Footer() {
           <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <Stack direction="row" spacing={0}>
               <IconButton
-                sx={{ color: '#FFFFFF', p: { md: '0px' } }}
+                sx={{ color: '#FFFFFF', p: { md: '0px' }, transition: 'all 0.3s', '&:hover': { opacity: 0.8, transform: 'scale(1.2)', backgroundColor: 'transparent' } }}
                 component="a"
                 href="https://es-la.facebook.com/gobdecordoba/"
                 target="_blank"
@@ -109,7 +109,7 @@ export default function Footer() {
                 <FacebookIcon sx={{ fontSize: { md: '2rem', lg: '2rem' } }} />
               </IconButton>
               <IconButton
-                sx={{ color: '#FFFFFF', p: { md: '0px' } }}
+                sx={{ color: '#FFFFFF', p: { md: '0px' }, transition: 'all 0.3s', '&:hover': { opacity: 0.8, transform: 'scale(1.2)', backgroundColor: 'transparent' } }}
                 component="a"
                 href="https://x.com/gobdecordoba?lang=es"
                 target="_blank"
@@ -118,7 +118,7 @@ export default function Footer() {
                 <TwitterIcon sx={{ fontSize: { md: '2rem', lg: '2rem' } }} />
               </IconButton>
               <IconButton
-                sx={{ color: '#FFFFFF', p: { md: '0px' } }}
+                sx={{ color: '#FFFFFF', p: { md: '0px' }, transition: 'all 0.3s', '&:hover': { opacity: 0.8, transform: 'scale(1.2)', backgroundColor: 'transparent' } }}
                 component="a"
                 href="https://www.instagram.com/cordobaok/?hl=es-la"
                 target="_blank"
@@ -127,7 +127,7 @@ export default function Footer() {
                 <InstagramIcon sx={{ fontSize: { md: '2rem', lg: '2rem' } }} />
               </IconButton>
               <IconButton
-                sx={{ color: '#FFFFFF', p: { md: '0px' } }}
+                sx={{ color: '#FFFFFF', p: { md: '0px' }, transition: 'all 0.3s', '&:hover': { opacity: 0.8, transform: 'scale(1.2)', backgroundColor: 'transparent' } }}
                 component="a"
                 href="https://www.youtube.com/user/gobiernodecordoba"
                 target="_blank"

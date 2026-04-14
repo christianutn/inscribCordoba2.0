@@ -172,7 +172,16 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
         <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'common.black' }} />
         <Box component="form" noValidate sx={{ mt: 3 }}>
           <Grid container spacing={3}>
-            {/* --- Row 1: Perfil, Area Temática, Certifica Córdoba --- */}
+            {/* --- Row 1: Curso, Perfil , Área temática --- */}
+            <Grid item xs={12} md={4}>
+              <Autocomplete
+                label={"Curso"}
+                options={cursosOptions.map((curso) => curso.nombre)}
+                value={curso}
+                getValue={(value) => setCurso(value)}
+              />
+            </Grid>
+
             <Grid item xs={12} md={4}>
               <Autocomplete
                 label={"Seleccione perfil"}
@@ -189,6 +198,7 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
                 getValue={(value) => setAreaTematica(value || "")}
               />
             </Grid>
+             {/* --- Row 2: Certifica en CC, Tipo Certificación, Imagen Portal --- */}
             <Grid item xs={12} md={4}>
               <Autocomplete
                 label={"Seleccione si certifica en Campus Córdoba"}
@@ -197,7 +207,7 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
                 getValue={(value) => setCertificaCordoba(value)}
               />
             </Grid>
-            {/* --- Row 2: Tipo Certificación, Imagen Portal --- */}
+           
             <Grid item xs={12} md={4}>
               <Autocomplete
                 label={"Tipo de certificación"}
@@ -214,14 +224,7 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
                 getValue={(value) => setImagenPortal(value)}
               />
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Autocomplete
-                label={"Curso"}
-                options={cursosOptions.map((curso) => curso.nombre)}
-                value={curso}
-                getValue={(value) => setCurso(value)}
-              />
-            </Grid>
+            
             {/* --- Row 3: Presentación/Fundamentación --- */}
             <Grid item xs={12}>
               <Tooltip

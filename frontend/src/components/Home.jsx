@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
 import {
   Box,
   Container,
@@ -9,28 +9,25 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  ListItemText,
   Divider,
-  Chip,
   Skeleton,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  useTheme
+  ButtonBase,
 } from '@mui/material';
 import {
-  CheckCircleOutline as CheckCircleOutlineIcon,
   InfoOutlined as InfoOutlinedIcon,
-  EventAvailable as EventAvailableIcon,
-  Article as ArticleIcon,
-  ContactMail as ContactMailIcon,
   ArrowForward as ArrowForwardIcon,
-  NotificationsActive as NotificationsActiveIcon,
-  CalendarToday as CalendarTodayIcon,
-  AutoAwesome as AutoAwesomeIcon,
-  PushPin as PushPinIcon
+  PushPin as PushPinIcon,
+  Delete as DeleteIcon,
+  NotificationsNone as NotificationsNoneIcon,
+  EventNote as EventNoteIcon,
+  Assignment as AssignmentIcon,
+  CalendarMonth as CalendarMonthIcon,
+  NoteAdd as NoteAddIcon
 } from '@mui/icons-material';
 import { getAvisos, deleteAviso } from '../services/avisos.service';
 import DOMPurify from 'dompurify';
@@ -42,23 +39,12 @@ import Victorius from './imagenes/victorius.png';
 import CampusCba from './imagenes/campus_cordoba.png';
 import LogoFooter from './imagenes/logo_footer.png';
 
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import Alerta from '@mui/material/Alert';
-
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-const paperStyles = {
-  p: 3,
-  borderRadius: '16px',
-  boxShadow: 2,
-  height: '100%',
-};
-
 const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
-  const theme = useTheme();
   const [avisos, setAvisos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -69,12 +55,10 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [avisoToDelete, setAvisoToDelete] = useState(null);
 
-  // Disparar resize event tras la animación del sidebar para que los
-  // componentes internos (tablas, gráficos) recalculen su ancho real.
   useEffect(() => {
     const timer = setTimeout(() => {
       window.dispatchEvent(new Event('resize'));
-    }, 300); // 300ms coincide con la duración de la transición del Drawer
+    }, 300);
     return () => clearTimeout(timer);
   }, [sidebarOpen]);
 
@@ -111,7 +95,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
   }
 
   const linksInteresData = [
-    { img: Capacitacion4, title: 'Capacitación 2 Pasos', url: 'https://drive.google.com/drive/folders/12HPXuMo59WUBNS26h-KahNQi8ivRDfDV' },
+    { img: Capacitacion4, title: 'Documentación para cursos nuevos', url: 'https://drive.google.com/drive/folders/12HPXuMo59WUBNS26h-KahNQi8ivRDfDV' },
     { img: Victorius, title: 'Gestión Victorius', url: 'https://campuscordoba.cba.gov.ar/gestordeplataforma/public/' },
     { img: PortalCC, title: 'Portal Campus Córdoba', url: 'https://campuscordoba.cba.gov.ar/#page-event-list' },
     { img: CampusCba, title: 'Plataforma Campus Córdoba', url: 'https://campuscordoba.cba.gov.ar/plataforma/my/' },
@@ -207,30 +191,14 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
         sx={{
           width: '100%',
           flexGrow: 1,
-          backgroundColor: '#FFFFFF',
+          backgroundColor: '#F3F4F6',
           transition: 'width 0.3s ease-in-out',
+          minHeight: 'auto',
+          pb: 0
         }}
       >
-        {/* SECCIÓN 1: Bienvenida y Avisos */}
-        <Box sx={{ py: { xs: 4, md: 6 }, backgroundColor: '#FFFFFF' }}>
-          <Container maxWidth={false} sx={{ position: 'relative', px: { xs: 2, md: 5 } }}>
-            {/* Silueta sutil institucional (El Panal) */}
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '-30px',
-                right: 0,
-                width: { xs: '250px', sm: '350px', md: '500px' },
-                height: { xs: '250px', sm: '350px', md: '500px' },
-                backgroundSize: 'contain',
-                backgroundRepeat: 'no-repeat',
-                opacity: 0.02,
-                pointerEvents: 'none',
-                zIndex: 0,
-                filter: 'grayscale(100%)'
-              }}
-            />
-
+        <Box sx={{ py: { xs: 4, md: 6 } }}>
+          <Container maxWidth={false} sx={{ px: { xs: 2, md: 5 } }}>
             <Typography
               variant="h2"
               component="h1"
@@ -243,472 +211,382 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                   md: 'clamp(2.2rem, 3.5vw, 2.8rem)',
                   lg: 'clamp(2.6rem, 3vw, 3.5rem)',
                 },
-                mb: { xs: 3, md: 5, lg: 8 },
+                mb: { xs: 4, md: 6 },
                 color: 'primary.main',
                 textAlign: 'left',
                 letterSpacing: '-2px',
-                position: 'relative',
-                zIndex: 1,
               }}
             >
               {nombre ? `¡Hola ${nombre}!` : '¡Hola Valentina De Los Angeles!'}
             </Typography>
 
-            <Grid container spacing={{ xs: 0.5, md: 0.5 }} alignItems="flex-start">
-              {/* Últimos Avisos (70%) */}
-              <Grid item xs={12} md={8.4}>
-                <Box sx={{ pr: { md: 2 } }}>
-                  <Box display="flex" alignItems="center" mb={3} px={0.5}>
+            <Grid container spacing={4}>
+              {/* COLUMNA IZQUIERDA: Mi Ruta de Gestión (60%) */}
+              <Grid item xs={12} md={7.2}>
+                <Box>
+                  <Box display="flex" alignItems="center" mb={4}>
                     <Typography
                       variant="h5"
                       component="h2"
                       sx={{
                         fontWeight: 700,
                         fontFamily: 'Geogrotesque Sharp, sans-serif',
-                        color: '#5C6F82',
-                        letterSpacing: '0.5px',
-                        textTransform: 'uppercase',
-                        mb: 0,
-                        fontSize: '1.2rem'
+                        color: '#374151',
+                        fontSize: '1.5rem',
+                        letterSpacing: '-0.5px'
                       }}
                     >
-                      Últimos Avisos
+                      Pasos para crear un nuevo curso
                     </Typography>
                     {successMessage && (
-                      <Alerta
-                        severity="success"
-                        sx={{
-                          ml: 2,
-                          flexShrink: 0,
-                          fontSize: '0.85rem',
-                          fontWeight: 500,
-                          py: 0.5, px: 2,
-                          borderRadius: '16px',
-                        }}
-                        onClose={handleCloseAlert}
-                      >
+                      <Alerta severity="success" sx={{ ml: 2, py: 0, borderRadius: '12px' }} onClose={handleCloseAlert}>
                         {successMessage}
                       </Alerta>
                     )}
                     {errorMessage && (
-                      <Alerta
-                        severity="error"
-                        sx={{
-                          ml: 2,
-                          flexShrink: 0,
-                          fontSize: '0.85rem',
-                          fontWeight: 500,
-                          py: 0.5, px: 2,
-                          borderRadius: '16px',
-                        }}
-                        onClose={handleCloseAlert}
-                      >
+                      <Alerta severity="error" sx={{ ml: 2, py: 0, borderRadius: '12px' }} onClose={handleCloseAlert}>
                         {errorMessage}
                       </Alerta>
                     )}
                   </Box>
 
-                  {/* Feed de Avisos */}
-                  <Box>
-                    {loading ? (
-                      Array.from(new Array(3)).map((_, index) => (
-                        <Box key={index} sx={{ mb: 4, p: 4, backgroundColor: 'white', borderRadius: '16px', boxShadow: 1 }}>
-                          <Skeleton variant="text" width="80%" sx={{ mb: 1 }} />
-                          <Skeleton variant="text" width="40%" sx={{ fontSize: '0.8rem', mb: 2 }} />
-                          <Skeleton variant="rectangular" height={80} sx={{ borderRadius: '16px' }} />
-                        </Box>
-                      ))
-                    ) : avisos.length === 0 ? (
-                      <Box textAlign="center" p={8} sx={{ background: 'white', borderRadius: '24px', border: '1px dashed #E2E8F0' }}>
-                        <InfoOutlinedIcon sx={{ fontSize: 64, color: '#CBD5E0', mb: 2 }} />
-                        <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          No hay noticias destacadas hoy.
-                        </Typography>
+                  <Grid container spacing={3}>
+                    {/* PASOS: Ahora navegables por teclado y con mayor accesibilidad */}
+                    {[
+                      { step: 'Paso 1', title: 'Cargar Nota', color: '#009EE3', icon: <NoteAddIcon />, desc: 'Iniciá el proceso cargando la nota de autorización correspondiente.', option: 'SubaNotaDeAutorizacion' },
+                      { step: 'Paso 2', title: 'Crear Evento', color: '#009EE3', icon: <AssignmentIcon />, desc: 'Una vez autorizada la nota, completá el formulario del evento de tu capacitación.', option: 'Eventos' },
+                      { step: 'Paso 3', title: 'Crear Cohorte', color: '#009EE3', icon: <EventNoteIcon />, desc: 'Completá el formulario de cohorte para agendar las fechas de tu capacitación.', option: 'Formulario' },
+                      { step: 'Paso 4', title: 'Ver Calendario', color: '#009EE3', icon: <CalendarMonthIcon />, desc: 'Consultá las cohortes que cargaste en el calendario.', option: 'Calendario' }
+                    ].map((item, idx) => (
+                      <Grid item xs={12} key={idx}>
+                        <ButtonBase
+                          component="div"
+                          onClick={() => setOpcionSeleccionada(item.option)}
+                          aria-label={`${item.step}: ${item.title}. ${item.desc}`}
+                          sx={{
+                            width: '100%',
+                            textAlign: 'left',
+                            display: 'block',
+                            borderRadius: '16px',
+                            transition: 'all 0.2s',
+                          }}
+                        >
+                          <Paper
+                            elevation={0}
+                            sx={{
+                              p: 3,
+                              borderRadius: '16px',
+                              backgroundColor: '#FFFFFF',
+                              border: '1px solid #E5E7EB',
+                              display: 'flex',
+                              alignItems: 'center',
+                              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                              '&:hover': {
+                                transform: 'translateY(-2px)',
+                                boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                                borderColor: item.color
+                              }
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 56,
+                                height: 56,
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: 'rgba(0, 158, 227, 0.08)',
+                                color: 'primary.main',
+                                mr: 3,
+                                flexShrink: 0
+                              }}
+                            >
+                              {item.icon}
+                            </Box>
+                            <Box sx={{ flexGrow: 1 }}>
+                              <Typography
+                                variant="overline"
+                                sx={{
+                                  color: item.color,
+                                  fontWeight: 800,
+                                  fontFamily: 'Geogrotesque Sharp, sans-serif',
+                                  letterSpacing: '1px',
+                                  fontSize: '0.75rem',
+                                  display: 'block',
+                                  lineHeight: 1.5
+                                }}
+                              >
+                                {item.step}
+                              </Typography>
+                              <Typography
+                                variant="h6"
+                                sx={{
+                                  fontWeight: 700,
+                                  fontFamily: 'Geogrotesque Sharp, sans-serif',
+                                  color: '#1A202C',
+                                  lineHeight: 1.2,
+                                  fontSize: '1.15rem'
+                                }}
+                              >
+                                {item.title}
+                              </Typography>
+                              <Typography variant="body2" sx={{ color: '#6B7280', mt: 0.5, fontFamily: 'Poppins, sans-serif', fontSize: '1rem' }}>
+                                {item.desc}
+                              </Typography>
+                            </Box>
+                            <ArrowForwardIcon sx={{ color: '#D1D5DB', ml: 2 }} />
+                          </Paper>
+                        </ButtonBase>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              </Grid>
+
+              {/* COLUMNA DERECHA: Panel de Avisos (40%) */}
+              <Grid item xs={12} md={4.8}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '16px',
+                    p: 3,
+                    border: '1px solid #E5E7EB',
+                    height: '100%',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  }}
+                >
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      sx={{
+                        fontWeight: 700,
+                        fontFamily: 'Geogrotesque Sharp, sans-serif',
+                        color: '#374151',
+                        letterSpacing: '0.5px',
+                        textTransform: 'uppercase',
+                        fontSize: '1.1rem'
+                      }}
+                    >
+                      Avisos y Novedades
+                    </Typography>
+                  </Box>
+
+                  {loading ? (
+                    Array.from(new Array(5)).map((_, index) => (
+                      <Box key={index} sx={{ mb: 2 }}>
+                        <Skeleton variant="text" width="70%" />
+                        <Skeleton variant="text" width="30%" height={15} />
+                        <Divider sx={{ my: 2, opacity: 0.5 }} />
                       </Box>
-                    ) : (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                        {avisos.map((aviso) => (
-                          <AvisoCard
-                            key={aviso.id}
+                    ))
+                  ) : (
+                    <List disablePadding>
+                      {avisos.map((aviso, index) => (
+                        <React.Fragment key={aviso.id}>
+                          <AvisoCompacto
                             aviso={aviso}
                             rol={rol}
                             formatearFecha={formatearFecha}
                             handleDeleteAvisoClick={handleDeleteAvisoClick}
-                            loadingDelete={loadingDelete}
-                            avisoToDelete={avisoToDelete}
                           />
-                        ))}
-                      </Box>
-                    )}
-                  </Box>
-                </Box>
+                          {index < avisos.length - 1 && <Divider sx={{ my: 2, opacity: 0.6 }} />}
+                        </React.Fragment>
+                      ))}
+                      {avisos.length === 0 && (
+                        <Box textAlign="center" py={6}>
+                          <NotificationsNoneIcon sx={{ fontSize: 48, color: '#D1D5DB', mb: 2 }} />
+                          <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'Poppins, sans-serif' }}>
+                            No hay noticias destacadas hoy.
+                          </Typography>
+                        </Box>
+                      )}
+                    </List>
+                  )}
+                </Paper>
               </Grid>
 
-              {/* Bloque ¿Qué podés hacer aquí? (30%) */}
-              <Grid item xs={12} md={3.6} sx={{ mt: { xs: 6, md: 0 } }}>
-                <Box sx={{ position: 'sticky', top: '24px', pl: { md: 2 } }}>
+              {/* SECCIÓN INFERIOR: Accesos Rápidos */}
+              <Grid item xs={12}>
+                <Box sx={{ mt: 6, pt: 6, borderTop: '1px solid #E5E7EB' }}>
                   <Typography
-                    variant="h5"
+                    variant="h3"
                     component="h2"
                     sx={{
-                      fontWeight: 700,
+                      fontWeight: 600,
                       fontFamily: 'Geogrotesque Sharp, sans-serif',
-                      color: '#5C6F82',
-                      letterSpacing: '0.5px',
+                      textAlign: 'center',
+                      mb: 6,
+                      color: '#1A202C',
                       textTransform: 'uppercase',
-                      mb: 4,
-                      lineHeight: 1.2,
-                      fontSize: '1.1rem'
+                      letterSpacing: '-1px',
+                      fontSize: { xs: '1.4rem', md: '1.8rem' }
                     }}
                   >
-                    ¿Qué podés hacer aquí?
+                    Accesos Rápidos
                   </Typography>
-
-                  <List disablePadding>
-                    {[
-                      {
-                        icon: <EventAvailableIcon sx={{ fontSize: '2.5rem' }} />,
-                        title: 'Planificación Anual',
-                        desc: 'Organizá las fechas de tus capacitaciones de forma eficiente.'
-                      },
-                      {
-                        icon: <ArticleIcon sx={{ fontSize: '2.5rem' }} />,
-                        title: 'Cursos Registrados',
-                        desc: 'Consultá en tiempo real el estado de todas tus capacitaciones.'
-                      },
-                      {
-                        icon: <NotificationsActiveIcon sx={{ fontSize: '2.5rem' }} />,
-                        title: 'Avisos Importantes',
-                        desc: 'Visualizá avisos críticos y novedades al momento.'
-                      },
-                      {
-                        icon: <AutoAwesomeIcon sx={{ fontSize: '2.5rem' }} />,
-                        title: 'Gestión 100% Digital',
-                        desc: 'Para una administración ágil y sostenible.'
-                      }
-                    ].map((item, idx) => (
-                      <Box key={idx} sx={{ mb: 6, display: 'flex', alignItems: 'flex-start' }}>
-                        <Box
-                          sx={{
-                            color: 'primary.main',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mr: 3,
-                            mt: 0.5
-                          }}
-                        >
-                          {item.icon}
-                        </Box>
-                        <Box>
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              fontWeight: 700,
-                              fontFamily: 'Geogrotesque Sharp, sans-serif',
-                              color: '#1A202C',
-                              fontSize: '1.25rem',
-                              lineHeight: 1.3
-                            }}
-                          >
-                            {item.title}
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            sx={{
-                              mt: 1,
-                              fontSize: '1.1rem',
-                              color: 'text.secondary',
-                              lineHeight: 1.6,
-                              fontFamily: 'Poppins, sans-serif'
-                            }}
-                          >
-                            {item.desc}
-                          </Typography>
-                        </Box>
-                      </Box>
+                  <Grid container spacing={3}>
+                    {linksInteresData.map((link, i) => (
+                      <Grid item xs={12} sm={6} md={3} key={i}>
+                        <LinkInteres
+                          imagenSrc={link.img}
+                          titulo={link.title}
+                          url={link.url}
+                        />
+                      </Grid>
                     ))}
-                  </List>
+                  </Grid>
                 </Box>
               </Grid>
             </Grid>
           </Container>
         </Box>
 
-        {/* SECCIÓN 2: Flujo de Gestión */}
-        <Box
-          sx={{
-            width: '100%',
-            py: { xs: 5, md: 8 },
-            backgroundColor: '#F4F7F9',
-            borderTop: '1px solid #E2E8F0',
-            borderBottom: '1px solid #E2E8F0'
-          }}
-        >
-          <Container maxWidth={false} sx={{ px: { xs: 2, md: 5 } }}>
-            <Typography
-              variant="h3"
-              component="h2"
-              sx={{
-                fontWeight: 600,
-                fontFamily: 'Geogrotesque Sharp, sans-serif',
-                mb: { xs: 5, md: 8 },
-                color: '#1A202C',
-                textAlign: 'center',
-                letterSpacing: { xs: '-0.5px', md: '-1.5px' },
-                textTransform: 'uppercase',
-                fontSize: { xs: '1.6rem', md: '2.2rem' }
-              }}
-            >
-              Ruta de Gestión
-            </Typography>
-
-            <Grid container spacing={{ xs: 2.5, md: 4 }} justifyContent="center">
-              {[
-                { step: 'Paso 1', title: 'Cargar Nota', color: '#E2464C', desc: 'Iniciá el proceso cargando la nota de autorización correspondiente.', option: 'SubaNotaDeAutorizacion' },
-                { step: 'Paso 2', title: 'Crear Evento', color: '#009EE3', desc: 'Completá el formulario del evento de tu capacitación.', option: 'Eventos' },
-                { step: 'Paso 3', title: 'Crear Cohorte', color: '#004582', desc: 'Completá el formulario de cohorte para agendar las fechas de tu capacitación.', option: 'Formulario' },
-                { step: 'Paso 4', title: 'Ver Calendario', color: '#5D717E', desc: 'Consultá las cohortes que cargaste en el calendario.', option: 'Calendario' }
-              ].map((item, idx) => (
-                <Grid item xs={12} sm={6} lg={3} key={idx}>
-                  <Paper
-                    elevation={0}
-                    onClick={() => setOpcionSeleccionada(item.option)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setOpcionSeleccionada(item.option);
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    sx={{
-                      p: { xs: 3, sm: 4, lg: 5 },
-                      borderRadius: '16px',
-                      backgroundColor: '#ffffff',
-                      borderLeft: `10px solid ${item.color}`,
-                      borderTop: '1px solid #E2E8F0',
-                      borderRight: '1px solid #E2E8F0',
-                      borderBottom: '1px solid #E2E8F0',
-                      height: '100%',
-                      minHeight: { sm: '200px' }, // Evita que se deformen en 2 columnas
-                      display: 'flex',
-                      flexDirection: 'column',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                      '&:hover': {
-                        transform: 'translateY(-12px)',
-                        boxShadow: '0 25px 30px -10px rgba(0, 0, 0, 0.15)',
-                      }
-                    }}
-                  >
-                    <Typography
-                      variant="overline"
-                      sx={{
-                        color: item.color,
-                        fontWeight: 800,
-                        fontFamily: 'Geogrotesque Sharp, sans-serif',
-                        letterSpacing: '1.5px',
-                        fontSize: '1rem',
-                      }}
-                    >
-                      {item.step}
-                    </Typography>
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        fontWeight: 800,
-                        fontFamily: 'Geogrotesque Sharp, sans-serif',
-                        color: '#1A202C',
-                        mt: 1.5,
-                        mb: 2,
-                        lineHeight: 1.2
-                      }}
-                    >
-                      {item.title}
-                    </Typography>
-                    <Typography variant="body1" sx={{ color: '#4A5568', lineHeight: 1.6, fontSize: '1.1rem', fontFamily: 'Poppins, sans-serif' }}>
-                      {item.desc}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
-          </Container>
-        </Box>
-
-        {/* SECCIÓN 3: Accesos Rápidos */}
-        <Box sx={{ pt: { xs: 8, md: 10 }, pb: { xs: 4, md: 6 }, backgroundColor: '#FFFFFF' }}>
-          <Container maxWidth={false} sx={{ px: { xs: 2, md: 5 } }}>
-            <Typography
-              variant="h3"
-              component="h2"
-              sx={{
-                fontWeight: 600,
-                fontFamily: 'Geogrotesque Sharp, sans-serif',
-                textAlign: 'center',
-                mb: { xs: 6, md: 8 },
-                color: '#1A202C',
-                textTransform: 'uppercase',
-                letterSpacing: { xs: '-0.5px', md: '-1.5px' },
-                fontSize: { xs: '1.6rem', md: '2.2rem' }
-              }}
-            >
-              Accesos Rápidos
-            </Typography>
-            <Grid container spacing={{ xs: 2.5, md: 4 }} justifyContent="center" alignItems="stretch">
-              {linksInteresData.map((link, i) => (
-                <Grid item xs={12} sm={6} lg={3} key={i} sx={{ display: 'flex' }}>
-                  <LinkInteres
-                    imagenSrc={link.img}
-                    titulo={link.title}
-                    url={link.url}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Container>
-        </Box>
       </Box>
     </>
   );
 };
 
-// --- Componente Auxiliar para Tarjetas de Aviso ---
-const AvisoCard = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, loadingDelete, avisoToDelete }) => {
+const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isTruncated, setIsTruncated] = useState(false);
-  const contentRef = useRef(null);
+  const [canExpand, setCanExpand] = useState(false);
+  const textRef = useRef(null);
 
+  // Detectar si el texto está truncado físicamente después del renderizado
   useLayoutEffect(() => {
-    const checkTruncation = () => {
-      if (contentRef.current && !isExpanded) {
-        // Detectar si el contenido es mayor que el espacio de 3 lineas (aprox 72-80px)
-        // o simplemente comparar scrollHeight vs clientHeight mientras está en line-clamp
-        setIsTruncated(contentRef.current.scrollHeight > contentRef.current.clientHeight);
-      }
-    };
-
-    // Pequeño timeout para asegurar que el DOM se haya pintado si hay HTML complejo
-    const timer = setTimeout(checkTruncation, 50);
-    window.addEventListener('resize', checkTruncation);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', checkTruncation);
-    };
+    if (textRef.current && !isExpanded) {
+      // Usamos un pequeño margen de 5px para evitar falsos positivos por saltos de línea vacíos o redondeo de fuentes
+      const isTruncated = textRef.current.scrollHeight > (textRef.current.clientHeight + 5);
+      setCanExpand(isTruncated);
+    }
   }, [aviso.contenido, isExpanded]);
 
+  const renderIcon = () => {
+    return (
+      <Typography sx={{ fontSize: '1.2rem', lineHeight: 1 }}>
+        {aviso.icono || '📌'}
+      </Typography>
+    );
+  };
+
   return (
-    <Box sx={{
-      p: { xs: 3, sm: 4 },
-      pb: isExpanded ? 6 : { xs: 3, sm: 4 },
-      backgroundColor: '#ffffff',
-      borderRadius: '16px',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-      border: '1px solid #F0F0F0',
-      '&:hover': {
-        boxShadow: '0 6px 16px rgba(0,0,0,0.06)'
-      }
-    }}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          justifyContent: 'space-between',
-          alignItems: { xs: 'flex-start', sm: 'center' },
-          mb: 2,
-          gap: { xs: 1.5, sm: 0 }
-        }}
-      >
-        <Box display="flex" alignItems="center" sx={{ flexGrow: 1, pr: { xs: 0, sm: 2 }, width: { xs: '100%', sm: 'auto' } }}>
-          <Typography variant="h6" sx={{ fontSize: '1.25rem', fontWeight: 800, color: '#000000', lineHeight: 1.3, display: 'flex', alignItems: 'center', fontFamily: 'Geogrotesque Sharp, sans-serif' }}>
-            {aviso.icono || <PushPinIcon sx={{ fontSize: '1.4rem', mr: 1, color: 'primary.main', transform: 'rotate(45deg)' }} />}
-            <span style={{ flex: 1 }}>{aviso.titulo}</span>
+    <ListItem
+      alignItems="flex-start"
+      disableGutters
+      sx={{
+        flexDirection: 'column',
+        position: 'relative',
+        '&:hover .delete-btn': { opacity: 1 },
+        py: 1
+      }}
+    >
+      <Box sx={{ display: 'flex', width: '100%', mb: 0.5, alignItems: 'center' }}>
+        <Box
+          sx={{
+            minWidth: 40,
+            height: 40,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0, 158, 227, 0.05)',
+            mr: 2,
+            flexShrink: 0
+          }}
+        >
+          {renderIcon()}
+        </Box>
+        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 700,
+              fontFamily: 'Poppins, sans-serif',
+              color: '#1F2937',
+              lineHeight: 1.3,
+              fontSize: '0.95rem',
+              wordBreak: 'break-word'
+            }}
+          >
+            {aviso.titulo}
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: '#9CA3AF',
+              fontFamily: 'Poppins, sans-serif',
+              fontSize: '0.8rem',
+              display: 'block',
+              mt: 0.1
+            }}
+          >
+            {formatearFecha(aviso.created_at)}
           </Typography>
         </Box>
-
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-          width: { xs: '100%', sm: 'auto' },
-          justifyContent: { xs: 'space-between', sm: 'flex-end' },
-          borderTop: { xs: '1px solid rgba(0,0,0,0.05)', sm: 'none' },
-          pt: { xs: 1.5, sm: 0 }
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', color: '#757575', opacity: 0.7 }}>
-            <CalendarTodayIcon sx={{ fontSize: '0.85rem', mr: 0.8 }} />
-            <Typography variant="caption" sx={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              {formatearFecha(aviso.created_at)}
-            </Typography>
-          </Box>
-          {rol === 'ADM' && (
-            <IconButton
-              aria-label={`eliminar aviso ${aviso.titulo}`}
-              onClick={() => handleDeleteAvisoClick(aviso)}
-              size="small"
-              sx={{
-                color: '#899dac',
-                transition: 'all 0.2s ease',
-                '&:hover': { color: 'error.main', backgroundColor: 'rgba(211, 47, 47, 0.04)' }
-              }}
-              disabled={loadingDelete && avisoToDelete?.id === aviso.id}
-            >
-              {(loadingDelete && avisoToDelete?.id === aviso.id) ? <CircularProgress size={18} color="inherit" /> : <DeleteForeverIcon fontSize="small" />}
-            </IconButton>
-          )}
-        </Box>
+        {rol === 'ADM' && (
+          <IconButton
+            className="delete-btn"
+            aria-label="eliminar"
+            onClick={() => handleDeleteAvisoClick(aviso)}
+            size="small"
+            sx={{
+              opacity: 0,
+              transition: 'opacity 0.2s',
+              color: 'error.light',
+              ml: 1
+            }}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        )}
       </Box>
-
-      {/* Area del contenido expandible */}
-      <Box sx={{ overflow: 'hidden' }}>
-        <Box
-          ref={contentRef}
+      <Box sx={{ pl: 7, width: '100%' }}>
+        <Typography
+          ref={textRef}
+          variant="body2"
           sx={{
-            mt: 1,
-            fontSize: '1.05rem', // Aumentado para legibilidad (16.8px)
-            color: '#333',
+            color: '#4B5563',
             fontFamily: 'Poppins, sans-serif',
+            fontSize: '0.98rem',
+            lineHeight: 1.6,
             display: isExpanded ? 'block' : '-webkit-box',
-            WebkitLineClamp: isExpanded ? 'none' : 5,
+            WebkitLineClamp: isExpanded ? 'none' : 3,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            lineHeight: 1.6,
-            '& p': { marginBlockStart: '0.8em', marginBlockEnd: '0.8em', fontFamily: 'Poppins, sans-serif' },
-            '& a': { color: '#004582', fontWeight: 500, textDecoration: 'none' },
-            '& ul, & ol': { pl: 2, fontFamily: 'Poppins, sans-serif' }
+            wordBreak: 'break-word'
           }}
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(aviso.contenido)
           }}
         />
+        {canExpand && (
+          <Button
+            size="small"
+            variant="text"
+            onClick={() => setIsExpanded(!isExpanded)}
+            sx={{
+              mt: 0.5,
+              textTransform: 'none',
+              p: 0,
+              minWidth: 'auto',
+              fontWeight: 600,
+              color: 'primary.main',
+              display: 'inline-flex',
+              '&:hover': {
+                backgroundColor: 'transparent',
+                textDecoration: 'underline'
+              }
+            }}
+          >
+            {isExpanded ? 'Ver menos' : 'Ver más'}
+          </Button>
+        )}
       </Box>
-
-      {(isTruncated || isExpanded) && (
-        <Button
-          variant="text"
-          onClick={() => setIsExpanded(!isExpanded)}
-          aria-expanded={isExpanded}
-          sx={{
-            mt: 2,
-            px: 1,
-            minHeight: '44px', // Área táctil mínima accesible
-            fontSize: '0.9rem',
-            textTransform: 'none',
-            fontWeight: 700,
-            color: '#005A87', // Azul accesible
-            minWidth: 'auto',
-            '&:hover': { background: 'rgba(0, 90, 135, 0.04)', color: '#004582', textDecoration: 'none' }
-          }}
-        >
-          {isExpanded ? 'Ver menos' : 'Leer aviso completo'}
-        </Button>
-      )}
-    </Box>
+    </ListItem>
   );
 };
 

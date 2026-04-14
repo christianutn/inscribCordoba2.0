@@ -730,11 +730,22 @@ const ReporteCursosCC = ({ sidebarOpen }) => {
 
     return (
         <Box sx={{ width: '100%', boxSizing: 'border-box', p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: 1,
+                    position: 'relative',
+                    textAlign: 'center',
+                    px: 6,
+                }}
+            >
                 <Typography variant="h4" gutterBottom component="h1" sx={{ textAlign: 'center', mb: 0, mt: 2, fontWeight: 'bold' }}>
                     Reporte Cursos {selectedYear} {selectedMonth !== 'all' ? ` - ${mesesFull[selectedMonth]}` : ' - Anual'}
                 </Typography>
-                <Box sx={{ position: 'absolute', right: 0 }}>
+                <Box sx={{ position: 'absolute', right: 0, top: 0 }}>
                     <BotonCircular icon="descargar" onClick={handleOpenExcelModal} tooltip="Descargar Reporte Excel" disabled={loading || filteredCronogramaData.length === 0} />
                 </Box>
             </Box>
