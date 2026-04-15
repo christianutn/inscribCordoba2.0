@@ -3,18 +3,207 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, TextField, MenuItem, Grid, FormControl,
     InputLabel, Select, IconButton, Typography, Divider, Box,
-    Alert
+    Alert, Stepper, Step, StepLabel, Chip, Tooltip,
+    CircularProgress, Paper
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BlockIcon from '@mui/icons-material/Block';
+import RestoreIcon from '@mui/icons-material/Restore';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
-const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filter }) => {
-    // Determinar si el curso ya tiene un evento
-    const tieneEvento = useMemo(() => {
-        return record?.detalle_evento != null;
-    }, [record]);
+// Configuración de la máquina de estados
+const ESTADOS = {
+    AUT:   { label: 'Autorizado',                  cod: 'AUT',   color: '#7986cb', step: 0 },
+    MAQ:   { label: 'Maquetado',                   cod: 'MAQ',   color: '#4db6ac', step: 1 },
+    CON:   { label: 'Configurado',                 cod: 'CON',   color: '#81c784', step: 2 },
+    PVICT: { label: 'Pendiente carga en Victorius',cod: 'PVICT', color: '#ffb74d', step: 3 },
+    EC:    { label: 'Evento cargado en Victorius', cod: 'EC',    color: '#4caf50', step: 4 },
+    NVIG:  { label: 'No Vigente',                  cod: 'NVIG',  color: '#ef5350', step: -1 },
+};
+
+const FLUJO_NORMAL = ['AUT', 'MAQ', 'CON', 'PVICT', 'EC'];
+
+// Info contextual por estado
+const ESTADO_INFO = {
+    AUT:   'El curso fue autorizado. El referente debe maquetar el curso y avisar para avanzar.',
+    MAQ:   'El curso está maquetado. El equipo debe configurarlo para habilitarlo.',
+    CON:   'El curso está configurado y visible para completar el formulario de nuevo evento.',
+    PVICT: 'El formulario de evento fue completado. Un usuario GA debe cargar el evento en Victorius.',
+    EC:    'El evento fue cargado en Victorius. El proceso está completo.',
+    NVIG:  'El curso está dado de baja y no está vigente.',
+};
+
+const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onRestaurar, loading }) => {
+    const [restaurarTarget, setRestaurarTarget] = useState('');
+    const [showRestaurarMenu, setShowRestaurarMenu] = useState(false);
+
+    const esNVIG = estadoActual === 'NVIG';
+    const stepActual = ESTADOS[estadoActual]?.step ?? -1;
+    const esPrimerEstado = stepActual === 0;
+    const esUltimoEstado = stepActual === FLUJO_NORMAL.length - 1;
+
+    return (
+        <Paper
+            variant="outlined"
+            sx={{
+                p: 2.5,
+                mb: 3,
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%)',
+                borderColor: '#c5cae9'
+            }}
+        >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="subtitle1" fontWeight={600} color="text.primary">
+                    Estado del Curso
+                </Typography>
+                <Chip
+                    label={ESTADOS[estadoActual]?.label ?? estadoActual}
+                    sx={{
+                        backgroundColor: ESTADOS[estadoActual]?.color ?? '#9e9e9e',
+                        color: 'white',
+                        fontWeight: 700,
+                        fontSize: '0.8rem',
+                        px: 1
+                    }}
+                    icon={<CheckCircleIcon style={{ color: 'white' }} />}
+                />
+            </Box>
+
+            {/* Stepper visual del flujo normal */}
+            {!esNVIG && (
+                <Stepper activeStep={stepActual} alternativeLabel sx={{ mb: 2 }}>
+                    {FLUJO_NORMAL.map((cod) => (
+                        <Step key={cod} completed={stepActual > ESTADOS[cod].step}>
+                            <StepLabel
+                                StepIconProps={{
+                                    style: {
+                                        color: stepActual >= ESTADOS[cod].step
+                                            ? ESTADOS[cod].color
+                                            : undefined
+                                    }
+                                }}
+                            >
+                                <Typography variant="caption">{ESTADOS[cod].label}</Typography>
+                            </StepLabel>
+                        </Step>
+                    ))}
+                </Stepper>
+            )}
+
+            {/* Info contextual */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2, p: 1.5, bgcolor: 'rgba(0,0,0,0.03)', borderRadius: 1 }}>
+                <InfoOutlinedIcon fontSize="small" color="action" sx={{ mt: 0.2 }} />
+                <Typography variant="body2" color="text.secondary">
+                    {ESTADO_INFO[estadoActual] ?? ''}
+                </Typography>
+            </Box>
+
+            {/* Acciones de estado */}
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
+                {/* Retroceder (ADM) */}
+                {!esNVIG && !esPrimerEstado && (
+                    <Tooltip title="Retroceder al estado anterior (solo ADM)">
+                        <span>
+                            <Button
+                                size="small"
+                                variant="outlined"
+                                color="warning"
+                                startIcon={<ArrowBackIcon />}
+                                onClick={onRetroceder}
+                                disabled={loading}
+                                sx={{ textTransform: 'none' }}
+                            >
+                                Retroceder estado
+                            </Button>
+                        </span>
+                    </Tooltip>
+                )}
+
+                {/* Avanzar */}
+                {!esNVIG && !esUltimoEstado && (
+                    <Tooltip title={`Avanzar al siguiente estado: ${ESTADOS[FLUJO_NORMAL[stepActual + 1]]?.label}`}>
+                        <span>
+                            <Button
+                                size="small"
+                                variant="contained"
+                                color="primary"
+                                endIcon={<ArrowForwardIcon />}
+                                onClick={onAvanzar}
+                                disabled={loading}
+                                sx={{ textTransform: 'none' }}
+                            >
+                                Avanzar a: {ESTADOS[FLUJO_NORMAL[stepActual + 1]]?.label}
+                            </Button>
+                        </span>
+                    </Tooltip>
+                )}
+
+                {/* Dar de baja (ADM, solo si no es NVIG) */}
+                {!esNVIG && (
+                    <Tooltip title="Marcar curso como No Vigente (solo ADM)">
+                        <span>
+                            <Button
+                                size="small"
+                                variant="outlined"
+                                color="error"
+                                startIcon={<BlockIcon />}
+                                onClick={onDarDeBaja}
+                                disabled={loading}
+                                sx={{ textTransform: 'none' }}
+                            >
+                                Dar de baja
+                            </Button>
+                        </span>
+                    </Tooltip>
+                )}
+
+                {/* Restaurar (solo si NVIG) */}
+                {esNVIG && (
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <FormControl size="small" sx={{ minWidth: 220 }}>
+                            <InputLabel>Restaurar al estado</InputLabel>
+                            <Select
+                                value={restaurarTarget}
+                                label="Restaurar al estado"
+                                onChange={(e) => setRestaurarTarget(e.target.value)}
+                            >
+                                {FLUJO_NORMAL.map((cod) => (
+                                    <MenuItem key={cod} value={cod}>{ESTADOS[cod].label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <Tooltip title="Restaurar el curso a un estado activo (solo ADM)">
+                            <span>
+                                <Button
+                                    size="small"
+                                    variant="contained"
+                                    color="success"
+                                    startIcon={<RestoreIcon />}
+                                    onClick={() => restaurarTarget && onRestaurar(restaurarTarget)}
+                                    disabled={!restaurarTarget || loading}
+                                    sx={{ textTransform: 'none' }}
+                                >
+                                    Restaurar
+                                </Button>
+                            </span>
+                        </Tooltip>
+                    </Box>
+                )}
+
+                {loading && <CircularProgress size={20} />}
+            </Box>
+        </Paper>
+    );
+};
+
+const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxiliaryData, filter }) => {
+    const tieneEvento = useMemo(() => record?.detalle_evento != null, [record]);
 
     const [formData, setFormData] = useState({
-        // Campos del Curso
         curso: '',
         nombre: '',
         cupo: '',
@@ -23,15 +212,10 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
         codTipoCapacitacion: '',
         cantidad_horas: '',
         codArea: '',
-        esVigente: 0,
-        tiene_evento_creado: 0,
-        numero_evento: '',
-        esta_maquetado: 0,
-        esta_configurado: 0,
         aplica_sincronizacion_certificados: 0,
         url_curso: '',
-        esta_autorizado: 0,
-        // Campos del Evento
+        numero_evento: '',
+        // Evento
         perfil: '',
         area_tematica: '',
         tipo_certificacion: '',
@@ -44,12 +228,14 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
     });
 
     const [errors, setErrors] = useState({});
+    const [estadoLoading, setEstadoLoading] = useState(false);
+    const [estadoFeedback, setEstadoFeedback] = useState(null); // { type: 'success'|'error', msg }
+    const [estadoActual, setEstadoActual] = useState('AUT');
 
     useEffect(() => {
         if (record) {
             const evento = record.detalle_evento;
             setFormData({
-                // Campos del Curso (ahora directamente desde el record, que ES un curso)
                 curso: record.cod || '',
                 nombre: record.nombre || '',
                 cupo: record.cupo || '',
@@ -58,15 +244,9 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                 codTipoCapacitacion: record.tipo_capacitacion || '',
                 cantidad_horas: record.cantidad_horas || '',
                 codArea: record.area || '',
-                esVigente: record.esVigente ? 1 : 0,
-                tiene_evento_creado: record.tiene_evento_creado ? 1 : 0,
-                numero_evento: record.numero_evento || '',
-                esta_maquetado: record.esta_maquetado ? 1 : 0,
-                esta_configurado: record.esta_configurado ? 1 : 0,
                 aplica_sincronizacion_certificados: record.aplica_sincronizacion_certificados ? 1 : 0,
                 url_curso: record.url_curso || '',
-                esta_autorizado: record.esta_autorizado ? 1 : 0,
-                // Campos del Evento (pueden ser null si no tiene evento)
+                numero_evento: record.numero_evento || '',
                 perfil: evento?.detalle_perfil?.cod || evento?.perfil || '',
                 area_tematica: evento?.detalle_areaTematica?.cod || evento?.area_tematica || '',
                 tipo_certificacion: evento?.detalle_tipoCertificacion?.cod || evento?.tipo_certificacion || '',
@@ -82,49 +262,31 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                 curso: '', nombre: '', cupo: '',
                 codPlataformaDictado: '', codMedioInscripcion: '',
                 codTipoCapacitacion: '', cantidad_horas: '', codArea: '',
-                esVigente: 0, tiene_evento_creado: 0, numero_evento: '',
-                esta_maquetado: 0, esta_configurado: 0,
-                aplica_sincronizacion_certificados: 0, url_curso: '',
-                esta_autorizado: 0,
+                aplica_sincronizacion_certificados: 0, url_curso: '', numero_evento: '',
                 perfil: '', area_tematica: '', tipo_certificacion: '',
                 presentacion: '', objetivos: '', requisitos_aprobacion: '',
                 ejes_tematicos: '', certifica_en_cc: 1, disenio_a_cargo_cc: 1
             });
         }
         setErrors({});
+        setEstadoFeedback(null);
+        setEstadoActual(record?.estado ?? record?.detalle_estado_curso?.cod ?? 'AUT');
     }, [record, open]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: null }));
-        }
+        setFormData(prev => ({ ...prev, [name]: value }));
+        if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
     };
 
-    /**
-     * Determina si el usuario completó algún campo del evento.
-     * Si no completó ninguno, solo se guardará el curso.
-     */
-    const hayDatosDeEvento = useMemo(() => {
-        return !!(
-            formData.perfil ||
-            formData.area_tematica ||
-            formData.tipo_certificacion ||
-            formData.presentacion?.trim() ||
-            formData.objetivos?.trim() ||
-            formData.requisitos_aprobacion?.trim() ||
-            formData.ejes_tematicos?.trim()
-        );
-    }, [formData]);
+    const hayDatosDeEvento = useMemo(() => !!(
+        formData.perfil || formData.area_tematica || formData.tipo_certificacion ||
+        formData.presentacion?.trim() || formData.objetivos?.trim() ||
+        formData.requisitos_aprobacion?.trim() || formData.ejes_tematicos?.trim()
+    ), [formData]);
 
     const validate = () => {
         const newErrors = {};
-
-        // --- Validaciones del Curso (siempre obligatorias) ---
         if (!formData.nombre) newErrors.nombre = 'El nombre es obligatorio';
         if (formData.nombre && formData.nombre.length > 250) newErrors.nombre = 'Máximo 250 caracteres';
         if (!formData.cupo) newErrors.cupo = 'El cupo es obligatorio';
@@ -136,24 +298,14 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
         if (!formData.codTipoCapacitacion) newErrors.codTipoCapacitacion = 'Requerido';
         if (!formData.codArea) newErrors.codArea = 'Requerido';
 
-        // --- Validaciones del Evento ---
-        // Solo se validan si: (a) ya tiene evento, o (b) el usuario empezó a completar datos de evento
         if (tieneEvento || hayDatosDeEvento) {
             if (!formData.perfil) newErrors.perfil = 'El perfil es obligatorio';
             if (!formData.area_tematica) newErrors.area_tematica = 'El área temática es obligatoria';
             if (!formData.tipo_certificacion) newErrors.tipo_certificacion = 'El tipo de certificación es obligatorio';
-            if (!formData.presentacion || formData.presentacion.trim() === '') {
-                newErrors.presentacion = 'La presentación es obligatoria';
-            }
-            if (!formData.objetivos || formData.objetivos.trim() === '') {
-                newErrors.objetivos = 'Los objetivos son obligatorios';
-            }
-            if (!formData.requisitos_aprobacion || formData.requisitos_aprobacion.trim() === '') {
-                newErrors.requisitos_aprobacion = 'Los requisitos de aprobación son obligatorios';
-            }
-            if (!formData.ejes_tematicos || formData.ejes_tematicos.trim() === '') {
-                newErrors.ejes_tematicos = 'Los ejes temáticos son obligatorios';
-            }
+            if (!formData.presentacion?.trim()) newErrors.presentacion = 'La presentación es obligatoria';
+            if (!formData.objetivos?.trim()) newErrors.objetivos = 'Los objetivos son obligatorios';
+            if (!formData.requisitos_aprobacion?.trim()) newErrors.requisitos_aprobacion = 'Los requisitos de aprobación son obligatorios';
+            if (!formData.ejes_tematicos?.trim()) newErrors.ejes_tematicos = 'Los ejes temáticos son obligatorios';
         }
 
         setErrors(newErrors);
@@ -162,10 +314,32 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
 
     const handleSubmit = () => {
         if (validate()) {
-            onSave({
-                ...formData,
-                tieneEvento // Indica al hook si debe crear o actualizar evento
-            });
+            onSave({ ...formData, tieneEvento });
+        }
+    };
+
+    const calcularNuevoEstado = (estadoCurrent, accion, estadoDestino) => {
+        const stepActual = ESTADOS[estadoCurrent]?.step ?? -1;
+        switch (accion) {
+            case 'avanzar':    return FLUJO_NORMAL[stepActual + 1] ?? estadoCurrent;
+            case 'retroceder': return FLUJO_NORMAL[stepActual - 1] ?? estadoCurrent;
+            case 'darDeBaja':  return 'NVIG';
+            case 'restaurar':  return estadoDestino ?? estadoCurrent;
+            default:           return estadoCurrent;
+        }
+    };
+
+    const handleCambioEstado = async (accion, estadoDestino = null) => {
+        if (!record?.cod || !onChangeEstado) return;
+        setEstadoLoading(true);
+        setEstadoFeedback(null);
+        const result = await onChangeEstado(record, accion, estadoDestino);
+        setEstadoLoading(false);
+        if (result.success) {
+            setEstadoActual(prev => calcularNuevoEstado(prev, accion, estadoDestino));
+            setEstadoFeedback({ type: 'success', msg: 'Estado actualizado correctamente.' });
+        } else {
+            setEstadoFeedback({ type: 'error', msg: result.error || 'Error al cambiar el estado.' });
         }
     };
 
@@ -183,17 +357,33 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                     aria-label="close"
                     onClick={onClose}
                     sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
+                        position: 'absolute', right: 8, top: 8,
                         color: (theme) => theme.palette.grey[500],
                     }}
                 >
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
+
             <DialogContent dividers>
-                {/* Mensaje informativo para cursos sin evento */}
+                {/* ============================== */}
+                {/* SECCIÓN: Estado del Curso      */}
+                {/* ============================== */}
+                {estadoFeedback && (
+                    <Alert severity={estadoFeedback.type} sx={{ mb: 2 }} onClose={() => setEstadoFeedback(null)}>
+                        {estadoFeedback.msg}
+                    </Alert>
+                )}
+
+                <EstadoStepper
+                    estadoActual={estadoActual}
+                    loading={estadoLoading}
+                    onAvanzar={() => handleCambioEstado('avanzar')}
+                    onRetroceder={() => handleCambioEstado('retroceder')}
+                    onDarDeBaja={() => handleCambioEstado('darDeBaja')}
+                    onRestaurar={(destino) => handleCambioEstado('restaurar', destino)}
+                />
+
                 {!tieneEvento && (
                     <Alert severity="info" sx={{ mb: 2 }}>
                         Este curso aún no tiene un evento asociado. Puede modificar los datos del curso y, opcionalmente,
@@ -329,27 +519,12 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <FormControl fullWidth>
-                            <InputLabel>¿Está vigente?</InputLabel>
+                            <InputLabel>¿Aplica sincronización de certificados?</InputLabel>
                             <Select
-                                name="esVigente"
-                                value={formData.esVigente}
-                                label="¿Está vigente?"
+                                name="aplica_sincronizacion_certificados"
+                                value={formData.aplica_sincronizacion_certificados}
+                                label="¿Aplica sincronización de certificados?"
                                 onChange={handleChange}
-                            >
-                                <MenuItem value={1}>Sí</MenuItem>
-                                <MenuItem value={0}>No</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth>
-                            <InputLabel>¿Tiene evento creado en Victorius?</InputLabel>
-                            <Select
-                                name="tiene_evento_creado"
-                                value={formData.tiene_evento_creado}
-                                label="¿Tiene evento creado en Victorius?"
-                                onChange={handleChange}
-
                             >
                                 <MenuItem value={1}>Sí</MenuItem>
                                 <MenuItem value={0}>No</MenuItem>
@@ -369,62 +544,6 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                         />
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth>
-                            <InputLabel>¿Está maquetado?</InputLabel>
-                            <Select
-                                name="esta_maquetado"
-                                value={formData.esta_maquetado}
-                                label="¿Está maquetado?"
-                                onChange={handleChange}
-                            >
-                                <MenuItem value={1}>Sí</MenuItem>
-                                <MenuItem value={0}>No</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth>
-                            <InputLabel>¿Está configurado?</InputLabel>
-                            <Select
-                                name="esta_configurado"
-                                value={formData.esta_configurado}
-                                label="¿Está configurado?"
-                                onChange={handleChange}
-                            >
-                                <MenuItem value={1}>Sí</MenuItem>
-                                <MenuItem value={0}>No</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth>
-                            <InputLabel>¿Aplica sincronización certificados?</InputLabel>
-                            <Select
-                                name="aplica_sincronizacion_certificados"
-                                value={formData.aplica_sincronizacion_certificados}
-                                label="¿Aplica sincronización certificados?"
-                                onChange={handleChange}
-                            >
-                                <MenuItem value={1}>Sí</MenuItem>
-                                <MenuItem value={0}>No</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth>
-                            <InputLabel>¿Está autorizado?</InputLabel>
-                            <Select
-                                name="esta_autorizado"
-                                value={formData.esta_autorizado}
-                                label="¿Está autorizado?"
-                                onChange={handleChange}
-                            >
-                                <MenuItem value={1}>Sí</MenuItem>
-                                <MenuItem value={0}>No</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
                         <TextField
                             name="url_curso"
                             label="URL del Curso"
@@ -442,7 +561,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                 {/* ============================== */}
                 <Box sx={{ mt: 3 }}>
                     <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>
-                        {tieneEvento ? 'Datos del Evento en Victorius' : 'Datos del Evento en Victorius'}
+                        Datos del Evento en Victorius
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
 
@@ -453,7 +572,6 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                     )}
 
                     <Grid container spacing={2}>
-                        {/* Dropdowns del Evento */}
                         <Grid item xs={12} sm={4}>
                             <FormControl fullWidth required={tieneEvento || hayDatosDeEvento} error={!!errors.perfil}>
                                 <InputLabel>Perfil</InputLabel>
@@ -463,9 +581,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                                     label="Perfil"
                                     onChange={handleChange}
                                 >
-                                    <MenuItem value="">
-                                        <em>Sin seleccionar</em>
-                                    </MenuItem>
+                                    <MenuItem value=""><em>Sin seleccionar</em></MenuItem>
                                     {auxiliaryData.perfiles.map((item) => (
                                         <MenuItem key={item.cod} value={item.cod}>{item.descripcion}</MenuItem>
                                     ))}
@@ -482,9 +598,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                                     label="Área Temática"
                                     onChange={handleChange}
                                 >
-                                    <MenuItem value="">
-                                        <em>Sin seleccionar</em>
-                                    </MenuItem>
+                                    <MenuItem value=""><em>Sin seleccionar</em></MenuItem>
                                     {auxiliaryData.areasTematicas.map((item) => (
                                         <MenuItem key={item.cod} value={item.cod}>{item.descripcion}</MenuItem>
                                     ))}
@@ -501,9 +615,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                                     label="Tipo de Certificación"
                                     onChange={handleChange}
                                 >
-                                    <MenuItem value="">
-                                        <em>Sin seleccionar</em>
-                                    </MenuItem>
+                                    <MenuItem value=""><em>Sin seleccionar</em></MenuItem>
                                     {auxiliaryData.tiposCertificacion.map((item) => (
                                         <MenuItem key={item.cod} value={item.cod}>{item.descripcion}</MenuItem>
                                     ))}
@@ -512,14 +624,11 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                             </FormControl>
                         </Grid>
 
-                        {/* Text Areas del Evento */}
                         <Grid item xs={12}>
                             <TextField
                                 name="presentacion"
                                 label="Presentación"
-                                fullWidth
-                                multiline
-                                rows={4}
+                                fullWidth multiline rows={4}
                                 value={formData.presentacion}
                                 onChange={handleChange}
                                 required={tieneEvento || hayDatosDeEvento}
@@ -531,9 +640,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                             <TextField
                                 name="objetivos"
                                 label="Objetivos"
-                                fullWidth
-                                multiline
-                                rows={4}
+                                fullWidth multiline rows={4}
                                 value={formData.objetivos}
                                 onChange={handleChange}
                                 required={tieneEvento || hayDatosDeEvento}
@@ -545,9 +652,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                             <TextField
                                 name="ejes_tematicos"
                                 label="Ejes Temáticos"
-                                fullWidth
-                                multiline
-                                rows={4}
+                                fullWidth multiline rows={4}
                                 value={formData.ejes_tematicos}
                                 onChange={handleChange}
                                 required={tieneEvento || hayDatosDeEvento}
@@ -559,9 +664,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                             <TextField
                                 name="requisitos_aprobacion"
                                 label="Requisitos de Aprobación"
-                                fullWidth
-                                multiline
-                                rows={3}
+                                fullWidth multiline rows={3}
                                 value={formData.requisitos_aprobacion}
                                 onChange={handleChange}
                                 required={tieneEvento || hayDatosDeEvento}
@@ -570,7 +673,6 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                             />
                         </Grid>
 
-                        {/* Booleanos del Evento */}
                         <Grid item xs={12} sm={6}>
                             <FormControl fullWidth>
                                 <InputLabel>¿Certifica en CC?</InputLabel>
@@ -602,6 +704,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, record, auxiliaryData, filte
                     </Grid>
                 </Box>
             </DialogContent>
+
             <DialogActions>
                 <Button onClick={onClose} color="secondary">
                     Cancelar

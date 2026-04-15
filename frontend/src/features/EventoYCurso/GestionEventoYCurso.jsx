@@ -15,7 +15,7 @@ import ModalCrearCurso from '../../components/NotaDeAutorizacion/Modals/ModalCre
 const GestionEventoYCurso = () => {
     const {
         data, loading, error,
-        updateItem, deleteItem,
+        updateItem, deleteItem, changeEstado,
         refreshData, auxiliaryData
     } = useEventoYCurso();
 
@@ -31,16 +31,13 @@ const GestionEventoYCurso = () => {
     const filteredData = useMemo(() => {
         let result = data;
 
-        // Filtrar por estado de evento basado en el atributo tiene_evento_creado de la tabla cursos
+        // Filtrar por estado de curso
         if (filter === 'conEvento') {
-            result = result.filter(item => item.tiene_evento_creado == 1);
+            result = result.filter(item => item.estado === 'EC');
         } else if (filter === 'sinEvento') {
-            result = result.filter(item => !item.tiene_evento_creado || item.tiene_evento_creado == 0);
+            result = result.filter(item => item.estado !== 'EC');
         } else if (filter === 'pendientesVictorius') {
-            result = result.filter(item =>
-                (!item.tiene_evento_creado || item.tiene_evento_creado == 0) &&
-                item.tiene_formulario_evento_creado == 1
-            );
+            result = result.filter(item => item.estado === 'PVICT');
         }
 
         // Filtrar por búsqueda de texto
@@ -114,10 +111,7 @@ const GestionEventoYCurso = () => {
     };
 
     const pendientesCount = useMemo(() => {
-        return data.filter(item =>
-            (!item.tiene_evento_creado || item.tiene_evento_creado == 0) &&
-            item.tiene_formulario_evento_creado == 1
-        ).length;
+        return data.filter(item => item.estado === 'PVICT').length;
     }, [data]);
 
     if (loading && data.length === 0) {
@@ -227,6 +221,7 @@ const GestionEventoYCurso = () => {
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 onSave={handleSave}
+                onChangeEstado={changeEstado}
                 record={currentRecord}
                 auxiliaryData={auxiliaryData}
                 filter={filter}

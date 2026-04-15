@@ -102,6 +102,11 @@ const Curso = sequelize.define("cursos", {
     tiene_formulario_evento_creado: {
         type: DataTypes.TINYINT(1), // Cambiado a TINYINT(1) para coincidir con MySQL
         allowNull: true
+    },
+    estado: {
+        type: DataTypes.STRING(10),
+        allowNull: false,
+        defaultValue: 'NVIG'
     }
 }, {
     timestamps: false,

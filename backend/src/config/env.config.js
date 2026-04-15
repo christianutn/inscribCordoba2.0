@@ -65,6 +65,7 @@ const config = {
             : ENV === 'development'
                 ? process.env.EMAIL_SUPPORT_DEV
                 : process.env.EMAIL_SUPPORT_DEV,
+
     },
 
     // JWT

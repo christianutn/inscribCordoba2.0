@@ -6,7 +6,7 @@ import Usuario from "../models/usuario.models.js";
 import sequelize from "../../../../config/database.js";
 import { createHash } from "../../../../utils/bcrypt.js"
 import generarToken from "../../../../utils/jwt.js";
-import enviarCorreo from "../../../../utils/enviarCorreo.js";
+import EmailAdapter from "../../../../adapters/EmailAdapter.js";
 import parseEsExcepcionParaFechas from "../../../../utils/parseEsExcepcionParaFechas.js"
 import envConfig from "../../../../config/env.config.js"
 
@@ -343,9 +343,17 @@ export const recuperoContrasenia = async (req, res, next) => {
 
 
         const token = generarToken({ cuil: cuil, mail: persona.mail, token_version: usuario.token_version });
-        //armamamos la url de la peticion para el frontend
+        // armamamos la url de la peticion para el frontend
         const urlPeticion = url + "/cambiarContrasenia?token=" + token;
-        await enviarCorreo(generarHtmlRecuperarContraseña(urlPeticion), "Recupero de contraseña", persona.mail);
+
+        // Uso del EmailAdapter para mandar el correo
+        const emailAdapter = new EmailAdapter();
+        await emailAdapter.enviarCorreo(
+            persona.mail, // Destinatario
+            "Recupero de contraseña", // Asunto
+            generarHtmlRecuperarContraseña(urlPeticion) // HTML
+        );
+
         // Devolver el mail enmascarado
         const maskedEmail = maskEmail(persona.mail);
 
