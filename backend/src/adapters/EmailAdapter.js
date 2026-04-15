@@ -278,9 +278,73 @@ class EmailAdapter {
      * @returns {Promise<Object>} - Resultado del envío
      */
     async enviarNotificacionEfemerideCargada(datosUsuario, curso, efemerides) {
-        const destinatario = config.email.user;
+        const destinatario = config.email.supportEmail;
         const asunto = `Nuevas Efemérides - Curso: ${curso.nombre}`;
         const htmlMensaje = this.generarHtmlNotificacionEfemeride(datosUsuario, curso, efemerides);
+
+        return await this.enviarCorreo(destinatario, asunto, htmlMensaje);
+    }
+
+    generarHtmlNotificacionEventoCreado(cursoEvento) {
+
+        return `<!DOCTYPE html>
+        <html lang="es">
+          <head>
+            <meta charset="UTF-8" />
+            <title>Nuevo Formulario - Creación de Evento</title>
+            <style>
+              body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f4f6f8;
+                margin: 0;
+                padding: 0;
+              }
+              .container {
+                max-width: 600px;
+                margin: 30px auto;
+                background-color: #ffffff;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+              }
+              h2 {
+                color: #2c3e50;
+              }
+              p {
+                font-size: 16px;
+                color: #333333;
+              }
+              .highlight {
+                font-weight: bold;
+                color: #2980b9;
+                font-size: 18px;
+              }
+              .footer {
+                margin-top: 30px;
+                font-size: 12px;
+                color: #888888;
+                text-align: center;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h2>📩 Nuevo formulario recibido</h2>
+              <p>Se ha completado un nuevo formulario para la creación de un evento.</p>
+              <p><span class="highlight">Nombre del curso:</span> ${cursoEvento.nombre} </p>
+              <p>Por favor, revise los datos para continuar con el proceso correspondiente.</p>
+              <div class="footer">
+                Este es un mensaje automático. No responda este correo.
+              </div>
+            </div>
+          </body>
+        </html>`
+    }
+
+    async enviarNotificacionEventoCreado(cursoEvento) {
+        const destinatario = config.email.supportEmail;
+        const asunto = `Nuevo Evento - Curso: ${cursoEvento.nombre}`;
+        const htmlMensaje = this.generarHtmlNotificacionEventoCreado(cursoEvento);
 
         return await this.enviarCorreo(destinatario, asunto, htmlMensaje);
     }

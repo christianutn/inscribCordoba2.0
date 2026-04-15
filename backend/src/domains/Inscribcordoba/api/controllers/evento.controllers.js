@@ -9,7 +9,7 @@ import TipoCapacitacion from '../models/tipoCapacitacion.models.js';
 import PlataformaDictado from '../models/plataformaDictado.models.js';
 import Area from '../models/area.models.js';
 import { actualizarCursoDB, buildCursoData } from './curso.controllers.js';
-import enviarCorreo from '../../../../utils/enviarCorreo.js';
+import EmailAdapter from '../../../../adapters/EmailAdapter.js';
 import sequelize from '../../../../config/database.js';
 import Persona from '../models/persona.models.js';
 import Usuario from '../models/usuario.models.js';
@@ -186,14 +186,6 @@ export const postEvento = async (req, res, next) => {
         // La validación interna levantará error y hará rollback de la transacción de no ser así.
         await CursoStateService.marcarPendienteCargaEnVictorius(curso, t);
 
-        // Se eliminó la validación de que el evento no exista en la base de datos ya que hay eventos que están
-        // marcados como existentes pero no se encuentran en la base de datos
-        // const existeEvento = await Evento.findOne({ where: { curso } });
-        // if (existeEvento) {
-        //     logger.warn(`⚠️ Evento ya existe en la base de datos - Curso: ${curso}`);
-        //     throw new AppError("Ya existe el evento", 400);
-        // }
-
         const fecha_desde = DateTime.now()
             .setZone('America/Argentina/Buenos_Aires')
             .toFormat("yyyy-MM-dd HH:mm:ss");
@@ -217,67 +209,15 @@ export const postEvento = async (req, res, next) => {
             },
             { transaction: t }
         );
+        const emailAdapter = new EmailAdapter();
+        await emailAdapter.enviarNotificacionEventoCreado(cursoEvento)
 
-        // Commit de la transacción: cambios en Curso y creación de Evento quedan confirmados
+        logger.info(`📧 Correo de notificación enviado con éxito - Curso: ${cursoEvento.nombre}`);
+
+        // Commit de la transacción: cambios en Curso y creación de Evento quedan confirmados solo si el email no falló
         await t.commit();
 
-        logger.info(`✅ Evento creado exitosamente - Curso: ${curso} - Nombre: ${cursoEvento.nombre}`);
-
-        const htmlBodyCorreo = `<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Nuevo Formulario - Creación de Evento</title>
-    <style>
-      body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f6f8;
-        margin: 0;
-        padding: 0;
-      }
-      .container {
-        max-width: 600px;
-        margin: 30px auto;
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      }
-      h2 {
-        color: #2c3e50;
-      }
-      p {
-        font-size: 16px;
-        color: #333333;
-      }
-      .highlight {
-        font-weight: bold;
-        color: #2980b9;
-        font-size: 18px;
-      }
-      .footer {
-        margin-top: 30px;
-        font-size: 12px;
-        color: #888888;
-        text-align: center;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h2>📩 Nuevo formulario recibido</h2>
-      <p>Se ha completado un nuevo formulario para la creación de un evento.</p>
-      <p><span class="highlight">Nombre del curso:</span> ${cursoEvento.nombre} </p>
-      <p>Por favor, revise los datos para continuar con el proceso correspondiente.</p>
-      <div class="footer">
-        Este es un mensaje automático. No responda este correo.
-      </div>
-    </div>
-  </body>
-</html>`
-        enviarCorreo(htmlBodyCorreo, "Nuevo Formulario - Creación de Evento", "soportecampuscordoba@gmail.com");
-
-        logger.info(`📧 Correo de notificación enviado - Curso: ${cursoEvento.nombre}`);
+        logger.info(`✅ Evento creado y confirmado en Base de Datos - Curso: ${curso} - Nombre: ${cursoEvento.nombre}`);
 
         res.status(201).json(evento);
     } catch (error) {
