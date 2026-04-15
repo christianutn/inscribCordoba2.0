@@ -95,6 +95,12 @@ const config = {
         keyApp: process.env.KEY_APP_PROD,
         urlApi: process.env.URL_API_PROD,
     },
+
+    // Monitoreo automatizado
+    monitoring: {
+        alertEmails: process.env.MONITORING_ALERT_EMAILS || process.env.EMAIL_RECIPIENTS,
+        externalEndpoints: process.env.MONITORING_EXTERNAL_ENDPOINTS || null,
+    },
 };
 
 /**

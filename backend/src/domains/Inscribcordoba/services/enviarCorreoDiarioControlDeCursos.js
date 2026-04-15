@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import envioCorreo from "../../../utils/enviarCorreo.js"; // Asegúrate que esta ruta es correcta
 import Instancia from "../../Inscribcordoba/api/models/instancia.models.js";
+import runMonitoring from "../../../services/monitoring/monitoring.service.js";
 
 
 
@@ -245,6 +246,11 @@ const enviarCorreoDiarioContolDeCursos = () => {
     } catch (error) {
       console.error(`[${timestamp}] CRON TAREA: Error general durante la ejecución:`, error);
     }
+
+    // Ejecutar monitoreo de servicios (no bloquea la tarea principal)
+    runMonitoring().catch(err => {
+      console.error(`[${timestamp}] CRON TAREA: Error en monitoreo de servicios:`, err);
+    });
 
   }, {
     scheduled: true,
