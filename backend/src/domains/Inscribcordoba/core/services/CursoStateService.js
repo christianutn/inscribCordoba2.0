@@ -11,11 +11,11 @@ import AppError from '../../../../utils/appError.js';
  */
 const _ejecutarTransicion = async (cod, transaction, transitionCallback) => {
     // 1. Buscar el curso en BD
-    const curso = await cursoModel.findOne({ 
+    const curso = await cursoModel.findOne({
         where: { cod },
-        ...(transaction ? { transaction } : {}) 
+        ...(transaction ? { transaction } : {})
     });
-    
+
     if (!curso) {
         throw new AppError(`No se encontró el curso con código '${cod}'.`, 404);
     }
@@ -29,7 +29,7 @@ const _ejecutarTransicion = async (cod, transaction, transitionCallback) => {
 
     // 4. Persistir el nuevo estado
     const estadoNuevo = contexto.getEstadoActual();
-    
+
     if (estadoAnterior !== estadoNuevo) {
         await cursoModel.update(
             { estado: estadoNuevo },
@@ -131,6 +131,13 @@ const autorizarDesdeNota = async (cod, transaction = null) => {
     );
 };
 
+const validarPermiteCargaInstancias = (curso) => {
+    if (!curso) {
+        throw new AppError('Curso no provisto para la validación.', 400);
+    }
+    return curso.estado == 'PVICT' || curso.estado == 'EC';
+};
+
 const CursoStateService = {
     avanzar,
     retroceder,
@@ -139,7 +146,8 @@ const CursoStateService = {
     marcarEventoCreadoEnVictorius,
     restaurar,
     autorizar,
-    autorizarDesdeNota
+    autorizarDesdeNota,
+    validarPermiteCargaInstancias
 };
 
 export default CursoStateService;

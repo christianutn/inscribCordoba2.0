@@ -14,6 +14,7 @@ import Departamento from '../../domains/Inscribcordoba/api/models/departamentos.
 import Usuario from '../../domains/Inscribcordoba/api/models/usuario.models.js';
 import FechasInhabilitadas from '../../domains/Inscribcordoba/api/models/fechas_inhabilitadas.models.js';
 import FechasInhabilitadasFin from '../../domains/Inscribcordoba/api/models/fechas_inhabilitadas_fin.models.js';
+import CursoStateService from '../../domains/Inscribcordoba/core/services/CursoStateService.js';
 
 // Middleware de validación para una ruta de creación/actualización de Curso/Evento
 const validarDatosCursoConCohortes = [
@@ -81,13 +82,10 @@ const validarDatosCursoConCohortes = [
             if (!curso) {
                 throw new AppError(`No se encontró un curso con el código ${value}.`, 404);
             }
-
-            if (!curso.esVigente) { // Validación de negocio: ¿está vigente?
-                throw new AppError(`El curso con código ${value} no está vigente.`, 400);
-            }
-
-            if (curso.tiene_evento_creado == 0 && curso.tiene_formulario_evento_creado == 0) { // Validación de negocio: ¿tiene evento creado?
-                throw new AppError(`El curso con código ${value} no tiene evento creado ni formulario de evento enviado.`, 400);
+            // Validación de negocio: Estado del curso
+            const esEstadoValido = CursoStateService.validarPermiteCargaInstancias(curso);
+            if (!esEstadoValido) {
+                throw new AppError(`El curso con código ${value} se encuentra en estado '${curso.estado}'. Solo se pueden cargar instancias para cursos en estado 'PVICT' o 'EC'.`, 400);
             }
         }),
 
@@ -308,6 +306,8 @@ const validarDatosCursoConCohortes = [
             }
             return true;
         }),
+
+
 
 ]
 
