@@ -229,7 +229,7 @@ export default function Formulario() {
                 <Autocomplete options={areas.filter(a => a.esVigente === 1).map(a => a.nombre)} label={"Seleccione un área"} value={selectArea} getValue={(value) => { setSelectArea(value); setSelectCurso(""); const areaSeleccionada = areas.find(a => a.nombre === value); if (areaSeleccionada) { setCursos(areaSeleccionada.detalle_cursos); } else { setCursos([]); } }} />
               </Grid>
               <Grid item xs={12} md={6}>
-                <Autocomplete options={cursos.filter(c => ['CON', 'PVICT', 'EC'].includes(c.estado)).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso} getValue={async (value) => {
+                <Autocomplete options={cursos.filter(c => ['PVICT', 'EC'].includes(c.estado)).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso} getValue={async (value) => {
                   setSelectCurso(value);
                   const codCurso = cursos.find(c => c.nombre === value)?.cod;
                   if (codCurso) {
