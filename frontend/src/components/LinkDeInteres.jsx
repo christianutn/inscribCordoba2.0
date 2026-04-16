@@ -76,7 +76,6 @@ const LinkInteres = ({ imagenSrc, titulo, url }) => {
       <Button
         className="action-btn"
         variant="contained"
-        fullWidth
         component="a"
         href={url}
         target="_blank"
@@ -84,6 +83,7 @@ const LinkInteres = ({ imagenSrc, titulo, url }) => {
         sx={{
           fontFamily: 'Poppins, sans-serif',
           py: 1.2,
+          width: '160px',
           fontWeight: 700,
           fontSize: '0.95rem',
           color: '#ffffff',

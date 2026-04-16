@@ -61,6 +61,7 @@ import { useAuth } from '../context/AuthContext';
 import config from '../config.js';
 
 const drawerWidth = 260;
+const miniDrawerWidth = 72;
 
 const menuConfigByRole = {
   ADM: [
@@ -68,7 +69,7 @@ const menuConfigByRole = {
     { label: "Tablero ", identifier: "ReporteCursosIdentifier", icon: <AssessmentIcon /> },
     { label: "Reporte Admin", identifier: "ReporteAdmin", icon: <AssessmentIcon /> },
     { label: "Ver Calendario", identifier: "Calendario", icon: <CalendarMonthIcon /> },
-    { label: "Versión Reducida Administradores", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon /> },
+    { label: "Versión Reducida ADM", identifier: "VersionReducidaAdministradores", icon: <InsertInvitationIcon /> },
     { label: "Versión Reducida GA", identifier: "VersionReducidaGa", icon: <InsertInvitationIcon /> },
     { label: "Gestionar Autorizaciones", identifier: "Autorizaciones", icon: <DifferenceIcon /> },
     { label: "Gestión", identifier: "Gestion", icon: <SettingsSuggestIcon /> },
@@ -101,58 +102,29 @@ const menuConfigByRole = {
   ],
 };
 
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    flexGrow: 1,
-    padding: theme.spacing(3),
-    backgroundColor: theme.palette.background.default,
-    // Fix: merged duplicate sm breakpoints into one
-    [theme.breakpoints.up('sm')]: {
-      marginTop: '64px',
-      minHeight: 'calc(100vh - 64px)',
-      marginLeft: `-${drawerWidth}px`,
-      // Abierto: transición suave con curva easeOut (menú entró)
-      transition: theme.transitions.create(['margin', 'width'], {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      ...(open && {
-        marginLeft: 0,
-      }),
-      ...(!open && {
-        marginLeft: `-${drawerWidth}px`,
-        transition: theme.transitions.create(['margin', 'width'], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-      }),
-    },
-    marginTop: theme.mixins.toolbar.minHeight,
-    minHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`,
-    width: '100%', // Asegura ancho 100% para que se expanda/contraia de forma elástica
-    minWidth: 0,
-    overflowX: 'hidden',
+const Main = styled('main')(({ theme }) => ({
+  flexGrow: 1,
+  minHeight: '100vh',
+  display: 'flex',
+  flexDirection: 'column',
+  marginTop: '64px',
+  width: '100%',
+  overflowX: 'hidden',
+  transition: theme.transitions.create(['margin', 'width'], {
+    easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    duration: 350,
   }),
-);
+}));
 
-const AppBarStyled = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
+const AppBarStyled = styled(MuiAppBar)(({ theme }) => ({
+  // El zIndex + 1 lo pone por encima del menú lateral
+  zIndex: theme.zIndex.drawer + 1,
   boxShadow: theme.shadows[1],
   backgroundColor: theme.palette.primary.main,
-
-  // El color de fondo se tomará automáticamente de 'theme.palette.primary.main'
+  width: '100%', // Ocupa todo el ancho siempre
   transition: theme.transitions.create(['margin', 'width'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: `${drawerWidth}px`,
+    easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    duration: 350,
   }),
 }));
 
@@ -168,7 +140,7 @@ export default function Principal() {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(true);
   const [opcionesAMostrar, setOpcionesAMostrar] = useState([]);
@@ -250,7 +222,7 @@ export default function Principal() {
   useEffect(() => {
     const timer = setTimeout(() => {
       window.dispatchEvent(new Event('resize'));
-    }, theme.transitions.duration.enteringScreen + 50);
+    }, 400);
     return () => clearTimeout(timer);
   }, [open, theme.transitions.duration.enteringScreen]);
 
@@ -294,7 +266,7 @@ export default function Principal() {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', maxWidth: '100vw', overflowX: 'hidden' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
       <CssBaseline />
       <AppBarStyled position="fixed" open={open}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -302,9 +274,9 @@ export default function Principal() {
             <IconButton
               color="inherit"
               aria-label="open drawer"
-              onClick={handleDrawerOpen}
+              onClick={() => setOpen(!open)}
               edge="start"
-              sx={{ mr: 1, ...(open && { display: 'none' }), color: 'white' }}
+              sx={{ mr: 1, color: 'white', display: { xs: 'flex', md: 'none' } }}
             >
               <MenuIcon />
             </IconButton>
@@ -341,25 +313,39 @@ export default function Principal() {
       </AppBarStyled>
 
       <Drawer
+        variant={isMobile ? "temporary" : "permanent"}
+        anchor="left"
+        open={open}
+        onClose={() => setOpen(false)}
         sx={{
-          width: drawerWidth,
+          width: open ? drawerWidth : (isMobile ? 0 : miniDrawerWidth),
           flexShrink: 0,
+          whiteSpace: 'nowrap',
+          boxSizing: 'border-box',
+          transition: theme.transitions.create('width', {
+            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            duration: 350,
+          }),
           '& .MuiDrawer-paper': {
-            width: drawerWidth,
+            width: open ? drawerWidth : (isMobile ? 0 : miniDrawerWidth),
             boxSizing: 'border-box',
-            borderRight: 'none',
-            boxShadow: theme.shadows[2],
+            borderRight: '1px solid #E0E0E0',
+            // --- ESTOS CAMBIOS SON LOS QUE EVITAN SOLAPAMIENTOS Y GAPS ---
+            marginTop: isMobile ? '56px' : '64px', // Ajuste dinámico para mobile (56px) y desktop (64px)
+            height: isMobile ? 'calc(100% - 56px)' : 'calc(100% - 64px)', 
+            // -----------------------------------------------------
+            transition: theme.transitions.create('width', {
+              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+              duration: 350,
+            }),
+            overflowX: 'hidden',
             // Scrollbar modern refinements
             scrollbarWidth: 'thin',
             scrollbarColor: `#E2E8F0 transparent`,
-            '&::-webkit-scrollbar': {
-              width: '8px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: 'transparent',
-            },
+            '&::-webkit-scrollbar': { width: '8px' },
+            '&::-webkit-scrollbar-track': { background: 'transparent' },
             '&::-webkit-scrollbar-thumb': {
-              backgroundColor: '#E2E8F0',
+              backgroundColor: '#CBD5E1',
               borderRadius: '10px',
               border: '2px solid transparent',
               backgroundClip: 'content-box',
@@ -369,15 +355,34 @@ export default function Principal() {
             },
           },
         }}
-        variant={isMobile ? "temporary" : "persistent"}
-        anchor="left"
-        open={open}
-        onClose={handleDrawerClose}
       >
-        <DrawerHeader>
-          <Typography variant="h6" sx={{ ml: 1, flexGrow: 1, fontWeight: 600 }}>Menú</Typography>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        <DrawerHeader sx={{
+          justifyContent: isMobile ? 'flex-start' : (open ? 'space-between' : 'center'),
+          px: open ? 2 : 0,
+          minHeight: '64px !important', 
+          backgroundColor: isMobile ? '#F8F9FA' : 'transparent',
+          borderBottom: isMobile ? '1px solid #E2E8F0' : 'none',
+        }}>
+          {open && (
+            <Typography variant="h6" sx={{ 
+              ml: isMobile ? 1.5 : 1, 
+              fontWeight: 700, 
+              color: '#1E293B', 
+              fontSize: '0.9rem',
+              textAlign: 'left',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Menú
+            </Typography>
+          )}
+          <IconButton onClick={() => setOpen(!open)} sx={{
+            p: '4px',
+            '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' },
+            transition: 'all 350ms cubic-bezier(0.4, 0, 0.2, 1)',
+            display: { xs: 'none', md: 'inline-flex' }
+          }}>
+            {open ? <MenuIcon sx={{ color: '#1e293b', fontSize: '1.2rem' }} /> : <MenuIcon sx={{ color: '#1e293b', fontSize: '1.2rem' }} />}
           </IconButton>
         </DrawerHeader>
         <Divider />
@@ -385,30 +390,72 @@ export default function Principal() {
 
           {opcionesAMostrar.map((item) => (
             <ListItem key={item.identifier} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                component="a"
+              <Tooltip title={!open ? item.label : ""} placement="right" arrow>
+                <ListItemButton
+                  component="a"
                 href={`/principal#${item.identifier}`}
                 onClick={(e) => handleListItemClick(e, item.identifier)}
                 selected={opcionSeleccionada === item.identifier}
                 sx={{
-                  minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, py: 1.2, mb: 0.5, borderRadius: 1, mx: 1.5,
-                  textDecoration: 'none', color: 'inherit',
+                  minHeight: 44,
+                  justifyContent: open ? 'initial' : 'center',
+                  px: open ? 2.5 : 0,
+                  py: 0.8,
+                  mb: 0.4,
+                  borderRadius: open ? '50px' : '12px',
+                  mx: open ? 1.2 : 'auto',
+                  width: open ? 'auto' : 44,
+                  textDecoration: 'none',
+                  color: '#475569',
+                  transition: 'all 350ms cubic-bezier(0.4, 0, 0.2, 1)',
                   '&.Mui-selected': {
-                    backgroundColor: theme.palette.action.selected, fontWeight: 'fontWeightBold',
-                    '& .MuiListItemIcon-root, & .MuiListItemText-primary': { color: theme.palette.primary.main, }
+                    backgroundColor: 'rgba(0, 158, 227, 0.08)',
+                    color: '#009EE3',
+                    '& .MuiListItemIcon-root': {
+                      color: '#009EE3',
+                    },
+                    '& .MuiListItemText-primary': {
+                      color: '#009EE3',
+                      fontWeight: 600,
+                      display: open ? 'block' : 'none',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 158, 227, 0.12)',
+                    }
                   },
-                  '&:hover': { backgroundColor: theme.palette.action.hover, }
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 158, 227, 0.04)',
+                    color: opcionSeleccionada === item.identifier ? '#009EE3' : '#0F172A',
+                    '& .MuiListItemIcon-root': {
+                      color: opcionSeleccionada === item.identifier ? '#009EE3' : '#0F172A',
+                    }
+                  }
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: opcionSeleccionada === item.identifier ? theme.palette.primary.main : theme.palette.text.secondary }}>
+                <ListItemIcon sx={{
+                  minWidth: 0,
+                  mr: open ? 2 : 0,
+                  justifyContent: 'center',
+                  color: opcionSeleccionada === item.identifier ? '#009EE3' : '#64748B',
+                  transition: 'color 350ms cubic-bezier(0.4, 0, 0.2, 1)'
+                }}>
                   {item.icon}
                 </ListItemIcon>
                 <ListItemText
                   primary={item.label}
-                  primaryTypographyProps={{ fontWeight: opcionSeleccionada === item.identifier ? '600' : '400', fontSize: '0.95rem' }}
-                  sx={{ opacity: open ? 1 : 0 }}
+                  primaryTypographyProps={{
+                    fontWeight: opcionSeleccionada === item.identifier ? 600 : 500,
+                    fontSize: '0.875rem',
+                    fontFamily: "'Poppins', 'Roboto', sans-serif",
+                  }}
+                  sx={{
+                    display: open ? 'block' : 'none',
+                    opacity: open ? 1 : 0,
+                    transition: 'opacity 350ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
                 />
-              </ListItemButton>
+                </ListItemButton>
+              </Tooltip>
             </ListItem>
           ))}
         </List>
@@ -416,18 +463,59 @@ export default function Principal() {
         <Box sx={{ mb: 2, mt: 'auto' }}>
           <Divider sx={{ mx: 1.5, my: 1 }} />
           <ListItem disablePadding sx={{ display: 'block' }}>
-            <ListItemButton onClick={handleLogout} sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, py: 1.2, borderRadius: 1, mx: 1.5, color: theme.palette.error.main, '&:hover': { backgroundColor: 'rgba(211, 47, 47, 0.08)', } }} >
-              <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: 'inherit' }} >
+            <Tooltip title={!open ? "Cerrar Sesión" : ""} placement="right" arrow>
+              <ListItemButton
+                onClick={handleLogout}
+              sx={{
+                minHeight: 44,
+                justifyContent: open ? 'initial' : 'center',
+                px: open ? 2.5 : 0,
+                py: 0.8,
+                borderRadius: open ? '50px' : '12px',
+                mx: open ? 1.2 : 'auto',
+                width: open ? 'auto' : 44,
+                color: theme.palette.error.main,
+                transition: 'all 350ms cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                  color: theme.palette.error.dark,
+                  '& .MuiListItemIcon-root': {
+                    color: theme.palette.error.dark,
+                  }
+                }
+              }}
+            >
+              <ListItemIcon sx={{
+                minWidth: 0,
+                mr: open ? 2 : 0,
+                justifyContent: 'center',
+                color: 'inherit',
+                transition: 'color 350ms cubic-bezier(0.4, 0, 0.2, 1)'
+              }}>
                 <LogoutIcon />
               </ListItemIcon>
-              <ListItemText primary="Cerrar Sesión" sx={{ opacity: open ? 1 : 0 }} />
+              <ListItemText
+                primary="Cerrar Sesión"
+                primaryTypographyProps={{
+                  fontWeight: 500,
+                  fontSize: '0.875rem',
+                  fontFamily: "'Poppins', 'Roboto', sans-serif",
+                }}
+                sx={{
+                  display: open ? 'block' : 'none',
+                  opacity: open ? 1 : 0,
+                  transition: 'opacity 350ms cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              />
             </ListItemButton>
-          </ListItem>
+          </Tooltip>
+        </ListItem>
         </Box>
       </Drawer>
 
-      <Main open={open} sx={{ display: 'flex', flexDirection: 'column', p: 0 }}>
-        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Main open={open}>
+        {/* Este Box asegura que el contenido ocupe todo el ancho sin márgenes raros */}
+        <Box sx={{ flexGrow: 1, width: '100%' }}>
           {mostrarOpcion()}
         </Box>
         <Footer />

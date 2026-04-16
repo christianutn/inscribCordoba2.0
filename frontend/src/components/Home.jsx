@@ -203,29 +203,56 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
           pb: 8
         }}
       >
-        <Box sx={{ py: { xs: 4, md: 6 } }}>
-          <Container maxWidth={false} sx={{ px: { xs: 2, md: 5 } }}>
+        {/* CABECERA: Saludo con efecto de "respiración" */}
+        <Box sx={{
+          width: '100%',
+          backgroundColor: '#FFFFFF',
+          borderBottom: '1px solid rgba(0,0,0,0.05)',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.01)',
+          mb: { xs: 4, md: 8 },
+          py: { xs: 4, md: 6 },
+          position: 'relative',
+          zIndex: 1
+        }}>
+          <Container maxWidth={false} sx={{ px: { xs: 3, md: 7 } }}>
             <Typography
               variant="h2"
               component="h1"
               sx={{
-                fontWeight: 700,
+                fontWeight: 600,
                 fontFamily: "'Geogrotesque Sharp', sans-serif",
                 fontSize: {
                   xs: 'clamp(1.6rem, 5vw, 2rem)',
                   sm: 'clamp(2rem, 4vw, 2.4rem)',
-                  md: 'clamp(2.2rem, 3.5vw, 2.8rem)',
-                  lg: 'clamp(2.6rem, 3vw, 3.5rem)',
+                  md: 'clamp(2.5rem, 3.5vw, 3rem)',
+                  lg: 'clamp(3rem, 3vw, 3.8rem)',
                 },
-                mb: { xs: 4, md: 6 },
-                color: '#003d7a',
+                color: '#1e1e1e',
                 textAlign: 'left',
                 letterSpacing: '-1.5px',
+                m: 0
               }}
             >
-              {nombre ? `¡Hola ${nombre}!` : '¡Hola Valentina De Los Angeles!'}
+              {nombre ? `¡Hola ${nombre}!` : '¡Hola Usuario!'}
             </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 400,
+                fontSize: '19px',
+                color: '#64748B',
+                mt: 1,
+                textAlign: 'left'
+              }}
+            >
+              Te damos la bienvenida al panel de gestión de InscribCórdoba.
+            </Typography>
+          </Container>
+        </Box>
 
+        <Box>
+          <Container maxWidth={false} sx={{ px: { xs: 3, md: 7 } }}>
             <Grid container spacing={5} alignItems="flex-start">
               {/* COLUMNA IZQUIERDA: Mi Ruta de Gestión (60%) */}
               <Grid item xs={12} md={7}>
@@ -235,7 +262,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                       variant="h5"
                       component="h2"
                       sx={{
-                        fontWeight: 700,
+                        fontWeight: 600,
                         fontFamily: "'Geogrotesque Sharp', sans-serif",
                         color: '#334155',
                         fontSize: '1.5rem',
@@ -281,7 +308,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                           <Paper
                             elevation={0}
                             sx={{
-                              p: 3,
+                              p: '20px 24px',
                               borderRadius: '20px',
                               backgroundColor: 'rgba(255, 255, 255, 0.8)',
                               backdropFilter: 'blur(10px)',
@@ -372,7 +399,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                       variant="h6"
                       component="h2"
                       sx={{
-                        fontWeight: 700,
+                        fontWeight: 600,
                         fontFamily: "'Geogrotesque Sharp', sans-serif",
                         color: '#334155',
                         letterSpacing: '-0.5px',
@@ -392,17 +419,6 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                     ))
                   ) : (
                     <Box sx={{ position: 'relative' }}>
-                      {/* Línea de tiempo sutil con gradiente */}
-                      <Box sx={{
-                        position: 'absolute',
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: '1px',
-                        background: 'linear-gradient(to bottom, #CBD5E1, transparent)',
-                        zIndex: 0
-                      }} />
-
                       {avisos.map((aviso) => (
                         <AvisoCompacto
                           key={aviso.id}
@@ -410,8 +426,6 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                           rol={rol}
                           formatearFecha={formatearFecha}
                           handleDeleteAvisoClick={handleDeleteAvisoClick}
-                          // Lógica UX: Hasta 3 avisos mostramos casi todo (12 líneas). 
-                          // A partir del 4to aviso, compactamos a 3 líneas para cuidar el scroll.
                           lineLimit={avisos.length <= 3 ? 12 : 3}
                         />
                       ))}
@@ -430,12 +444,12 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
 
               {/* SECCIÓN INFERIOR: Accesos Rápidos */}
               <Grid item xs={12}>
-                <Box sx={{ mt: 5, pt: 4, borderTop: '1px solid rgba(0,0,0,0.03)' }}>
+                <Box sx={{ mt: 8 }}>
                   <Typography
                     variant="h3"
                     component="h2"
                     sx={{
-                      fontWeight: 700,
+                      fontWeight: 600,
                       fontFamily: "'Geogrotesque Sharp', sans-serif",
                       textAlign: 'center',
                       mb: 6,
@@ -477,7 +491,6 @@ const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, lin
   useLayoutEffect(() => {
     const checkOverflow = () => {
       if (textRef.current && !isExpanded) {
-        // Tolerancia de 5px para evitar falsos positivos
         const isTruncated = textRef.current.scrollHeight > (textRef.current.clientHeight + 5);
         setCanExpand(isTruncated);
       }
@@ -492,7 +505,6 @@ const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, lin
     const iconStyle = { fontSize: '1.4rem' };
     const icono = iconoRaw ? iconoRaw.trim().toLowerCase() : '';
 
-    // Mapeo por palabras clave (Nueva DB) o por contenido de emoji (Vieja DB)
     if (icono === 'pin' || icono.includes('📌')) return <PushPinIcon sx={iconStyle} />;
     if (icono === 'warning' || icono.includes('⚠️')) return <WarningIcon sx={iconStyle} />;
     if (icono === 'info' || icono.includes('ℹ️')) return <InfoOutlinedIcon sx={iconStyle} />;
@@ -502,7 +514,6 @@ const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, lin
     if (icono === 'calendar' || icono.includes('📅')) return <EventIcon sx={iconStyle} />;
     if (icono === 'tip' || icono.includes('💡')) return <LightbulbIcon sx={iconStyle} />;
 
-    // Fallback por defecto si no hay coincidencia
     return <InfoOutlinedIcon sx={iconStyle} />;
   };
 
@@ -513,11 +524,24 @@ const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, lin
         pb: 6,
         position: 'relative',
         '&:last-child': { pb: 0 },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          left: 0,
+          top: '22px',
+          bottom: 0,
+          width: '1px',
+          backgroundColor: '#CBD5E1',
+          zIndex: 1
+        },
+        '&:last-child::after': {
+          display: 'none'
+        },
         '&::before': {
           content: '""',
           position: 'absolute',
           left: '-4px',
-          top: '22px', // Centrado con el contenedor de 52px
+          top: '22px',
           width: '9px',
           height: '9px',
           borderRadius: '50%',
@@ -550,7 +574,7 @@ const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, lin
           <Typography
             variant="caption"
             sx={{
-              color: '#64748B',
+              color: '#94A3B8',
               fontFamily: 'Poppins, sans-serif',
               fontWeight: 600,
               fontSize: '0.85rem',

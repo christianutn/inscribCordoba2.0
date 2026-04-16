@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Container, IconButton, Stack } from "@mui/material";
 import {
   FacebookRounded as FacebookIcon,
-  Twitter as TwitterIcon,
+  X as XIcon,
   Instagram as InstagramIcon,
   YouTube as YouTubeIcon
 } from "@mui/icons-material";
@@ -115,7 +115,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <TwitterIcon sx={{ fontSize: { md: '2rem', lg: '2rem' } }} />
+                <XIcon sx={{ fontSize: { md: '2rem', lg: '2rem' } }} />
               </IconButton>
               <IconButton
                 sx={{ color: '#FFFFFF', p: { md: '0px' }, transition: 'all 0.3s', '&:hover': { opacity: 0.8, transform: 'scale(1.2)', backgroundColor: 'transparent' } }}
