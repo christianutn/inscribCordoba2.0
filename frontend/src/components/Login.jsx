@@ -65,12 +65,12 @@ const Login = () => {
         }
 
         const rememberedCuil = localStorage.getItem('rememberedCuil');
-        const rememberedContrasenia = localStorage.getItem('rememberedContrasenia');
-        if (rememberedCuil && rememberedContrasenia) {
+        if (rememberedCuil) {
             setCuil(rememberedCuil);
-            setContrasenia(rememberedContrasenia);
             setRememberMe(true);
+            // La contraseña nunca se persiste — el usuario la escribe manualmente
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, navigate]);
 
     const handleSubmit = async (event) => {
@@ -84,10 +84,8 @@ const Login = () => {
             localStorage.setItem('jwt', token);
             if (rememberMe) {
                 localStorage.setItem('rememberedCuil', cuil);
-                localStorage.setItem('rememberedContrasenia', contrasenia);
             } else {
                 localStorage.removeItem('rememberedCuil');
-                localStorage.removeItem('rememberedContrasenia');
             }
             await checkAuth(); // Actualiza el estado global antes de navegar
             navigate(from, { replace: true });
@@ -182,18 +180,20 @@ const Login = () => {
     );
 
     const renderLoginForm = () => (
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box component="form" id="login-form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
                 margin="normal"
                 required
                 fullWidth
                 id="cuil"
+                name="username"
                 label="Nombre de usuario"
                 autoComplete="username"
                 autoFocus
                 variant="outlined"
                 value={cuil}
                 onChange={(e) => setCuil(e.target.value)}
+                inputProps={{ name: 'username', autoComplete: 'username' }}
                 sx={{
                     '& .MuiInputLabel-root': { fontSize: '1.1rem' },
                     '& .MuiOutlinedInput-root': { fontSize: '1.15rem' }
@@ -206,10 +206,12 @@ const Login = () => {
                 label="Contraseña"
                 type={showPassword ? "text" : "password"}
                 id="contrasenia"
+                name="password"
                 autoComplete="current-password"
                 variant="outlined"
                 value={contrasenia}
                 onChange={(e) => setContrasenia(e.target.value)}
+                inputProps={{ name: 'password', autoComplete: 'current-password' }}
                 sx={{
                     '& .MuiInputLabel-root': { fontSize: '1.1rem' },
                     '& .MuiOutlinedInput-root': { fontSize: '1.15rem' }
@@ -232,7 +234,7 @@ const Login = () => {
             />
             <FormControlLabel
                 control={<Checkbox value="remember" color="primary" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}
-                label={<Typography variant="body1" sx={{ fontSize: '1.05rem' }}>Recordar mi usuario y contraseña</Typography>}
+                label={<Typography variant="body1" sx={{ fontSize: '1.05rem' }}>Recordar mi usuario</Typography>}
                 sx={{ mt: 1 }}
             />
             <Button

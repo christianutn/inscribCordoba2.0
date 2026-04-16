@@ -133,15 +133,7 @@ export default function Formulario() {
 
   };
 
-  const tiene_el_curso_evento_creado = (codCurso) => {
-    const curso = cursos.find((curso) => curso.cod === codCurso);
-    if (!curso) return false;
 
-    const tieneEventoCreado = Number(curso.tiene_evento_creado) === 1;
-    const tieneFormularioEventoCreado = Number(curso.tiene_formulario_evento_creado) === 1;
-
-    return tieneEventoCreado || tieneFormularioEventoCreado;
-  };
 
   const handleEventoCreado = (codCurso) => {
     setCursos(prevCursos => prevCursos.map(curso =>
@@ -175,13 +167,6 @@ export default function Formulario() {
       const codCurso = cursos.find((curso) => curso.nombre === selectCurso)?.cod;
       if (!codCurso) throw new Error("El curso seleccionado no es válido");
 
-      if (!tiene_el_curso_evento_creado(codCurso)) {
-        setTituloAlerta("El curso no tiene un evento creado");
-        setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${selectCurso}'. Por favor, complete primero este formulario.`);
-        setOpenAlertDialog(true);
-        setNuevoEvento(true);
-        throw new Error("El curso no tiene un evento creado.");
-      }
 
       const datosParaEnviar = {
         curso: codCurso,
@@ -244,7 +229,7 @@ export default function Formulario() {
                 <Autocomplete options={areas.filter(a => a.esVigente === 1).map(a => a.nombre)} label={"Seleccione un área"} value={selectArea} getValue={(value) => { setSelectArea(value); setSelectCurso(""); const areaSeleccionada = areas.find(a => a.nombre === value); if (areaSeleccionada) { setCursos(areaSeleccionada.detalle_cursos); } else { setCursos([]); } }} />
               </Grid>
               <Grid item xs={12} md={6}>
-                <Autocomplete options={cursos.filter(c => c.esVigente === 1 && c.esta_autorizado === 1).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso} getValue={async (value) => {
+                <Autocomplete options={cursos.filter(c => ['CON', 'PVICT', 'EC'].includes(c.estado)).map(c => c.nombre)} label={"Seleccione un curso"} value={selectCurso} getValue={async (value) => {
                   setSelectCurso(value);
                   const codCurso = cursos.find(c => c.nombre === value)?.cod;
                   if (codCurso) {
@@ -257,12 +242,6 @@ export default function Formulario() {
                       console.error(e);
                       setTutores([]);
                       setInstanciasExistentes([]);
-                    }
-                    if (!tiene_el_curso_evento_creado(codCurso)) {
-                      setTituloAlerta("El curso no tiene un evento creado");
-                      setMensajeAlerta(`Notamos que no completó el formulario de nuevo evento para el curso de '${value}'. Por favor, complete este formulario.`);
-                      setOpenAlertDialog(true);
-                      setNuevoEvento(true);
                     }
                   } else {
                     setTutores([]);

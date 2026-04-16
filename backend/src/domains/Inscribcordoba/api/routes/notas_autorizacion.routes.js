@@ -20,7 +20,7 @@ router.put('/',
     autorizarNotaDeAutorizacion
 )
 
-router.post('/subir-nota-de-autorizacion',
+router.post('/',
     passport.authenticate('jwt', { session: false }),
     autorizar(['ADM', 'REF', 'GA']),
     manejadorArchivos.middleware(),

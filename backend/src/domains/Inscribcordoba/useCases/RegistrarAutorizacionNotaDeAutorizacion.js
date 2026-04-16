@@ -1,7 +1,7 @@
 
 import sequelize from "../../../config/database.js";
 import { DateTime } from "luxon";
-import CursoModel from "../api/models/curso.models.js";
+import CursoStateService from "../core/services/CursoStateService.js";
 
 export default class RegistrarAutorizacionNotaDeAutorizacion {
     constructor({
@@ -42,7 +42,7 @@ export default class RegistrarAutorizacionNotaDeAutorizacion {
             // Actualizamos cursos
 
             for (const curso of this.cursos) {
-                await CursoModel.update({ esta_autorizado: 1 }, { where: { cod: curso.cod }, transaction: t })
+                await CursoStateService.autorizarDesdeNota(curso.cod, t);
             }
 
 

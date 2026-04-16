@@ -13,37 +13,40 @@ import BlockIcon from '@mui/icons-material/Block';
 import RestoreIcon from '@mui/icons-material/Restore';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 // Configuración de la máquina de estados
 const ESTADOS = {
-    AUT:   { label: 'Autorizado',                  cod: 'AUT',   color: '#7986cb', step: 0 },
-    MAQ:   { label: 'Maquetado',                   cod: 'MAQ',   color: '#4db6ac', step: 1 },
-    CON:   { label: 'Configurado',                 cod: 'CON',   color: '#81c784', step: 2 },
-    PVICT: { label: 'Pendiente carga en Victorius',cod: 'PVICT', color: '#ffb74d', step: 3 },
-    EC:    { label: 'Evento cargado en Victorius', cod: 'EC',    color: '#4caf50', step: 4 },
-    NVIG:  { label: 'No Vigente',                  cod: 'NVIG',  color: '#ef5350', step: -1 },
+    AUT: { label: 'Autorizado', cod: 'AUT', color: '#7986cb', step: 0 },
+    MAQ: { label: 'Maquetado', cod: 'MAQ', color: '#4db6ac', step: 1 },
+    CON: { label: 'Configurado', cod: 'CON', color: '#81c784', step: 2 },
+    PVICT: { label: 'Pendiente carga en Victorius', cod: 'PVICT', color: '#ffb74d', step: 3 },
+    EC: { label: 'Evento cargado en Victorius', cod: 'EC', color: '#4caf50', step: 4 },
+    NVIG: { label: 'No Vigente', cod: 'NVIG', color: '#ef5350', step: -1 },
 };
 
 const FLUJO_NORMAL = ['AUT', 'MAQ', 'CON', 'PVICT', 'EC'];
 
 // Info contextual por estado
 const ESTADO_INFO = {
-    AUT:   'El curso fue autorizado. El referente debe maquetar el curso y avisar para avanzar.',
-    MAQ:   'El curso está maquetado. El equipo debe configurarlo para habilitarlo.',
-    CON:   'El curso está configurado y visible para completar el formulario de nuevo evento.',
+    AUT: 'El curso fue autorizado. El referente debe maquetar el curso y avisar para avanzar.',
+    MAQ: 'El curso está maquetado. El equipo debe configurarlo para habilitarlo.',
+    CON: 'El curso está configurado y visible para completar el formulario de nuevo evento.',
     PVICT: 'El formulario de evento fue completado. Un usuario GA debe cargar el evento en Victorius.',
-    EC:    'El evento fue cargado en Victorius. El proceso está completo.',
-    NVIG:  'El curso está dado de baja y no está vigente.',
+    EC: 'El evento fue cargado en Victorius. El proceso está completo.',
+    NVIG: 'El curso está dado de baja y no está vigente.',
 };
 
-const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onRestaurar, loading }) => {
+const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onRestaurar, loading, tieneEvento }) => {
     const [restaurarTarget, setRestaurarTarget] = useState('');
-    const [showRestaurarMenu, setShowRestaurarMenu] = useState(false);
+    const [confirmarRetroceso, setConfirmarRetroceso] = useState(false);
 
     const esNVIG = estadoActual === 'NVIG';
     const stepActual = ESTADOS[estadoActual]?.step ?? -1;
     const esPrimerEstado = stepActual === 0;
     const esUltimoEstado = stepActual === FLUJO_NORMAL.length - 1;
+    // El retroceso desde PVICT implica posible borrado de evento
+    const retrocesoPVICT = estadoActual === 'PVICT';
 
     return (
         <Paper
@@ -104,16 +107,32 @@ const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onR
 
             {/* Acciones de estado */}
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
+                {/* Advertencia especial cuando el curso está en PVICT y tiene evento cargado */}
+                {retrocesoPVICT && tieneEvento && (
+                    <Box sx={{ width: '100%', mb: 0.5 }}>
+                        <Alert
+                            severity="warning"
+                            icon={<WarningAmberIcon />}
+                            sx={{ borderRadius: 1.5, fontSize: '0.82rem' }}
+                        >
+                            <strong>Atención:</strong> Este curso tiene un formulario de evento completado.
+                            Si retrocede el estado a <strong>Configurado</strong>, el formulario de evento
+                            será <strong>eliminado permanentemente</strong> de la base de datos y el curso
+                            deberá completarse nuevamente.
+                        </Alert>
+                    </Box>
+                )}
+
                 {/* Retroceder (ADM) */}
                 {!esNVIG && !esPrimerEstado && (
-                    <Tooltip title="Retroceder al estado anterior (solo ADM)">
+                    <Tooltip title={retrocesoPVICT && tieneEvento ? '⚠️ Retroceder eliminará el evento cargado' : 'Retroceder al estado anterior (solo ADM)'}>
                         <span>
                             <Button
                                 size="small"
                                 variant="outlined"
                                 color="warning"
                                 startIcon={<ArrowBackIcon />}
-                                onClick={onRetroceder}
+                                onClick={() => retrocesoPVICT ? setConfirmarRetroceso(true) : onRetroceder()}
                                 disabled={loading}
                                 sx={{ textTransform: 'none' }}
                             >
@@ -196,6 +215,46 @@ const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onR
 
                 {loading && <CircularProgress size={20} />}
             </Box>
+
+            {/* Diálogo de confirmación para retroceso desde PVICT */}
+            <Dialog open={confirmarRetroceso} onClose={() => setConfirmarRetroceso(false)} maxWidth="xs" fullWidth>
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'warning.dark' }}>
+                    <WarningAmberIcon color="warning" />
+                    Confirmar retroceso de estado
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" sx={{ mb: 2, color: 'black' }}>
+                        Está por retroceder el curso del estado <strong>"Pendiente carga en Victorius"</strong> al estado <strong>"Configurado"</strong>.
+                    </Typography>
+                    {tieneEvento && (
+                        <Alert severity="error" sx={{ mb: 1 }}>
+                            <strong>Esta acción eliminará permanentemente el formulario de evento completado.</strong>
+                            {' '}El curso quedará nuevamente disponible para completar el formulario, pero todos
+                            los datos ingresados previamente se perderán y no podrán recuperarse.
+                        </Alert>
+                    )}
+                    <Typography variant="body2" color="text.primary">
+                        ¿Desea continuar de todas formas?
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setConfirmarRetroceso(false)}
+                        color="inherit"
+                        sx={{ textTransform: 'none' }}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        onClick={() => { setConfirmarRetroceso(false); onRetroceder(); }}
+                        variant="contained"
+                        color="warning"
+                        sx={{ textTransform: 'none' }}
+                    >
+                        Confirmar retroceso
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Paper>
     );
 };
@@ -321,11 +380,11 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
     const calcularNuevoEstado = (estadoCurrent, accion, estadoDestino) => {
         const stepActual = ESTADOS[estadoCurrent]?.step ?? -1;
         switch (accion) {
-            case 'avanzar':    return FLUJO_NORMAL[stepActual + 1] ?? estadoCurrent;
+            case 'avanzar': return FLUJO_NORMAL[stepActual + 1] ?? estadoCurrent;
             case 'retroceder': return FLUJO_NORMAL[stepActual - 1] ?? estadoCurrent;
-            case 'darDeBaja':  return 'NVIG';
-            case 'restaurar':  return estadoDestino ?? estadoCurrent;
-            default:           return estadoCurrent;
+            case 'darDeBaja': return 'NVIG';
+            case 'restaurar': return estadoDestino ?? estadoCurrent;
+            default: return estadoCurrent;
         }
     };
 
@@ -336,12 +395,32 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
         const result = await onChangeEstado(record, accion, estadoDestino);
         setEstadoLoading(false);
         if (result.success) {
+            const estadoPrevio = estadoActual;
             setEstadoActual(prev => calcularNuevoEstado(prev, accion, estadoDestino));
+
+            // Si se retrocedió desde PVICT → CON, el backend eliminó el evento:
+            // limpiar los campos de "Datos del Evento" en el formulario local
+            if (accion === 'retroceder' && estadoPrevio === 'PVICT') {
+                setFormData(prev => ({
+                    ...prev,
+                    perfil: '',
+                    area_tematica: '',
+                    tipo_certificacion: '',
+                    presentacion: '',
+                    objetivos: '',
+                    requisitos_aprobacion: '',
+                    ejes_tematicos: '',
+                    certifica_en_cc: 1,
+                    disenio_a_cargo_cc: 1
+                }));
+            }
+
             setEstadoFeedback({ type: 'success', msg: 'Estado actualizado correctamente.' });
         } else {
             setEstadoFeedback({ type: 'error', msg: result.error || 'Error al cambiar el estado.' });
         }
     };
+
 
     const cursoNombre = record?.nombre || record?.cod || '';
     const modalTitle = tieneEvento ? 'Editar Evento y Curso' : 'Editar Curso / Crear Evento';
@@ -378,6 +457,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                 <EstadoStepper
                     estadoActual={estadoActual}
                     loading={estadoLoading}
+                    tieneEvento={tieneEvento}
                     onAvanzar={() => handleCambioEstado('avanzar')}
                     onRetroceder={() => handleCambioEstado('retroceder')}
                     onDarDeBaja={() => handleCambioEstado('darDeBaja')}
