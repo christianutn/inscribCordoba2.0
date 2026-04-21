@@ -21,7 +21,7 @@ const ESTADOS = {
     MAQ: { label: 'Maquetado', cod: 'MAQ', color: '#4db6ac', step: 1 },
     CON: { label: 'Configurado', cod: 'CON', color: '#81c784', step: 2 },
     PVICT: { label: 'Pendiente carga en Victorius', cod: 'PVICT', color: '#ffb74d', step: 3 },
-    EC: { label: 'Evento creado en Victorius', cod: 'EC', color: '#4caf50', step: 4 },
+    EC: { label: 'Creado en Victorius', cod: 'EC', color: '#4caf50', step: 4 },
     NVIG: { label: 'No Vigente', cod: 'NVIG', color: '#ef5350', step: -1 },
 };
 
@@ -355,9 +355,9 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
         return JSON.stringify(formData) !== JSON.stringify(initialFormData);
     }, [formData, initialFormData]);
 
-    const permiteEdicionEvento = useMemo(() => 
+    const permiteEdicionEvento = useMemo(() =>
         ['CON', 'PVICT', 'EC'].includes(estadoActual),
-    [estadoActual]);
+        [estadoActual]);
 
     const validate = () => {
         const newErrors = {};
@@ -439,7 +439,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                 // Para cualquier otro cambio de estado exitoso, actualizamos la base con la foto actual
                 // del formData, ya que si había cambios y se cambió el estado, esos cambios aún están
                 // pendientes de "Guardar", pero el ESTADO en sí ya se guardó y refrescó.
-                setInitialFormData({...formData});
+                setInitialFormData({ ...formData });
             }
 
             setEstadoFeedback({ type: 'success', msg: 'Estado actualizado correctamente.' });
@@ -826,15 +826,15 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                 <Button onClick={onClose} color="secondary">
                     Cancelar
                 </Button>
-                <Button 
-                    onClick={handleSubmit} 
-                    variant="contained" 
+                <Button
+                    onClick={handleSubmit}
+                    variant="contained"
                     color="primary"
                     disabled={!hasChanges || isSaving}
                     startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : null}
                 >
-                    {isSaving 
-                        ? 'Guardando...' 
+                    {isSaving
+                        ? 'Guardando...'
                         : (tieneEvento ? 'Guardar Cambios' : (hayDatosDeEvento ? 'Crear Evento y Guardar' : 'Guardar Curso'))
                     }
                 </Button>

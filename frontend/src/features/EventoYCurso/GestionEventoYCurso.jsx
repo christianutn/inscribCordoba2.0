@@ -168,7 +168,7 @@ const GestionEventoYCurso = () => {
                                 )}
                             </Box>
                         </ToggleButton>
-                        <ToggleButton value="EC" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Eventos creados en Victorius</ToggleButton>
+                        <ToggleButton value="EC" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Creados en Victorius</ToggleButton>
                         <ToggleButton value="NVIG" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>No vigentes</ToggleButton>
                     </ToggleButtonGroup>
                     <Button
