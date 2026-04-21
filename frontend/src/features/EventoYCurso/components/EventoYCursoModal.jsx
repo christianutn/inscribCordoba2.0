@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '../../../context/AuthContext';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, TextField, MenuItem, Grid, FormControl,
@@ -37,7 +38,7 @@ const ESTADO_INFO = {
     NVIG: 'El curso está dado de baja y no está vigente.',
 };
 
-const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onRestaurar, loading, tieneEvento }) => {
+const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onRestaurar, loading, tieneEvento, esGA }) => {
     const [restaurarTarget, setRestaurarTarget] = useState('');
     const [confirmarRetroceso, setConfirmarRetroceso] = useState(false);
 
@@ -124,7 +125,7 @@ const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onR
                 )}
 
                 {/* Retroceder (ADM) */}
-                {!esNVIG && !esPrimerEstado && (
+                {!esNVIG && !esPrimerEstado && !esGA && (
                     <Tooltip title={retrocesoPVICT && tieneEvento ? '⚠️ Retroceder eliminará el evento cargado' : 'Retroceder al estado anterior (solo ADM)'}>
                         <span>
                             <Button
@@ -152,7 +153,7 @@ const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onR
                                 color="primary"
                                 endIcon={<ArrowForwardIcon />}
                                 onClick={onAvanzar}
-                                disabled={loading}
+                                disabled={loading || (esGA && estadoActual !== 'PVICT')}
                                 sx={{ textTransform: 'none' }}
                             >
                                 Avanzar a: {ESTADOS[FLUJO_NORMAL[stepActual + 1]]?.label}
@@ -162,7 +163,7 @@ const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onR
                 )}
 
                 {/* Dar de baja (ADM, solo si no es NVIG) */}
-                {!esNVIG && (
+                {!esNVIG && !esGA && (
                     <Tooltip title="Marcar curso como No Vigente (solo ADM)">
                         <span>
                             <Button
@@ -181,7 +182,7 @@ const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onR
                 )}
 
                 {/* Restaurar (solo si NVIG) */}
-                {esNVIG && (
+                {esNVIG && !esGA && (
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
                         <FormControl size="small" sx={{ minWidth: 220 }}>
                             <InputLabel>Restaurar al estado</InputLabel>
@@ -260,6 +261,9 @@ const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onR
 };
 
 const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxiliaryData, filter }) => {
+    const { user } = useAuth();
+    const esGA = user?.rol === 'GA';
+
     const tieneEvento = useMemo(() => record?.detalle_evento != null, [record]);
 
     const [formData, setFormData] = useState({
@@ -355,9 +359,10 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
         return JSON.stringify(formData) !== JSON.stringify(initialFormData);
     }, [formData, initialFormData]);
 
-    const permiteEdicionEvento = useMemo(() =>
-        ['CON', 'PVICT', 'EC'].includes(estadoActual),
-        [estadoActual]);
+    const permiteEdicionEvento = useMemo(() => {
+        if (!tieneEvento) return false;
+        return ['CON', 'PVICT', 'EC'].includes(estadoActual);
+    }, [estadoActual, tieneEvento]);
 
     const validate = () => {
         const newErrors = {};
@@ -485,6 +490,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                     estadoActual={estadoActual}
                     loading={estadoLoading}
                     tieneEvento={tieneEvento}
+                    esGA={esGA}
                     onAvanzar={() => handleCambioEstado('avanzar')}
                     onRetroceder={() => handleCambioEstado('retroceder')}
                     onDarDeBaja={() => handleCambioEstado('darDeBaja')}
@@ -680,7 +686,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
 
                     {!permiteEdicionEvento && (
                         <Alert severity="info" sx={{ mb: 2 }}>
-                            La edición de los datos del evento solo está permitida en los estados: <strong>Configurado</strong>, <strong>Pendiente de carga</strong> o <strong>Evento creado</strong>.
+                            La edición de los datos del evento solo está permitida en los estados: <strong>Pendiente de carga</strong> o <strong>Evento creado</strong>.
                         </Alert>
                     )}
 
