@@ -144,7 +144,8 @@ export const postCurso = async (req, res, next) => {
             medio_inscripcion,
             plataforma_dictado,
             tipo_capacitacion,
-            area
+            area,
+            estado_inicial
         } = req.body;
 
 
@@ -161,8 +162,8 @@ export const postCurso = async (req, res, next) => {
         if (nombre.length === 0) throw new AppError("El nombre no puede ser vacío", 400);
 
         // El estado inicial se obtiene explícitamente desde la máquina de estados.
-        // Esto conceptualmente representa el "avanzar" de la nada hacia el estado de inicio.
-        const estadoInicial = CursoStateContext.getEstadoInicial();
+        // Opcionalmente, se puede sobreescribir si se envia explícitamente (ej: creación delegada o masiva).
+        const estadoCarga = estado_inicial || CursoStateContext.getEstadoInicial();
 
         const response = await cursoModel.create({
             cod,
@@ -173,7 +174,7 @@ export const postCurso = async (req, res, next) => {
             plataforma_dictado,
             tipo_capacitacion,
             area,
-            estado: estadoInicial
+            estado: estadoCarga
         });
 
         res.status(200).json(response)

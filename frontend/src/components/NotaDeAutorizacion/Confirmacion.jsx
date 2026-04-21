@@ -212,6 +212,7 @@ const Confirmacion = () => {
     const [selectedCursos, setSelectedCursos] = useState([]);
     const [cursoTutores, setCursoTutores] = useState({});
     const [cursoSearch, setCursoSearch] = useState("");
+    const searchTimeoutRef = React.useRef(null);
 
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
@@ -265,7 +266,8 @@ const Confirmacion = () => {
     const fetchCursos = async (search = "") => {
         try {
             const data = await getCursos(search);
-            setCursos(data);
+            const filteredData = data.filter(curso => curso.estado === 'NVIG');
+            setCursos(filteredData);
         } catch (err) { console.error(err); }
     };
 
@@ -560,8 +562,14 @@ const Confirmacion = () => {
                                         placeholder="Buscar cursos por nombre"
                                         value={cursoSearch}
                                         onChange={(e) => {
-                                            setCursoSearch(e.target.value);
-                                            fetchCursos(e.target.value);
+                                            const val = e.target.value;
+                                            setCursoSearch(val);
+                                            if (searchTimeoutRef.current) {
+                                                clearTimeout(searchTimeoutRef.current);
+                                            }
+                                            searchTimeoutRef.current = setTimeout(() => {
+                                                fetchCursos(val);
+                                            }, 500);
                                         }}
                                     />
                                 </Box>
@@ -723,6 +731,7 @@ const Confirmacion = () => {
                 onClose={() => setOpenModalCurso(false)}
                 onSuccess={handleSuccessCurso}
                 areas={areas}
+                estadoInicial="NVIG"
             />
             <ModalCrearCoordinador
                 open={openModalCoordinador}

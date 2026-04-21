@@ -8,8 +8,6 @@ const manejadorArchivos = new ManejadorArchivos("nota_autorizacion");
 
 const notasAutorizacionRouter = Router();
 
-console.log("Si se usaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-
 notasAutorizacionRouter.post(
   "/",
   passport.authenticate("jwt", { session: false }),
