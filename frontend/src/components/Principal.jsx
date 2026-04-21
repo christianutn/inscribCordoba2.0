@@ -389,71 +389,78 @@ export default function Principal() {
         <List sx={{ flexGrow: 1, py: 1 }}>
 
           {opcionesAMostrar.map((item) => (
-            <ListItem key={item.identifier} disablePadding sx={{ display: 'block' }}>
+            <ListItem key={item.identifier} disablePadding>
               <Tooltip title={!open ? item.label : ""} placement="right" arrow>
                 <ListItemButton
                   component="a"
-                href={`/principal#${item.identifier}`}
-                onClick={(e) => handleListItemClick(e, item.identifier)}
-                selected={opcionSeleccionada === item.identifier}
-                sx={{
-                  minHeight: 44,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: open ? 2.5 : 0,
-                  py: 0.8,
-                  mb: 0.4,
-                  borderRadius: open ? '50px' : '12px',
-                  mx: open ? 1.2 : 'auto',
-                  width: open ? 'auto' : 44,
-                  textDecoration: 'none',
-                  color: '#475569',
-                  transition: 'all 350ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&.Mui-selected': {
-                    backgroundColor: 'rgba(0, 158, 227, 0.08)',
-                    color: '#009EE3',
-                    '& .MuiListItemIcon-root': {
+                  href={`/principal#${item.identifier}`}
+                  onClick={(e) => handleListItemClick(e, item.identifier)}
+                  selected={opcionSeleccionada === item.identifier}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: open ? 'initial' : 'center',
+                    px: open ? 2.5 : 0,
+                    py: 1,
+                    mb: 0.6,
+                    borderRadius: open ? '50px' : '12px',
+                    mx: open ? 1.2 : 'auto',
+                    width: open ? 'auto' : 48,
+                    textDecoration: 'none',
+                    color: '#475569',
+                    transition: 'all 350ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    '&.Mui-selected': {
+                      backgroundColor: 'rgba(0, 158, 227, 0.08)',
                       color: '#009EE3',
-                    },
-                    '& .MuiListItemText-primary': {
-                      color: '#009EE3',
-                      fontWeight: 600,
-                      display: open ? 'block' : 'none',
+                      '& .MuiListItemIcon-root': {
+                        color: '#009EE3',
+                      },
+                      '& .MuiListItemText-primary': {
+                        color: '#009EE3',
+                        fontWeight: 600,
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 158, 227, 0.12)',
+                      }
                     },
                     '&:hover': {
-                      backgroundColor: 'rgba(0, 158, 227, 0.12)',
-                    }
-                  },
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 158, 227, 0.04)',
-                    color: opcionSeleccionada === item.identifier ? '#009EE3' : '#0F172A',
-                    '& .MuiListItemIcon-root': {
+                      backgroundColor: 'rgba(0, 158, 227, 0.04)',
                       color: opcionSeleccionada === item.identifier ? '#009EE3' : '#0F172A',
+                      '& .MuiListItemIcon-root': {
+                        color: opcionSeleccionada === item.identifier ? '#009EE3' : '#0F172A',
+                      }
                     }
-                  }
-                }}
-              >
-                <ListItemIcon sx={{
-                  minWidth: 0,
-                  mr: open ? 2 : 0,
-                  justifyContent: 'center',
-                  color: opcionSeleccionada === item.identifier ? '#009EE3' : '#64748B',
-                  transition: 'color 350ms cubic-bezier(0.4, 0, 0.2, 1)'
-                }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{
-                    fontWeight: opcionSeleccionada === item.identifier ? 600 : 500,
-                    fontSize: '0.875rem',
-                    fontFamily: "'Poppins', 'Roboto', sans-serif",
                   }}
-                  sx={{
-                    display: open ? 'block' : 'none',
-                    opacity: open ? 1 : 0,
-                    transition: 'opacity 350ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                />
+                >
+                  <ListItemIcon sx={{
+                    minWidth: 0,
+                    mr: open ? 2 : 0,
+                    justifyContent: 'center',
+                    color: opcionSeleccionada === item.identifier ? '#009EE3' : '#64748B',
+                    transition: 'color 350ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    flexShrink: 0
+                  }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{
+                      fontWeight: opcionSeleccionada === item.identifier ? 600 : 500,
+                      fontSize: '0.85rem',
+                      fontFamily: "'Poppins', 'Roboto', sans-serif",
+                      lineHeight: 1.2,
+                      whiteSpace: open ? 'normal' : 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                    sx={{
+                      display: open ? 'block' : 'none',
+                      opacity: open ? 1 : 0,
+                      transition: 'opacity 350ms cubic-bezier(0.4, 0, 0.2, 1)',
+                      m: 0
+                    }}
+                  />
                 </ListItemButton>
               </Tooltip>
             </ListItem>

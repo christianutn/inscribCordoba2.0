@@ -6,9 +6,6 @@ import {
   Paper,
   Typography,
   Button,
-  List,
-  ListItem,
-  ListItemIcon,
   Divider,
   Skeleton,
   Dialog,
@@ -19,7 +16,6 @@ import {
   ButtonBase,
 } from '@mui/material';
 import {
-  InfoOutlined as InfoOutlinedIcon,
   ArrowForward as ArrowForwardIcon,
   PushPinOutlined as PushPinIcon,
   Delete as DeleteIcon,
@@ -28,12 +24,12 @@ import {
   Assignment as AssignmentIcon,
   CalendarMonth as CalendarMonthIcon,
   NoteAdd as NoteAddIcon,
-  WarningAmberOutlined as WarningIcon,
-  CheckCircleOutline as SuccessIcon,
-  CampaignOutlined as CampaignIcon,
-  CelebrationOutlined as CelebrationIcon,
-  EventAvailableOutlined as EventIcon,
-  LightbulbOutlined as LightbulbIcon
+  WarningAmber as WarningAmberIcon,
+  CheckCircleOutline as CheckCircleOutlineIcon,
+  Campaign as CampaignIcon,
+  Celebration as CelebrationIcon,
+  LightbulbCircle as LightbulbIcon,
+  InfoOutlined as InfoOutlinedIcon
 } from '@mui/icons-material';
 import { getAvisos, deleteAviso } from '../services/avisos.service';
 import DOMPurify from 'dompurify';
@@ -43,7 +39,6 @@ import Capacitacion4 from './imagenes/capacitacion_4pasos.png';
 import PortalCC from './imagenes/portal_cc.png';
 import Victorius from './imagenes/victorius.png';
 import CampusCba from './imagenes/campus_cordoba.png';
-import LogoFooter from './imagenes/logo_footer.png';
 
 import IconButton from '@mui/material/IconButton';
 import Alerta from '@mui/material/Alert';
@@ -203,7 +198,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
           pb: 8
         }}
       >
-        {/* CABECERA: Saludo con efecto de "respiración" */}
+        {/* CABECERA: Saludo */}
         <Box sx={{
           width: '100%',
           backgroundColor: '#FFFFFF',
@@ -251,238 +246,241 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
           </Container>
         </Box>
 
-        <Box>
+        <Box sx={{ mt: 1 }}>
           <Container maxWidth={false} sx={{ px: { xs: 3, md: 7 } }}>
-            <Grid container spacing={5} alignItems="flex-start">
-              {/* COLUMNA IZQUIERDA: Mi Ruta de Gestión (60%) */}
-              <Grid item xs={12} md={7}>
-                <Box>
-                  <Box display="flex" alignItems="center" height="40px" mb={4}>
-                    <Typography
-                      variant="h5"
-                      component="h2"
+            {/* Sección de Pasos */}
+            <Box sx={{ mb: 6 }}>
+              <Box display="flex" alignItems="center" mb={4}>
+                <Typography
+                  variant="h5"
+                  component="h2"
+                  sx={{
+                    fontWeight: 600,
+                    fontFamily: "'Geogrotesque Sharp', sans-serif",
+                    color: '#334155',
+                    fontSize: '1.5rem',
+                    letterSpacing: '-0.5px'
+                  }}
+                >
+                  Pasos para crear un nuevo curso
+                </Typography>
+                {successMessage && (
+                  <Alerta severity="success" sx={{ ml: 2, py: 0, borderRadius: '12px' }} onClose={handleCloseAlert}>
+                    {successMessage}
+                  </Alerta>
+                )}
+                {errorMessage && (
+                  <Alerta severity="error" sx={{ ml: 2, py: 0, borderRadius: '12px' }} onClose={handleCloseAlert}>
+                    {errorMessage}
+                  </Alerta>
+                )}
+              </Box>
+
+              <Grid container spacing={3}>
+                {[
+                  { step: 'PASO 1', title: 'Cargar Nota', color: '#009EE3', icon: <NoteAddIcon />, desc: 'Iniciá el proceso cargando la nota de autorización correspondiente.', option: rol === 'ADM' ? 'Autorizaciones' : 'MisNotasAutorizacionIdentifier' },
+                  { step: 'PASO 2', title: 'Crear Evento', color: '#009EE3', icon: <AssignmentIcon />, desc: 'Una vez autorizada la nota, completá el formulario del evento de tu capacitación.', option: 'Eventos' },
+                  { step: 'PASO 3', title: 'Crear Cohorte', color: '#009EE3', icon: <EventNoteIcon />, desc: 'Completá el formulario de cohorte para agendar las fechas de tu capacitación.', option: 'Formulario' },
+                  { step: 'PASO 4', title: 'Ver Calendario', color: '#009EE3', icon: <CalendarMonthIcon />, desc: 'Consultá las cohortes que cargaste en el calendario.', option: 'Calendario' }
+                ].map((item, idx) => (
+                  <Grid item xs={12} md={6} key={idx} sx={{ display: 'flex' }}>
+                    <ButtonBase
+                      component="div"
+                      onClick={() => setOpcionSeleccionada(item.option)}
                       sx={{
-                        fontWeight: 600,
-                        fontFamily: "'Geogrotesque Sharp', sans-serif",
-                        color: '#334155',
-                        fontSize: '1.5rem',
-                        letterSpacing: '-0.5px'
+                        width: '100%',
+                        height: '100%',
+                        textAlign: 'left',
+                        display: 'flex',
+                        borderRadius: '20px',
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&:hover': {
+                          transform: 'translateX(8px) translateY(-2px)',
+                        }
                       }}
                     >
-                      Pasos para crear un nuevo curso
-                    </Typography>
-                    {successMessage && (
-                      <Alerta severity="success" sx={{ ml: 2, py: 0, borderRadius: '12px' }} onClose={handleCloseAlert}>
-                        {successMessage}
-                      </Alerta>
-                    )}
-                    {errorMessage && (
-                      <Alerta severity="error" sx={{ ml: 2, py: 0, borderRadius: '12px' }} onClose={handleCloseAlert}>
-                        {errorMessage}
-                      </Alerta>
-                    )}
-                  </Box>
-
-                  <Grid container spacing={3}>
-                    {[
-                      { step: 'Paso 1', title: 'Cargar Nota', color: '#009EE3', icon: <NoteAddIcon />, desc: 'Iniciá el proceso cargando la nota de autorización correspondiente.', option: rol === 'ADM' ? 'Autorizaciones' : 'MisNotasAutorizacionIdentifier' },
-                      { step: 'Paso 2', title: 'Crear Evento', color: '#009EE3', icon: <AssignmentIcon />, desc: 'Una vez autorizada la nota, completá el formulario del evento de tu capacitación.', option: 'Eventos' },
-                      { step: 'Paso 3', title: 'Crear Cohorte', color: '#009EE3', icon: <EventNoteIcon />, desc: 'Completá el formulario de cohorte para agendar las fechas de tu capacitación.', option: 'Formulario' },
-                      { step: 'Paso 4', title: 'Ver Calendario', color: '#009EE3', icon: <CalendarMonthIcon />, desc: 'Consultá las cohortes que cargaste en el calendario.', option: 'Calendario' }
-                    ].map((item, idx) => (
-                      <Grid item xs={12} key={idx}>
-                        <ButtonBase
-                          component="div"
-                          onClick={() => setOpcionSeleccionada(item.option)}
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: '20px 24px',
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '20px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                          backdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(255, 255, 255, 0.4)',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.02), 0 10px 20px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255, 255, 255, 0.6)',
+                          '&:hover': {
+                            transform: 'translateY(-6px)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            boxShadow: '0 20px 40px rgba(0, 158, 227, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
+                            '& .arrow-wrap': { transform: 'translateX(6px)', opacity: 1 },
+                            '& .icon-box': { transform: 'scale(1.1)', filter: 'brightness(1.1)' }
+                          }
+                        }}
+                      >
+                        <Box
+                          className="icon-box"
                           sx={{
-                            width: '100%',
-                            textAlign: 'left',
-                            display: 'block',
-                            borderRadius: '20px',
-                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                            '&:hover': {
-                              transform: 'translateX(8px) translateY(-2px)',
-                            }
+                            width: 58,
+                            height: 58,
+                            borderRadius: '30px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: `${item.color}15`,
+                            color: item.color,
+                            mr: 3,
+                            flexShrink: 0,
+                            transition: 'all 0.3s ease'
                           }}
                         >
-                          <Paper
-                            elevation={0}
+                          {item.icon}
+                        </Box>
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="overline"
                             sx={{
-                              p: '20px 24px',
-                              borderRadius: '20px',
-                              backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                              backdropFilter: 'blur(10px)',
-                              border: '1px solid rgba(255, 255, 255, 0.4)',
-                              position: 'relative',
-                              overflow: 'hidden',
-                              display: 'flex',
-                              alignItems: 'center',
-                              transition: 'all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1)',
-                              boxShadow: '0 2px 4px rgba(0,0,0,0.02), 0 10px 20px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255, 255, 255, 0.6)',
-                              '&:hover': {
-                                transform: 'translateY(-6px)',
-                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                                boxShadow: '0 20px 40px rgba(0, 158, 227, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
-                                '& .arrow-wrap': { transform: 'translateX(6px)', opacity: 1 },
-                                '& .icon-box': { transform: 'scale(1.1)', filter: 'brightness(1.1)' }
-                              }
+                              color: '#475569',
+                              fontWeight: 800,
+                              fontFamily: "'Geogrotesque Sharp', sans-serif",
+                              letterSpacing: '1.5px',
+                              fontSize: '0.9rem',
+                              display: 'block',
+                              lineHeight: 1.2,
+                              mb: 0.5
                             }}
                           >
-                            <Box
-                              className="icon-box"
-                              sx={{
-                                width: 52,
-                                height: 52,
-                                borderRadius: '14px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: `${item.color}15`,
-                                color: item.color,
-                                mr: 3,
-                                flexShrink: 0,
-                                transition: 'all 0.3s ease'
-                              }}
-                            >
-                              {item.icon}
-                            </Box>
-                            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                              <Typography
-                                variant="overline"
-                                sx={{
-                                  color: '#475569',
-                                  fontWeight: 800,
-                                  fontFamily: "'Geogrotesque Sharp', sans-serif",
-                                  letterSpacing: '1.5px',
-                                  fontSize: '0.9rem',
-                                  display: 'block',
-                                  lineHeight: 1.2,
-                                  mb: 0.5
-                                }}
-                              >
-                                {item.step}
-                              </Typography>
-                              <Typography
-                                variant="h6"
-                                sx={{
-                                  fontWeight: 700,
-                                  fontFamily: 'Poppins, sans-serif',
-                                  color: '#0F172A',
-                                  lineHeight: 1.2,
-                                  fontSize: '1.25rem',
-                                  letterSpacing: '-0.3px',
-                                  mb: 0.8
-                                }}
-                              >
-                                {item.title}
-                              </Typography>
-                              <Typography variant="body2" sx={{ color: '#334155', fontFamily: 'Poppins, sans-serif', fontSize: '1rem', lineHeight: 1.5 }}>
-                                {item.desc}
-                              </Typography>
-                            </Box>
-                            <Box className="arrow-wrap" sx={{ transition: 'transform 0.3s', ml: 2, color: '#CBD5E1' }}>
-                              <ArrowForwardIcon fontSize="small" />
-                            </Box>
-                          </Paper>
-                        </ButtonBase>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              </Grid>
-
-              {/* COLUMNA DERECHA: Panel de Avisos (40%) */}
-              <Grid item xs={12} md={5}>
-                <Box sx={{ height: '100%', pl: { md: 2 } }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" height="40px" mb={4}>
-                    <Typography
-                      variant="h6"
-                      component="h2"
-                      sx={{
-                        fontWeight: 600,
-                        fontFamily: "'Geogrotesque Sharp', sans-serif",
-                        color: '#334155',
-                        letterSpacing: '-0.5px',
-                        fontSize: '1.5rem'
-                      }}
-                    >
-                      Avisos y Novedades
-                    </Typography>
-                  </Box>
-
-                  {loading ? (
-                    Array.from(new Array(3)).map((_, index) => (
-                      <Box key={index} sx={{ mb: 4, pl: 2, borderLeft: '2px solid #E2E8F0' }}>
-                        <Skeleton variant="text" width="60%" height={30} />
-                        <Skeleton variant="text" width="90%" />
-                      </Box>
-                    ))
-                  ) : (
-                    <Box sx={{ position: 'relative' }}>
-                      {avisos.map((aviso) => (
-                        <AvisoCompacto
-                          key={aviso.id}
-                          aviso={aviso}
-                          rol={rol}
-                          formatearFecha={formatearFecha}
-                          handleDeleteAvisoClick={handleDeleteAvisoClick}
-                          lineLimit={avisos.length <= 3 ? 12 : 3}
-                        />
-                      ))}
-                      {avisos.length === 0 && (
-                        <Paper elevation={0} sx={{ p: 6, textAlign: 'center', borderRadius: '20px', backgroundColor: 'rgba(255, 255, 255, 0.4)', border: '1px dashed #CBD5E1' }}>
-                          <NotificationsNoneIcon sx={{ fontSize: 48, color: '#CBD5E1', mb: 2 }} />
-                          <Typography variant="body2" color="#64748B" sx={{ fontFamily: 'Poppins, sans-serif' }}>
-                            Mantente al tanto de las novedades próximamente.
+                            {item.step}
                           </Typography>
-                        </Paper>
-                      )}
-                    </Box>
-                  )}
-                </Box>
-              </Grid>
-
-              {/* SECCIÓN INFERIOR: Accesos Rápidos */}
-              <Grid item xs={12}>
-                <Box sx={{ mt: 8 }}>
-                  <Typography
-                    variant="h3"
-                    component="h2"
-                    sx={{
-                      fontWeight: 600,
-                      fontFamily: "'Geogrotesque Sharp', sans-serif",
-                      textAlign: 'center',
-                      mb: 6,
-                      mt: 1,
-                      color: '#0F172A',
-                      letterSpacing: '-0.5px',
-                      fontSize: { xs: '1.4rem', md: '1.8rem' }
-                    }}
-                  >
-                    Recursos de Interés
-                  </Typography>
-                  <Grid container spacing={4}>
-                    {linksInteresData.map((link, i) => (
-                      <Grid item xs={12} sm={6} md={3} key={i}>
-                        <LinkInteres
-                          imagenSrc={link.img}
-                          titulo={link.title}
-                          url={link.url}
-                        />
-                      </Grid>
-                    ))}
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 700,
+                              fontFamily: 'Poppins, sans-serif',
+                              color: '#0F172A',
+                              lineHeight: 1.2,
+                              fontSize: '1.25rem',
+                              letterSpacing: '-0.3px',
+                              mb: 0.8
+                            }}
+                          >
+                            {item.title}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: '#334155', fontFamily: 'Poppins, sans-serif', fontSize: '1rem', lineHeight: 1.5 }}>
+                            {item.desc}
+                          </Typography>
+                        </Box>
+                        <Box className="arrow-wrap" sx={{ transition: 'transform 0.3s', ml: 2, color: '#CBD5E1' }}>
+                          <ArrowForwardIcon fontSize="small" />
+                        </Box>
+                      </Paper>
+                    </ButtonBase>
                   </Grid>
-                </Box>
+                ))}
               </Grid>
-            </Grid>
+            </Box>
+
+            {/* Sección de Avisos y Novedades */}
+            <Box sx={{ mb: 6, mt: 8 }}>
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{
+                  fontWeight: 600,
+                  fontFamily: "'Geogrotesque Sharp', sans-serif",
+                  color: '#334155',
+                  letterSpacing: '-0.5px',
+                  fontSize: '1.5rem',
+                  mb: 4
+                }}
+              >
+                Avisos y Novedades
+              </Typography>
+
+              {loading ? (
+                <Grid container spacing={3}>
+                  {[1, 2, 3].map((n) => (
+                    <Grid item xs={12} sm={6} md={4} key={n}>
+                      <Skeleton variant="rectangular" height={160} sx={{ borderRadius: '16px' }} />
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <Grid container spacing={3}>
+                  {avisos.map((aviso) => (
+                    <Grid
+                      item
+                      key={aviso.id}
+                      xs={12}
+                      sm={6}
+                      md={avisos.length === 1 ? 6 : (avisos.length === 2 ? 6 : 4)}
+                    >
+                      <AvisoCompacto
+                        aviso={aviso}
+                        rol={rol}
+                        formatearFecha={formatearFecha}
+                        handleDeleteAvisoClick={handleDeleteAvisoClick}
+                        lineLimit={3}
+                      />
+                    </Grid>
+                  ))}
+                  {avisos.length === 0 && (
+                    <Grid item xs={12}>
+                      <Paper elevation={0} sx={{ p: 6, textAlign: 'center', borderRadius: '16px', backgroundColor: '#FFFFFF', border: '1px dashed #E2E8F0' }}>
+                        <NotificationsNoneIcon sx={{ fontSize: 48, color: '#CBD5E1', mb: 2 }} />
+                        <Typography variant="body1" color="#64748B" sx={{ fontFamily: 'Poppins, sans-serif' }}>
+                          No hay avisos recientes para mostrar.
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  )}
+                </Grid>
+              )}
+            </Box>
+
+            {/* Recursos de Interés */}
+            <Box sx={{ mt: 10, pb: 6 }}>
+              <Typography
+                variant="h3"
+                component="h2"
+                sx={{
+                  fontWeight: 600,
+                  fontFamily: "'Geogrotesque Sharp', sans-serif",
+                  textAlign: 'center',
+                  mb: 6,
+                  color: '#0F172A',
+                  letterSpacing: '-0.5px',
+                  fontSize: { xs: '1.4rem', md: '1.8rem' }
+                }}
+              >
+                Recursos de Interés
+              </Typography>
+              <Grid container spacing={4}>
+                {linksInteresData.map((link, i) => (
+                  <Grid item xs={12} sm={6} md={3} key={i}>
+                    <LinkInteres
+                      imagenSrc={link.img}
+                      titulo={link.title}
+                      url={link.url}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
           </Container>
         </Box>
-
       </Box>
     </>
   );
 };
 
+// Componente de Aviso Estilo Timeline
 const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, lineLimit = 3 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [canExpand, setCanExpand] = useState(false);
@@ -501,18 +499,33 @@ const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, lin
     return () => window.removeEventListener('resize', checkOverflow);
   }, [aviso.contenido, isExpanded, lineLimit]);
 
+  const getColorByIcon = (iconoRaw) => {
+    const icono = iconoRaw ? iconoRaw.trim() : 'Información';
+    if (icono === 'Importante' || icono === '📌') return '#E2464C'; // Rojo
+    if (icono === 'Advertencia' || icono === '⚠️') return '#F59E0B'; // Naranja
+    if (icono === 'Información' || icono === 'ℹ️') return '#009EE3'; // Cian
+    if (icono === 'Éxito / Logro' || icono === '✅') return '#10B981'; // Verde
+    if (icono === 'Anuncio General' || icono === '📢') return '#1E3A8A'; // Azul oscuro
+    if (icono === 'Celebración / Evento' || icono === '🎉') return '#D946EF'; // Rosa/Violeta
+    if (icono === 'Recordatorio Fecha' || icono === '📅') return '#64748B'; // Gris azulado
+    if (icono === 'Tip / Sugerencia' || icono === '💡') return '#EAB308'; // Amarillo
+    return '#009EE3';
+  };
+
+  const accentColor = getColorByIcon(aviso.icono);
+
   const getAvisoIcon = (iconoRaw) => {
     const iconStyle = { fontSize: '1.4rem' };
-    const icono = iconoRaw ? iconoRaw.trim().toLowerCase() : '';
+    const icono = iconoRaw ? iconoRaw.trim() : 'Información';
 
-    if (icono === 'pin' || icono.includes('📌')) return <PushPinIcon sx={iconStyle} />;
-    if (icono === 'warning' || icono.includes('⚠️')) return <WarningIcon sx={iconStyle} />;
-    if (icono === 'info' || icono.includes('ℹ️')) return <InfoOutlinedIcon sx={iconStyle} />;
-    if (icono === 'success' || icono.includes('✅')) return <SuccessIcon sx={iconStyle} />;
-    if (icono === 'announcement' || icono.includes('📢')) return <CampaignIcon sx={iconStyle} />;
-    if (icono === 'celebration' || icono.includes('🎉')) return <CelebrationIcon sx={iconStyle} />;
-    if (icono === 'calendar' || icono.includes('📅')) return <EventIcon sx={iconStyle} />;
-    if (icono === 'tip' || icono.includes('💡')) return <LightbulbIcon sx={iconStyle} />;
+    if (icono === 'Importante' || icono === '📌') return <PushPinIcon sx={iconStyle} />;
+    if (icono === 'Advertencia' || icono === '⚠️') return <WarningAmberIcon sx={iconStyle} />;
+    if (icono === 'Información' || icono === 'ℹ️') return <InfoOutlinedIcon sx={iconStyle} />;
+    if (icono === 'Éxito / Logro' || icono === '✅') return <CheckCircleOutlineIcon sx={iconStyle} />;
+    if (icono === 'Anuncio General' || icono === '📢') return <CampaignIcon sx={iconStyle} />;
+    if (icono === 'Celebración / Evento' || icono === '🎉') return <CelebrationIcon sx={iconStyle} />;
+    if (icono === 'Recordatorio Fecha' || icono === '📅') return <CalendarMonthIcon sx={iconStyle} />;
+    if (icono === 'Tip / Sugerencia' || icono === '💡') return <LightbulbIcon sx={iconStyle} />;
 
     return <InfoOutlinedIcon sx={iconStyle} />;
   };
@@ -520,154 +533,172 @@ const AvisoCompacto = ({ aviso, rol, formatearFecha, handleDeleteAvisoClick, lin
   return (
     <Box
       sx={{
-        pl: 3,
-        pb: 6,
+        width: '100%',
+        p: '20px 24px',
+        borderRadius: '16px',
+        cursor: 'pointer',
         position: 'relative',
-        '&:last-child': { pb: 0 },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          left: 0,
-          top: '22px',
-          bottom: 0,
-          width: '1px',
-          backgroundColor: '#CBD5E1',
-          zIndex: 1
-        },
-        '&:last-child::after': {
-          display: 'none'
+        transition: 'all 0.3s ease-in-out',
+        '&:hover': {
+          backgroundColor: 'rgba(0, 158, 227, 0.03)',
+          '& .timeline-node': {
+            backgroundColor: '#009EE3',
+            color: '#FFFFFF',
+            borderColor: '#009EE3',
+            transform: 'scale(1.1)'
+          },
+          '& .delete-btn': { opacity: 1 },
+          '& .btn-arrow': { transform: 'translateX(4px)', opacity: 1 }
         },
         '&::before': {
           content: '""',
           position: 'absolute',
-          left: '-4px',
-          top: '22px',
-          width: '9px',
-          height: '9px',
-          borderRadius: '50%',
-          backgroundColor: '#009EE3',
-          border: '2px solid #FFF',
-          zIndex: 2,
-          boxShadow: '0 0 0 4px rgba(0, 158, 227, 0.1)'
-        }
+          left: '42px',
+          top: 0,
+          bottom: 0,
+          width: '1px',
+          backgroundColor: '#E2E8F0',
+          zIndex: 0
+        },
+        '&:first-of-type::before': { top: '36px' },
+        '&:last-of-type::before': { height: '36px' }
       }}
     >
-      <Box sx={{ display: 'flex', width: '100%', mb: 1.5, alignItems: 'flex-start' }}>
+      <Box sx={{ display: 'flex', gap: 4, width: '100%', position: 'relative', zIndex: 1 }}>
+        {/* Nodo de Timeline */}
         <Box
+          className="timeline-node"
           sx={{
-            width: 48,
-            height: 48,
-            borderRadius: '14px',
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0, 158, 227, 0.12)',
-            color: '#007bb1',
-            mr: 3,
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            color: accentColor,
             flexShrink: 0,
-            transition: 'all 0.3s ease'
+            mt: 4,
+            transition: 'all 0.3s ease-in-out',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
           }}
         >
           {getAvisoIcon(aviso.icono)}
         </Box>
+
+        {/* Contenido */}
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-          <Typography
-            variant="caption"
-            sx={{
-              color: '#94A3B8',
-              fontFamily: 'Poppins, sans-serif',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              display: 'block',
-              mb: 0.3,
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}
-          >
-            {formatearFecha(aviso.created_at)}
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 700,
-              fontFamily: "'Geogrotesque Sharp', sans-serif",
-              color: '#0F172A',
-              lineHeight: 1.2,
-              fontSize: '1.25rem',
-              wordBreak: 'break-word',
-              letterSpacing: '-0.3px'
-            }}
-          >
-            {aviso.titulo}
-          </Typography>
-        </Box>
-        {rol === 'ADM' && (
-          <IconButton
-            className="delete-btn"
-            aria-label="eliminar"
-            onClick={() => handleDeleteAvisoClick(aviso)}
-            size="small"
-            sx={{ color: '#E2E8F0', '&:hover': { color: 'error.light' }, ml: 1 }}
-          >
-            <DeleteIcon fontSize="small" style={{ fontSize: '1rem' }} />
-          </IconButton>
-        )}
-      </Box>
-      <Box sx={{ pl: 9.5, width: '100%' }}>
-        <Typography
-          ref={textRef}
-          variant="body2"
-          sx={{
-            color: '#1E293B',
-            fontFamily: 'Poppins, sans-serif',
-            fontSize: '1rem',
-            lineHeight: 1.6,
-            display: isExpanded ? 'block' : '-webkit-box',
-            WebkitLineClamp: isExpanded ? 'none' : lineLimit,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            wordBreak: 'break-word',
-            fontWeight: 400
-          }}
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(aviso.contenido)
-          }}
-        />
-        {canExpand && (
-          <Button
-            size="small"
-            variant="text"
-            onClick={() => setIsExpanded(!isExpanded)}
-            sx={{
-              mt: 1.5,
-              textTransform: 'none',
-              p: 0,
-              px: 2,
-              py: 0.5,
-              minWidth: 'auto',
-              fontWeight: 700,
-              color: '#009EE3',
-              display: 'inline-flex',
-              alignItems: 'center',
-              fontSize: '0.95rem',
-              borderRadius: '50px',
-              border: '1px solid rgba(0, 158, 227, 0.2)',
-              '&:hover': {
-                backgroundColor: 'rgba(0, 158, 227, 0.05)',
-                borderColor: '#009EE3',
-                '& .btn-arrow': { transform: 'translateX(4px)', opacity: 1, width: 'auto', ml: 0.5 }
-              }
-            }}
-          >
-            {isExpanded ? 'Leer menos' : 'Seguir leyendo...'}
-            {!isExpanded && (
-              <Box component="span" className="btn-arrow" sx={{ opacity: 0, width: 0, transition: 'all 0.2s ease', display: 'inline-block' }}>
-                →
-              </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#64748B',
+                  fontFamily: 'Poppins, sans-serif',
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                  display: 'block',
+                  mb: 0.5,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                {formatearFecha(aviso.created_at)}
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 800,
+                  fontFamily: "'Geogrotesque Sharp', sans-serif",
+                  color: '#0F172A',
+                  lineHeight: 1.2,
+                  fontSize: '1.25rem'
+                }}
+              >
+                {aviso.titulo}
+              </Typography>
+            </Box>
+
+            {rol === 'ADM' && (
+              <IconButton
+                className="delete-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteAvisoClick(aviso);
+                }}
+                size="small"
+                sx={{
+                  color: '#CBD5E1',
+                  '&:hover': { color: '#E2464C' },
+                  opacity: 0,
+                  transition: 'opacity 0.2s ease'
+                }}
+              >
+                <DeleteIcon sx={{ fontSize: '1rem' }} />
+              </IconButton>
             )}
-          </Button>
-        )}
+          </Box>
+
+          <Box>
+            <Typography
+              ref={textRef}
+              variant="body2"
+              sx={{
+                color: '#475569',
+                fontFamily: 'Poppins, sans-serif',
+                fontSize: '1rem',
+                lineHeight: 1.6,
+                display: isExpanded ? 'block' : '-webkit-box',
+                WebkitLineClamp: isExpanded ? 'none' : lineLimit,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                wordBreak: 'break-word',
+                fontWeight: 400
+              }}
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(aviso.contenido)
+              }}
+            />
+            {canExpand && (
+              <Button
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+                sx={{
+                  mt: 1.5,
+                  textTransform: 'none',
+                  p: 0,
+                  fontWeight: 700,
+                  color: '#009EE3',
+                  fontFamily: 'Poppins, sans-serif',
+                  fontSize: '0.95rem',
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                    textDecoration: 'underline'
+                  }
+                }}
+              >
+                {isExpanded ? 'Leer menos' : 'Leer más'}
+                <Box
+                  component="span"
+                  className="btn-arrow"
+                  sx={{
+                    ml: 0.5,
+                    transition: 'all 0.2s ease',
+                    display: 'inline-block',
+                    opacity: 0.7
+                  }}
+                >
+                  →
+                </Box>
+              </Button>
+            )}
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
