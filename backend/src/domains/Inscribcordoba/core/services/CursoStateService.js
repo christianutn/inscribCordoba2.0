@@ -110,9 +110,9 @@ const autorizarDesdeNota = async (cod, transaction = null) => {
         throw new AppError(`No se encontró el curso con código '${cod}'.`, 404);
     }
 
-    // 2. Verificar que el estado actual sea NVIG
+    // 2. Verificar que el estado actual sea NVIG (Cuando al inicio de cada año se ponen a todos como no vigentes) o autorizado si fue creado en el momento de la autorización.
     if (curso.estado !== 'NVIG') {
-        throw new AppError(`El curso '${cod}' no se puede autorizar porque su estado actual es '${curso.estado}', se esperaba 'NVIG'.`, 400);
+        throw new AppError(`El curso '${cod}' no se puede autorizar porque su estado actual es '${curso.estado}', se esperaba  No Vigente.`, 400);
     }
 
     // 3. Verificar si tiene un evento cargado

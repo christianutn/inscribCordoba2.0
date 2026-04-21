@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getCursosConEventos, deleteEvento, putEventoYCurso, postEvento } from '../../../services/evento.service';
+import { getCursosConEventos, putEventoYCurso, postEvento } from '../../../services/evento.service';
 import { getPerfiles } from '../../../services/perfiles.service';
 import { getAreasTematicas } from '../../../services/areasTematicas.service';
 import { getTiposCertificaciones } from '../../../services/tiposCertificaciones.service';
@@ -181,19 +181,7 @@ const useEventoYCurso = () => {
         }
     };
 
-    const deleteItem = async (curso) => {
-        setLoading(true);
-        try {
-            await deleteEvento(curso);
-            await fetchData();
-            return { success: true };
-        } catch (err) {
-            setError(err.message || "Error al eliminar el evento.");
-            return { success: false, error: err.message };
-        } finally {
-            setLoading(false);
-        }
-    };
+
 
     /**
      * Cambia el estado de un curso usando el endpoint PUT /cursos,
@@ -235,7 +223,6 @@ const useEventoYCurso = () => {
         loading,
         error,
         updateItem,
-        deleteItem,
         changeEstado,
         refreshData: fetchData,
         auxiliaryData: {

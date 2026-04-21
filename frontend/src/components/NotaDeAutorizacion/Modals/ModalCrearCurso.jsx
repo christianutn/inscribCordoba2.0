@@ -17,7 +17,7 @@ import { getPlataformasDictado } from "../../../services/plataformasDictado.serv
 
 import { getTiposCapacitacion } from "../../../services/tiposCapacitacion.service";
 
-const ModalCrearCurso = ({ open, onClose, onSuccess, areas }) => {
+const ModalCrearCurso = ({ open, onClose, onSuccess, areas, estadoInicial }) => {
     const [formData, setFormData] = useState({
         cod: "",
         nombre: "",
@@ -91,7 +91,8 @@ const ModalCrearCurso = ({ open, onClose, onSuccess, areas }) => {
             await postCurso({
                 ...formData,
                 cupo: Number(formData.cupo),
-                cantidad_horas: Number(formData.cantidad_horas)
+                cantidad_horas: Number(formData.cantidad_horas),
+                ...(estadoInicial ? { estado_inicial: estadoInicial } : {})
             });
             onSuccess("Curso creado con éxito");
             onClose();

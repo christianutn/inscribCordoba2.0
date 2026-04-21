@@ -1,4 +1,4 @@
-import { getCursosConEventos, getEventos, getEventoByCod, postEvento, deleteEvento, putEvento } from '../domains/Inscribcordoba/api/controllers/evento.controllers.js';
+import { getCursosConEventos, getEventos, getEventoByCod, postEvento, putEvento } from '../domains/Inscribcordoba/api/controllers/evento.controllers.js';
 import { Router } from 'express';
 import passport from 'passport';
 import autorizar from '../utils/autorizar.js';
@@ -65,7 +65,7 @@ eventoRouter.post("/",
     ],
     postEvento);
 
-eventoRouter.delete("/:curso", passport.authenticate('jwt', { session: false }), autorizar(['ADM']), deleteEvento)
+
 
 eventoRouter.put("/:curso", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'GA']), putEvento)
 

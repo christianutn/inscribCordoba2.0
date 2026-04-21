@@ -42,24 +42,7 @@ export const getEventos = async () => {
     }
 }
 
-export const deleteEvento = async (curso) => {
-    try {
-        const response = await fetch(URL + "/" + curso, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            }
-        });
-        const data = await response.json();
-        if (response.status !== 200) {
-            throw new Error(data.message || "Error al eliminar evento");
-        }
-        return data;
-    } catch (error) {
-        throw error;
-    }
-}
+
 
 export const putEvento = async (evento) => {
     try {

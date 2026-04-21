@@ -2,9 +2,8 @@ import React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box, IconButton, Tooltip, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 
-const EventoYCursoTable = ({ data, onEdit, onDelete }) => {
+const EventoYCursoTable = ({ data, onEdit }) => {
     const columns = [
         {
             field: 'cod',
@@ -29,20 +28,7 @@ const EventoYCursoTable = ({ data, onEdit, onDelete }) => {
             width: 80,
             type: 'number'
         },
-        {
-            field: 'tieneEvento',
-            headerName: 'Evento',
-            width: 120,
-            valueGetter: (value, row) => row.tiene_evento_creado ? 'Con Evento' : 'Sin Evento',
-            renderCell: (params) => (
-                <Chip
-                    label={params.row.tiene_evento_creado ? 'Con Evento' : 'Sin Evento'}
-                    color={params.row.tiene_evento_creado ? 'success' : 'warning'}
-                    size="small"
-                    variant={params.row.tiene_evento_creado ? 'filled' : 'outlined'}
-                />
-            )
-        },
+
         {
             field: 'perfil',
             headerName: 'Perfil',
@@ -107,13 +93,7 @@ const EventoYCursoTable = ({ data, onEdit, onDelete }) => {
                             <EditIcon />
                         </IconButton>
                     </Tooltip>
-                    {params.row.detalle_evento && (
-                        <Tooltip title="Eliminar Evento">
-                            <IconButton onClick={() => onDelete(params.row)} color="error" size="small">
-                                <DeleteIcon />
-                            </IconButton>
-                        </Tooltip>
-                    )}
+
                 </Box>
             )
         }

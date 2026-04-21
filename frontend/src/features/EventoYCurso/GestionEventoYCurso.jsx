@@ -15,7 +15,7 @@ import ModalCrearCurso from '../../components/NotaDeAutorizacion/Modals/ModalCre
 const GestionEventoYCurso = () => {
     const {
         data, loading, error,
-        updateItem, deleteItem, changeEstado,
+        updateItem, changeEstado,
         refreshData, auxiliaryData
     } = useEventoYCurso();
 
@@ -23,8 +23,6 @@ const GestionEventoYCurso = () => {
     const [currentRecord, setCurrentRecord] = useState(null);
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
     const [searchTerm, setSearchTerm] = useState('');
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [recordToDelete, setRecordToDelete] = useState(null);
     const [filter, setFilter] = useState('todos');
     const [crearCursoModalOpen, setCrearCursoModalOpen] = useState(false);
 
@@ -32,12 +30,8 @@ const GestionEventoYCurso = () => {
         let result = data;
 
         // Filtrar por estado de curso
-        if (filter === 'conEvento') {
-            result = result.filter(item => item.estado === 'EC');
-        } else if (filter === 'sinEvento') {
-            result = result.filter(item => item.estado !== 'EC');
-        } else if (filter === 'pendientesVictorius') {
-            result = result.filter(item => item.estado === 'PVICT');
+        if (filter !== 'todos') {
+            result = result.filter(item => item.estado === filter);
         }
 
         // Filtrar por búsqueda de texto
@@ -58,32 +52,7 @@ const GestionEventoYCurso = () => {
         setModalOpen(true);
     };
 
-    const handleDeleteClick = (record) => {
-        setRecordToDelete(record);
-        setDeleteDialogOpen(true);
-    };
 
-    const handleConfirmDelete = async () => {
-        if (recordToDelete) {
-            const result = await deleteItem(recordToDelete.cod);
-            if (result.success) {
-                setNotification({
-                    open: true,
-                    message: 'Evento eliminado correctamente',
-                    severity: 'success'
-                });
-            } else {
-                setNotification({ open: true, message: result.error, severity: 'error' });
-            }
-        }
-        setDeleteDialogOpen(false);
-        setRecordToDelete(null);
-    };
-
-    const handleCancelDelete = () => {
-        setDeleteDialogOpen(false);
-        setRecordToDelete(null);
-    };
 
     const handleSave = async (formData) => {
         const result = await updateItem(formData);
@@ -160,10 +129,11 @@ const GestionEventoYCurso = () => {
                         }}
                     >
                         <ToggleButton value="todos" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Todos</ToggleButton>
-                        <ToggleButton value="conEvento" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Con Evento</ToggleButton>
-                        <ToggleButton value="sinEvento" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Sin Evento</ToggleButton>
+                        <ToggleButton value="AUT" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Autorizados</ToggleButton>
+                        <ToggleButton value="MAQ" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Maquetados</ToggleButton>
+                        <ToggleButton value="CON" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Configurados</ToggleButton>
                         <ToggleButton
-                            value="pendientesVictorius"
+                            value="PVICT"
                             color="primary"
                             sx={{
                                 px: 2,
@@ -198,6 +168,8 @@ const GestionEventoYCurso = () => {
                                 )}
                             </Box>
                         </ToggleButton>
+                        <ToggleButton value="EC" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>Creados en Victorius</ToggleButton>
+                        <ToggleButton value="NVIG" sx={{ px: 2, textTransform: 'none', fontWeight: 500 }}>No vigentes</ToggleButton>
                     </ToggleButtonGroup>
                     <Button
                         variant="contained"
@@ -214,7 +186,6 @@ const GestionEventoYCurso = () => {
             <EventoYCursoTable
                 data={filteredData}
                 onEdit={handleEdit}
-                onDelete={handleDeleteClick}
             />
 
             <EventoYCursoModal
@@ -237,27 +208,7 @@ const GestionEventoYCurso = () => {
                 areas={auxiliaryData.areas}
             />
 
-            {/* Delete Confirmation Dialog */}
-            <Dialog
-                open={deleteDialogOpen}
-                onClose={handleCancelDelete}
-            >
-                <DialogTitle>Confirmar Eliminación</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        ¿Está seguro que desea eliminar el evento del curso <strong>{recordToDelete?.nombre || recordToDelete?.cod}</strong>?
-                        Esta acción no se puede deshacer. El curso se mantendrá pero sin evento asociado.
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCancelDelete} color="secondary">
-                        Cancelar
-                    </Button>
-                    <Button onClick={handleConfirmDelete} color="error" variant="contained">
-                        Eliminar
-                    </Button>
-                </DialogActions>
-            </Dialog>
+
 
             <Snackbar
                 open={notification.open}
