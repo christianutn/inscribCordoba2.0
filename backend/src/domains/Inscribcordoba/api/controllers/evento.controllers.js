@@ -192,23 +192,22 @@ export const postEvento = async (req, res, next) => {
 
         const usuario = req.user.user.cuil;
 
-        const evento = await Evento.create(
-            {
-                curso,
-                perfil,
-                area_tematica,
-                tipo_certificacion,
-                presentacion,
-                objetivos,
-                requisitos_aprobacion,
-                ejes_tematicos,
-                certifica_en_cc,
-                disenio_a_cargo_cc,
-                fecha_desde,
-                usuario
-            },
-            { transaction: t }
-        );
+        const eventoData = {
+            curso,
+            perfil,
+            area_tematica,
+            tipo_certificacion,
+            presentacion,
+            objetivos,
+            requisitos_aprobacion,
+            ejes_tematicos,
+            certifica_en_cc,
+            disenio_a_cargo_cc,
+            fecha_desde,
+            usuario
+        };
+
+        const [evento, created] = await Evento.upsert(eventoData, { transaction: t });
         const emailAdapter = new EmailAdapter();
         await emailAdapter.enviarNotificacionEventoCreado(cursoEvento)
 
