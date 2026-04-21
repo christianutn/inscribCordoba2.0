@@ -243,68 +243,7 @@ export const postEvento = async (req, res, next) => {
 
 
 
-export const deleteEvento = async (req, res, next) => {
-    let transaction; // Declara la variable para la transacción aquí
 
-    try {
-        const { curso } = req.params;
-
-        logger.info(`🗑️ Iniciando eliminación de evento - Curso: ${curso}`);
-
-        // Inicia la transacción
-        transaction = await sequelize.transaction();
-
-        // 1. Buscar la instancia del evento, dentro de la transacción
-        const evento = await Evento.findOne({
-            where: {
-                curso: curso,
-            }
-        }, { transaction }); // ¡Importante pasar la transacción aquí!
-
-        if (!evento) {
-            logger.warn(`⚠️ Intento de eliminar evento inexistente - Curso: ${curso}`);
-            // Si el evento no existe, revierte la transacción antes de lanzar el error
-            await transaction.rollback();
-            throw new AppError("Evento no existe", 400);
-        }
-
-        // 2. Actualizar el campo 'tiene_formulario_evento_creado' en el modelo Curso, dentro de la transacción
-        await Curso.update(
-            {
-                tiene_formulario_evento_creado: 0 // Solo pasamos el campo que queremos actualizar
-            },
-            {
-                where: {
-                    cod: curso, // Asumo que 'curso' de los params es el 'cod' del Curso
-                },
-                transaction: transaction // ¡Importante pasar la transacción aquí como parte del segundo objeto!
-            }
-        );
-
-        // 3. Eliminar la instancia del evento, dentro de la transacción
-        await evento.destroy({ transaction }); // ¡Importante pasar la transacción aquí!
-
-        // 4. Si todo fue exitoso, commitea la transacción
-        await transaction.commit();
-
-        logger.info(`✅ Evento eliminado exitosamente - Curso: ${curso}`);
-
-        res.status(200).json({ message: "Evento eliminado y curso actualizado." }); // Mensaje más descriptivo
-
-    } catch (error) {
-        // Si hubo algún error, revierte la transacción si existe
-        if (transaction) {
-            await transaction.rollback();
-        }
-
-        logger.error(`❌ Error al eliminar evento - Curso: ${req.params.curso} - Error: ${error.message}`, {
-            stack: error.stack,
-            curso: req.params.curso
-        });
-
-        next(error); // Pasa el error al siguiente middleware de manejo de errores
-    }
-};
 
 
 export const putEvento = async (req, res, next) => {

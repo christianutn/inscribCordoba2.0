@@ -21,7 +21,7 @@ const ESTADOS = {
     MAQ: { label: 'Maquetado', cod: 'MAQ', color: '#4db6ac', step: 1 },
     CON: { label: 'Configurado', cod: 'CON', color: '#81c784', step: 2 },
     PVICT: { label: 'Pendiente carga en Victorius', cod: 'PVICT', color: '#ffb74d', step: 3 },
-    EC: { label: 'Evento cargado en Victorius', cod: 'EC', color: '#4caf50', step: 4 },
+    EC: { label: 'Evento creado en Victorius', cod: 'EC', color: '#4caf50', step: 4 },
     NVIG: { label: 'No Vigente', cod: 'NVIG', color: '#ef5350', step: -1 },
 };
 
@@ -286,6 +286,8 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
         disenio_a_cargo_cc: 1
     });
 
+    const [initialFormData, setInitialFormData] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
     const [errors, setErrors] = useState({});
     const [estadoLoading, setEstadoLoading] = useState(false);
     const [estadoFeedback, setEstadoFeedback] = useState(null); // { type: 'success'|'error', msg }
@@ -294,18 +296,18 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
     useEffect(() => {
         if (record) {
             const evento = record.detalle_evento;
-            setFormData({
+            const initialData = {
                 curso: record.cod || '',
                 nombre: record.nombre || '',
-                cupo: record.cupo || '',
+                cupo: record.cupo ? String(record.cupo) : '',
                 codPlataformaDictado: record.plataforma_dictado || '',
                 codMedioInscripcion: record.medio_inscripcion || '',
                 codTipoCapacitacion: record.tipo_capacitacion || '',
-                cantidad_horas: record.cantidad_horas || '',
+                cantidad_horas: record.cantidad_horas ? String(record.cantidad_horas) : '',
                 codArea: record.area || '',
                 aplica_sincronizacion_certificados: record.aplica_sincronizacion_certificados ? 1 : 0,
                 url_curso: record.url_curso || '',
-                numero_evento: record.numero_evento || '',
+                numero_evento: record.numero_evento ? String(record.numero_evento) : '',
                 perfil: evento?.detalle_perfil?.cod || evento?.perfil || '',
                 area_tematica: evento?.detalle_areaTematica?.cod || evento?.area_tematica || '',
                 tipo_certificacion: evento?.detalle_tipoCertificacion?.cod || evento?.tipo_certificacion || '',
@@ -315,9 +317,11 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                 ejes_tematicos: evento?.ejes_tematicos || '',
                 certifica_en_cc: evento ? (Number(evento.certifica_en_cc) === 0 ? 0 : 1) : 1,
                 disenio_a_cargo_cc: evento ? (Number(evento.disenio_a_cargo_cc) === 0 ? 0 : 1) : 1
-            });
+            };
+            setFormData(initialData);
+            setInitialFormData(initialData);
         } else {
-            setFormData({
+            const emptyData = {
                 curso: '', nombre: '', cupo: '',
                 codPlataformaDictado: '', codMedioInscripcion: '',
                 codTipoCapacitacion: '', cantidad_horas: '', codArea: '',
@@ -325,7 +329,9 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                 perfil: '', area_tematica: '', tipo_certificacion: '',
                 presentacion: '', objetivos: '', requisitos_aprobacion: '',
                 ejes_tematicos: '', certifica_en_cc: 1, disenio_a_cargo_cc: 1
-            });
+            };
+            setFormData(emptyData);
+            setInitialFormData(emptyData);
         }
         setErrors({});
         setEstadoFeedback(null);
@@ -343,6 +349,15 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
         formData.presentacion?.trim() || formData.objetivos?.trim() ||
         formData.requisitos_aprobacion?.trim() || formData.ejes_tematicos?.trim()
     ), [formData]);
+
+    const hasChanges = useMemo(() => {
+        if (!initialFormData) return false;
+        return JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    }, [formData, initialFormData]);
+
+    const permiteEdicionEvento = useMemo(() => 
+        ['CON', 'PVICT', 'EC'].includes(estadoActual),
+    [estadoActual]);
 
     const validate = () => {
         const newErrors = {};
@@ -371,9 +386,14 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (validate()) {
-            onSave({ ...formData, tieneEvento });
+            setIsSaving(true);
+            try {
+                await onSave({ ...formData, tieneEvento });
+            } finally {
+                setIsSaving(false);
+            }
         }
     };
 
@@ -401,8 +421,8 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
             // Si se retrocedió desde PVICT → CON, el backend eliminó el evento:
             // limpiar los campos de "Datos del Evento" en el formulario local
             if (accion === 'retroceder' && estadoPrevio === 'PVICT') {
-                setFormData(prev => ({
-                    ...prev,
+                const wipedEventData = {
+                    ...formData,
                     perfil: '',
                     area_tematica: '',
                     tipo_certificacion: '',
@@ -412,7 +432,14 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                     ejes_tematicos: '',
                     certifica_en_cc: 1,
                     disenio_a_cargo_cc: 1
-                }));
+                };
+                setFormData(wipedEventData);
+                setInitialFormData(wipedEventData); // Sincronizamos la base para que no se habite el botón de guardado
+            } else {
+                // Para cualquier otro cambio de estado exitoso, actualizamos la base con la foto actual
+                // del formData, ya que si había cambios y se cambió el estado, esos cambios aún están
+                // pendientes de "Guardar", pero el ESTADO en sí ya se guardó y refrescó.
+                setInitialFormData({...formData});
             }
 
             setEstadoFeedback({ type: 'success', msg: 'Estado actualizado correctamente.' });
@@ -645,15 +672,21 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
 
-                    {!tieneEvento && !hayDatosDeEvento && (
+                    {!tieneEvento && !hayDatosDeEvento && permiteEdicionEvento && (
                         <Alert severity="warning" sx={{ mb: 2 }}>
                             Si completa los campos de evento, se creará un evento nuevo para este curso al guardar.
                         </Alert>
                     )}
 
+                    {!permiteEdicionEvento && (
+                        <Alert severity="info" sx={{ mb: 2 }}>
+                            La edición de los datos del evento solo está permitida en los estados: <strong>Configurado</strong>, <strong>Pendiente de carga</strong> o <strong>Evento creado</strong>.
+                        </Alert>
+                    )}
+
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={4}>
-                            <FormControl fullWidth required={tieneEvento || hayDatosDeEvento} error={!!errors.perfil}>
+                            <FormControl fullWidth required={tieneEvento || hayDatosDeEvento} error={!!errors.perfil} disabled={!permiteEdicionEvento}>
                                 <InputLabel>Perfil</InputLabel>
                                 <Select
                                     name="perfil"
@@ -670,7 +703,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <FormControl fullWidth required={tieneEvento || hayDatosDeEvento} error={!!errors.area_tematica}>
+                            <FormControl fullWidth required={tieneEvento || hayDatosDeEvento} error={!!errors.area_tematica} disabled={!permiteEdicionEvento}>
                                 <InputLabel>Área Temática</InputLabel>
                                 <Select
                                     name="area_tematica"
@@ -687,7 +720,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <FormControl fullWidth required={tieneEvento || hayDatosDeEvento} error={!!errors.tipo_certificacion}>
+                            <FormControl fullWidth required={tieneEvento || hayDatosDeEvento} error={!!errors.tipo_certificacion} disabled={!permiteEdicionEvento}>
                                 <InputLabel>Tipo de Certificación</InputLabel>
                                 <Select
                                     name="tipo_certificacion"
@@ -714,6 +747,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                                 required={tieneEvento || hayDatosDeEvento}
                                 error={!!errors.presentacion}
                                 helperText={errors.presentacion}
+                                disabled={!permiteEdicionEvento}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -726,6 +760,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                                 required={tieneEvento || hayDatosDeEvento}
                                 error={!!errors.objetivos}
                                 helperText={errors.objetivos}
+                                disabled={!permiteEdicionEvento}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -738,6 +773,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                                 required={tieneEvento || hayDatosDeEvento}
                                 error={!!errors.ejes_tematicos}
                                 helperText={errors.ejes_tematicos}
+                                disabled={!permiteEdicionEvento}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -750,11 +786,12 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                                 required={tieneEvento || hayDatosDeEvento}
                                 error={!!errors.requisitos_aprobacion}
                                 helperText={errors.requisitos_aprobacion}
+                                disabled={!permiteEdicionEvento}
                             />
                         </Grid>
 
                         <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
+                            <FormControl fullWidth disabled={!permiteEdicionEvento}>
                                 <InputLabel>¿Certifica en CC?</InputLabel>
                                 <Select
                                     name="certifica_en_cc"
@@ -768,7 +805,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
+                            <FormControl fullWidth disabled={!permiteEdicionEvento}>
                                 <InputLabel>¿Diseño a cargo de CC?</InputLabel>
                                 <Select
                                     name="disenio_a_cargo_cc"
@@ -789,8 +826,17 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                 <Button onClick={onClose} color="secondary">
                     Cancelar
                 </Button>
-                <Button onClick={handleSubmit} variant="contained" color="primary">
-                    {tieneEvento ? 'Guardar Cambios' : (hayDatosDeEvento ? 'Crear Evento y Guardar' : 'Guardar Curso')}
+                <Button 
+                    onClick={handleSubmit} 
+                    variant="contained" 
+                    color="primary"
+                    disabled={!hasChanges || isSaving}
+                    startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : null}
+                >
+                    {isSaving 
+                        ? 'Guardando...' 
+                        : (tieneEvento ? 'Guardar Cambios' : (hayDatosDeEvento ? 'Crear Evento y Guardar' : 'Guardar Curso'))
+                    }
                 </Button>
             </DialogActions>
         </Dialog>
