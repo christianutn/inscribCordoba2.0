@@ -8,7 +8,7 @@ import passport from "passport";
 const cursoRouter = Router();
 
 
-cursoRouter.get("/", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), getCursos)
+cursoRouter.get("/", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA', 'LOG']), getCursos)
 
 cursoRouter.post("/",
     passport.authenticate('jwt', { session: false }),

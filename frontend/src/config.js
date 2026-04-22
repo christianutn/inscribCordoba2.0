@@ -4,8 +4,8 @@ const config = {
     apiBaseUrl: process.env.REACT_APP_API_BASE_URL,
     entornoReact,
     rolesPermitidosCcAsistencias: entornoReact === 'development'
-        ? ['ADM', 'GA', 'REF']
-        : ['ADM', 'GA']
+        ? ['ADM', 'GA', 'REF', 'LOG']
+        : ['ADM', 'GA', 'LOG']
 };
 
 export default config;
