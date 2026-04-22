@@ -100,6 +100,10 @@ const menuConfigByRole = {
     ...(config.rolesPermitidosCcAsistencias.includes('GA') ? [{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> }] : []),
     { label: "Efemérides", identifier: "Efemerides", icon: <EventNoteIcon /> },
   ],
+  LOG: [
+    { label: "Inicio", identifier: "Home", icon: <HouseIcon /> },
+    ...(config.rolesPermitidosCcAsistencias.includes('LOG') ? [{ label: "Registro de Asistencias", identifier: "CcAsistenciasMain", icon: <QrCodeIcon /> }] : []),
+  ],
 };
 
 const Main = styled('main')(({ theme }) => ({

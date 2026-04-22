@@ -12,28 +12,28 @@ const router = Router();
 const cidiService = new CidiService();
 
 // ======== EVENTOS ========
-router.get("/eventos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), getEventos);
+router.get("/eventos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA', 'LOG']), getEventos);
 router.get("/eventos/:id", getEventoById); // Endpoint público para que el escáner QR cargue la info
-router.post("/eventos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), createEvento);
-router.put("/eventos/:id", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), updateEvento);
-router.delete("/eventos/:id", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), deleteEvento);
+router.post("/eventos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA', 'LOG']), createEvento);
+router.put("/eventos/:id", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA', 'LOG']), updateEvento);
+router.delete("/eventos/:id", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA', 'LOG']), deleteEvento);
 
 
 // ======== INSCRIPTOS ========
 // List of inscribed for an event
-router.get("/inscriptos/evento/:evento_id", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), async (req, res) => {
+router.get("/inscriptos/evento/:evento_id", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA', 'LOG']), async (req, res) => {
     // The previous implementation mapped incorrectly. Let's use the controller function
     await getInscriptosByEvento(req, res);
 });
 
 // Update specific note and attendance
-router.put("/inscriptos/:id", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), updateNotaYAsistencia);
+router.put("/inscriptos/:id", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA', 'LOG']), updateNotaYAsistencia);
 
 // Confirm Attendance (QR or Manual lookup) -> Open for general users without auth if triggered via QR
 router.post("/inscriptos/confirmar", publicApiLimiter, confirmarAsistencia);
 
 // Carga Masiva (Excel template upload)
-router.post("/inscriptos/masivos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), cargarInscriptosMasivos);
+router.post("/inscriptos/masivos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA', 'LOG']), cargarInscriptosMasivos);
 
 
 // ======== PARTICIPANTES ========
@@ -41,7 +41,7 @@ router.post("/inscriptos/masivos", passport.authenticate('jwt', { session: false
 router.post("/participantes/upsert", createOrUpdateParticipantesG);
 
 // Upsert massively from Excel
-router.post("/participantes/masivos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA']), createOrUpdateParticipantesMasivos);
+router.post("/participantes/masivos", passport.authenticate('jwt', { session: false }), autorizar(['ADM', 'REF', 'GA', 'LOG']), createOrUpdateParticipantesMasivos);
 
 // Look up from Cidi via CIDI service
 router.get("/participantes/cidi/:cuil", publicApiLimiter, async (req, res) => {
