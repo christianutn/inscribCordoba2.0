@@ -198,7 +198,7 @@ const CronogramaCalendar = ({
       <Grid container spacing={6}>
         {/* Calendario */}
         <Grid item xs={12} md={7}>
-          <Paper elevation={0} sx={{ p: 3, background: 'linear-gradient(135deg, #F5F9FC 0%, #EEF4F9 100%)', borderRadius: 10 }}>
+          <Paper elevation={0} sx={{ p: 3, background: 'linear-gradient(135deg, #F5F9FC 0%, #EEF4F9 100%)', borderRadius: 4 }}>
             {/* Header */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <IconButton
@@ -218,8 +218,7 @@ const CronogramaCalendar = ({
                   textAlign: 'center',
                   color: '#004582',
                   fontFamily: "'Geogrotesque Sharp', sans-serif",
-                  fontSize: '1.5rem',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                  fontSize: '1.5rem'
                 }}
               >
                 {MONTH_NAMES[currentDate.month()]} {currentDate.year()}
@@ -329,7 +328,7 @@ const CronogramaCalendar = ({
               flexDirection: 'column',
               background: '#FAFBFC',
               border: '1px solid #E0E7FF',
-              borderRadius: 10,
+              borderRadius: 4,
               overflow: 'hidden'
             }}
           >

@@ -8,10 +8,11 @@ import isBetween from 'dayjs/plugin/isBetween';
 import { getInstancias } from "../services/instancias.service";
 import ReactApexChart from 'react-apexcharts';
 import {
-    Box, CircularProgress, Typography, Alert, Paper, Grid,
+    Box, Typography, Alert, Paper, Grid,
     Card, CardContent, FormControl, InputLabel, Select, MenuItem, Button,
     Tab, Tabs, TextField, Tooltip, IconButton
 } from "@mui/material";
+import BurbujasLoader from "./UIElements/BurbujasLoader";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CancelIcon from '@mui/icons-material/Cancel';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -811,7 +812,11 @@ const ReporteCursosCC = ({ sidebarOpen }) => {
                 </Grid>
             </Paper>
 
-            {loading && <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}><CircularProgress /></Box>}
+            {loading && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+                    <BurbujasLoader />
+                </Box>
+            )}
 
             {!loading && error && <Alert severity="error">{error}</Alert>}
 

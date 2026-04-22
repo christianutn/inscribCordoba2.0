@@ -9,9 +9,9 @@ import {
     MenuItem,
     Grid,
     Alert,
-    CircularProgress,
     Autocomplete
 } from "@mui/material";
+import BurbujasLoader from "../../UIElements/BurbujasLoader";
 
 import { postTutores } from "../../../services/tutores.service";
 
@@ -166,7 +166,7 @@ const ModalCrearTutor = ({ open, onClose, onSuccess, areas }) => {
             <DialogActions>
                 <Button onClick={onClose} color="inherit">Cancelar</Button>
                 <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-                    {loading ? <CircularProgress size={24} /> : "Crear"}
+                    {loading ? <BurbujasLoader small /> : "Crear"}
                 </Button>
             </DialogActions>
         </Dialog>

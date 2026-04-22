@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Box, Button, Alert, CircularProgress, Snackbar, TextField, InputAdornment } from '@mui/material';
+import { Box, Button, Alert, Snackbar, TextField, InputAdornment } from '@mui/material';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import useAsignacionesAreas from './hooks/useAsignacionesAreas';
@@ -66,7 +67,7 @@ const GestionAsignacionesAreas = () => {
     };
 
     if (loading && data.length === 0) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
+        return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><BurbujasLoader /></Box>;
     }
 
     return (

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
+import BurbujasLoader from '../../UIElements/BurbujasLoader';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button, 
-    Stack, TextField, Typography, CircularProgress
+    Stack, TextField, Typography
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
@@ -67,7 +68,7 @@ const CambiarFechasModal = ({ open, onClose, onUpdate, loading, selectedRowData 
             <DialogActions>
                 <Button onClick={onClose}>Cancelar</Button>
                 <Button onClick={handleConfirm} variant="contained" disabled={loading}>
-                    {loading ? <CircularProgress size={24} color="inherit" /> : "Guardar Fechas"}
+                    {loading ? <BurbujasLoader small /> : "Guardar Fechas"}
                 </Button>
             </DialogActions>
         </Dialog>

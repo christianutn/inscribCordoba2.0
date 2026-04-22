@@ -6,12 +6,12 @@ import {
   Tabs,
   Tab,
   Typography,
-  CircularProgress,
   FormControl,
   InputLabel,
   Select,
   MenuItem
 } from '@mui/material';
+import BurbujasLoader from './UIElements/BurbujasLoader';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 // Se elimina getMatrizFechas
@@ -271,7 +271,7 @@ const DetalleMesChart = ({ sidebarOpen }) => {
       </FormControl>
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: chartHeight + 50 }}>
-          <CircularProgress />
+          <BurbujasLoader />
         </Box>
       ) : labels.length === 0 ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: chartHeight + 50, border: '1px dashed grey', borderRadius: '4px', p: 2, textAlign: 'center' }}>

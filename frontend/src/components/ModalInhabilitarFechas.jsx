@@ -8,7 +8,6 @@ import {
     TextField,
     Box,
     Typography,
-    CircularProgress,
     Alert,
     Backdrop,
     Tabs,
@@ -17,6 +16,7 @@ import {
     FormControlLabel,
     Checkbox
 } from '@mui/material';
+import BurbujasLoader from './UIElements/BurbujasLoader';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateRangeCalendar } from '@mui/x-date-pickers-pro/DateRangeCalendar';
@@ -250,10 +250,14 @@ const ModalInhabilitarFechas = ({ open, onClose }) => {
             </DialogTitle>
             <DialogContent>
                 <Backdrop
-                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, position: 'absolute' }}
+                    sx={{ 
+                        zIndex: (theme) => theme.zIndex.drawer + 1, 
+                        position: 'absolute',
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)'
+                    }}
                     open={loading}
                 >
-                    <CircularProgress color="inherit" />
+                    <BurbujasLoader />
                 </Backdrop>
 
                 {/* Tabs para seleccionar tipo */}

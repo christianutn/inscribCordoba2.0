@@ -7,9 +7,9 @@ import {
     TextField,
     Button,
     Grid,
-    Alert,
-    CircularProgress
+    Alert
 } from "@mui/material";
+import BurbujasLoader from "../../UIElements/BurbujasLoader";
 import { postCoordinador } from "../../../services/coordinadores.service";
 
 const ModalCrearCoordinador = ({ open, onClose, onSuccess }) => {
@@ -129,7 +129,7 @@ const ModalCrearCoordinador = ({ open, onClose, onSuccess }) => {
             <DialogActions>
                 <Button onClick={onClose} color="inherit">Cancelar</Button>
                 <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-                    {loading ? <CircularProgress size={24} /> : "Crear"}
+                    {loading ? <BurbujasLoader small /> : "Crear"}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -2,12 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { Button, Box, Typography, Paper, TextField, InputAdornment } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import TutorModal from './components/TutorModal';
 import TutoresTable from './components/TutoresTable';
 import useTutores from './hooks/useTutores';
 
 const GestionTutores = () => {
-    const { tutores, fetchTutores } = useTutores();
+    const { tutores, fetchTutores, loading } = useTutores();
     const [openModal, setOpenModal] = useState(false);
     const [selectedTutor, setSelectedTutor] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -77,10 +78,16 @@ const GestionTutores = () => {
                 </Box>
             </Paper>
 
-            <TutoresTable
-                tutores={filteredTutores}
-                onEdit={handleEditTutor}
-            />
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <BurbujasLoader />
+                </Box>
+            ) : (
+                <TutoresTable
+                    tutores={filteredTutores}
+                    onEdit={handleEditTutor}
+                />
+            )}
 
             <TutorModal
                 open={openModal}

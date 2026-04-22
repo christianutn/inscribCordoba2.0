@@ -8,11 +8,11 @@ import {
   Select,
   MenuItem,
   Typography,
-  CircularProgress,
   Grid,
   Tabs,
   Tab
 } from '@mui/material';
+import BurbujasLoader from './UIElements/BurbujasLoader';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 // Se elimina getMatrizFechas y buscarPosicionFecha
@@ -285,7 +285,7 @@ const DetalleFechasChart = ({ sidebarOpen }) => {
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: chartHeight + 50 }}>
-          <CircularProgress />
+          <BurbujasLoader />
         </Box>
       ) : !mesSeleccionado || meses.length === 0 ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: chartHeight + 50, border: '1px dashed grey', borderRadius: '4px', p: 2, textAlign: 'center' }}>

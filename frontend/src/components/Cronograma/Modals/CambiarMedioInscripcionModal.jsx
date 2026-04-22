@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import BurbujasLoader from '../../UIElements/BurbujasLoader';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button,
-    FormControl, InputLabel, Select, MenuItem, Typography, CircularProgress
+    FormControl, InputLabel, Select, MenuItem, Typography
 } from '@mui/material';
 
 const CambiarMedioInscripcionModal = ({ open, onClose, onUpdate, loading, selectedRowData, allMedios }) => {
@@ -44,7 +45,7 @@ const CambiarMedioInscripcionModal = ({ open, onClose, onUpdate, loading, select
             <DialogActions>
                 <Button onClick={onClose}>Cancelar</Button>
                 <Button onClick={handleConfirm} variant="contained" disabled={!selectedMedio || loading}>
-                    {loading ? <CircularProgress size={24} color="inherit" /> : "Confirmar Medio"}
+                    {loading ? <BurbujasLoader small /> : "Confirmar Medio"}
                 </Button>
             </DialogActions>
         </Dialog>

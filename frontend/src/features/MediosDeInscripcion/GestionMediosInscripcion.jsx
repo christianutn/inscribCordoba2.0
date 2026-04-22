@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Alert, Snackbar } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import MediosInscripcionTable from './components/MediosInscripcionTable';
 import MedioInscripcionModal from './components/MedioInscripcionModal';
 import useMediosInscripcion from './hooks/useMediosInscripcion';
@@ -67,10 +68,16 @@ const GestionMediosInscripcion = () => {
                 </Alert>
             )}
 
-            <MediosInscripcionTable
-                data={medios}
-                onEdit={handleEdit}
-            />
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <BurbujasLoader />
+                </Box>
+            ) : (
+                <MediosInscripcionTable
+                    data={medios}
+                    onEdit={handleEdit}
+                />
+            )}
 
             <MedioInscripcionModal
                 open={modalOpen}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Box, Card, CardContent, Typography, Button, TextField, Grid, Paper, IconButton, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions, LinearProgress, CircularProgress, Tooltip, Alert, MenuItem, useTheme, useMediaQuery, Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { Container, Box, Card, CardContent, Typography, Button, TextField, Grid, Paper, IconButton, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions, LinearProgress, Tooltip, Alert, MenuItem, useTheme, useMediaQuery, Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import BurbujasLoader from '../UIElements/BurbujasLoader';
 import {
   QrCode as QrCodeIcon,
   Download as DownloadIcon,
@@ -537,6 +538,13 @@ export default function CcAsistenciasMain() {
                   '& .MuiDataGrid-cell': { py: 1.5, display: 'flex', alignItems: 'center', fontFamily: 'Poppins' },
                   '& .MuiDataGrid-row': { transition: 'background-color 0.2s', '&:hover': { bgcolor: 'rgba(0,123,255,0.04)' } }
                 }}
+                slots={{
+                  loadingOverlay: () => (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                      <BurbujasLoader />
+                    </Box>
+                  )
+                }}
               />
             </Box>
           </Box>
@@ -625,7 +633,7 @@ export default function CcAsistenciasMain() {
             />
           </Box>
 
-          {isUploading && <LinearProgress sx={{ mt: 3, borderRadius: '5px', height: '6px' }} />}
+
           {uploadMessage && <Alert severity={uploadMessage.includes('❌') ? 'error' : 'success'} sx={{ mt: 3, borderRadius: '12px', fontFamily: 'Poppins', fontWeight: 500 }}>{uploadMessage}</Alert>}
         </DialogContent>
         <DialogActions sx={{ p: 3, gap: 1 }}>
@@ -648,7 +656,7 @@ export default function CcAsistenciasMain() {
               boxShadow: '0 4px 12px rgba(0,123,255,0.2)'
             }}
           >
-            {isUploading ? 'SUBIENDO...' : 'SUBIR ARCHIVO'}
+            {isUploading ? <BurbujasLoader small /> : 'SUBIR ARCHIVO'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -732,7 +740,7 @@ export default function CcAsistenciasMain() {
                   style={{ width: '100%', maxWidth: '450px' }}
                 />
               ) : (
-                <CircularProgress />
+                <BurbujasLoader />
               )}
             </Box>
 

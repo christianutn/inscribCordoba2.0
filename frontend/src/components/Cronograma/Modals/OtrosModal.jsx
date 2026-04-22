@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Dialog, DialogTitle, DialogContent, DialogActions, Button, 
-    FormControl, Input, Typography, CircularProgress
+    Dialog, DialogTitle, DialogContent, DialogActions, Button,
+    FormControl, Input, Typography
 } from '@mui/material';
+import BurbujasLoader from '../../UIElements/BurbujasLoader';
 
 const OtrosModal = ({ open, onClose, onUpdate, loading, selectedRowData }) => {
     const [cantidadInscriptos, setCantidadInscriptos] = useState('');
@@ -36,7 +37,7 @@ const OtrosModal = ({ open, onClose, onUpdate, loading, selectedRowData }) => {
             <DialogActions>
                 <Button onClick={onClose}>Cancelar</Button>
                 <Button onClick={handleConfirm} variant="contained" disabled={loading}>
-                    {loading ? <CircularProgress size={24} color="inherit" /> : "Confirmar"}
+                    {loading ? <BurbujasLoader small /> : "Confirmar"}
                 </Button>
             </DialogActions>
         </Dialog>

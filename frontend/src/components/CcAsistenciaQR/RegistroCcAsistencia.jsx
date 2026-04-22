@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import {
-    Container, Box, Typography, Button, TextField, CircularProgress,
+    Container, Box, Typography, Button, TextField,
     Alert, Paper, Avatar, InputAdornment, IconButton, useTheme, useMediaQuery, Stack
 } from '@mui/material';
+import BurbujasLoader from '../UIElements/BurbujasLoader';
 import {
     Search as SearchIcon,
     CheckCircle as CheckCircleIcon,
@@ -93,7 +94,7 @@ export default function RegistroCcAsistencia() {
         }
     };
 
-    if (loadingEvento) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh"><CircularProgress size={60} /></Box>;
+
 
     if (!evento) return <Container maxWidth="xs" sx={{ mt: 8 }}><Alert severity="error" sx={{ borderRadius: '12px' }}>{error}</Alert></Container>;
 
@@ -148,9 +149,15 @@ export default function RegistroCcAsistencia() {
                         bgcolor: '#fff'
                     }}
                 >
-                    <Box sx={{ p: { xs: 4, sm: 5 }, textAlign: 'center' }}>
+                    <Box sx={{ p: { xs: 4, sm: 5 }, textAlign: 'center', minHeight: '400px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
 
-                        {!eventoValido && (
+                        {loadingEvento ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                                <BurbujasLoader />
+                            </Box>
+                        ) : (
+                            <>
+                                {!eventoValido && (
                             <>
                                 <Avatar sx={{ mx: 'auto', mb: 3, width: 80, height: 80, bgcolor: '#ffebe9', color: 'error.main', boxShadow: '0 8px 16px rgba(0,0,0,0.05)' }}>
                                     <EventBusyIcon sx={{ fontSize: 40 }} />
@@ -244,7 +251,7 @@ export default function RegistroCcAsistencia() {
                                         boxShadow: '0 4px 12px rgba(0,123,255,0.2)'
                                     }}
                                 >
-                                    {loadingCuil ? <CircularProgress size={24} color="inherit" /> : 'BUSCAR DATOS'}
+                                    {loadingCuil ? <BurbujasLoader small /> : 'BUSCAR DATOS'}
                                 </Button>
                             </>
                         )}
@@ -304,7 +311,7 @@ export default function RegistroCcAsistencia() {
                                             boxShadow: '0 4px 12px rgba(0,123,255,0.2)'
                                         }}
                                     >
-                                        {loadingCuil ? <CircularProgress size={24} color="inherit" /> : 'CONFIRMAR ASISTENCIA'}
+                                        {loadingCuil ? <BurbujasLoader small /> : 'CONFIRMAR ASISTENCIA'}
                                     </Button>
 
                                     <Button
@@ -344,13 +351,15 @@ export default function RegistroCcAsistencia() {
                                 </Typography>
                             </>
                         )}
-                    </Box>
-
-                    {eventoValido && error && participantInfo && !successMessage && (
-                        <Box sx={{ px: 4, pb: 4 }}>
-                            <Alert severity="error" sx={{ borderRadius: '12px' }}>{error}</Alert>
-                        </Box>
+                        
+                        {eventoValido && error && participantInfo && !successMessage && (
+                            <Box sx={{ px: 4, pb: 4 }}>
+                                <Alert severity="error" sx={{ borderRadius: '12px' }}>{error}</Alert>
+                            </Box>
+                        )}
+                        </>
                     )}
+                    </Box>
                 </Paper>
             </Container>
 

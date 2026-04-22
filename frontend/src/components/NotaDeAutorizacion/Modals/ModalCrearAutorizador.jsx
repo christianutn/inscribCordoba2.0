@@ -8,9 +8,9 @@ import {
     Button,
     MenuItem,
     Grid,
-    Alert,
-    CircularProgress
+    Alert
 } from "@mui/material";
+import BurbujasLoader from "../../UIElements/BurbujasLoader";
 
 import { postAutorizador } from "../../../services/autorizadores.service";
 
@@ -164,7 +164,7 @@ const ModalCrearAutorizador = ({ open, onClose, onSuccess, areas }) => {
             <DialogActions>
                 <Button onClick={onClose} color="inherit">Cancelar</Button>
                 <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-                    {loading ? <CircularProgress size={24} /> : "Crear"}
+                    {loading ? <BurbujasLoader small /> : "Crear"}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button,
     Grid, TextField, FormControl, InputLabel, Select, MenuItem,
-    FormControlLabel, Switch, Typography, CircularProgress,
+    FormControlLabel, Switch, Typography,
     Box, Tooltip, Alert
 } from '@mui/material';
+import BurbujasLoader from '../../UIElements/BurbujasLoader';
 import InfoIcon from '@mui/icons-material/Info';
 import { getPlataformasDictado } from '../../../services/plataformasDictado.service.js';
 import { getTiposCapacitacion } from '../../../services/tiposCapacitacion.service.js';
@@ -331,7 +332,7 @@ const ModificacionMasivaModal = ({
                     variant="contained"
                     color="primary"
                 >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Actualizar Masivamente'}
+                    {loading ? <BurbujasLoader small /> : 'Actualizar Masivamente'}
                 </Button>
             </DialogActions>
         </Dialog>

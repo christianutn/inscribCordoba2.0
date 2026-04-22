@@ -10,7 +10,7 @@ import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
 import { getFeriadosDelAnio } from '../services/api.service.js';
 import { getFechasInvalidas } from '../services/instancias.service.js';
-import CircularProgress from '@mui/material/CircularProgress'; // Importar CircularProgress
+import BurbujasLoader from './UIElements/BurbujasLoader';
 import Box from '@mui/material/Box';
 import { getFechasInhabilitadas } from '../services/fechas_inhabilitadas.service.js';
 import { getFechasInhabilitadasFin } from '../services/fechas_inhabilitadas_fin.service.js';
@@ -214,7 +214,7 @@ const Fecha = ({ mensaje, getFecha, id, fieldFecha, value, esCampusCordoba, fech
               borderRadius: 'inherit', // Si el contenedor tiene bordes redondeados
             }}
           >
-            <CircularProgress />
+            <BurbujasLoader />
           </Box>
         )}
       </Box>

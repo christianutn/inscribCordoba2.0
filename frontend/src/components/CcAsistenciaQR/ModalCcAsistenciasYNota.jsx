@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography, Button, TextField, Grid, Switch, Paper, Alert, Snackbar, IconButton } from '@mui/material';
+import BurbujasLoader from '../UIElements/BurbujasLoader';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { updateNotaYAsistencia } from '../../services/cc_asistencia.service.js';
 
@@ -174,7 +175,7 @@ export default function ModalCcAsistenciasYNota({ open, onClose, participante, i
                         boxShadow: '0 4px 12px rgba(0,123,255,0.2)'
                     }}
                 >
-                    GUARDAR
+                    {loading ? <BurbujasLoader small /> : 'GUARDAR'}
                 </Button>
             </DialogActions>
 

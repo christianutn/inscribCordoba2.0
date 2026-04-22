@@ -5,9 +5,12 @@ const TituloPrincipal = ({ texto, fontWeight }) => {
     return (
         <Typography
             className="titulo-principal"
-            variant="h5"
+            variant="h4"
             color="text.primary"
-            style={{ fontWeight: fontWeight || 'bold' }} // Aplicar fontWeight dinámicamente
+            sx={{ 
+                fontWeight: fontWeight || 700,
+                fontFamily: "'Geogrotesque Sharp', sans-serif"
+            }}
         >
             {texto}
         </Typography>

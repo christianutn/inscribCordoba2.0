@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import BurbujasLoader from '../../UIElements/BurbujasLoader';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button, 
-    FormControl, Input, Typography, CircularProgress
+    FormControl, Input, Typography
 } from '@mui/material';
 
-const CambiarComentariosModal = ({ open, onClose, onUpdate, loading, selectedRowData }) => {
+const CambiarCupoModal = ({ open, onClose, onUpdate, loading, selectedRowData }) => {
     const [cantidadCupos, setCantidadCupos] = useState('');
 
     useEffect(() => {
@@ -21,7 +22,7 @@ const CambiarComentariosModal = ({ open, onClose, onUpdate, loading, selectedRow
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-            <DialogTitle>Otros</DialogTitle>
+            <DialogTitle>Cambiar Cupo</DialogTitle>
             <DialogContent dividers>
                 <Typography gutterBottom>Curso: <strong>{selectedRowData?.["Nombre del curso"]}</strong></Typography>
                 <Typography gutterBottom>Cantidad Cupos:</Typography>
@@ -36,12 +37,12 @@ const CambiarComentariosModal = ({ open, onClose, onUpdate, loading, selectedRow
             <DialogActions>
                 <Button onClick={onClose}>Cancelar</Button>
                 <Button onClick={handleConfirm} variant="contained" disabled={loading}>
-                    {loading ? <CircularProgress size={24} color="inherit" /> : "Confirmar"}
+                    {loading ? <BurbujasLoader small /> : "Confirmar"}
                 </Button>
             </DialogActions>
         </Dialog>
     );
 };
 
-export default CambiarComentariosModal;
+export default CambiarCupoModal;
 

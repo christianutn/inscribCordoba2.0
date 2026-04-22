@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   Button,
   Tooltip,
-  CircularProgress,
   Alert,
   Box,
   Typography,
@@ -13,6 +12,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
+import BurbujasLoader from "../../UIElements/BurbujasLoader";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -621,7 +621,7 @@ const ModalCargarNota = ({ open, onClose, onSuccess }) => {
                 >
                   {loading ? (
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <CircularProgress size={20} color="inherit" />
+                      <BurbujasLoader small />
                       Subiendo...
                     </Box>
                   ) : (

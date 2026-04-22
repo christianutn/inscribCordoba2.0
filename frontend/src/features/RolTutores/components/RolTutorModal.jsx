@@ -11,7 +11,6 @@ import {
     Select,
     MenuItem,
     TextField,
-    CircularProgress,
     Divider,
     Table,
     TableBody,
@@ -24,6 +23,7 @@ import {
     Paper
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import BurbujasLoader from '../../../components/UIElements/BurbujasLoader';
 
 const RolTutorModal = ({
     open,
@@ -112,7 +112,7 @@ const RolTutorModal = ({
 
                 {loadingTutores ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                        <CircularProgress />
+                        <BurbujasLoader />
                     </Box>
                 ) : tutores.length === 0 ? (
                     <Typography color="text.secondary" sx={{ py: 2 }}>

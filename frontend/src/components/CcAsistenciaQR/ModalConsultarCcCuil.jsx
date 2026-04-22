@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography, Button, TextField, CircularProgress, IconButton, Alert, useTheme, useMediaQuery, Paper } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography, Button, TextField, IconButton, Alert, useTheme, useMediaQuery, Paper } from '@mui/material';
+import BurbujasLoader from '../UIElements/BurbujasLoader';
 import { Close as CloseIcon, Search as SearchIcon } from '@mui/icons-material';
 import { getPersonaCidi } from '../../services/cc_asistencia.service.js';
 
@@ -98,7 +99,7 @@ export default function ModalConsultarCcCuil({ open, onClose, idEvento, nombreCu
                                 fontWeight: 'bold'
                             }}
                         >
-                            {loading ? <CircularProgress size={24} color="inherit" /> : <><SearchIcon sx={{ mr: 1 }} />BUSCAR</>}
+                            {loading ? <BurbujasLoader small /> : <><SearchIcon sx={{ mr: 1 }} />BUSCAR</>}
                         </Button>
                     </Box>
 

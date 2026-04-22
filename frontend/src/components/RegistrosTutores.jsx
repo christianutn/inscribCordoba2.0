@@ -7,7 +7,7 @@ import { Divider } from "@mui/material";
 import BotonCircular from "./UIElements/BotonCircular.jsx";
 import Button from "./UIElements/Button.jsx";
 import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
+import BurbujasLoader from "./UIElements/BurbujasLoader";
 import Alert from '@mui/material/Alert';
 import TextField from "./UIElements/TextField.jsx";
 import { getRoles } from "../services/roles.service.js"
@@ -109,17 +109,31 @@ const RegistrosTutores = () => {
                     Formulario enviado exitosamente
                 </Alert>
             }
-            {
-                cargando && <Backdrop
-                    sx={{ color: 'primary.main', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                    open={cargando}
-                >
-                    <CircularProgress color="inherit" />
-                </Backdrop>
-            }
-
             <form>
-                <div className='container-alta-usuario'>
+                <div 
+                    className='container-alta-usuario'
+                    style={{
+                        opacity: cargando ? 0.6 : 1,
+                        pointerEvents: cargando ? 'none' : 'auto',
+                        transition: 'opacity 0.3s ease',
+                        position: 'relative'
+                    }}
+                >
+                    {cargando && (
+                        <Box sx={{ 
+                            position: 'absolute', 
+                            top: '50%', 
+                            left: '50%', 
+                            transform: 'translate(-50%, -50%)',
+                            zIndex: 2,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 1
+                        }}>
+                            <BurbujasLoader />
+                        </Box>
+                    )}
                     <div className='titulo'><Titulo texto='Alta de usuario' /></div>
                     <div className="divider">
                         <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'black', marginTop: 2 }} />

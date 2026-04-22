@@ -35,6 +35,7 @@ import VistaCards from "./VistaCards";
 import VistaLista from "./VistaLista";
 import ModalCargarNota from "./Modals/ModalCargarNota";
 import AddIcon from "@mui/icons-material/Add";
+import BurbujasLoader from "../UIElements/BurbujasLoader";
 
 const Autorizaciones = () => {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const Autorizaciones = () => {
   });
   const [areas, setAreas] = useState([]);
   const [modalCargarNotaOpen, setModalCargarNotaOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [alert, setAlert] = useState({
     open: false,
@@ -56,6 +58,7 @@ const Autorizaciones = () => {
   const [viewType, setViewType] = useState("cards");
 
   const fetchUltimoEstadoDeAutorizaciones = async () => {
+    setLoading(true);
     try {
       const response = await getUltimosEstadoDeAutorizaciones();
       setAutorizaciones(response);
@@ -77,6 +80,8 @@ const Autorizaciones = () => {
         "Error al obtener el último estado de autorizaciones:",
         error,
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -331,24 +336,30 @@ const Autorizaciones = () => {
         </Paper>
 
         {/* Content Section */}
-        {viewType === "cards" ? (
-          <VistaCards
-            data={filteredAutorizaciones}
-            onVerPdf={handleVerPdf}
-            onRechazar={handleRechazar}
-            onAutorizar={(nota) =>
-              navigate("/confirmaciones", { state: { datos: nota } })
-            }
-          />
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 12, minHeight: '400px', alignItems: 'center' }}>
+            <BurbujasLoader />
+          </Box>
         ) : (
-          <VistaLista
-            data={filteredAutorizaciones}
-            onVerPdf={handleVerPdf}
-            onRechazar={handleRechazar}
-            onAutorizar={(nota) =>
-              navigate("/confirmaciones", { state: { datos: nota } })
-            }
-          />
+          viewType === "cards" ? (
+            <VistaCards
+              data={filteredAutorizaciones}
+              onVerPdf={handleVerPdf}
+              onRechazar={handleRechazar}
+              onAutorizar={(nota) =>
+                navigate("/confirmaciones", { state: { datos: nota } })
+              }
+            />
+          ) : (
+            <VistaLista
+              data={filteredAutorizaciones}
+              onVerPdf={handleVerPdf}
+              onRechazar={handleRechazar}
+              onAutorizar={(nota) =>
+                navigate("/confirmaciones", { state: { datos: nota } })
+              }
+            />
+          )
         )}
 
         {/* Modal for Loading Notes */}

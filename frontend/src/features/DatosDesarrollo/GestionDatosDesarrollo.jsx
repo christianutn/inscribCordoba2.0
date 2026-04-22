@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import {
-    Box, Button, Alert, CircularProgress, Snackbar,
+    Box, Button, Alert, Snackbar,
     TextField, InputAdornment, Typography, Paper,
     FormControl, InputLabel, Select, MenuItem,
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 } from '@mui/material';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import CodeIcon from '@mui/icons-material/Code';
@@ -134,7 +135,7 @@ const GestionDatosDesarrollo = () => {
     };
 
     if (loading && (!datos || datos.length === 0)) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
+        return <Box sx={{ display: 'flex', justifyContent: 'center', p: 10 }}><BurbujasLoader /></Box>;
     }
 
     return (

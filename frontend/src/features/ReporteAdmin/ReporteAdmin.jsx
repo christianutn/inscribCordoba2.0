@@ -5,9 +5,7 @@ import {
   CardContent,
   Typography,
   Grid,
-  CircularProgress,
   Button,
-  useTheme,
   Divider,
   Table,
   TableBody,
@@ -18,6 +16,8 @@ import {
   Paper,
   useMediaQuery
 } from "@mui/material";
+import { useTheme } from '@mui/material/styles';
+import BurbujasLoader from "../../components/UIElements/BurbujasLoader";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -370,7 +370,18 @@ const ReporteAdmin = () => {
     <Box sx={{ p: { xs: 2, md: 4 }, minHeight: "100%", background: "#f8f9fa", borderRadius: "16px" }}>
       {/* HEADER SECTION */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight="700" color="black" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Typography 
+          variant="h4" 
+          fontWeight="700" 
+          color="black" 
+          gutterBottom 
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+            fontFamily: "'Geogrotesque Sharp', sans-serif"
+          }}
+        >
           Tablero Equipo de Administradores
         </Typography>
         <Typography variant="h6" color="text.secondary" fontWeight={500} sx={{ opacity: 0.8 }}>
@@ -379,7 +390,19 @@ const ReporteAdmin = () => {
       </Box>
 
       {/* FILTER PANEL - Improved alignment and removed redundant button */}
-      <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 4, mb: 4, p: 2, bgcolor: "rgba(255,255,255,0.7)", backdropFilter: 'blur(10px)' }}>
+      <Card 
+        elevation={0} 
+        sx={{ 
+          border: `1px solid ${theme.palette.divider}`, 
+          borderRadius: 4, 
+          mb: 4, 
+          p: 2, 
+          bgcolor: "#fff",
+          opacity: loading ? 0.6 : 1,
+          transition: 'opacity 0.3s ease',
+          pointerEvents: loading ? 'none' : 'auto'
+        }}
+      >
         <Grid container spacing={3} alignItems="center">
           <Grid item xs={12} sm={6} md={3.5}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -388,6 +411,7 @@ const ReporteAdmin = () => {
                 value={fechaDesde}
                 onChange={(v) => setFechaDesde(v)}
                 format="DD/MM/YYYY"
+                disabled={loading}
                 slotProps={{ textField: { fullWidth: true, size: "medium" } }}
               />
             </LocalizationProvider>
@@ -399,6 +423,7 @@ const ReporteAdmin = () => {
                 value={fechaHasta}
                 onChange={(v) => setFechaHasta(v)}
                 format="DD/MM/YYYY"
+                disabled={loading}
                 slotProps={{ textField: { fullWidth: true, size: "medium" } }}
               />
             </LocalizationProvider>
@@ -408,6 +433,7 @@ const ReporteAdmin = () => {
               options={adminOptions}
               value={selectedAdmin}
               onChange={(_, newValue) => setSelectedAdmin(newValue)}
+              disabled={loading}
               renderInput={(params) => <TextField {...params} label="Filtrar por Administrador" variant="outlined" />}
               fullWidth
             />
@@ -416,6 +442,7 @@ const ReporteAdmin = () => {
                 variant="outlined"
                 color="error"
                 onClick={handleClearFilters}
+                disabled={loading}
                 sx={{
                   minWidth: 56,
                   height: 56,
@@ -433,7 +460,7 @@ const ReporteAdmin = () => {
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "400px" }}>
-          <CircularProgress size={60} thickness={4} />
+          <BurbujasLoader />
         </Box>
       ) : (
         <Grid container spacing={4}>

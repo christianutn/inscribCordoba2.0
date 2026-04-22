@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   Button,
   Tooltip,
-  CircularProgress,
   Alert,
   Box,
   Typography,
@@ -14,6 +13,7 @@ import {
   DialogContentText,
   DialogActions,
 } from "@mui/material";
+import BurbujasLoader from "../UIElements/BurbujasLoader";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
@@ -439,7 +439,7 @@ const SubaNotaDeAutorizacion = ({ setOpcionSeleccionada }) => {
               }}
             >
               {loading ? (
-                <CircularProgress size={24} color="inherit" />
+                <BurbujasLoader small />
               ) : (
                 "SUBIR NOTA DE AUTORIZACIÓN"
               )}

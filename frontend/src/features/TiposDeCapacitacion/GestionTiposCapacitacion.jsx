@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Alert, Snackbar } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import TiposCapacitacionTable from './components/TiposCapacitacionTable';
 import TipoCapacitacionModal from './components/TipoCapacitacionModal';
 import useTiposCapacitacion from './hooks/useTiposCapacitacion';
@@ -67,10 +68,16 @@ const GestionTiposCapacitacion = () => {
                 </Alert>
             )}
 
-            <TiposCapacitacionTable
-                data={tipos}
-                onEdit={handleEdit}
-            />
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <BurbujasLoader />
+                </Box>
+            ) : (
+                <TiposCapacitacionTable
+                    data={tipos}
+                    onEdit={handleEdit}
+                />
+            )}
 
             <TipoCapacitacionModal
                 open={modalOpen}

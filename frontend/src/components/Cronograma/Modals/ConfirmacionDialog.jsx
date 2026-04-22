@@ -1,6 +1,7 @@
 import React from 'react';
+import BurbujasLoader from '../../UIElements/BurbujasLoader';
 import {
-    Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CircularProgress
+    Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography
 } from '@mui/material';
 
 const ConfirmacionDialog = ({ open, onClose, onConfirm, title, children, loading }) => {
@@ -13,7 +14,7 @@ const ConfirmacionDialog = ({ open, onClose, onConfirm, title, children, loading
             <DialogActions>
                 <Button onClick={onClose}>Cancelar</Button>
                 <Button onClick={onConfirm} variant="contained" color="primary" disabled={loading}>
-                    {loading ? <CircularProgress size={24} color="inherit" /> : "Confirmar"}
+                    {loading ? <BurbujasLoader small /> : "Confirmar"}
                 </Button>
             </DialogActions>
         </Dialog>

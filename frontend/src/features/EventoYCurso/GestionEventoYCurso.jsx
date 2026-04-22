@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import {
-    Box, Alert, CircularProgress, Snackbar,
+    Box, Alert, Snackbar,
     TextField, InputAdornment, Dialog, DialogTitle,
     DialogContent, DialogContentText, DialogActions,
     Typography, Button, ToggleButton, ToggleButtonGroup, Badge
 } from '@mui/material';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import useEventoYCurso from './hooks/useEventoYCurso';
@@ -84,7 +85,7 @@ const GestionEventoYCurso = () => {
     }, [data]);
 
     if (loading && data.length === 0) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
+        return <Box sx={{ display: 'flex', justifyContent: 'center', p: 10 }}><BurbujasLoader /></Box>;
     }
 
     return (

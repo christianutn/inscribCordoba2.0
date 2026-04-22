@@ -12,7 +12,7 @@ import Cohortes from "./Cohortes.jsx";
 import validarFecha from '../services/validarFechas.js';
 import { postInstancias, getInstanciasByCurso } from "../services/instancias.service.js";
 import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
+import BurbujasLoader from './UIElements/BurbujasLoader';
 import Divider from '@mui/material/Divider';
 import SubtituloPrincipal from './fonts/SubtituloPrincipal.jsx';
 import { validarOrdenFechas } from "../services/validarOrdenFechas.js";
@@ -210,7 +210,6 @@ export default function Formulario() {
     <>
       {error && <Alert sx={{ '& .MuiAlert-message': { fontSize: '16px' } }} variant="filled" severity="error">{error}</Alert>}
       {success && <Alert sx={{ '& .MuiAlert-message': { fontSize: '16px' } }} variant="filled" severity="success">Formulario enviado exitosamente</Alert>}
-      {cargando && <Backdrop sx={{ color: theme.palette.primary.main, zIndex: (theme) => theme.zIndex.drawer + 1 }} open={cargando}><CircularProgress color="inherit" /></Backdrop>}
 
       {nuevoEvento ? <NuevoEvento setNuevoEvento={setNuevoEvento} setOpenAlertDialog={setOpenAlertDialog} setTituloAlerta={setTituloAlerta} setMensajeAlerta={setMensajeAlerta} selectCurso={selectCurso} onEventoCreado={handleEventoCreado} /> :
         <Container maxWidth={false} sx={{ mt: 4, mb: 4, px: { xs: 2, md: 5 } }}>
@@ -218,7 +217,13 @@ export default function Formulario() {
             <Titulo texto='Crear Cohorte' />
           </Box>
           <Divider sx={{ marginBottom: 3, borderBottomWidth: 2, borderColor: 'common.black' }} />
-          <Box component="form" id="form-crear-instancia" noValidate sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          
+          {cargando ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 12, minHeight: '500px', alignItems: 'center' }}>
+              <BurbujasLoader />
+            </Box>
+          ) : (
+            <Box component="form" id="form-crear-instancia" noValidate sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 
             {/* Info Curso */}
             <Grid container spacing={3}>
@@ -357,6 +362,7 @@ export default function Formulario() {
               </MuiButton>
             </Box>
           </Box>
+          )}
         </Container>
       }
       {<Alerta openAlertDialog={openAlertDialog} setOpenAlertDialog={setOpenAlertDialog} titulo={tituloAlerta} mensaje={mensajeAlerta} />}

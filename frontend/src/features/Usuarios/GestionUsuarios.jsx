@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Box, Button, Alert, CircularProgress, Snackbar, TextField, InputAdornment } from '@mui/material';
+import { Box, Button, Alert, Snackbar, TextField, InputAdornment } from '@mui/material';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import useUsuarios from './hooks/useUsuarios';
@@ -78,10 +79,6 @@ const GestionUsuarios = ({ readOnly = false }) => {
         setNotification({ ...notification, open: false });
     };
 
-    if (loading && data.length === 0) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
-    }
-
     return (
         <Box sx={{ mt: 2 }}>
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -113,12 +110,18 @@ const GestionUsuarios = ({ readOnly = false }) => {
                 )}
             </Box>
 
-            <UsuariosTable
-                data={filteredData}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                readOnly={readOnly}
-            />
+            {loading && data.length === 0 ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+                    <BurbujasLoader />
+                </Box>
+            ) : (
+                <UsuariosTable
+                    data={filteredData}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    readOnly={readOnly}
+                />
+            )}
 
             <UsuarioModal
                 open={modalOpen}

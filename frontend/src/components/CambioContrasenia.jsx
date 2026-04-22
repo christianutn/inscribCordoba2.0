@@ -13,7 +13,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
 import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
+import BurbujasLoader from './UIElements/BurbujasLoader';
 import CssBaseline from '@mui/material/CssBaseline';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
@@ -130,7 +130,7 @@ const CambioContrasenia = () => {
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={cargando}
             >
-                <CircularProgress color="inherit" />
+                <BurbujasLoader />
             </Backdrop>
 
             <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2, pb: { xs: 4, md: 8 } }}>

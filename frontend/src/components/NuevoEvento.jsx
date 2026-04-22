@@ -19,8 +19,8 @@ import { postEvento } from "../services/evento.service.js";
 
 //import de usabilidad
 import Tooltip from '@mui/material/Tooltip';
+import BurbujasLoader from "./UIElements/BurbujasLoader";
 import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 
 function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, setMensajeAlerta, selectCurso, onEventoCreado }) {
@@ -157,20 +157,18 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
           Nuevo evento cargado con éxito
         </Alert>
       )}
-      {cargando && (
-        <Backdrop
-          sx={{ color: theme.palette.primary.main, zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={cargando}
-        >
-          <CircularProgress color="inherit" />
-        </Backdrop>
-      )}
       <Container maxWidth={false} sx={{ mt: 4, mb: 4, px: { xs: 2, md: 5 } }}>
         <Box sx={{ mb: 2 }}>
           <Titulo texto="Crear Evento" />
         </Box>
         <Divider sx={{ marginBottom: 2, borderBottomWidth: 2, borderColor: 'common.black' }} />
-        <Box component="form" noValidate sx={{ mt: 3 }}>
+        
+        {cargando ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 12, minHeight: '500px', alignItems: 'center' }}>
+            <BurbujasLoader />
+          </Box>
+        ) : (
+          <Box component="form" noValidate sx={{ mt: 3 }}>
           <Grid container spacing={3}>
             {/* --- Row 1: Curso, Perfil , Área temática --- */}
             <Grid item xs={12} md={4}>
@@ -326,6 +324,7 @@ function NuevoEventoForm({ setNuevoEvento, setOpenAlertDialog, setTituloAlerta, 
             </Grid>
           </Grid>
         </Box>
+        )}
       </Container>
     </>
   );

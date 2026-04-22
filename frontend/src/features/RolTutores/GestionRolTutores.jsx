@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Box, Alert, CircularProgress, Snackbar, TextField, InputAdornment, Typography } from '@mui/material';
+import { Box, Alert, Snackbar, TextField, InputAdornment, Typography } from '@mui/material';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import SearchIcon from '@mui/icons-material/Search';
 import useRolTutores from './hooks/useRolTutores';
 import RolTutoresTable from './components/RolTutoresTable';
@@ -67,8 +68,8 @@ const GestionRolTutores = () => {
 
     if (loading && cursos.length === 0) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                <CircularProgress />
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 10 }}>
+                <BurbujasLoader />
             </Box>
         );
     }

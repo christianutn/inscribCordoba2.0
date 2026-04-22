@@ -7,7 +7,8 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 
 import { DataGrid } from '@mui/x-data-grid';
 import { esES } from '@mui/x-data-grid/locales';
-import { Backdrop, CircularProgress, Box, Typography, Paper, Divider, Alert, Button } from '@mui/material';
+import { Backdrop, Box, Typography, Paper, Divider, Alert, Button } from '@mui/material';
+import BurbujasLoader from './UIElements/BurbujasLoader';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import InfoIcon from '@mui/icons-material/Info';
@@ -294,7 +295,7 @@ const CronogramaAdminReducido = () => {
         return '';
     }, []);
 
-    if (dataLoading && !cursosData.length) return (<Backdrop open sx={{ zIndex: t => t.zIndex.drawer + 1, color: '#fff' }}><CircularProgress color="inherit" /></Backdrop>);
+    // Eliminado el bloqueo total por Backdrop
     if (dataError && !successMessage) return (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}><Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}><Typography variant="h6" color="error" gutterBottom>Error</Typography><Typography>{dataError}</Typography><Button onClick={fetchData} sx={{ mt: 2 }}>Reintentar</Button></Paper></Box>);
     if (!dataLoading && !dataError && cursosData.length === 0) return (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 3 }}><Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}><Typography variant="h6" gutterBottom>No Hay Datos</Typography><Typography>No se encontraron datos en el cronograma.</Typography></Paper></Box>);
 
@@ -341,42 +342,56 @@ const CronogramaAdminReducido = () => {
                     </Alert>
                 )}
 
-                {dataLoading && (<Box sx={{ display: 'flex', justifyContent: 'center', my: 2, alignItems: 'center' }}><CircularProgress size={20} sx={{ mr: 1 }} /><Typography variant="body2" color="text.secondary">Actualizando tabla...</Typography></Box>)}
-
-                <Paper elevation={3} sx={{ height: 600, width: '100%' }}>
-                    <DataGrid
-                        rows={filteredData}
-                        columns={columnsForGrid}
-                        onRowClick={handleRowClick}
-                        getRowId={r => r.id}
-                        loading={dataLoading}
-                        density="compact"
-                        disableRowSelectionOnClick
-                        checkboxSelection
-                        onRowSelectionModelChange={(newRowSelectionModel) => {
-                            setRowSelectionModel(newRowSelectionModel);
-                        }}
-                        rowSelectionModel={rowSelectionModel}
-                        getRowClassName={getRowClassName}
-                        initialState={{ sorting: { sortModel: [{ field: 'Fecha inicio del curso', sort: 'asc' }] } }}
-                        sx={{
-                            border: 0,
-                            '& .MuiDataGrid-columnHeaders': { backgroundColor: 'primary.light', color: 'text.primary' },
-                            '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none!important' },
-                            '& .MuiDataGrid-row': { cursor: 'pointer' },
-                            '& .MuiDataGrid-row:hover': { backgroundColor: 'action.hover', },
-                            '& .MuiDataGrid-overlay': { backgroundColor: 'rgba(255,255,255,0.7)' },
-                            '& .row-cancelado': {
-                                backgroundColor: 'rgba(211, 47, 47, 0.08)',
-                                borderLeft: '4px solid #d32f2f',
-                                color: '#b71c1c',
-                                '&:hover': { backgroundColor: 'rgba(211, 47, 47, 0.15)', },
-                                '& .MuiDataGrid-cell': { color: '#b71c1c', },
-                            },
-                        }}
-                        slots={{ noRowsOverlay: () => (<Box sx={{ mt: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', p: 2 }}><InfoIcon color="action" sx={{ mb: 1, fontSize: '3rem' }} /><Typography align="center">{cursosData.length === 0 ? "No hay datos disponibles." : "No hay cursos que coincidan."}</Typography></Box>) }}
-                    />
-                </Paper>
+                {dataLoading && cursosData.length === 0 ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', flexDirection: 'column', gap: 2 }}>
+                        <BurbujasLoader />
+                        <Typography variant="body1" color="text.secondary" sx={{ fontFamily: "'Geogrotesque Sharp', sans-serif", fontWeight: 600 }}>
+                            Cargando cronograma...
+                        </Typography>
+                    </Box>
+                ) : (
+                    <Paper elevation={3} sx={{ height: 600, width: '100%', position: 'relative' }}>
+                        <DataGrid
+                            rows={filteredData}
+                            columns={columnsForGrid}
+                            onRowClick={handleRowClick}
+                            getRowId={r => r.id}
+                            loading={dataLoading}
+                            density="compact"
+                            disableRowSelectionOnClick
+                            checkboxSelection
+                            onRowSelectionModelChange={(newRowSelectionModel) => {
+                                setRowSelectionModel(newRowSelectionModel);
+                            }}
+                            rowSelectionModel={rowSelectionModel}
+                            getRowClassName={getRowClassName}
+                            initialState={{ sorting: { sortModel: [{ field: 'Fecha inicio del curso', sort: 'asc' }] } }}
+                            sx={{
+                                border: 0,
+                                '& .MuiDataGrid-columnHeaders': { backgroundColor: 'primary.light', color: 'text.primary' },
+                                '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none!important' },
+                                '& .MuiDataGrid-row': { cursor: 'pointer' },
+                                '& .MuiDataGrid-row:hover': { backgroundColor: 'action.hover', },
+                                '& .MuiDataGrid-overlay': { backgroundColor: 'rgba(255,255,255,0.7)' },
+                                '& .row-cancelado': {
+                                    backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                                    borderLeft: '4px solid #d32f2f',
+                                    color: '#b71c1c',
+                                    '&:hover': { backgroundColor: 'rgba(211, 47, 47, 0.15)', },
+                                    '& .MuiDataGrid-cell': { color: '#b71c1c', },
+                                },
+                            }}
+                            slots={{ 
+                                noRowsOverlay: () => (<Box sx={{ mt: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', p: 2 }}><InfoIcon color="action" sx={{ mb: 1, fontSize: '3rem' }} /><Typography align="center">{cursosData.length === 0 ? "No hay datos disponibles." : "No hay cursos que coincidan."}</Typography></Box>),
+                                loadingOverlay: () => (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', bgcolor: 'rgba(255,255,255,0.4)' }}>
+                                        <BurbujasLoader />
+                                    </Box>
+                                )
+                            }}
+                        />
+                    </Paper>
+                )}
 
                 <DetalleInstanciaModal
                     open={modalOpen}

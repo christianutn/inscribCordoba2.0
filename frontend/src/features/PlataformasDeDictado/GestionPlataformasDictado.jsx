@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Alert, Snackbar } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import PlataformasDictadoTable from './components/PlataformasDictadoTable';
 import PlataformaDictadoModal from './components/PlataformaDictadoModal';
 import usePlataformasDictado from './hooks/usePlataformasDictado';
@@ -67,10 +68,16 @@ const GestionPlataformasDictado = () => {
                 </Alert>
             )}
 
-            <PlataformasDictadoTable
-                data={plataformas}
-                onEdit={handleEdit}
-            />
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <BurbujasLoader />
+                </Box>
+            ) : (
+                <PlataformasDictadoTable
+                    data={plataformas}
+                    onEdit={handleEdit}
+                />
+            )}
 
             <PlataformaDictadoModal
                 open={modalOpen}

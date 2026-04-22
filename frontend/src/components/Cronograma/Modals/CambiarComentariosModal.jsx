@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Box, Card, CardHeader, CardContent, TextField, Button, CircularProgress, IconButton } from '@mui/material';
+import BurbujasLoader from '../../UIElements/BurbujasLoader';
+import { Modal, Box, Card, CardHeader, CardContent, TextField, Button, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+
 import { modalStyle } from '../constants';
 
 const CambiarComentariosModal = ({ open, onClose, onUpdate, loading, selectedRowData }) => {
@@ -40,7 +42,7 @@ const CambiarComentariosModal = ({ open, onClose, onUpdate, loading, selectedRow
                                 Cancelar
                             </Button>
                             <Button onClick={handleSubmit} disabled={loading} variant="contained">
-                                {loading ? <CircularProgress size={24} /> : "Guardar"}
+                                {loading ? <BurbujasLoader small /> : "Guardar"}
                             </Button>
                         </Box>
                     </CardContent>

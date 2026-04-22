@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography,
-    Button, TextField, IconButton, Autocomplete, CircularProgress, Snackbar, Alert, useTheme, useMediaQuery
+    Button, TextField, IconButton, Autocomplete, Snackbar, Alert, useTheme, useMediaQuery
 } from '@mui/material';
+import BurbujasLoader from '../UIElements/BurbujasLoader';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { getCursos } from '../../services/cursos.service.js';
 import { createCcAsistenciaEvento, updateCcAsistenciaEvento } from '../../services/cc_asistencia.service.js';
@@ -238,7 +239,7 @@ export default function ModalCrearCcEvento({ open, onClose, onSuccess, initialDa
                             boxShadow: '0 4px 12px rgba(0,123,255,0.2)'
                         }}
                     >
-                        {loading ? <CircularProgress size={24} color="inherit" /> : (isEditMode ? 'GUARDAR' : 'CREAR')}
+                        {loading ? <BurbujasLoader small /> : (isEditMode ? 'GUARDAR' : 'CREAR')}
                     </Button>
                 </DialogActions>
             </form>

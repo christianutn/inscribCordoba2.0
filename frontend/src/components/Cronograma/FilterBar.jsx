@@ -28,7 +28,16 @@ const FilterBar = ({
     const { setMinisterioFilter, setAreaFilter, setNombreFilter, setYearFilter, setMonthFilter, setActivosFilterActive, setAsignadoFilter, setOmitirCancelados } = setFilters;
 
     return (
-        <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
+        <Paper 
+            elevation={1} 
+            sx={{ 
+                p: 2, 
+                mb: 3,
+                opacity: loading ? 0.6 : 1,
+                transition: 'opacity 0.3s ease',
+                pointerEvents: loading ? 'none' : 'auto'
+            }}
+        >
             <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} sm={6} md={2.5}>
                     <TextField fullWidth label="Buscar por Asignado" variant="outlined" size="small" value={asignadoFilter} onChange={(e) => setAsignadoFilter(e.target.value)} InputProps={{ startAdornment: (<InputAdornment position="start"><AssignmentIndIcon color="action" fontSize="small" /></InputAdornment>), }} />

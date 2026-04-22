@@ -9,35 +9,37 @@ import { DataGrid } from "@mui/x-data-grid";
 import { esES } from "@mui/x-data-grid/locales";
 import {
   Backdrop,
-  CircularProgress,
   Box,
   Typography,
-  Modal,
   Card,
-  CardContent,
   CardHeader,
+  CardContent,
+  CardActions,
   IconButton,
-  Divider,
+  Button,
+  Grid,
+  Modal,
+  Fade,
   List,
   ListItem,
   ListItemText,
+  Divider,
   Paper,
+  Tooltip,
+  Tabs,
+  Tab,
+  Switch,
+  FormControlLabel,
   TextField,
+  InputAdornment,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Grid,
-  Button,
-  InputAdornment,
-  Tooltip,
-  Chip,
   Alert,
-  Switch,
-  FormControlLabel,
-  Tabs,
-  Tab,
+  Chip,
 } from "@mui/material";
+import BurbujasLoader from "./UIElements/BurbujasLoader";
 import BlockIcon from "@mui/icons-material/Block";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -704,12 +706,7 @@ const Cronograma = ({ user }) => {
     [formatValue],
   );
 
-  if (loading && !cursosData.length)
-    return (
-      <Backdrop open sx={{ zIndex: (t) => t.zIndex.drawer + 1, color: "#fff" }}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
-    );
+  // Eliminado el bloqueo total por Backdrop
   if (error)
     return (
       <Box sx={{ p: 3 }}>
@@ -752,7 +749,16 @@ const Cronograma = ({ user }) => {
         </div>
 
         <div>
-          <Paper elevation={1} sx={{ p: 2, width: "100%" }}>
+          <Paper 
+            elevation={1} 
+            sx={{ 
+              p: 2, 
+              width: "100%",
+              opacity: loading ? 0.6 : 1,
+              transition: 'opacity 0.3s ease',
+              pointerEvents: loading ? 'none' : 'auto'
+            }}
+          >
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} sm={6} md={2.5}>
                 <TextField
@@ -762,6 +768,7 @@ const Cronograma = ({ user }) => {
                   size="small"
                   value={nombreFilter}
                   onChange={handleNombreChange}
+                  disabled={loading}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -776,7 +783,7 @@ const Cronograma = ({ user }) => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  disabled={ministerioOptions.length <= 1}
+                  disabled={loading || ministerioOptions.length <= 1}
                 >
                   <InputLabel>Ministerio</InputLabel>
                   <Select
@@ -802,7 +809,7 @@ const Cronograma = ({ user }) => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  disabled={areaOptions.length <= 1}
+                  disabled={loading || areaOptions.length <= 1}
                 >
                   <InputLabel>Área</InputLabel>
                   <Select
@@ -833,7 +840,7 @@ const Cronograma = ({ user }) => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  disabled={isREF}
+                  disabled={loading || isREF}
                 >
                   <InputLabel>Año</InputLabel>
                   <Select
@@ -850,7 +857,7 @@ const Cronograma = ({ user }) => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6} md={2}>
-                <FormControl fullWidth size="small" variant="outlined">
+                <FormControl fullWidth size="small" variant="outlined" disabled={loading}>
                   <InputLabel>Mes Inicio Curso</InputLabel>
                   <Select
                     value={monthFilter}
@@ -1015,30 +1022,31 @@ const Cronograma = ({ user }) => {
           </Paper>
 
           {/* Content del Tab */}
-          <Box sx={{ opacity: tabValue === 0 ? 1 : 0, transition: 'opacity 0.3s ease-in-out', pointerEvents: tabValue === 0 ? 'auto' : 'none' }}>
+          <Box sx={{ display: tabValue === 0 ? "block" : "none" }}>
             {tabValue === 0 && (
               <>
-                {loading && cursosData.length > 0 && (
+                {loading && (
                   <Box
                     sx={{
                       display: "flex",
                       justifyContent: "center",
-                      my: 2,
+                      my: 4,
                       alignItems: "center",
+                      minHeight: "400px"
                     }}
                   >
-                    <CircularProgress size={20} sx={{ mr: 1 }} />
-                    <Typography variant="body2">Actualizando...</Typography>
+                    <BurbujasLoader />
                   </Box>
                 )}
-
-                <Paper elevation={3} sx={{ height: 600, width: "100%" }}>
-                  <DataGrid
-                    rows={filteredData}
-                    columns={columnsForGrid}
-                    onRowClick={handleRowClick}
-                    getRowId={(r) => r.id}
-                    loading={loading}
+                
+                {(!loading || cursosData.length > 0) && (
+                  <Paper elevation={3} sx={{ height: 600, width: "100%", opacity: loading ? 0.6 : 1 }}>
+                    <DataGrid
+                      rows={filteredData}
+                      columns={columnsForGrid}
+                      onRowClick={handleRowClick}
+                      getRowId={(r) => r.id}
+                      loading={loading}
                     density="compact"
                     disableRowSelectionOnClick
                     getRowClassName={getRowClassName}
@@ -1063,21 +1071,33 @@ const Cronograma = ({ user }) => {
                       },
                     }}
                   />
-                </Paper>
+                  </Paper>
+                )}
               </>
             )}
           </Box>
 
-          <Box sx={{ opacity: tabValue === 1 ? 1 : 0, transition: 'opacity 0.3s ease-in-out', pointerEvents: tabValue === 1 ? 'auto' : 'none' }}>
+          <Box sx={{ display: tabValue === 1 ? "block" : "none" }}>
             {tabValue === 1 && (
-              <CronogramaCalendar
-                filteredData={filteredData}
-                parseDate={parseDate}
-                yearFilter={yearFilter}
-                monthFilter={monthFilter}
-                setYearFilter={setYearFilter}
-                setMonthFilter={setMonthFilter}
-              />
+              <>
+                {loading && (
+                   <Box sx={{ display: 'flex', justifyContent: 'center', my: 4, minHeight: '400px', alignItems: 'center' }}>
+                     <BurbujasLoader />
+                   </Box>
+                )}
+                {(!loading || cursosData.length > 0) && (
+                  <Box sx={{ opacity: loading ? 0.6 : 1 }}>
+                    <CronogramaCalendar
+                      filteredData={filteredData}
+                      parseDate={parseDate}
+                      yearFilter={yearFilter}
+                      monthFilter={monthFilter}
+                      setYearFilter={setYearFilter}
+                      setMonthFilter={setMonthFilter}
+                    />
+                  </Box>
+                )}
+              </>
             )}
           </Box>
         </div>

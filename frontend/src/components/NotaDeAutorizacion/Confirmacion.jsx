@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import CircularProgress from '@mui/material/CircularProgress';
+import BurbujasLoader from "../UIElements/BurbujasLoader";
 import Backdrop from '@mui/material/Backdrop';
 import {
     Box,
@@ -702,10 +702,13 @@ const Confirmacion = () => {
             </Box >
             {
                 cargando && <Backdrop
-                    sx={{ color: 'primary.main', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    sx={{ 
+                        zIndex: (theme) => theme.zIndex.drawer + 1,
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)'
+                   }}
                     open={cargando}
                 >
-                    <CircularProgress color="inherit" />
+                    <BurbujasLoader />
                 </Backdrop>
             }
 

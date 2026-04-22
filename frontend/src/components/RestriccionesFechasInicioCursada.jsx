@@ -7,7 +7,7 @@ import Subtitulo from "./fonts/SubtituloPrincipal.jsx";
 import { Divider, Grid, Box } from "@mui/material";
 import Button from "./UIElements/Button.jsx";
 import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
+import BurbujasLoader from "./UIElements/BurbujasLoader";
 import Alert from '@mui/material/Alert';
 import Autocomplete from "../components/UIElements/Autocomplete.jsx";
 import { getRestricciones, putRestriccion } from "../services/restricciones.service.js";
@@ -222,17 +222,28 @@ const RestriccionesFechasInicioCursada = ({ sidebarOpen }) => {
                     Restricciones actualizadas con éxito
                 </Alert>
             )}
-            {cargando && (
-                <Backdrop
-                    sx={{ color: '#00519C', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                    open={cargando}
-                >
-                    <CircularProgress color="inherit" />
-                </Backdrop>
-            )}
-
-            <Box component="form" sx={{ p: { xs: 1, sm: 2, md: 3 }, width: '100%' }} noValidate autoComplete="off">
-                <Grid container spacing={3}>
+            <Box 
+                component="form" 
+                sx={{ 
+                    p: { xs: 1, sm: 2, md: 3 }, 
+                    width: '100%',
+                    position: 'relative'
+                }} 
+                noValidate 
+                autoComplete="off"
+            >
+                {cargando ? (
+                    <Box sx={{ 
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '600px',
+                        py: 8
+                    }}>
+                        <BurbujasLoader />
+                    </Box>
+                ) : (
+                    <Grid container spacing={3}>
 
                     <Grid item xs={12}>
                         <Titulo texto='Restricciones de Inicio de Cursada' />
@@ -318,6 +329,7 @@ const RestriccionesFechasInicioCursada = ({ sidebarOpen }) => {
                     </Grid>
 
                 </Grid>
+                )}
             </Box>
             <ModalInhabilitarFechas
                 open={openModalInhabilitar}

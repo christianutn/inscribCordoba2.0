@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Typography, Alert, CircularProgress, Paper } from '@mui/material';
+import { Box, Typography, Alert, Paper } from '@mui/material';
+import BurbujasLoader from '../UIElements/BurbujasLoader';
 import ModalConsultarCuil from './ModalConsultarCuil';
 import { getlistadoEventos } from '../../services/asistencias.service.js';
 import { postConfirmarAsistencia } from '../../services/asistencias.service.js';
@@ -56,41 +57,41 @@ const RegistroAsistencia = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
-                <CircularProgress />
-            </Box>
-        );
-    }
-
     return (
         <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Paper elevation={3} sx={{ p: 4, maxWidth: 600, width: '100%', textAlign: 'center' }}>
-                <Typography variant="h4" gutterBottom color="primary">
-                    Registro de Asistencia
-                </Typography>
-
-                {course && (
-                    <Box sx={{ mb: 4 }}>
-                        <Typography variant="h6">{course.curso?.nombre}</Typography>
-                        <Typography variant="subtitle1" color="text.secondary">{course.fecha_desde}</Typography>
+            <Paper elevation={3} sx={{ p: 4, maxWidth: 600, width: '100%', textAlign: 'center', minHeight: '300px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                        <BurbujasLoader />
                     </Box>
-                )}
+                ) : (
+                    <>
+                        <Typography variant="h4" gutterBottom color="primary">
+                            Registro de Asistencia
+                        </Typography>
 
-                {message && (
-                    <Alert
-                        severity={message.includes('✅') ? 'success' : 'error'}
-                        sx={{ mb: 2 }}
-                    >
-                        {message}
-                    </Alert>
-                )}
+                        {course && (
+                            <Box sx={{ mb: 4 }}>
+                                <Typography variant="h6">{course.curso?.nombre}</Typography>
+                                <Typography variant="subtitle1" color="text.secondary">{course.fecha_desde}</Typography>
+                            </Box>
+                        )}
 
-                {!showModal && !message && (
-                    <Typography variant="body1">
-                        Espere un momento...
-                    </Typography>
+                        {message && (
+                            <Alert
+                                severity={message.includes('✅') ? 'success' : 'error'}
+                                sx={{ mb: 2 }}
+                            >
+                                {message}
+                            </Alert>
+                        )}
+
+                        {!showModal && !message && (
+                            <Typography variant="body1">
+                                Espere un momento...
+                            </Typography>
+                        )}
+                    </>
                 )}
             </Paper>
 

@@ -14,12 +14,12 @@ import {
   Box,
   FormControl,
   InputLabel,
-  CircularProgress,
   Alert,
   AlertTitle,
   Stack,
   useTheme,
 } from '@mui/material';
+import BurbujasLoader from './UIElements/BurbujasLoader';
 
 const modules = {
   toolbar: [
@@ -200,7 +200,7 @@ const CrearAviso = () => {
               color="primary"
               onClick={handleGuardar}
               disabled={isSubmitting}
-              startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
+              startIcon={isSubmitting ? <BurbujasLoader small /> : null}
               sx={{
                 px: 4,
                 py: 1.5,

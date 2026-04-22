@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     Box, Typography, Card, TextField, Button, IconButton,
-    Autocomplete, CircularProgress, Alert, Snackbar, Divider,
+    Autocomplete, Alert, Snackbar, Divider,
     Chip, Tooltip, Fade, Paper, Stack, useTheme, alpha,
     Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     InputAdornment, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -349,7 +350,7 @@ const GestionEfemerides = ({ modo = "carga", user }) => {
                                         ...params.InputProps,
                                         endAdornment: (
                                             <>
-                                                {cursosLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                {cursosLoading ? <BurbujasLoader small /> : null}
                                                 {params.InputProps.endAdornment}
                                             </>
                                         ),
@@ -395,7 +396,7 @@ const GestionEfemerides = ({ modo = "carga", user }) => {
                             variant="contained"
                             onClick={handleSubmit}
                             disabled={!isFormValid || isSubmitting}
-                            startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+                            startIcon={isSubmitting ? <BurbujasLoader small /> : <SendIcon />}
                         >
                             Guardar Efemérides
                         </Button>
@@ -475,7 +476,7 @@ const GestionEfemerides = ({ modo = "carga", user }) => {
                 </Box>
 
                 {loadingList ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress /></Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><BurbujasLoader /></Box>
                 ) : (
                     <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2, border: `1px solid ${theme.palette.divider}`, maxHeight: 500 }}>
                         <Table stickyHeader size="small">
@@ -601,7 +602,7 @@ const GestionEfemerides = ({ modo = "carga", user }) => {
                         variant="contained"
                         onClick={handleSaveEdit}
                         disabled={isUpdating || !editDialog.data.fecha || !editDialog.data.descripcion.trim()}
-                        startIcon={isUpdating ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                        startIcon={isUpdating ? <BurbujasLoader small /> : <SaveIcon />}
                     >
                         Guardar Cambios
                     </Button>

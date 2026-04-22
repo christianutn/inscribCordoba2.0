@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import BurbujasLoader from '../../UIElements/BurbujasLoader';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField, 
-    Box, FormControlLabel, Checkbox, Typography, CircularProgress, Autocomplete as MuiAutocomplete
+    Box, FormControlLabel, Checkbox, Typography, Autocomplete as MuiAutocomplete
 } from '@mui/material';
 
 const GestionarRestriccionesModal = ({ open, onClose, onUpdate, loading, selectedRowData, allDepartamentos, allCursos }) => {
@@ -125,7 +126,7 @@ const GestionarRestriccionesModal = ({ open, onClose, onUpdate, loading, selecte
             <DialogActions>
                 <Button onClick={onClose}>Cancelar</Button>
                 <Button onClick={handleConfirm} variant="contained" disabled={loading || isInvalid}>
-                    {loading ? <CircularProgress size={24} color="inherit" /> : "Guardar Restricciones"}
+                    {loading ? <BurbujasLoader small /> : "Guardar Restricciones"}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -4,8 +4,9 @@ import {
     Button, TextField, MenuItem, Grid, FormControl,
     InputLabel, Select, IconButton, Typography, Divider, Box,
     Alert, Stepper, Step, StepLabel, Chip, Tooltip,
-    CircularProgress, Paper
+    Paper
 } from '@mui/material';
+import BurbujasLoader from '../../../components/UIElements/BurbujasLoader';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -213,7 +214,7 @@ const EstadoStepper = ({ estadoActual, onAvanzar, onRetroceder, onDarDeBaja, onR
                     </Box>
                 )}
 
-                {loading && <CircularProgress size={20} />}
+                {loading && <BurbujasLoader small />}
             </Box>
 
             {/* Diálogo de confirmación para retroceso desde PVICT */}
@@ -831,7 +832,7 @@ const EventoYCursoModal = ({ open, onClose, onSave, onChangeEstado, record, auxi
                     variant="contained"
                     color="primary"
                     disabled={!hasChanges || isSaving}
-                    startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : null}
+                    startIcon={isSaving ? <BurbujasLoader small /> : null}
                 >
                     {isSaving
                         ? 'Guardando...'

@@ -8,9 +8,9 @@ import {
     Button,
     MenuItem,
     Grid,
-    Alert,
-    CircularProgress
+    Alert
 } from "@mui/material";
+import BurbujasLoader from "../../UIElements/BurbujasLoader";
 import { postCurso } from "../../../services/cursos.service";
 import { getMediosInscripcion } from "../../../services/mediosInscripcion.service";
 import { getPlataformasDictado } from "../../../services/plataformasDictado.service";
@@ -241,7 +241,7 @@ const ModalCrearCurso = ({ open, onClose, onSuccess, areas, estadoInicial }) => 
             <DialogActions>
                 <Button onClick={onClose} color="inherit">Cancelar</Button>
                 <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-                    {loading ? <CircularProgress size={24} /> : "Crear"}
+                    {loading ? <BurbujasLoader small /> : "Crear"}
                 </Button>
             </DialogActions>
         </Dialog>

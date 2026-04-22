@@ -34,8 +34,7 @@ const SessionExpiredDialog = ({ open, onClose }) => {
             slotProps={{
                 backdrop: {
                     sx: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                        backdropFilter: 'blur(8px)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
                     }
                 }
             }}

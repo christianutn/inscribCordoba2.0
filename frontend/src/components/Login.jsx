@@ -15,7 +15,7 @@ import { useState, useEffect } from 'react';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
+import BurbujasLoader from './UIElements/BurbujasLoader';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -403,12 +403,7 @@ const Login = () => {
     return (
         <>
             {renderAlerts()}
-            <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={open}
-            >
-                <CircularProgress color="inherit" />
-            </Backdrop>
+
             <Box
                 sx={{
                     display: 'flex',
@@ -449,7 +444,13 @@ const Login = () => {
                             >
                                 {showForgotPassword ? 'Recuperar Contraseña' : 'Iniciar Sesión'}
                             </Typography>
-                            {showForgotPassword ? renderForgotPasswordForm() : renderLoginForm()}
+                            {open ? (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px', py: 8 }}>
+                                    <BurbujasLoader />
+                                </Box>
+                            ) : (
+                                showForgotPassword ? renderForgotPasswordForm() : renderLoginForm()
+                            )}
                         </Paper>
                     </Container>
                 </Box>

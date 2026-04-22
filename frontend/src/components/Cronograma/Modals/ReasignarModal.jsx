@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import {
-    Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, 
-    InputAdornment, Paper, List, ListItem, ListItemText, Typography, CircularProgress, Chip
+    Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
+    InputAdornment, Paper, List, ListItem, ListItemText, Typography, Chip
 } from '@mui/material';
+import BurbujasLoader from '../../UIElements/BurbujasLoader';
 import SearchIcon from '@mui/icons-material/Search';
 
 const ReasignarModal = ({ open, onClose, onReasign, loading, selectedRowData, adminUsers }) => {
@@ -90,7 +91,7 @@ const ReasignarModal = ({ open, onClose, onReasign, loading, selectedRowData, ad
                     color="primary" 
                     disabled={(selectedUserForReasign === null) || loading}
                 >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : "Confirmar Reasignación"}
+                    {loading ? <BurbujasLoader small /> : "Confirmar Reasignación"}
                 </Button>
             </DialogActions>
         </Dialog>

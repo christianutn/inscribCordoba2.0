@@ -42,8 +42,8 @@ import CampusCba from './imagenes/campus_cordoba.png';
 
 import IconButton from '@mui/material/IconButton';
 import Alerta from '@mui/material/Alert';
-import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
+import BurbujasLoader from './UIElements/BurbujasLoader';
 
 const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
   const [avisos, setAvisos] = useState([]);
@@ -144,14 +144,6 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
 
   return (
     <>
-      {loading && (
-        <Backdrop
-          sx={{ color: 'primary.main', zIndex: (theme) => theme.zIndex.drawer + 2 }}
-          open={loading}
-        >
-          <CircularProgress color="inherit" />
-        </Backdrop>
-      )}
 
       {openConfirmDialog && avisoToDelete && (
         <Dialog
@@ -179,7 +171,7 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
               onClick={handleConfirmDelete}
               variant="contained"
               color="error"
-              startIcon={loadingDelete ? <CircularProgress size={20} color="inherit" /> : <DeleteIcon />}
+              startIcon={loadingDelete ? <BurbujasLoader small /> : <DeleteIcon />}
               disabled={loadingDelete}
             >
               {loadingDelete ? "Eliminando..." : "Eliminar"}
@@ -198,6 +190,18 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
           pb: 8
         }}
       >
+        {loading ? (
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: '100vh',
+            width: '100%'
+          }}>
+            <BurbujasLoader />
+          </Box>
+        ) : (
+          <>
         {/* CABECERA: Saludo */}
         <Box sx={{
           width: '100%',
@@ -306,9 +310,8 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
                           width: '100%',
                           height: '100%',
                           borderRadius: '20px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                          backdropFilter: 'blur(10px)',
-                          border: '1px solid rgba(255, 255, 255, 0.4)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                          border: '1px solid rgba(0, 158, 227, 0.1)',
                           position: 'relative',
                           overflow: 'hidden',
                           display: 'flex',
@@ -475,6 +478,8 @@ const Home = ({ nombre, rol, setOpcionSeleccionada, sidebarOpen }) => {
             </Box>
           </Container>
         </Box>
+        </>
+        )}
       </Box>
     </>
   );

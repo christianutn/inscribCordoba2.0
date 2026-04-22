@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Alert, Snackbar } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import BurbujasLoader from '../../components/UIElements/BurbujasLoader';
 import MinisteriosTable from './components/MinisteriosTable';
 import MinisterioModal from './components/MinisterioModal';
 import useMinisterios from './hooks/useMinisterios';
@@ -67,10 +68,16 @@ const GestionMinisterios = () => {
                 </Alert>
             )}
 
-            <MinisteriosTable
-                data={ministerios}
-                onEdit={handleEdit}
-            />
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <BurbujasLoader />
+                </Box>
+            ) : (
+                <MinisteriosTable
+                    data={ministerios}
+                    onEdit={handleEdit}
+                />
+            )}
 
             <MinisterioModal
                 open={modalOpen}
