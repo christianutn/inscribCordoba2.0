@@ -245,7 +245,25 @@ const CronogramaGAReducido = () => {
     const handleDescargarExcel = useCallback(async ({ plataforma, incluirCancelados }) => {
         if (!filteredData.length) return;
         try {
-            let dataToExport = filteredData;
+            let dataToExport = [...filteredData];
+
+            dataToExport.sort((a, b) => {
+                const dateA = a.originalInstancia?.fecha_inicio_inscripcion || '';
+                const dateB = b.originalInstancia?.fecha_inicio_inscripcion || '';
+                return dateA.localeCompare(dateB);
+            });
+
+            dataToExport = dataToExport.map(row => {
+                let newRow = { ...row };
+                const fields = ["Fecha inicio inscripción", "Fecha fin inscripción", "Fecha inicio del curso", "Fecha fin del curso"];
+                fields.forEach(f => {
+                    if (newRow[f]) {
+                        const d = dayjs(newRow[f]);
+                        if (d.isValid()) newRow[f] = d.format('DD/MM/YYYY');
+                    }
+                });
+                return newRow;
+            });
 
             if (plataforma !== 'ALL') {
                 dataToExport = dataToExport.filter(row => {
@@ -342,7 +360,7 @@ const CronogramaGAReducido = () => {
                                     '& .MuiDataGrid-cell': { color: '#b71c1c', },
                                 },
                             }}
-                            slots={{ 
+                            slots={{
                                 noRowsOverlay: () => (<Box sx={{ mt: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', flexDirection: 'column', p: 2 }}><InfoIcon color="action" sx={{ mb: 1, fontSize: '3rem' }} /><Typography align="center">{cursosData.length === 0 ? "No hay datos disponibles." : "No hay cursos que coincidan."}</Typography></Box>),
                                 loadingOverlay: () => (
                                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', bgcolor: 'rgba(255,255,255,0.4)' }}>
@@ -472,6 +490,7 @@ const CronogramaGAReducido = () => {
                     open={excelModalOpen}
                     onClose={() => setExcelModalOpen(false)}
                     onDownload={handleDescargarExcel}
+                    infoMessage="Los filtros activos en la pantalla ya están siendo aplicados a esta descarga. El excel se encuentra ordenado por fecha de inicio de inscripción."
                 />
 
             </div>

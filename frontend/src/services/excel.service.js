@@ -53,26 +53,6 @@ export const descargarExcelCronograma = async (data, columns, nameFile) => {
         return;
     }
 
-    // --- NUEVO: Ordenar los datos ---
-    // Crear una copia para no modificar el array original (buena práctica)
-    const sortedData = [...data];
-
-    // Ordenar la copia por "Fecha inicio del curso" ascendente
-    sortedData.sort((a, b) => {
-        // Intentar convertir las fechas string a objetos Date
-        // Asumimos el formato "YYYY-MM-DD"
-        const dateA = new Date(a["Fecha inicio del curso"]);
-        const dateB = new Date(b["Fecha inicio del curso"]);
-
-        // Manejar posibles fechas inválidas o faltantes (opcional, pero robusto)
-        // Si a falta o es inválida, va al final. Si b falta o es inválida, va al final.
-        const timeA = !isNaN(dateA.getTime()) ? dateA.getTime() : Infinity;
-        const timeB = !isNaN(dateB.getTime()) ? dateB.getTime() : Infinity;
-
-        return timeA - timeB; // Orden ascendente (fecha más antigua primero)
-    });
-    // ---------------------------------
-
     try {
         // 1. Crear Libro y Hoja
         const workbook = new ExcelJS.Workbook();
@@ -97,9 +77,8 @@ export const descargarExcelCronograma = async (data, columns, nameFile) => {
         headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
         headerRow.height = 20;
 
-        // 4. Agregar Filas de Datos (USANDO sortedData)
-        // Iterar sobre los datos YA ORDENADOS
-        sortedData.forEach((row) => { // <-- Usar sortedData aquí
+        // 4. Agregar Filas de Datos
+        data.forEach((row) => {
             const addedRow = worksheet.addRow(row);
             // Opcional: Aplicar estilo a las celdas de datos
             // addedRow.font = { name: 'Calibri', size: 11 };

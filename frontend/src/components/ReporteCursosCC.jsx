@@ -690,11 +690,19 @@ const ReporteCursosCC = ({ sidebarOpen }) => {
                 return;
             }
 
+            dataFilteredParaExcel.sort((a, b) => {
+                const dateA = a.fecha_inicio_curso || '';
+                const dateB = b.fecha_inicio_curso || '';
+                return dateA.localeCompare(dateB);
+            });
+
             const dataParaExcel = dataFilteredParaExcel.map(inst => {
                 const det = inst.detalle_curso || {};
                 const min = det.detalle_area?.detalle_ministerio?.nombre || "";
                 const area = det.detalle_area?.nombre || "";
                 const plat = getPlataforma(inst);
+
+                const formatExcelDate = (dateStr) => dateStr && dayjs(dateStr).isValid() ? dayjs(dateStr).format('DD/MM/YYYY') : (dateStr || "");
 
                 return {
                     "Curso": inst.curso,
@@ -702,8 +710,8 @@ const ReporteCursosCC = ({ sidebarOpen }) => {
                     "Ministerio": min,
                     "Área": area,
                     "Plataforma de dictado": plat,
-                    "Fecha inicio curso": inst.fecha_inicio_curso,
-                    "Fecha fin curso": inst.fecha_fin_curso,
+                    "Fecha inicio curso": formatExcelDate(inst.fecha_inicio_curso),
+                    "Fecha fin curso": formatExcelDate(inst.fecha_fin_curso),
                     "Estado Instancia": inst.estado_instancia,
                     "Medio de inscripción": inst.medio_inscripcion,
                     "Cupo": inst.cupo,

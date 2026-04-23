@@ -368,7 +368,14 @@ const Cronograma = ({ user }) => {
     if (!filteredData.length) return;
     try {
       // Mapeamos los datos filtrados usando la info cruda (_raw) para incluir TODAS las columnas
-      const dataParaExcel = filteredData.map((item) => {
+      let dataToProcess = [...filteredData];
+      dataToProcess.sort((a, b) => {
+        const dateA = a._raw?.fecha_inicio_curso || '';
+        const dateB = b._raw?.fecha_inicio_curso || '';
+        return dateA.localeCompare(dateB);
+      });
+
+      const dataParaExcel = dataToProcess.map((item) => {
         const raw = item._raw || {};
         const det = raw.detalle_curso || {};
         const asig = raw.detalle_asignado || {};
@@ -376,16 +383,18 @@ const Cronograma = ({ user }) => {
         const rol = asig.detalle_rol || {};
         const areaAsig = asig.detalle_area || {};
 
+        const formatDate = (dateStr) => dateStr && dayjs(dateStr).isValid() ? dayjs(dateStr).format('DD/MM/YYYY') : (dateStr || "");
+
         return {
           Curso: raw.curso,
           "Nombre del curso": det.nombre,
           "Area del curso": raw.detalle_curso?.detalle_area?.nombre || "",
           Ministerio:
             raw.detalle_curso?.detalle_area?.detalle_ministerio?.nombre || "",
-          "Fecha inicio curso": raw.fecha_inicio_curso,
-          "Fecha fin curso": raw.fecha_fin_curso,
-          "Fecha inicio inscripción": raw.fecha_inicio_inscripcion,
-          "Fecha fin inscripción": raw.fecha_fin_inscripcion,
+          "Fecha inicio curso": formatDate(raw.fecha_inicio_curso),
+          "Fecha fin curso": formatDate(raw.fecha_fin_curso),
+          "Fecha inicio inscripción": formatDate(raw.fecha_inicio_inscripcion),
+          "Fecha fin inscripción": formatDate(raw.fecha_fin_inscripcion),
           "Estado Instancia": raw.estado_instancia,
           Cupo: raw.cupo,
           Inscriptos: raw.cantidad_inscriptos || 0,
@@ -491,6 +500,12 @@ const Cronograma = ({ user }) => {
           return;
         }
 
+        dataToProcess.sort((a, b) => {
+          const dateA = a._raw?.fecha_inicio_curso || '';
+          const dateB = b._raw?.fecha_inicio_curso || '';
+          return dateA.localeCompare(dateB);
+        });
+
         const dataParaExcel = dataToProcess.map((item) => {
           const raw = item._raw || {};
           const det = raw.detalle_curso || {};
@@ -499,16 +514,18 @@ const Cronograma = ({ user }) => {
           const rol = asig.detalle_rol || {};
           const areaAsig = asig.detalle_area || {};
 
+          const formatDate = (dateStr) => dateStr && dayjs(dateStr).isValid() ? dayjs(dateStr).format('DD/MM/YYYY') : (dateStr || "");
+
           return {
             Curso: raw.curso,
             "Nombre del curso": det.nombre,
             "Area del curso": raw.detalle_curso?.detalle_area?.nombre || "",
             Ministerio:
               raw.detalle_curso?.detalle_area?.detalle_ministerio?.nombre || "",
-            "Fecha inicio curso": raw.fecha_inicio_curso,
-            "Fecha fin curso": raw.fecha_fin_curso,
-            "Fecha inicio inscripción": raw.fecha_inicio_inscripcion,
-            "Fecha fin inscripción": raw.fecha_fin_inscripcion,
+            "Fecha inicio curso": formatDate(raw.fecha_inicio_curso),
+            "Fecha fin curso": formatDate(raw.fecha_fin_curso),
+            "Fecha inicio inscripción": formatDate(raw.fecha_inicio_inscripcion),
+            "Fecha fin inscripción": formatDate(raw.fecha_fin_inscripcion),
             "Estado Instancia": raw.estado_instancia,
             Cupo: raw.cupo,
             Inscriptos: raw.cantidad_inscriptos || 0,
@@ -749,10 +766,10 @@ const Cronograma = ({ user }) => {
         </div>
 
         <div>
-          <Paper 
-            elevation={1} 
-            sx={{ 
-              p: 2, 
+          <Paper
+            elevation={1}
+            sx={{
+              p: 2,
               width: "100%",
               opacity: loading ? 0.6 : 1,
               transition: 'opacity 0.3s ease',
@@ -1038,7 +1055,7 @@ const Cronograma = ({ user }) => {
                     <BurbujasLoader />
                   </Box>
                 )}
-                
+
                 {(!loading || cursosData.length > 0) && (
                   <Paper elevation={3} sx={{ height: 600, width: "100%", opacity: loading ? 0.6 : 1 }}>
                     <DataGrid
@@ -1047,30 +1064,30 @@ const Cronograma = ({ user }) => {
                       onRowClick={handleRowClick}
                       getRowId={(r) => r.id}
                       loading={loading}
-                    density="compact"
-                    disableRowSelectionOnClick
-                    getRowClassName={getRowClassName}
-                    initialState={{
-                      sorting: {
-                        sortModel: [
-                          { field: "Fecha inicio del curso", sort: "asc" },
-                        ],
-                      },
-                    }}
-                    sx={{
-                      "& .row-cancelado": {
-                        backgroundColor: "rgba(211, 47, 47, 0.08)",
-                        borderLeft: "4px solid #d32f2f",
-                        color: "#b71c1c",
-                        "&:hover": {
-                          backgroundColor: "rgba(211, 47, 47, 0.15)",
+                      density="compact"
+                      disableRowSelectionOnClick
+                      getRowClassName={getRowClassName}
+                      initialState={{
+                        sorting: {
+                          sortModel: [
+                            { field: "Fecha inicio del curso", sort: "asc" },
+                          ],
                         },
-                        "& .MuiDataGrid-cell": {
+                      }}
+                      sx={{
+                        "& .row-cancelado": {
+                          backgroundColor: "rgba(211, 47, 47, 0.08)",
+                          borderLeft: "4px solid #d32f2f",
                           color: "#b71c1c",
+                          "&:hover": {
+                            backgroundColor: "rgba(211, 47, 47, 0.15)",
+                          },
+                          "& .MuiDataGrid-cell": {
+                            color: "#b71c1c",
+                          },
                         },
-                      },
-                    }}
-                  />
+                      }}
+                    />
                   </Paper>
                 )}
               </>
@@ -1081,9 +1098,9 @@ const Cronograma = ({ user }) => {
             {tabValue === 1 && (
               <>
                 {loading && (
-                   <Box sx={{ display: 'flex', justifyContent: 'center', my: 4, minHeight: '400px', alignItems: 'center' }}>
-                     <BurbujasLoader />
-                   </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', my: 4, minHeight: '400px', alignItems: 'center' }}>
+                    <BurbujasLoader />
+                  </Box>
                 )}
                 {(!loading || cursosData.length > 0) && (
                   <Box sx={{ opacity: loading ? 0.6 : 1 }}>
@@ -1338,6 +1355,7 @@ const Cronograma = ({ user }) => {
         open={excelModalOpen}
         onClose={() => setExcelModalOpen(false)}
         onDownload={handleDescargarExcelConModal}
+        infoMessage="Los filtros activos en la pantalla ya están siendo aplicados a esta descarga. El excel se encuentra ordenado por fecha de inicio de curso."
       />
     </>
   );
