@@ -1,22 +1,19 @@
 import apiClient from './apiClient';
-
-
 const URL = process.env.REACT_APP_API_URL + "/mediosInscripcion";
+
 export const getMediosInscripcion = async () => {
     try {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`}
+                "Content-Type": "application/json"
+            }
         });
 
         const data = await response.json();
         if(response.status !== 200) {
-            
             throw new Error(data.message || "Error al obtener los medios de inscripción");
         }
-        
         
         return data
     } catch (error) {
@@ -31,8 +28,7 @@ export const putMedioInscripcion = async (medioInscripcion) => {
         const response = await apiClient(URL, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 ...medioInscripcion
@@ -54,8 +50,7 @@ export const deleteMedioInscripcion = async (cod) => {
         const response = await apiClient(`${URL}/${cod}`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -73,8 +68,7 @@ export const postMedioInscripcion = async (medioInscripcion) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 ...medioInscripcion

@@ -3,7 +3,6 @@ const URL = process.env.REACT_APP_API_URL + '/cc-asistencias';
 
 const getHeaders = (isFormData = false) => {
     const headers = {
-        "Authorization": `Bearer ${localStorage.getItem("jwt")}`
     };
     if (!isFormData) {
         headers["Content-Type"] = "application/json";

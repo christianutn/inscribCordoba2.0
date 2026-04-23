@@ -1,7 +1,4 @@
 import apiClient from './apiClient';
-
-
-
 const URL = process.env.REACT_APP_API_URL + "/ministerios";
 
 
@@ -10,8 +7,7 @@ export const getMinisterios = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
 
@@ -37,8 +33,7 @@ export const putMinisterios = async (ministerio) => {
         const response = await apiClient(URL, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 ...ministerio
@@ -62,8 +57,7 @@ export const postMinisterios = async (ministerio) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 ...ministerio
@@ -87,8 +81,7 @@ export const deleteMinisterio = async (codMinisterios) => {
         const response = await apiClient(`${URL}/${codMinisterios}`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
 

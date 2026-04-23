@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-
 const URL = process.env.REACT_APP_API_URL + "/plataformasDictado";
 
 export const getPlataformasDictado = async () => {
@@ -7,8 +6,7 @@ export const getPlataformasDictado = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -27,8 +25,7 @@ export const putPlataformaDictado = async (plataformaDictado) => {
         const response = await apiClient(URL, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({...plataformaDictado})
         });
@@ -47,8 +44,7 @@ export const deletePlataformaDictado = async (cod) => {
         const response = await apiClient(`${URL}/${cod}`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -66,8 +62,7 @@ export const postPlataformaDictado = async (plataformaDictado) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({...plataformaDictado})
         });

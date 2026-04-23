@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-
 const URL = process.env.REACT_APP_API_URL + "/cursos";
 
 export const getCursos = async (busqueda = "") => {
@@ -7,8 +6,7 @@ export const getCursos = async (busqueda = "") => {
         const response = await apiClient(`${URL}?busqueda=${busqueda}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -29,8 +27,7 @@ export const postCurso = async (curso) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ ...curso })
         });
@@ -54,8 +51,7 @@ export const putCurso = async (curso) => {
         const response = await apiClient(URL, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 ...curso
@@ -81,8 +77,7 @@ export const deleteCurso = async (cuil) => {
         const response = await apiClient(`${URL}/${cuil}`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
 
@@ -106,8 +101,7 @@ export const patchEstadoCurso = async (cod, accion, estadoDestino = null) => {
         const response = await apiClient(`${URL}/${cod}/estado`, {
             method: "PATCH",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(body)
         });

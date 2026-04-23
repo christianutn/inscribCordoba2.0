@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-
 const URL = process.env.REACT_APP_API_URL + "/tutores";
 
 export const getTutores = async (busqueda = "") => {
@@ -7,8 +6,7 @@ export const getTutores = async (busqueda = "") => {
         const response = await apiClient(`${URL}?busqueda=${busqueda}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -33,8 +31,7 @@ export const putTutores = async (tutor) => {
         const response = await apiClient(URL, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 ...tutor
@@ -60,8 +57,7 @@ export const deleteTutor = async (cuil) => {
         const response = await apiClient(`${URL}/${cuil}`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -80,8 +76,7 @@ export const postTutores = async (tutor) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 ...tutor

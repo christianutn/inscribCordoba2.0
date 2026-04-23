@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 export const validarOrdenFechas = (listaFechasEnOrden, esAutogestionado) => {
     const mensajes = [
         "- Fecha inscripción desde -",
@@ -44,4 +45,3 @@ export const validarOrdenFechas = (listaFechasEnOrden, esAutogestionado) => {
 
     return true;
 };
-

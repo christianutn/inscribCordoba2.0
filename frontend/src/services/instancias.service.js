@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-
 const URL = process.env.REACT_APP_API_URL + "/instancias";
 
 
@@ -11,8 +10,7 @@ export const postInstancias = async (newInstancia) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(newInstancia)
         })
@@ -33,8 +31,7 @@ export const getInstancias = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         })
         const data = await response.json();
@@ -57,8 +54,7 @@ export const getInstanciasByCurso = async (curso) => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -86,8 +82,7 @@ export const getFechasInvalidas = async (targetYear) => {
         const response = await apiClient(`${URL}/get-fechas-invalidas/${targetYear}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         })
 
@@ -108,8 +103,7 @@ export const putInstancia = async (curso_params, fecha_inicio_curso_params, newI
         const response = await apiClient(`${URL}/${curso_params}/${fecha_inicio_curso_params}`, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(newInstancia)
         })
@@ -128,8 +122,7 @@ export const putInstanciasMasivo = async (payload) => {
         const response = await apiClient(`${URL}`, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(payload)
         })
@@ -148,8 +141,7 @@ export const getTablaInstanciasPorUsuario = async (fecha_desde, fecha_hasta) => 
         const response = await apiClient(`${URL}/tabla-instancias-por-usuario?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();

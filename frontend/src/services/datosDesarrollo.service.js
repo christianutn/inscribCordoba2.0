@@ -6,8 +6,7 @@ export const getDatosDesarrollo = async (busqueda = "", mes = "", anio = "") => 
         const response = await apiClient(`${URL}?busqueda=${busqueda}&mes=${mes}&anio=${anio}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -26,8 +25,7 @@ export const postDatosDesarrollo = async (datos) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(datos)
         });
@@ -46,8 +44,7 @@ export const putDatosDesarrollo = async (id, datos) => {
         const response = await apiClient(`${URL}/${id}`, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(datos)
         });
@@ -66,8 +63,7 @@ export const deleteDatosDesarrollo = async (id) => {
         const response = await apiClient(`${URL}/${id}`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
 

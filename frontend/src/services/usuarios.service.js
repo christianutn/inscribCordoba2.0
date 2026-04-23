@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/usuarios";
 
 export const getUsuarios = async () => {
@@ -5,8 +6,7 @@ export const getUsuarios = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -19,16 +19,10 @@ export const getUsuarios = async () => {
         throw error
     }
 }
-
-
-import apiClient from './apiClient';
-
 export const putUsuarios = async (usuario) => {
     // Usamos apiClient que ya maneja credentials y headers base.
-    // Además, ya no inyectamos el JWT del localStorage; el navegador enviará la cookie automáticamente.
-    const endpoint = '/usuarios'; // Asumiendo que esta es la ruta base para usuarios
-    
-    return await apiClient(endpoint, {
+
+    return await apiClient(URL, {
         method: "PUT",
         body: JSON.stringify(usuario)
     });
@@ -39,8 +33,7 @@ export const deleteUsuario = async (cuil) => {
         const response = await apiClient(`${URL}/${cuil}`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -58,8 +51,7 @@ export const getMyUser = async () => {
         const response = await apiClient(`${URL}/myuser`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")} `
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -79,8 +71,7 @@ export const postUser = async (user) => {
         const response = await apiClient(`${URL}/registrar`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ ...user })
         });
@@ -100,7 +91,7 @@ export const cambiarContrasenia = async (nuevaContrasenia) => {
         // 1. Intento primero el token de la URL
         const params = new URLSearchParams(window.location.search);
         let token = params.get("token");
-        
+
         // 2. Si no hay token en la URL, lo saco del localStorage
         if (!token) {
             token = localStorage.getItem("jwt");
@@ -114,8 +105,7 @@ export const cambiarContrasenia = async (nuevaContrasenia) => {
         const response = await apiClient(`${URL}/contrasenia`, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ nuevaContrasenia })
         });
@@ -140,7 +130,7 @@ export const recuperoContrasenia = async (cuil) => {
         const response = await apiClient(`${URL}/recuperoContrasenia`, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ cuil: cuil })
         });
@@ -160,8 +150,7 @@ export const invalidarSesionPorInactividad = async () => {
         const response = await apiClient(`${URL}/invalidar-sesion`, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
 

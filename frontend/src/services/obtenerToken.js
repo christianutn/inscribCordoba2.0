@@ -30,5 +30,3 @@ const obtenerToken = async (cuil, contrasenia) => {
 };
 
 export default obtenerToken;
-
-

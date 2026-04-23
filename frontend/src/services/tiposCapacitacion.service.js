@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-
 const URL = process.env.REACT_APP_API_URL + "/tiposCapacitacion";
 
 export const getTiposCapacitacion = async () => {
@@ -7,8 +6,7 @@ export const getTiposCapacitacion = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -28,8 +26,7 @@ export const putTiposCapacitacion = async (tipoCapacitacion) => {
         const response = await apiClient(URL, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({...tipoCapacitacion})
         });
@@ -50,8 +47,7 @@ export const postTiposCapacitacion = async (tipoCapacitacion) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({...tipoCapacitacion})
         });
@@ -70,8 +66,7 @@ export const deleteTiposCapacitacion = async (identificador) => {
         const response = await apiClient(`${URL}/${identificador}`, {
             method: "DELETE",   
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();

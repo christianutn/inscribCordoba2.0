@@ -6,10 +6,9 @@ export const postAviso = async (avisoNuevo) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify(avisoNuevo),
+            body: JSON.stringify(avisoNuevo)
         });
         const data = await response.json();
 
@@ -27,8 +26,7 @@ export const getAvisos = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -48,9 +46,8 @@ export const deleteAviso = async (id) => {
         const response = await apiClient(`${URL}/${id}`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-            },
+                "Content-Type": "application/json"
+            }
         });
 
         if (response.status !== 204) {

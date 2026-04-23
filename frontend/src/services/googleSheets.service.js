@@ -1,7 +1,4 @@
 import apiClient from './apiClient';
-
-
-
 const URL = process.env.REACT_APP_API_URL + "/googleSheets";
 
 export const getCronograma = async () => {
@@ -10,10 +7,9 @@ export const getCronograma = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        });
+                "Content-Type": "application/json"
+            }
+            });
 
         const data = await response.json();
         if(response.status !== 200) {
@@ -33,10 +29,9 @@ export const getMatrizFechas = async () => {
         const response = await apiClient(URL + "/matrizFechas", {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        }); 
+                "Content-Type": "application/json"
+            }
+            }); 
 
         const data = await response.json();
         if(response.status !== 200) {
@@ -89,10 +84,9 @@ export const getObjNroEventos = async () => {
         const response = await apiClient(URL + "/nroEventos", {
             method: "GET",
             headers: {
-                "Content-Type": "application/json", 
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        });
+                "Content-Type": "application/json"
+            }
+            });
 
         const data = await response.json();
         if(response.status !== 200) {

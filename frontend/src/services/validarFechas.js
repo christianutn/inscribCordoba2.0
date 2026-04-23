@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 const validarFecha = (fecha) => {
     
     // Expresión regular para validar el formato AAAA-MM-DD

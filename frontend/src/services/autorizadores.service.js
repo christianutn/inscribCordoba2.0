@@ -6,8 +6,7 @@ export const getAutorizadores = async (busqueda = "") => {
         const response = await apiClient(`${URL}?busqueda=${busqueda}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -26,8 +25,7 @@ export const postAutorizador = async (autorizador) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 ...autorizador

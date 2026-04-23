@@ -10,7 +10,7 @@ export const getDiccionarioChatbot = async (pregunta, idCategoria) => {
         const response = await apiClient(`${URL}?pregunta=${pregunta}&idCategoria=${idCategoria}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -31,7 +31,7 @@ export const getDiccionarioChatbotPuntual = async (id) => {
         const response = await apiClient(`${URLP}?id=${id}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -52,7 +52,7 @@ export const insertDiccionarioChatbot = async (diccionario) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ ...diccionario }), // Convertir el objeto a JSON
         });
@@ -69,5 +69,3 @@ export const insertDiccionarioChatbot = async (diccionario) => {
         throw error; // Propagar el error para manejarlo fuera
     }
 };
-
-

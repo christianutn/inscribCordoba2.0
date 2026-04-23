@@ -9,8 +9,7 @@ export const getEfemerides = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -32,8 +31,7 @@ export const getEfemeridesByCurso = async (curso) => {
         const response = await apiClient(`${URL}/curso/${curso}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -55,8 +53,7 @@ export const postEfemerides = async (payload) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(payload)
         });
@@ -80,8 +77,7 @@ export const putEfemeride = async (id, payload) => {
         const response = await apiClient(`${URL}/${id}`, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(payload)
         });
@@ -104,8 +100,7 @@ export const deleteEfemeride = async (id) => {
         const response = await apiClient(`${URL}/${id}`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();

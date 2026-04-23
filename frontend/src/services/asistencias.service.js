@@ -9,10 +9,9 @@ export const postSubaMasiva = async (archivo) => {
         const response = await apiClient(`${URL}/inscripciones/cargas-masivas`, {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
             },
-            body: formData,
-        });
+            body: formData
+            });
 
         const data = await response.json();
 
@@ -33,10 +32,9 @@ export const getCursos = async () => {
         const response = await apiClient(`${URL}/cursos`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        });
+                "Content-Type": "application/json"
+            }
+            });
         const data = await response.json();
         return data;
     } catch (error) {
@@ -50,10 +48,9 @@ export const getlistadoEventos = async () => {
         const response = await apiClient(`${URL}/eventos/listado`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        });
+                "Content-Type": "application/json"
+            }
+            });
         const data = await response.json();
         return data;
     } catch (error) {
@@ -68,10 +65,9 @@ export const getConsultarAsistencia = async (cuil, id_evento) => {
         const response = await apiClient(`${URL}/consultar/${cuil}/${id_evento}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        });
+                "Content-Type": "application/json"
+            }
+            });
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -91,8 +87,7 @@ export const postConfirmarAsistencia = async (cuil, id_evento) => {
         const response = await apiClient(`${URL}/confirmar`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ cuil, id_evento })
         });
@@ -115,10 +110,9 @@ export const getListadosDeParticipantes = async (id_evento) => {
         const response = await apiClient(`${URL}/operaciones/participantes?id_evento=${id_evento}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        });
+                "Content-Type": "application/json"
+            }
+            });
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -139,10 +133,9 @@ export const getAsistenciaPorEvento = async (id_evento, cuil) => {
         const response = await apiClient(`${URL}/obtenerListadoDeParticipantesPorEvento?id_evento=${id_evento}&cuil=${cuil}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        });
+                "Content-Type": "application/json"
+            }
+            });
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -162,10 +155,9 @@ export const getNotasPorCuilYEvento = async (cuil, id_evento) => {
         const response = await apiClient(`${URL}/notas/${cuil}/${id_evento}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        });
+                "Content-Type": "application/json"
+            }
+            });
 
         if (!response.ok) {
             if (response.status === 404) {
@@ -188,8 +180,7 @@ export const crearOActualizarNota = async (cuil, id_evento, nota) => {
         const response = await apiClient(`${URL}/notas/${cuil}/${id_evento}`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ nota: nota }) // El backend espera { nota: ... } en el body
         });
@@ -212,8 +203,7 @@ export const putAsistencia = async (cuil, id_evento, fecha, estado_asistencia) =
         const response = await apiClient(`${URL}/manual`, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 cuil,
@@ -241,10 +231,9 @@ export const getCursosDeAsistencias = async () => {
         const response = await apiClient(`${URL}/cursos`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        });
+                "Content-Type": "application/json"
+            }
+            });
 
         if (!response.ok) {
             throw new Error('Error al obtener los cursos de asistencia');
@@ -263,8 +252,7 @@ export const postEventoManual = async (eventoData) => {
         const response = await apiClient(`${URL}/eventos/manual`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(eventoData)
         });
@@ -287,10 +275,9 @@ export const getDetalleEventoConAsistencia = async (id_evento) => {
         const response = await apiClient(`${URL}/eventos/detalle-evento-con-asistencia/${id_evento}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-        });
+                "Content-Type": "application/json"
+            }
+            });
 
         if (!response.ok) {
             const errorData = await response.json();

@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 import { deleteCurso } from "./cursos.service.js";
 import {deleteMinisterio} from "./ministerios.service.js";
 import {deleteArea} from "./areas.service.js";
@@ -50,4 +51,3 @@ export const deleteRow = async (identificador, option) => {
         throw error
     }
 }
-

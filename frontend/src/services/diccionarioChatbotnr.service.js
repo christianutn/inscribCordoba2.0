@@ -6,7 +6,7 @@ export const getDiccionarioChatbotnr = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -24,7 +24,7 @@ export const insertDiccionarioChatbotnr = async (diccionario) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ ...diccionario }), // Convertir el objeto a JSON
         });
@@ -41,5 +41,3 @@ export const insertDiccionarioChatbotnr = async (diccionario) => {
         throw error; // Propagar el error para manejarlo fuera
     }
 };
-
-

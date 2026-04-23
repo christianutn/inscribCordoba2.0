@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-
 const URL = process.env.REACT_APP_API_URL + "/historico-tutores-en-cursos";
 
 export const getHistoricoTutoresVigentesPorCurso = async (curso_cod) => {
@@ -7,8 +6,7 @@ export const getHistoricoTutoresVigentesPorCurso = async (curso_cod) => {
         const tutores = await apiClient(`${URL}/${curso_cod}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         })
         const data = await tutores.json();
@@ -26,8 +24,7 @@ export const asignarNuevoRol = async (data) => {
         const response = await apiClient(`${URL}`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(data)
         })

@@ -6,8 +6,7 @@ export const postEvento = async (evento) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ ...evento })
         });
@@ -28,9 +27,8 @@ export const getEventos = async () => {
             {
                 method: "GET",
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-                }
+                    "Content-Type": "application/json"
+            }
             }
         );
         const data = await response.json();
@@ -50,8 +48,7 @@ export const putEvento = async (evento) => {
         const response = await apiClient(URL + "/" + evento.curso, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ ...evento })
         });
@@ -74,8 +71,7 @@ export const putEventoYCurso = async (payload) => {
         const response = await apiClient(URL + "/" + payload.curso, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(payload)
         });
@@ -98,8 +94,7 @@ export const getCursosConEventos = async () => {
         const response = await apiClient(URL + "/cursos-con-eventos", {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -111,5 +106,3 @@ export const getCursosConEventos = async () => {
         throw error;
     }
 }
-
-

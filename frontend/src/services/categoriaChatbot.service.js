@@ -6,7 +6,7 @@ export const getCategoriasChatbot = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();
@@ -24,7 +24,7 @@ export const insertCategoriasChatbot = async (categoria) => {
         const response = await apiClient(URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({ ...categoria }), // Convertir el objeto a JSON
         });
@@ -41,6 +41,3 @@ export const insertCategoriasChatbot = async (categoria) => {
         throw error; // Propagar el error para manejarlo fuera
     }
 }
-
-
-

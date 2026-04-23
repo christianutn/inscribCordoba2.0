@@ -6,8 +6,7 @@ export const getPerfiles = async () => {
         const response = await apiClient(URL, {
             method: "GET",
             headers: {                
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                "Content-Type": "application/json"
             }
         });
         const data = await response.json();        
@@ -20,4 +19,3 @@ export const getPerfiles = async () => {
         throw error
     }
 }
-

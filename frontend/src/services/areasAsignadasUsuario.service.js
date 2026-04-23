@@ -7,8 +7,7 @@ export const getAreasAsignadas = async () => {
         const response = await apiClient(`${URL}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                'Content-Type': 'application/json'
             }
         });
 
@@ -29,8 +28,7 @@ export const postAreaAsignada = async (asignacionData) => {
         const response = await apiClient(`${URL}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(asignacionData)
         });
@@ -52,8 +50,7 @@ export const putAreaAsignada = async (asignacionData) => {
         const response = await apiClient(`${URL}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(asignacionData)
         });
@@ -76,8 +73,7 @@ export const deleteAreaAsignada = async (usuario, area) => {
         const response = await apiClient(`${URL}/${usuario}/${area}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                'Content-Type': 'application/json'
             }
         });
 
@@ -99,8 +95,7 @@ export const getAreasAsignadasPorUsuario = async (usuario) => {
         const response = await apiClient(`${URL}/usuario/${usuario}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                'Content-Type': 'application/json'
             }
         });
 

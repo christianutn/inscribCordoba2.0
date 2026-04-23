@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-
 const URL = process.env.REACT_APP_API_URL + "/notas-autorizacion";
 
 
@@ -11,7 +10,6 @@ export const subirNotaDeAutorizacion = async (archivo) => {
       method: "POST",
       body: formData,
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem("jwt")}`
       }
     });
 
@@ -33,7 +31,6 @@ export const autorizar = async (data) => {
     const response = await apiClient(`${URL}`, {
       method: "PUT",
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem("jwt")}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify(data)
