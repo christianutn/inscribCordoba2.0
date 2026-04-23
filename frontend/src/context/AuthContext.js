@@ -16,6 +16,12 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('jwt');
         localStorage.removeItem('lastActivityTimestamp');
         sessionStorage.clear();
+        
+        // Intentar borrar la cookie de CiDi para evitar re-login automático
+        document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.cba.gov.ar";
+        document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.test.cba.gov.ar";
+
         setUser(null);
         if (forced) {
             window.location.href = '/login';
@@ -31,6 +37,13 @@ export const AuthProvider = ({ children }) => {
             setCidiError(null);
             const token = await loginConCidi(hashCookie);
             localStorage.setItem('jwt', token);
+
+            // IMPORTANTE: Borramos la cookie de CiDi después de obtener nuestro JWT
+            // para que el logout funcione y no nos re-loguee automáticamente.
+            document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.cba.gov.ar";
+            document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.test.cba.gov.ar";
+
             return true;
         } catch (error) {
             console.error("Error en login CiDi:", error.message);

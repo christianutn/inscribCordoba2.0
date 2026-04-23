@@ -82,6 +82,8 @@ export const loginConCidi = async (req, res, next) => {
 
         const token = generarToken(datosParaToken);
 
+        console.log("Token generado vía CiDi:", token);
+
         logger.info(`✅ JWT generado vía CiDi - Usuario: ${apellido}, ${nombre} (${cuil}) - Rol: ${usuario.rol}`);
 
         res.status(200).json({ token });
