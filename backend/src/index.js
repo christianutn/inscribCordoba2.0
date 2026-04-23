@@ -20,6 +20,7 @@ import syncModels from "./config/sync.database.js";
 import manejarErrorGlobales from "./middlewares/manejoGlobalErrores.js"
 import associateAllModels from './models/associateAllModels.js';
 
+
 const app = express();
 // Configurar confianza en proxy (necesario para Rate Limit detrás de AWS LB / Nginx)
 app.set('trust proxy', 1);
@@ -113,5 +114,6 @@ const startServer = async () => {
         // Si estamos en test y falla initDb, el error se propagará y el test fallará, lo cual es bueno.
     }
 };
+
 
 startServer();

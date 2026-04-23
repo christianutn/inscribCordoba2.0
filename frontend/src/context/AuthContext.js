@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { getMyUser, invalidarSesionPorInactividad } from '../services/usuarios.service';
+import { loginConCidi } from '../services/auth.service';
 import useInactivityLogout from '../hooks/useInactivityLogout';
 import SessionExpiredDialog from '../components/SessionExpiredDialog';
 
@@ -9,6 +10,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showSessionExpired, setShowSessionExpired] = useState(false);
+    const [cidiError, setCidiError] = useState(null);
 
     const logout = useCallback((forced = false) => {
         localStorage.removeItem('jwt');
@@ -20,9 +22,48 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
+    /**
+     * Intenta autenticar al usuario vía CiDi usando un hashCookie.
+     * Retorna true si el login fue exitoso, false si no.
+     */
+    const loginCidi = useCallback(async (hashCookie) => {
+        try {
+            setCidiError(null);
+            const token = await loginConCidi(hashCookie);
+            localStorage.setItem('jwt', token);
+            return true;
+        } catch (error) {
+            console.error("Error en login CiDi:", error.message);
+            setCidiError(error.message);
+            return false;
+        }
+    }, []);
+
     const checkAuth = useCallback(async () => {
         const token = localStorage.getItem('jwt');
+
+        // Si no hay JWT, verificar si hay cookie "CiDi" seteada por el portal de CiDi
         if (!token) {
+            const cidiCookie = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('CiDi='));
+
+            if (cidiCookie) {
+                const hashCookie = cidiCookie.split('=')[1];
+
+                // Intentar login con CiDi
+                const success = await loginCidi(hashCookie);
+                if (success) {
+                    // Obtener datos del usuario con el JWT recién generado
+                    const res = await getMyUser();
+                    if (res) {
+                        setUser(res);
+                    }
+                }
+                setLoading(false);
+                return;
+            }
+
             setUser(null);
             setLoading(false);
             return;
@@ -43,7 +84,7 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    }, [logout]);
+    }, [logout, loginCidi]);
 
     // Callback de inactividad: invalidar sesión en el backend y mostrar el diálogo
     const handleInactivity = useCallback(async () => {
@@ -87,7 +128,7 @@ export const AuthProvider = ({ children }) => {
     }, [checkAuth, logout]);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, loading, logout, checkAuth, showSessionExpired }}>
+        <AuthContext.Provider value={{ user, setUser, loading, logout, checkAuth, showSessionExpired, cidiError, setCidiError }}>
             {children}
             <SessionExpiredDialog
                 open={showSessionExpired}

@@ -27,11 +27,13 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Footer from './layout/footer';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
 import { useAuth } from '../context/AuthContext';
+import config from '../config.js';
+import Divider from '@mui/material/Divider';
 
 
 
 const Login = () => {
-    const { checkAuth, user, showSessionExpired } = useAuth();
+    const { checkAuth, user, showSessionExpired, cidiError, setCidiError } = useAuth();
     const [mensajeDeError, setMensajeDeError] = useState(null);
     const [mensajeDeExito, setMensajeDeExito] = useState(null);
     const [open, setOpen] = useState(false);
@@ -54,6 +56,12 @@ const Login = () => {
             navigate(from, { replace: true });
         }
 
+        // Mostrar error de CiDi si lo hubo
+        if (cidiError) {
+            setMensajeDeError(cidiError);
+            setCidiError(null);
+        }
+
         // Verificar si venimos de un cierre por inactividad.
         // Solo mostrar la alerta si NO se está mostrando el diálogo premium actual (showSessionExpired = false)
         const reason = localStorage.getItem('logout_reason');
@@ -71,7 +79,7 @@ const Login = () => {
             // La contraseña nunca se persiste — el usuario la escribe manualmente
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, navigate]);
+    }, [user, navigate, cidiError]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -275,6 +283,32 @@ const Login = () => {
                     </Link>
                 </Grid>
             </Grid>
+
+            {/* Separador y botón CiDi */}
+            <Divider sx={{ my: 3, fontSize: '0.9rem', color: 'text.secondary' }}>o</Divider>
+
+            <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => {
+                    window.location.href = config.cidiLoginUrl;
+                }}
+                sx={{
+                    borderRadius: '50px',
+                    padding: '12px 0',
+                    fontWeight: 'bold',
+                    fontSize: '1.1rem',
+                    letterSpacing: '0.5px',
+                    borderColor: '#1976d2',
+                    color: '#1976d2',
+                    '&:hover': {
+                        borderColor: '#115293',
+                        backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                    }
+                }}
+            >
+                Ingresar con Ciudadano Digital
+            </Button>
         </Box>
     );
 

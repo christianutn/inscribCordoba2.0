@@ -88,12 +88,27 @@ const config = {
 
     // CIDI (Sistema de autenticación)
     cidi: {
-        cuilOperador: process.env.CUIL_OPERADOR_PROD,
-        hashCookieOperador: process.env.HASH_COOKIE_OPERADOR_PROD,
-        idApplication: process.env.ID_APLICATION_PROD,
-        contrasenia: process.env.CONTRASENIA_PROD,
-        keyApp: process.env.KEY_APP_PROD,
-        urlApi: process.env.URL_API_PROD,
+        cuilOperador: ENV === 'production'
+            ? process.env.CUIL_OPERADOR_PROD
+            : process.env.CUIL_OPERADOR_TEST,
+        hashCookieOperador: ENV === 'production'
+            ? process.env.HASH_COOKIE_OPERADOR_PROD
+            : process.env.HASH_COOKIE_OPERADOR_TEST,
+        idApplication: ENV === 'production'
+            ? process.env.ID_APLICATION_PROD
+            : process.env.ID_APLICATION_TEST,
+        contrasenia: ENV === 'production'
+            ? process.env.CONTRASENIA_PROD
+            : process.env.CONTRASENIA_TEST,
+        keyApp: ENV === 'production'
+            ? process.env.KEY_APP_PROD
+            : process.env.KEY_APP_TEST,
+        urlApi: ENV === 'production'
+            ? process.env.URL_API_PROD
+            : process.env.URL_API_TEST,
+        urlApiApp: ENV === 'production'
+            ? process.env.URL_API_APP_PROD
+            : process.env.URL_API_APP_TEST,
     },
 
     // Monitoreo automatizado

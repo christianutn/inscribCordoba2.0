@@ -1,15 +1,17 @@
 import crypto from 'crypto'; // 👈 Asegúrate de importar el módulo 'crypto' si estás en Node.js
+import config from '../config/env.config.js';
 
 export default class CidiService {
 
     constructor() {
-        // Todas estas propiedades están correctamente asignadas al objeto 'this'
-        this.CUIL_OPERADOR = process.env.CUIL_OPERADOR_PROD;
-        this.HASH_COOKIE_OPERADOR = process.env.HASH_COOKIE_OPERADOR_PROD;
-        this.ID_APLICATION = process.env.ID_APLICATION_PROD;
-        this.CONTRASENIA = process.env.CONTRASENIA_PROD;
-        this.KEY_APP = process.env.KEY_APP_PROD;
-        this.URL_API = process.env.URL_API_PROD; // 👈 Opcional: Definir la URL como propiedad
+        // Credenciales seleccionadas automáticamente según NODE_ENV (vía env.config.js)
+        this.CUIL_OPERADOR = config.cidi.cuilOperador;
+        this.HASH_COOKIE_OPERADOR = config.cidi.hashCookieOperador;
+        this.ID_APLICATION = config.cidi.idApplication;
+        this.CONTRASENIA = config.cidi.contrasenia;
+        this.KEY_APP = config.cidi.keyApp;
+        this.URL_API = config.cidi.urlApi;
+        this.URL_API_APP = config.cidi.urlApiApp;
     }
 
     getTimeStamp() {
@@ -89,4 +91,47 @@ export default class CidiService {
             throw error;
         }
     };
+    async obtenerUsuarioAplicacion(hashCookie) {
+        try {
+            // Obtener el timestamp actual
+            const timeStamp = this.getTimeStamp();
+
+            // Generar el valor del token, utilizando this.KEY_APP (corregido)
+            const tokenValue = this.generateTokenValue(timeStamp, this.KEY_APP); // 👈 CORRECCIÓN
+
+            // URL del API de consulta (seleccionada según entorno vía env.config.js)
+            const url = this.URL_API_APP;
+
+            // Enviar solicitud POST
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    IdAplicacion: this.ID_APLICATION,
+                    Contrasenia: this.CONTRASENIA,
+                    HashCookie: hashCookie,
+                    TokenValue: tokenValue,
+                    TimeStamp: timeStamp,
+                    CUIL: null
+                })
+            });
+
+            // Parsear la respuesta en formato JSON
+            const data = await response.json();
+
+            if (data.Respuesta.Resultado != "OK") {
+                throw new Error("No autenticado en CIDI");
+            }
+
+            return data;
+        } catch (error) {
+            // Manejo de errores
+            console.error("Error al obtener persona en CIDI:", error.message); // 👈 Opcional: agregar un log
+            throw error;
+        }
+    };
 }
+
+

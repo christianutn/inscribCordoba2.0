@@ -12,6 +12,7 @@ import autorizadorRouter from "./autorizador.routes.js";
 import instanciaRouter from "./instancia.routes.js";
 import tutorXInstanciaRouter from "./tutorXInstancia.routes.js";
 import loginRouter from "./login.routes.js";
+import authRouter from "./auth.routes.js";
 import tutorRouter from "./tutor.routes.js";
 import rolesTutorRouter from "./rolesTutor.routes.js";
 
@@ -55,6 +56,7 @@ router.use("/autorizadores", autorizadorRouter)
 router.use("/instancias", instanciaRouter)
 router.use("/tutoresXInstancias", tutorXInstanciaRouter)
 router.use("/login", loginRouter)
+router.use("/auth", authRouter)
 router.use("/tutores", tutorRouter)
 router.use("/rolesTutor", rolesTutorRouter)
 router.use("/restricciones", restriccionesFechasInicioCursada)
