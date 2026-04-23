@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/instancias";
 
@@ -7,7 +8,7 @@ export const postInstancias = async (newInstancia) => {
 
 
 
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -29,7 +30,7 @@ export const postInstancias = async (newInstancia) => {
 
 export const getInstancias = async () => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -53,7 +54,7 @@ export const getInstancias = async () => {
 
 export const getInstanciasByCurso = async (curso) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -82,7 +83,7 @@ export const getInstanciasByCurso = async (curso) => {
 
 export const getFechasInvalidas = async (targetYear) => {
     try {
-        const response = await fetch(`${URL}/get-fechas-invalidas/${targetYear}`, {
+        const response = await apiClient(`${URL}/get-fechas-invalidas/${targetYear}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -104,7 +105,7 @@ export const getFechasInvalidas = async (targetYear) => {
 
 export const putInstancia = async (curso_params, fecha_inicio_curso_params, newInstancia) => {
     try {
-        const response = await fetch(`${URL}/${curso_params}/${fecha_inicio_curso_params}`, {
+        const response = await apiClient(`${URL}/${curso_params}/${fecha_inicio_curso_params}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -124,7 +125,7 @@ export const putInstancia = async (curso_params, fecha_inicio_curso_params, newI
 
 export const putInstanciasMasivo = async (payload) => {
     try {
-        const response = await fetch(`${URL}`, {
+        const response = await apiClient(`${URL}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -144,7 +145,7 @@ export const putInstanciasMasivo = async (payload) => {
 
 export const getTablaInstanciasPorUsuario = async (fecha_desde, fecha_hasta) => {
     try {
-        const response = await fetch(`${URL}/tabla-instancias-por-usuario?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}`, {
+        const response = await apiClient(`${URL}/tabla-instancias-por-usuario?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

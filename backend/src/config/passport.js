@@ -16,19 +16,11 @@ const inicializarPassport = () => {
 
 
     const cookieExtractor = req => {
-
-
-        // Tomamos el token de los headers de autorización, si existe
-        let token = req.headers.authorization ? req.headers.authorization : '';
-
-        // Verificamos si el token es una cadena y si comienza con 'Bearer '
-        if (typeof token === 'string' && token.startsWith('Bearer ')) {
-            // Si es así, eliminamos la palabra 'Bearer ' del inicio
-            token = token.slice(7, token.length);
+        let token = null;
+        if (req && req.cookies) {
+            token = req.cookies['jwt']; // Obtenemos el token directamente de la cookie 'jwt'
         }
-
         return token;
-
     }
 
     passport.use('jwt', new JWTStrategy({

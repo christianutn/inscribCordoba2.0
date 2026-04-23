@@ -1,8 +1,9 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/avisos";
 
 export const postAviso = async (avisoNuevo) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -23,7 +24,7 @@ export const postAviso = async (avisoNuevo) => {
 
 export const getAvisos = async () => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -44,7 +45,7 @@ export const getAvisos = async () => {
 
 export const deleteAviso = async (id) => {
     try {
-        const response = await fetch(`${URL}/${id}`, {
+        const response = await apiClient(`${URL}/${id}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 /**
  * Servicio de autenticación vía CiDi.
  * Envía el hashCookie al backend para validar contra la API de CiDi
@@ -12,7 +13,7 @@ const URL = process.env.REACT_APP_API_URL + "/auth";
  * @returns {Promise<string>} El JWT interno
  */
 export const loginConCidi = async (hashCookie) => {
-    const response = await fetch(`${URL}/cidi`, {
+    const response = await apiClient(`${URL}/cidi`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -34,5 +35,5 @@ export const loginConCidi = async (hashCookie) => {
         throw error;
     }
 
-    return data.token;
+    return data.usuario;
 };

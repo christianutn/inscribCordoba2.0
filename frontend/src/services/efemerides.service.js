@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/efemerides";
 
 /**
@@ -5,7 +6,7 @@ const URL = process.env.REACT_APP_API_URL + "/efemerides";
  */
 export const getEfemerides = async () => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -28,7 +29,7 @@ export const getEfemerides = async () => {
  */
 export const getEfemeridesByCurso = async (curso) => {
     try {
-        const response = await fetch(`${URL}/curso/${curso}`, {
+        const response = await apiClient(`${URL}/curso/${curso}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -51,7 +52,7 @@ export const getEfemeridesByCurso = async (curso) => {
  */
 export const postEfemerides = async (payload) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -76,7 +77,7 @@ export const postEfemerides = async (payload) => {
  */
 export const putEfemeride = async (id, payload) => {
     try {
-        const response = await fetch(`${URL}/${id}`, {
+        const response = await apiClient(`${URL}/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -100,7 +101,7 @@ export const putEfemeride = async (id, payload) => {
  */
 export const deleteEfemeride = async (id) => {
     try {
-        const response = await fetch(`${URL}/${id}`, {
+        const response = await apiClient(`${URL}/${id}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

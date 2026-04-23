@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/areasAsignadasUsuario";
 
 // Obtener todas las áreas asignadas
 export const getAreasAsignadas = async () => {
     try {
-        const response = await fetch(`${URL}`, {
+        const response = await apiClient(`${URL}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -25,7 +26,7 @@ export const getAreasAsignadas = async () => {
 
 export const postAreaAsignada = async (asignacionData) => {
     try {
-        const response = await fetch(`${URL}`, {
+        const response = await apiClient(`${URL}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -48,7 +49,7 @@ export const postAreaAsignada = async (asignacionData) => {
 // Actualizar una asignación existente
 export const putAreaAsignada = async (asignacionData) => {
     try {
-        const response = await fetch(`${URL}`, {
+        const response = await apiClient(`${URL}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -72,7 +73,7 @@ export const putAreaAsignada = async (asignacionData) => {
 // Eliminar una asignación
 export const deleteAreaAsignada = async (usuario, area) => {
     try {
-        const response = await fetch(`${URL}/${usuario}/${area}`, {
+        const response = await apiClient(`${URL}/${usuario}/${area}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ export const deleteAreaAsignada = async (usuario, area) => {
 // Obtener áreas asignadas por usuario
 export const getAreasAsignadasPorUsuario = async (usuario) => {
     try {
-        const response = await fetch(`${URL}/usuario/${usuario}`, {
+        const response = await apiClient(`${URL}/usuario/${usuario}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

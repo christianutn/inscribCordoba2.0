@@ -1,8 +1,9 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/fechas-inhabilitadas";
 
 export const getFechasInhabilitadas = async () => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -22,7 +23,7 @@ export const getFechasInhabilitadas = async () => {
 
 export const postFechasInhabilitadas = async (fechas) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -43,7 +44,7 @@ export const postFechasInhabilitadas = async (fechas) => {
 
 export const deleteFechasInhabilitadas = async (fechas) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

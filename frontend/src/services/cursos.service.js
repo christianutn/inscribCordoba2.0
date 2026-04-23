@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/cursos";
 
 export const getCursos = async (busqueda = "") => {
     try {
-        const response = await fetch(`${URL}?busqueda=${busqueda}`, {
+        const response = await apiClient(`${URL}?busqueda=${busqueda}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -25,7 +26,7 @@ export const getCursos = async (busqueda = "") => {
 export const postCurso = async (curso) => {
     try {
 
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -50,7 +51,7 @@ export const putCurso = async (curso) => {
 
 
 
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -77,7 +78,7 @@ export const putCurso = async (curso) => {
 export const deleteCurso = async (cuil) => {
     try {
 
-        const response = await fetch(`${URL}/${cuil}`, {
+        const response = await apiClient(`${URL}/${cuil}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -102,7 +103,7 @@ export const patchEstadoCurso = async (cod, accion, estadoDestino = null) => {
         const body = { accion };
         if (estadoDestino) body.estadoDestino = estadoDestino;
 
-        const response = await fetch(`${URL}/${cod}/estado`, {
+        const response = await apiClient(`${URL}/${cod}/estado`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",

@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/cambios-estados-notas-autorizacion";
 
 export const getUltimosEstadoDeAutorizaciones = async () => {
     try {
-        const response = await fetch(`${URL}/obtener-ultimo-estado-de-nota-de-autorizacion`, {
+        const response = await apiClient(`${URL}/obtener-ultimo-estado-de-nota-de-autorizacion`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
@@ -24,7 +25,7 @@ export const getUltimosEstadoDeAutorizaciones = async () => {
 
 export const rechazarNotaDeAutorizacion = async (data) => {
     try {
-        const response = await fetch(`${URL}/rechazar-nota-de-autorizacion`, {
+        const response = await apiClient(`${URL}/rechazar-nota-de-autorizacion`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`,

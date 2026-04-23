@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/historico-tutores-en-cursos";
 
 export const getHistoricoTutoresVigentesPorCurso = async (curso_cod) => {
     try {
-        const tutores = await fetch(`${URL}/${curso_cod}`, {
+        const tutores = await apiClient(`${URL}/${curso_cod}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -22,7 +23,7 @@ export const getHistoricoTutoresVigentesPorCurso = async (curso_cod) => {
 
 export const asignarNuevoRol = async (data) => {
     try {
-        const response = await fetch(`${URL}`, {
+        const response = await apiClient(`${URL}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

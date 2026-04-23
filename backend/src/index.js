@@ -46,7 +46,16 @@ export const initDb = async () => {
 
 
 
-app.use(cors());
+import cookieParser from 'cookie-parser';
+
+app.use(cookieParser());
+
+app.use(cors({
+    origin: process.env.URL_FRONTEND || 'http://localhost:3000', // El origen debe ser exacto, no puede ser '*' cuando credentials es true
+    credentials: true, // Habilitar el envío/recepción de cookies entre frontend y backend
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 // Middleware de accesos HTTP
 const accessLogStream = fs.createWriteStream(path.join(__dirname, '../logs/access.log'), { flags: 'a' });
 app.use(morgan('combined', { stream: accessLogStream }));

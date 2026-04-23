@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 
 
 const URL = process.env.REACT_APP_API_URL + "/mediosInscripcion";
 export const getMediosInscripcion = async () => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -27,7 +28,7 @@ export const getMediosInscripcion = async () => {
 export const putMedioInscripcion = async (medioInscripcion) => {
     try {
         
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -50,7 +51,7 @@ export const putMedioInscripcion = async (medioInscripcion) => {
 
 export const deleteMedioInscripcion = async (cod) => {
     try {
-        const response = await fetch(`${URL}/${cod}`, {
+        const response = await apiClient(`${URL}/${cod}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -69,7 +70,7 @@ export const deleteMedioInscripcion = async (cod) => {
 
 export const postMedioInscripcion = async (medioInscripcion) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

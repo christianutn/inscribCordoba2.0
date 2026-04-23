@@ -2,7 +2,7 @@ const URL = process.env.REACT_APP_API_URL + "/usuarios";
 
 export const getUsuarios = async () => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -21,30 +21,22 @@ export const getUsuarios = async () => {
 }
 
 
-export const putUsuarios = async (usuario) => {
-    try {
-        const response = await fetch(URL, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-            },
-            body: JSON.stringify({ ...usuario })
-        });
-        const data = await response.json();
-        if (response.status !== 200) {
-            throw new Error(data.message || "No se encontraron usuarios");
-        }
+import apiClient from './apiClient';
 
-        return data
-    } catch (error) {
-        throw error
-    }
+export const putUsuarios = async (usuario) => {
+    // Usamos apiClient que ya maneja credentials y headers base.
+    // Además, ya no inyectamos el JWT del localStorage; el navegador enviará la cookie automáticamente.
+    const endpoint = '/usuarios'; // Asumiendo que esta es la ruta base para usuarios
+    
+    return await apiClient(endpoint, {
+        method: "PUT",
+        body: JSON.stringify(usuario)
+    });
 }
 
 export const deleteUsuario = async (cuil) => {
     try {
-        const response = await fetch(`${URL}/${cuil}`, {
+        const response = await apiClient(`${URL}/${cuil}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -63,7 +55,7 @@ export const deleteUsuario = async (cuil) => {
 
 export const getMyUser = async () => {
     try {
-        const response = await fetch(`${URL}/myuser`, {
+        const response = await apiClient(`${URL}/myuser`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -84,7 +76,7 @@ export const getMyUser = async () => {
 export const postUser = async (user) => {
     try {
 
-        const response = await fetch(`${URL}/registrar`, {
+        const response = await apiClient(`${URL}/registrar`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -119,7 +111,7 @@ export const cambiarContrasenia = async (nuevaContrasenia) => {
         }
 
 
-        const response = await fetch(`${URL}/contrasenia`, {
+        const response = await apiClient(`${URL}/contrasenia`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -145,7 +137,7 @@ export const recuperoContrasenia = async (cuil) => {
     try {
 
 
-        const response = await fetch(`${URL}/recuperoContrasenia`, {
+        const response = await apiClient(`${URL}/recuperoContrasenia`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -165,7 +157,7 @@ export const recuperoContrasenia = async (cuil) => {
 
 export const invalidarSesionPorInactividad = async () => {
     try {
-        const response = await fetch(`${URL}/invalidar-sesion`, {
+        const response = await apiClient(`${URL}/invalidar-sesion`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

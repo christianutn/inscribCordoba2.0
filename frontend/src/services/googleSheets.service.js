@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 
 
 
@@ -6,7 +7,7 @@ const URL = process.env.REACT_APP_API_URL + "/googleSheets";
 export const getCronograma = async () => {
 
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -29,7 +30,7 @@ export const getCronograma = async () => {
 
 export const getMatrizFechas = async () => {
     try {
-        const response = await fetch(URL + "/matrizFechas", {
+        const response = await apiClient(URL + "/matrizFechas", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -85,7 +86,7 @@ export const buscarPosicionFecha = (fecha, ListaFechas) => {
 
 export const getObjNroEventos = async () => {
     try {
-        const response = await fetch(URL + "/nroEventos", {
+        const response = await apiClient(URL + "/nroEventos", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json", 

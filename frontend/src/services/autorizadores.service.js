@@ -1,8 +1,9 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/autorizadores";
 
 export const getAutorizadores = async (busqueda = "") => {
     try {
-        const response = await fetch(`${URL}?busqueda=${busqueda}`, {
+        const response = await apiClient(`${URL}?busqueda=${busqueda}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -22,7 +23,7 @@ export const getAutorizadores = async (busqueda = "") => {
 
 export const postAutorizador = async (autorizador) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/areas";
 
 export const getAreas = async (busqueda = "") => {
     try {
-        const response = await fetch(`${URL}?busqueda=${busqueda}`, {
+        const response = await apiClient(`${URL}?busqueda=${busqueda}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -24,7 +25,7 @@ export const getAreas = async (busqueda = "") => {
 export const putArea = async (area) => {
     try {
 
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -48,7 +49,7 @@ export const putArea = async (area) => {
 
 export const deleteArea = async (codArea) => {
     try {
-        const response = await fetch(`${URL}/${codArea}`, {
+        const response = await apiClient(`${URL}/${codArea}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -70,7 +71,7 @@ export const deleteArea = async (codArea) => {
 
 export const postArea = async (area) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/asistencias";
 
 export const postSubaMasiva = async (archivo) => {
@@ -5,7 +6,7 @@ export const postSubaMasiva = async (archivo) => {
     const formData = new FormData();
     formData.append("excelFile", archivo);
     try {
-        const response = await fetch(`${URL}/inscripciones/cargas-masivas`, {
+        const response = await apiClient(`${URL}/inscripciones/cargas-masivas`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("jwt")}`
@@ -29,7 +30,7 @@ export const postSubaMasiva = async (archivo) => {
 
 export const getCursos = async () => {
     try {
-        const response = await fetch(`${URL}/cursos`, {
+        const response = await apiClient(`${URL}/cursos`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -46,7 +47,7 @@ export const getCursos = async () => {
 
 export const getlistadoEventos = async () => {
     try {
-        const response = await fetch(`${URL}/eventos/listado`, {
+        const response = await apiClient(`${URL}/eventos/listado`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -64,7 +65,7 @@ export const getlistadoEventos = async () => {
 
 export const getConsultarAsistencia = async (cuil, id_evento) => {
     try {
-        const response = await fetch(`${URL}/consultar/${cuil}/${id_evento}`, {
+        const response = await apiClient(`${URL}/consultar/${cuil}/${id_evento}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -87,7 +88,7 @@ export const getConsultarAsistencia = async (cuil, id_evento) => {
 
 export const postConfirmarAsistencia = async (cuil, id_evento) => {
     try {
-        const response = await fetch(`${URL}/confirmar`, {
+        const response = await apiClient(`${URL}/confirmar`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -111,7 +112,7 @@ export const postConfirmarAsistencia = async (cuil, id_evento) => {
 
 export const getListadosDeParticipantes = async (id_evento) => {
     try {
-        const response = await fetch(`${URL}/operaciones/participantes?id_evento=${id_evento}`, {
+        const response = await apiClient(`${URL}/operaciones/participantes?id_evento=${id_evento}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -135,7 +136,7 @@ export const getListadosDeParticipantes = async (id_evento) => {
 
 export const getAsistenciaPorEvento = async (id_evento, cuil) => {
     try {
-        const response = await fetch(`${URL}/obtenerListadoDeParticipantesPorEvento?id_evento=${id_evento}&cuil=${cuil}`, {
+        const response = await apiClient(`${URL}/obtenerListadoDeParticipantesPorEvento?id_evento=${id_evento}&cuil=${cuil}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -158,7 +159,7 @@ export const getAsistenciaPorEvento = async (id_evento, cuil) => {
 
 export const getNotasPorCuilYEvento = async (cuil, id_evento) => {
     try {
-        const response = await fetch(`${URL}/notas/${cuil}/${id_evento}`, {
+        const response = await apiClient(`${URL}/notas/${cuil}/${id_evento}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -184,7 +185,7 @@ export const getNotasPorCuilYEvento = async (cuil, id_evento) => {
 
 export const crearOActualizarNota = async (cuil, id_evento, nota) => {
     try {
-        const response = await fetch(`${URL}/notas/${cuil}/${id_evento}`, {
+        const response = await apiClient(`${URL}/notas/${cuil}/${id_evento}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -208,7 +209,7 @@ export const crearOActualizarNota = async (cuil, id_evento, nota) => {
 
 export const putAsistencia = async (cuil, id_evento, fecha, estado_asistencia) => {
     try {
-        const response = await fetch(`${URL}/manual`, {
+        const response = await apiClient(`${URL}/manual`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -237,7 +238,7 @@ export const putAsistencia = async (cuil, id_evento, fecha, estado_asistencia) =
 
 export const getCursosDeAsistencias = async () => {
     try {
-        const response = await fetch(`${URL}/cursos`, {
+        const response = await apiClient(`${URL}/cursos`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -259,7 +260,7 @@ export const getCursosDeAsistencias = async () => {
 
 export const postEventoManual = async (eventoData) => {
     try {
-        const response = await fetch(`${URL}/eventos/manual`, {
+        const response = await apiClient(`${URL}/eventos/manual`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -283,7 +284,7 @@ export const postEventoManual = async (eventoData) => {
 
 export const getDetalleEventoConAsistencia = async (id_evento) => {
     try {
-        const response = await fetch(`${URL}/eventos/detalle-evento-con-asistencia/${id_evento}`, {
+        const response = await apiClient(`${URL}/eventos/detalle-evento-con-asistencia/${id_evento}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

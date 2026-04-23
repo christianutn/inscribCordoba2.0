@@ -3,6 +3,8 @@ import { getMyUser, invalidarSesionPorInactividad } from '../services/usuarios.s
 import { loginConCidi } from '../services/auth.service';
 import useInactivityLogout from '../hooks/useInactivityLogout';
 import SessionExpiredDialog from '../components/SessionExpiredDialog';
+import apiClient from '../services/apiClient';
+import config from '../config';
 
 const AuthContext = createContext(null);
 
@@ -12,19 +14,25 @@ export const AuthProvider = ({ children }) => {
     const [showSessionExpired, setShowSessionExpired] = useState(false);
     const [cidiError, setCidiError] = useState(null);
 
-    const logout = useCallback((forced = false) => {
-        localStorage.removeItem('jwt');
-        localStorage.removeItem('lastActivityTimestamp');
-        sessionStorage.clear();
-        
-        // Intentar borrar la cookie de CiDi para evitar re-login automático
-        document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.cba.gov.ar";
-        document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.test.cba.gov.ar";
+    const logout = useCallback(async (forced = false) => {
+        try {
+            // Le decimos al backend que borre la cookie
+            await apiClient(`${config.apiBaseUrl || 'http://localhost:4000/api'}/auth/logout`, { method: 'POST' });
+        } catch (error) {
+            console.error("Error en logout:", error);
+        } finally {
+            localStorage.removeItem('lastActivityTimestamp');
+            sessionStorage.clear();
+            
+            // Intentar borrar la cookie de CiDi para evitar re-login automático
+            document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.cba.gov.ar";
+            document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.test.cba.gov.ar";
 
-        setUser(null);
-        if (forced) {
-            window.location.href = '/login';
+            setUser(null);
+            if (forced) {
+                window.location.href = '/login';
+            }
         }
     }, []);
 
@@ -35,9 +43,8 @@ export const AuthProvider = ({ children }) => {
     const loginCidi = useCallback(async (hashCookie) => {
         try {
             setCidiError(null);
-            const token = await loginConCidi(hashCookie);
-            localStorage.setItem('jwt', token);
-
+            const usuario = await loginConCidi(hashCookie); // La cookie JWT se setea sola desde el backend
+            
             // IMPORTANTE: Borramos la cookie de CiDi después de obtener nuestro JWT
             // para que el logout funcione y no nos re-loguee automáticamente.
             document.cookie = "CiDi=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -53,31 +60,25 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const checkAuth = useCallback(async () => {
-        const token = localStorage.getItem('jwt');
+        const cidiCookie = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('CiDi='));
 
-        // Si no hay JWT, verificar si hay cookie "CiDi" seteada por el portal de CiDi
-        if (!token) {
-            const cidiCookie = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('CiDi='));
-
-            if (cidiCookie) {
-                const hashCookie = cidiCookie.split('=')[1];
-
-                // Intentar login con CiDi
-                const success = await loginCidi(hashCookie);
-                if (success) {
-                    // Obtener datos del usuario con el JWT recién generado
+        if (cidiCookie) {
+            const hashCookie = cidiCookie.split('=')[1];
+            // Intentar login con CiDi
+            const success = await loginCidi(hashCookie);
+            if (success) {
+                // Obtener datos del usuario con la nueva cookie JWT
+                try {
                     const res = await getMyUser();
                     if (res) {
                         setUser(res);
                     }
+                } catch (err) {
+                    console.error("Error al obtener usuario tras CiDi login", err);
                 }
-                setLoading(false);
-                return;
             }
-
-            setUser(null);
             setLoading(false);
             return;
         }
@@ -87,17 +88,15 @@ export const AuthProvider = ({ children }) => {
             if (res) {
                 setUser(res);
             } else {
-                // If getMyUser returns false, it means the token is invalid
-                logout();
+                setUser(null);
             }
         } catch (error) {
-            console.error("Auth check failed:", error);
-            // We don't logout on network errors, only on 401s if handled by service
-            // For now, if getMyUser specifically returns false, we logout (above)
+            // Si getMyUser falla (ej. 401 Unauthorized), setUser a null
+            setUser(null);
         } finally {
             setLoading(false);
         }
-    }, [logout, loginCidi]);
+    }, [loginCidi]);
 
     // Callback de inactividad: invalidar sesión en el backend y mostrar el diálogo
     const handleInactivity = useCallback(async () => {

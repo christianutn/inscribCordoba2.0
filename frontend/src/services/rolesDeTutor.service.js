@@ -1,10 +1,11 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/rolesTutor";
 
 
 export const getRolesDeTutor = async () => {
 
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

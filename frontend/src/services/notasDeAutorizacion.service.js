@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/notas-autorizacion";
 
@@ -6,7 +7,7 @@ export const subirNotaDeAutorizacion = async (archivo) => {
   const formData = new FormData();
   formData.append("nota_autorizacion", archivo);
   try {
-    const response = await fetch(`${URL}`, {
+    const response = await apiClient(`${URL}`, {
       method: "POST",
       body: formData,
       headers: {
@@ -29,7 +30,7 @@ export const subirNotaDeAutorizacion = async (archivo) => {
 
 export const autorizar = async (data) => {
   try {
-    const response = await fetch(`${URL}`, {
+    const response = await apiClient(`${URL}`, {
       method: "PUT",
       headers: {
         "Authorization": `Bearer ${localStorage.getItem("jwt")}`,

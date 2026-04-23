@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/tutores";
 
 export const getTutores = async (busqueda = "") => {
     try {
-        const response = await fetch(`${URL}?busqueda=${busqueda}`, {
+        const response = await apiClient(`${URL}?busqueda=${busqueda}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -29,7 +30,7 @@ export const getTutores = async (busqueda = "") => {
 export const putTutores = async (tutor) => {
 
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -56,7 +57,7 @@ export const putTutores = async (tutor) => {
 
 export const deleteTutor = async (cuil) => {
     try {
-        const response = await fetch(`${URL}/${cuil}`, {
+        const response = await apiClient(`${URL}/${cuil}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -76,7 +77,7 @@ export const deleteTutor = async (cuil) => {
 export const postTutores = async (tutor) => {
     try {
 
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

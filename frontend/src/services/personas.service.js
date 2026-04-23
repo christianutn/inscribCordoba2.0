@@ -1,10 +1,11 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/personas";
 
 
 export const getPersonas = async () => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -24,7 +25,7 @@ export const getPersonas = async () => {
 
 export const postPersona = async (persona) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -47,7 +48,7 @@ export const putPersona = async (persona) => {
 
    
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -73,7 +74,7 @@ export const putPersona = async (persona) => {
 
 export const deletePersona = async (cuil) => {
     try {
-        const response = await fetch(`${URL}/${cuil}`, {
+        const response = await apiClient(`${URL}/${cuil}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

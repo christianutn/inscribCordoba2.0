@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/plataformasDictado";
 
 export const getPlataformasDictado = async () => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -23,7 +24,7 @@ export const getPlataformasDictado = async () => {
 
 export const putPlataformaDictado = async (plataformaDictado) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -43,7 +44,7 @@ export const putPlataformaDictado = async (plataformaDictado) => {
 
 export const deletePlataformaDictado = async (cod) => {
     try {
-        const response = await fetch(`${URL}/${cod}`, {
+        const response = await apiClient(`${URL}/${cod}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -62,7 +63,7 @@ export const deletePlataformaDictado = async (cod) => {
 
 export const postPlataformaDictado = async (plataformaDictado) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

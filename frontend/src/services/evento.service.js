@@ -1,8 +1,9 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/eventos";
 
 export const postEvento = async (evento) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -23,7 +24,7 @@ export const postEvento = async (evento) => {
 
 export const getEventos = async () => {
     try {
-        const response = await fetch(URL,
+        const response = await apiClient(URL,
             {
                 method: "GET",
                 headers: {
@@ -46,7 +47,7 @@ export const getEventos = async () => {
 
 export const putEvento = async (evento) => {
     try {
-        const response = await fetch(URL + "/" + evento.curso, {
+        const response = await apiClient(URL + "/" + evento.curso, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -70,7 +71,7 @@ export const putEvento = async (evento) => {
  */
 export const putEventoYCurso = async (payload) => {
     try {
-        const response = await fetch(URL + "/" + payload.curso, {
+        const response = await apiClient(URL + "/" + payload.curso, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -94,7 +95,7 @@ export const putEventoYCurso = async (payload) => {
  */
 export const getCursosConEventos = async () => {
     try {
-        const response = await fetch(URL + "/cursos-con-eventos", {
+        const response = await apiClient(URL + "/cursos-con-eventos", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

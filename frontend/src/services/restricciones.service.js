@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/restricciones/fechasInicioCursada";
 
 export const getRestricciones = async () => {
     try {
-        const response = await fetch(`${URL}`, {
+        const response = await apiClient(`${URL}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -25,7 +26,7 @@ export const getRestricciones = async () => {
 export const putRestriccion = async (data) => {
     try {
        
-        const response = await fetch(`${URL}`, {
+        const response = await apiClient(`${URL}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

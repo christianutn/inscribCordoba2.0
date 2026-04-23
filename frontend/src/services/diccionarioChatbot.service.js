@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/diccionarioChatbot";
 const URLP = process.env.REACT_APP_API_URL + "/diccionarioChatbot/Puntual";
 const URLCNC = process.env.REACT_APP_API_URL + "/diccionarioChatbot/Cnc";
@@ -6,7 +7,7 @@ const URLCNC = process.env.REACT_APP_API_URL + "/diccionarioChatbot/Cnc";
 
 export const getDiccionarioChatbot = async (pregunta, idCategoria) => {
     try {
-        const response = await fetch(`${URL}?pregunta=${pregunta}&idCategoria=${idCategoria}`, {
+        const response = await apiClient(`${URL}?pregunta=${pregunta}&idCategoria=${idCategoria}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -27,7 +28,7 @@ export const getDiccionarioChatbot = async (pregunta, idCategoria) => {
 
 export const getDiccionarioChatbotPuntual = async (id) => {
     try {
-        const response = await fetch(`${URLP}?id=${id}`, {
+        const response = await apiClient(`${URLP}?id=${id}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -48,7 +49,7 @@ export const getDiccionarioChatbotPuntual = async (id) => {
 
 export const insertDiccionarioChatbot = async (diccionario) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

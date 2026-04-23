@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 
 const URL = process.env.REACT_APP_API_URL + "/tiposCapacitacion";
 
 export const getTiposCapacitacion = async () => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -24,7 +25,7 @@ export const getTiposCapacitacion = async () => {
 
 export const putTiposCapacitacion = async (tipoCapacitacion) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -46,7 +47,7 @@ export const putTiposCapacitacion = async (tipoCapacitacion) => {
 export const postTiposCapacitacion = async (tipoCapacitacion) => {
     
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -66,7 +67,7 @@ export const postTiposCapacitacion = async (tipoCapacitacion) => {
 
 export const deleteTiposCapacitacion = async (identificador) => {
     try {
-        const response = await fetch(`${URL}/${identificador}`, {
+        const response = await apiClient(`${URL}/${identificador}`, {
             method: "DELETE",   
             headers: {
                 "Content-Type": "application/json",

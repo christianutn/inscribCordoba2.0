@@ -1,9 +1,10 @@
+import apiClient from './apiClient';
 // src/services/auth.js
 
 const URL = process.env.REACT_APP_API_URL + "/login";
 const obtenerToken = async (cuil, contrasenia) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

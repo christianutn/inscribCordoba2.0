@@ -1,3 +1,4 @@
+import apiClient from './apiClient';
 
 
 
@@ -6,7 +7,7 @@ const URL = process.env.REACT_APP_API_URL + "/ministerios";
 
 export const getMinisterios = async () => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -33,7 +34,7 @@ export const getMinisterios = async () => {
 
 export const putMinisterios = async (ministerio) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -58,7 +59,7 @@ export const putMinisterios = async (ministerio) => {
 
 export const postMinisterios = async (ministerio) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -83,7 +84,7 @@ export const postMinisterios = async (ministerio) => {
 
 export const deleteMinisterio = async (codMinisterios) => {
     try {
-        const response = await fetch(`${URL}/${codMinisterios}`, {
+        const response = await apiClient(`${URL}/${codMinisterios}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

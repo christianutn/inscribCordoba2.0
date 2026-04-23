@@ -1,8 +1,9 @@
+import apiClient from './apiClient';
 const URL = process.env.REACT_APP_API_URL + "/datos-desarrollo";
 
 export const getDatosDesarrollo = async (busqueda = "", mes = "", anio = "") => {
     try {
-        const response = await fetch(`${URL}?busqueda=${busqueda}&mes=${mes}&anio=${anio}`, {
+        const response = await apiClient(`${URL}?busqueda=${busqueda}&mes=${mes}&anio=${anio}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -22,7 +23,7 @@ export const getDatosDesarrollo = async (busqueda = "", mes = "", anio = "") => 
 
 export const postDatosDesarrollo = async (datos) => {
     try {
-        const response = await fetch(URL, {
+        const response = await apiClient(URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -42,7 +43,7 @@ export const postDatosDesarrollo = async (datos) => {
 
 export const putDatosDesarrollo = async (id, datos) => {
     try {
-        const response = await fetch(`${URL}/${id}`, {
+        const response = await apiClient(`${URL}/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -62,7 +63,7 @@ export const putDatosDesarrollo = async (id, datos) => {
 
 export const deleteDatosDesarrollo = async (id) => {
     try {
-        const response = await fetch(`${URL}/${id}`, {
+        const response = await apiClient(`${URL}/${id}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

@@ -86,10 +86,27 @@ export const loginConCidi = async (req, res, next) => {
 
         logger.info(`✅ JWT generado vía CiDi - Usuario: ${apellido}, ${nombre} (${cuil}) - Rol: ${usuario.rol}`);
 
-        res.status(200).json({ token });
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Lax',
+            maxAge: 24 * 60 * 60 * 1000 // 24 horas
+        };
+
+        res.cookie('jwt', token, cookieOptions);
+        res.status(200).json({ message: "Login exitoso", usuario: datosParaToken });
 
     } catch (error) {
         logger.error(`❌ Error en login CiDi: ${error.message}`, { stack: error.stack });
         next(error);
     }
+};
+
+export const logout = (req, res) => {
+    res.clearCookie('jwt', { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Lax'
+    });
+    res.status(200).json({ message: "Sesión cerrada" });
 };
